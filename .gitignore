@@ -344,3 +344,8 @@ healthchecksdb
 .coverlet/
 .reportgenerator/
 *.favdoc
+
+
+*.exe
+*.pdb
+*.suo
