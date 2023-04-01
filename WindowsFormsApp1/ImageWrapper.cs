@@ -75,6 +75,46 @@ namespace WindowsFormsApp1
 		}
 
 		/// <summary>
+		/// Заносит квадрат в выходной буфер.
+		/// </summary>
+		public void FillSquare(int x, int y, Color color)
+		{
+			var i = x * 4 + y * stride;
+
+			if (i >= 0)
+			{
+
+				if (x >= 0 && x < Width && y >= 0 && y < Height)
+				{
+					outData[i] = color.B;
+					outData[i + 1] = color.G;
+					outData[i + 2] = color.R;
+				}
+
+				if (x >= 0 && x < Width-1 && y >= 0 && y < Height)
+				{
+					outData[i + 4] = color.B;
+					outData[i + 5] = color.G;
+					outData[i + 6] = color.R;
+				}
+
+				if (x >= 0 && x < Width && y >= 0 && y < Height-1)
+				{
+					outData[i + stride] = color.B;
+					outData[i + stride + 1] = color.G;
+					outData[i + stride + 2] = color.R;
+				}
+
+				if (x >= 0 && x < Width-1 && y >= 0 && y < Height-1)
+				{
+					outData[i + stride + 4] = color.B;
+					outData[i + stride + 5] = color.G;
+					outData[i + stride + 6] = color.R;
+				}
+			};
+		}
+
+		/// <summary>
 		/// Возвращает пиксел из исходнго изображения.
 		/// Либо заносит пиксел в выходной буфер.
 		/// </summary>

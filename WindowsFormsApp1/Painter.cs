@@ -86,7 +86,11 @@ namespace WindowsFormsApp1
 		{
 			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
 			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
+			//_iw.FillSquare(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
 			_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
+			_iw[bot.X * _botWidth, bot.Y * _botHeight + 1] = Color.Red;
+			_iw[bot.X * _botWidth + 1, bot.Y * _botHeight] = Color.Red;
+			_iw[bot.X * _botWidth + 1, bot.Y * _botHeight + 1] = Color.Red;
 		}
 
 		public void PaintFrame()
