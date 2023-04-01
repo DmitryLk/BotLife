@@ -83,18 +83,19 @@ namespace WindowsFormsApp1
 		private void Step()
 		{
 			_test.BeginInterval(1);
-			BotsAction();
+			WorldStep();
 			_test.EndBeginInterval(1, 2);
 			RedrawWorld();
 		}
 
-		private void BotsAction()
+		private void WorldStep()
 		{
 			//Parallel.For(0, currentBotsNumber, i => bots[i].Move());
 
 
 			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
 			{
+				//bots[botNumber].Step();
 				bots[botNumber].Move();
 			}
 		}

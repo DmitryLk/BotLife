@@ -77,7 +77,7 @@ namespace WindowsFormsApp1
 		{
 			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
 			//_gr.Clear(_fon);
-			_iw = new ImageWrapper(_btmp);
+			_iw = new ImageWrapper(_btmp, true);
 			//_gr.Clear(Form.ActiveForm.BackColor);
 			//_pb.Invalidate();
 		}
@@ -86,8 +86,11 @@ namespace WindowsFormsApp1
 		{
 			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
 			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
-			
+
+
 			_iw.FillSquare(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
+
+
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight + 1] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight] = Color.Red;

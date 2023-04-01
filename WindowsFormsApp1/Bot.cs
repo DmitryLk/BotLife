@@ -39,6 +39,39 @@ namespace WindowsFormsApp1
 			OnceDrawed = false;	
 		}
 
+		public void Step()
+		{
+			var newX = X + Vx;
+			if (newX >= 500)
+			{
+				newX = 499;
+				Vx = -Vx;
+			}
+			if (newX < 0)
+			{
+				newX = 0;
+				Vx = -Vx;
+			}
+
+
+			var newY = Y + Vy;
+			if (newY >= 500)
+			{
+				newY = 499;
+				Vy = -Vy;
+			}
+			if (newY < 0)
+			{
+				newY = 0;
+				Vy = -Vy;
+			}
+
+			Moved = X != newX || Y != newY;
+
+			X = newX;
+			Y = newY;
+		}
+
 		public void Move() 
 		{
 			var newX = X + Vx;

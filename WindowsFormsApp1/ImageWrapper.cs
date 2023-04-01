@@ -27,6 +27,7 @@ namespace WindowsFormsApp1
 		private byte[] data;//буфер исходного изображения
 		private byte[] outData;//выходной буфер
 		private int stride;
+		private bool _useCopy;
 		private BitmapData bmpData;
 		private Bitmap bmp;
 
@@ -34,8 +35,9 @@ namespace WindowsFormsApp1
 		/// Создание обертки поверх bitmap.
 		/// </summary>
 		/// <param name="copySourceToOutput">Копирует исходное изображение в выходной буфер</param>
-		public ImageWrapper(Bitmap bmp, bool copySourceToOutput = false)
+		public ImageWrapper(Bitmap bmp, bool useCopy, bool copySourceToOutput = false)
 		{
+			_useCopy = useCopy;
 			Width = bmp.Width;
 			Height = bmp.Height;
 			this.bmp = bmp;
@@ -46,8 +48,111 @@ namespace WindowsFormsApp1
 			//data = new byte[stride * Height];
 			//System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, data, 0, data.Length);
 
-			outData = copySourceToOutput ? (byte[])data.Clone() : new byte[stride * Height];
+			if (_useCopy)
+			{
+				outData = copySourceToOutput ? (byte[])data.Clone() : new byte[stride * Height];
+			}
 		}
+
+		/// <summary>
+		/// Заносит квадрат
+		/// </summary>
+		public unsafe void FillSquare(int x, int y, Color color)
+		{
+			byte* curpos;
+
+			if (x >= 0 && x < Width && y >= 0 && y < Height)
+			{
+				var i = x * 4 + y * stride;
+
+				if (_useCopy)
+				{
+					curpos = ((byte*)bmpData.Scan0) + i;
+					*(curpos) = color.B;
+					*(curpos + 1) = color.G;
+					*(curpos + 2) = color.R;
+					*(curpos + 3) = 255;
+
+					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height)
+					{
+						*(curpos + 4) = color.B;
+						*(curpos + 5) = color.G;
+						*(curpos + 6) = color.R;
+						*(curpos + 7) = 255;
+					}
+
+					if (x >= 0 && x < Width && y >= 0 && y < Height - 1)
+					{
+						outData[i + stride] = color.B;
+						outData[i + stride + 1] = color.G;
+						outData[i + stride + 2] = color.R;
+						outData[i + stride + 3] = 255;
+					}
+
+					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height - 1)
+					{
+						outData[i + stride + 4] = color.B;
+						outData[i + stride + 5] = color.G;
+						outData[i + stride + 6] = color.R;
+						outData[i + stride + 7] = 255;
+					}
+				}
+				else
+				{
+					outData[i] = color.B;
+					outData[i + 1] = color.G;
+					outData[i + 2] = color.R;
+					outData[i + 3] = 255;
+
+					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height)
+					{
+						outData[i + 4] = color.B;
+						outData[i + 5] = color.G;
+						outData[i + 6] = color.R;
+						outData[i + 7] = 255;
+					}
+
+					if (x >= 0 && x < Width && y >= 0 && y < Height - 1)
+					{
+						outData[i + stride] = color.B;
+						outData[i + stride + 1] = color.G;
+						outData[i + stride + 2] = color.R;
+						outData[i + stride + 3] = 255;
+					}
+
+					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height - 1)
+					{
+						outData[i + stride + 4] = color.B;
+						outData[i + stride + 5] = color.G;
+						outData[i + stride + 6] = color.R;
+						outData[i + stride + 7] = 255;
+					}
+				}
+
+			}
+		}
+
+		/// <summary>
+		/// Заносит в bitmap выходной буфер и снимает лок.
+		/// Этот метод обязателен к исполнению (либо явно, лмбо через using)
+		/// </summary>
+		public void Dispose()
+		{
+			if (_useCopy)
+			{
+				System.Runtime.InteropServices.Marshal.Copy(outData, 0, bmpData.Scan0, outData.Length);
+			}
+			bmp.UnlockBits(bmpData);
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		int GetIndex(int x, int y)
+		{
+			return (x < 0 || x >= Width || y < 0 || y >= Height) ? -1 : x * 4 + y * stride;
+		}
+
 
 		/// <summary>
 		/// Возвращает пиксел из исходнго изображения.
@@ -74,45 +179,6 @@ namespace WindowsFormsApp1
 			}
 		}
 
-		/// <summary>
-		/// Заносит квадрат в выходной буфер.
-		/// </summary>
-		public void FillSquare(int x, int y, Color color)
-		{
-			var i = x * 4 + y * stride;
-
-			if (i >= 0)
-			{
-
-				if (x >= 0 && x < Width && y >= 0 && y < Height)
-				{
-					outData[i] = color.B;
-					outData[i + 1] = color.G;
-					outData[i + 2] = color.R;
-				}
-
-				if (x >= 0 && x < Width-1 && y >= 0 && y < Height)
-				{
-					outData[i + 4] = color.B;
-					outData[i + 5] = color.G;
-					outData[i + 6] = color.R;
-				}
-
-				if (x >= 0 && x < Width && y >= 0 && y < Height-1)
-				{
-					outData[i + stride] = color.B;
-					outData[i + stride + 1] = color.G;
-					outData[i + stride + 2] = color.R;
-				}
-
-				if (x >= 0 && x < Width-1 && y >= 0 && y < Height-1)
-				{
-					outData[i + stride + 4] = color.B;
-					outData[i + stride + 5] = color.G;
-					outData[i + stride + 6] = color.R;
-				}
-			};
-		}
 
 		/// <summary>
 		/// Возвращает пиксел из исходнго изображения.
@@ -140,20 +206,6 @@ namespace WindowsFormsApp1
 			this[p.X, p.Y] = Color.FromArgb((int)r, (int)g, (int)b);
 		}
 
-		int GetIndex(int x, int y)
-		{
-			return (x < 0 || x >= Width || y < 0 || y >= Height) ? -1 : x * 4 + y * stride;
-		}
-
-		/// <summary>
-		/// Заносит в bitmap выходной буфер и снимает лок.
-		/// Этот метод обязателен к исполнению (либо явно, лмбо через using)
-		/// </summary>
-		public void Dispose()
-		{
-			System.Runtime.InteropServices.Marshal.Copy(outData, 0, bmpData.Scan0, outData.Length);
-			bmp.UnlockBits(bmpData);
-		}
 
 		/// <summary>
 		/// Перечисление всех точек изображения
