@@ -4,26 +4,36 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = System.Windows.Forms.Label;
 using TextBox = System.Windows.Forms.TextBox;
 
+
+
+
 namespace WindowsFormsApp1
 {
-	public class Painter
+	public class Painter : IDisposable
 	{
 		private PictureBox _pb;
 		private Bitmap _btmp;
+		private Bitmap _btmp2;
 		private Graphics _gr;
+		private ImageWrapper _iw;
+
 		private SolidBrush _br;
 		private Color _fon;
 		private Label _label;
 		private TextBox _textBox;
 
+		private int _worldWidth;
+		private int _worldHeight;
 		private int _botWidth;
 		private int _botHeight;
 		private int _cnt;
@@ -40,41 +50,59 @@ namespace WindowsFormsApp1
 			_br = new SolidBrush(Color.Red);
 			_fon = Color.Gray;
 			_cnt = 0;
-			_dt =	DateTime.Now;
+			_dt = DateTime.Now;
 
 			_test = test;
 		}
 
 		public void Configure(int worldWidth, int worldHeight, int botWidth, int botHeight)
 		{
+			_worldHeight = worldHeight;
+			_worldWidth = worldWidth;
 			_botHeight = botHeight;
 			_botWidth = botWidth;
+
+
+			//_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
+			//_gr = Graphics.FromImage(_btmp);
+
+			// Инициализация при запуске
 			_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
-			_gr = Graphics.FromImage(_btmp);
+			_pb.Image = _btmp;
+			//_gr = Graphics.FromImage(_pb.Image);
+
 		}
 
 		public void StartNewFrame()
 		{
-			_gr.Clear(_fon);
+			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
+			//_gr.Clear(_fon);
+			_iw = new ImageWrapper(_btmp);
+			//_gr.Clear(Form.ActiveForm.BackColor);
+			//_pb.Invalidate();
 		}
 
 		public void DrawBotOnFrame(Bot bot)
 		{
-			_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
+			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
+			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
+			_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
 		}
 
-		public void PaintFrame() 
+		public void PaintFrame()
 		{
-			_pb.Image = _btmp;
-			_pb.Update();
-			//_pb.Refresh();
+			_iw.Dispose();
+
+			//_pb.Image = _btmp2;
+			//_pb.Update();
+			_pb.Refresh();
 
 			_cnt++;
 			if (_cnt % 10 == 0)
 			{
 				var tms = (DateTime.Now - _dt).TotalSeconds;
 				if (tms == 0) new Exception("tms == 0");
-				var fps = 10/tms;
+				var fps = 10 / tms;
 				_dt = DateTime.Now;
 				_label.Text = "fps: " + fps.ToString("#");
 				_label.Update();
@@ -82,6 +110,14 @@ namespace WindowsFormsApp1
 				_textBox.Text = _test.GetText();
 				_textBox.Update();
 			}
+		}
+
+		public void Dispose()
+		{
+			_btmp.Dispose();
+			_gr.Dispose();
+			_iw.Dispose();
+			_br.Dispose();
 		}
 	}
 }

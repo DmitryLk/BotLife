@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -13,62 +14,87 @@ namespace WindowsFormsApp1
 {
 	public class Tester
 	{
-		public PictureBox _pb;
-		public Bitmap _btmp;
-		public Graphics _gr;
-		public SolidBrush _br;
-		public Color _fon;
-		public Label _label;
+		private const int numberOfIntervals = 10;
+		private Interval[] _intervals;
+		private long _frequency;
 
-		private int _botWidth;
-		private int _botHeight;
-		private int _cnt;
-		private DateTime _dt;
-
-		public Painter(PictureBox pb, Label label)
+		public Tester()
 		{
-			_pb = pb;
-			_label = label;
-			_br = new SolidBrush(Color.Red);
-			_fon = Color.Gray;
-			_cnt = 0;
-			_dt =	DateTime.Now;
+			_intervals = new Interval[numberOfIntervals];
+			_frequency = Stopwatch.Frequency;
 		}
 
-		public void Configure(int worldWidth, int worldHeight, int botWidth, int botHeight)
+		public void InitInterval(int i, string name)
 		{
-			_botHeight = botHeight;
-			_botWidth = botWidth;
-			_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
-			_gr = Graphics.FromImage(_btmp);
-		}
-
-		public void StartNewFrame()
-		{
-			_gr.Clear(_fon);
-		}
-
-		public void DrawBotOnFrame(Bot bot)
-		{
-			_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
-		}
-
-		public void PaintFrame() 
-		{
-			_pb.Image = _btmp;
-			_pb.Update();
-			//_pb.Refresh();
-
-			_cnt++;
-			if (_cnt % 10 == 0)
+			if (i > numberOfIntervals)
 			{
-				var tms = (DateTime.Now - _dt).TotalSeconds;
-				if (tms == 0) new Exception("tms == 0");
-				var fps = 10/tms;
-				_dt = DateTime.Now;
-				_label.Text = "fps: " + fps.ToString("#");
-				_label.Update();
+				new Exception("if (i > numberOfIntervals)");
 			}
+
+			if (_intervals[i - 1] == null)
+			{
+				_intervals[i - 1] = new Interval();
+			}
+
+			_intervals[i - 1].Active = true;
+			_intervals[i - 1].Num = i;
+			_intervals[i - 1].Name = name;
+			_intervals[i - 1].TotalMeasurement = 0;
+			_intervals[i - 1].NumberOfMeasurement = 0;
 		}
+
+		public void BeginInterval(int i)
+		{
+			_intervals[i - 1].LastMeasurement = Stopwatch.GetTimestamp();
+		}
+
+		public void EndInterval(int i)
+		{
+			_intervals[i - 1].TotalMeasurement += Stopwatch.GetTimestamp() - _intervals[i - 1].LastMeasurement;
+			_intervals[i - 1].NumberOfMeasurement++;
+		}
+
+		public void EndBeginInterval(int end, int begin)
+		{
+			_intervals[begin - 1].LastMeasurement = Stopwatch.GetTimestamp();
+			_intervals[end - 1].TotalMeasurement += _intervals[begin - 1].LastMeasurement - _intervals[end - 1].LastMeasurement;
+			_intervals[end - 1].NumberOfMeasurement++;
+		}
+
+		public string GetText()
+		{
+			var sb = new StringBuilder();
+			var sumElapsedMs = 0;
+
+			foreach (var i in _intervals)
+			{
+				if (i != null && i.Active)
+				{
+					i.ElapsedMs = (int)(1000000L * i.TotalMeasurement / i.NumberOfMeasurement / _frequency);
+					sumElapsedMs += i.ElapsedMs;
+				}
+			}
+
+			foreach (var i in _intervals)
+			{
+				if (i != null && i.Active)
+				{
+					sb.AppendLine($"{i.Num}. {i.Name} {i.ElapsedMs} mcs ({100*i.ElapsedMs/sumElapsedMs }%)");
+				}
+			}
+
+			return sb.ToString();
+		}
+	}
+
+	public class Interval
+	{
+		public bool Active;
+		public int Num;
+		public string Name;
+		public long LastMeasurement;
+		public long TotalMeasurement;
+		public int NumberOfMeasurement;
+		public int ElapsedMs;
 	}
 }

@@ -37,12 +37,17 @@ namespace WindowsFormsApp1
 		{
 			_painter = painter;
 			_painter.Configure(worldWidth, worldHeight, botWidth, botHeight);
+
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
 			_test = test;
+			_test.InitInterval(1, "BotsAction();");
+			_test.InitInterval(2, "RedrawWorld();");
+			_test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
+			_test.InitInterval(4, "PaintFrame();");
 
 			InitWorld();
 		}
@@ -79,7 +84,7 @@ namespace WindowsFormsApp1
 		{
 			_test.BeginInterval(1);
 			BotsAction();
-			_test.EndInterval(1);
+			_test.EndBeginInterval(1, 2);
 			RedrawWorld();
 		}
 
@@ -97,17 +102,22 @@ namespace WindowsFormsApp1
 		private void RedrawWorld()
 		{
 			_painter.StartNewFrame();
+			_test.EndBeginInterval(2, 3);
 
 			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
 			{
-				if (bots[botNumber].Moved)
-				{
-					_painter.DrawBotOnFrame(bots[botNumber]);
-				}
+				_painter.DrawBotOnFrame(bots[botNumber]);
+				//if (bots[botNumber].Moved || !bots[botNumber].OnceDrawed)
+				//{
+				//	_painter.DrawBotOnFrame(bots[botNumber]);
+				//	bots[botNumber].OnceDrawed = true;
+				//}
 			}
+			_test.EndBeginInterval(3, 4);
 
 			_painter.PaintFrame();
 			//await Task.Delay(1);
+			_test.EndInterval(4);
 		}
 	}
 }

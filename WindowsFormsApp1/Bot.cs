@@ -14,14 +14,29 @@ namespace WindowsFormsApp1
 		public int Vx;
 		public int Vy;
 		public bool Moved;
+		public bool OnceDrawed;
 
 		public Bot(Random rnd, int maxX, int maxY)
 		{
 			X = rnd.Next(1, maxX);
 			Y = rnd.Next(1, maxY);
-			Vx = rnd.Next(-1, 2);
-			Vy = rnd.Next(-1, 2);
+			//Vx = rnd.Next(-1, 2);
+			//Vy = rnd.Next(-1, 2);
+
+
+			if (rnd.Next(100) > 97)
+			{
+				Vx = rnd.Next(-1, 2);
+				Vy = rnd.Next(-1, 2);
+			}
+			else
+			{
+				Vx = 0;
+				Vy = 0;
+			}
+
 			Moved = false;
+			OnceDrawed = false;	
 		}
 
 		public void Move() 

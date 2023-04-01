@@ -18,7 +18,6 @@ namespace WindowsFormsApp1
 		{
 			InitializeComponent();
 			var test = new Tester();
-			test.Start();
 
 			var painter = new Painter(pictureBox1, label1, textBox1, test);
 			life = new Life(painter, test);
