@@ -14,9 +14,6 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = System.Windows.Forms.Label;
 using TextBox = System.Windows.Forms.TextBox;
 
-
-
-
 namespace WindowsFormsApp1
 {
 	public class Painter : IDisposable
@@ -38,6 +35,7 @@ namespace WindowsFormsApp1
 		private int _botHeight;
 		private int _cnt;
 		private DateTime _dt;
+		private int _reportFrequency;
 
 		public Tester _test;
 
@@ -55,12 +53,13 @@ namespace WindowsFormsApp1
 			_test = test;
 		}
 
-		public void Configure(int worldWidth, int worldHeight, int botWidth, int botHeight)
+		public void Configure(int worldWidth, int worldHeight, int botWidth, int botHeight, int reportFrequency)
 		{
 			_worldHeight = worldHeight;
 			_worldWidth = worldWidth;
 			_botHeight = botHeight;
 			_botWidth = botWidth;
+			_reportFrequency = reportFrequency;
 
 
 			//_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
@@ -77,7 +76,7 @@ namespace WindowsFormsApp1
 		{
 			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
 			//_gr.Clear(_fon);
-			_iw = new ImageWrapper(_btmp, true);
+			_iw = new ImageWrapper(_btmp, false);
 			//_gr.Clear(Form.ActiveForm.BackColor);
 			//_pb.Invalidate();
 		}
@@ -87,6 +86,15 @@ namespace WindowsFormsApp1
 			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
 			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
 
+			//Color.LightGray
+			//Form.ActiveForm.BackColor
+			//Color.Empty
+			//Color.FromArgb(255,128,128,128)
+			//Color.FromKnownColor(KnownColor.ActiveCaption)
+			if (bot.X != bot.OldX || bot.Y != bot.OldY)
+			{
+				_iw.FillSquare(bot.OldX * _botWidth, bot.OldY * _botHeight, Color.FromKnownColor(KnownColor.ActiveCaption));
+			}
 
 			_iw.FillSquare(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
 
@@ -106,11 +114,11 @@ namespace WindowsFormsApp1
 			_pb.Refresh();
 
 			_cnt++;
-			if (_cnt % 10 == 0)
+			if (_cnt % _reportFrequency == 0)
 			{
 				var tms = (DateTime.Now - _dt).TotalSeconds;
 				if (tms == 0) new Exception("tms == 0");
-				var fps = 10 / tms;
+				var fps = _reportFrequency / tms;
 				_dt = DateTime.Now;
 				_label.Text = "fps: " + fps.ToString("#");
 				_label.Update();

@@ -15,6 +15,7 @@ namespace WindowsFormsApp1
 	public class Tester
 	{
 		private const int numberOfIntervals = 10;
+
 		private Interval[] _intervals;
 		private long _frequency;
 

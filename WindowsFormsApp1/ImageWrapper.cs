@@ -65,7 +65,7 @@ namespace WindowsFormsApp1
 			{
 				var i = x * 4 + y * stride;
 
-				if (_useCopy)
+				if (!_useCopy)
 				{
 					curpos = ((byte*)bmpData.Scan0) + i;
 					*(curpos) = color.B;
@@ -83,18 +83,18 @@ namespace WindowsFormsApp1
 
 					if (x >= 0 && x < Width && y >= 0 && y < Height - 1)
 					{
-						outData[i + stride] = color.B;
-						outData[i + stride + 1] = color.G;
-						outData[i + stride + 2] = color.R;
-						outData[i + stride + 3] = 255;
+						*(curpos + stride) = color.B;
+						*(curpos + stride + 1) = color.G;
+						*(curpos + stride + 2) = color.R;
+						*(curpos + stride + 3) = 255;
 					}
 
 					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height - 1)
 					{
-						outData[i + stride + 4] = color.B;
-						outData[i + stride + 5] = color.G;
-						outData[i + stride + 6] = color.R;
-						outData[i + stride + 7] = 255;
+						*(curpos + stride + 4) = color.B;
+						*(curpos + stride + 5) = color.G;
+						*(curpos + stride + 6) = color.R;
+						*(curpos + stride + 7) = 255;
 					}
 				}
 				else

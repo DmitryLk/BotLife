@@ -20,6 +20,7 @@ namespace WindowsFormsApp1
 		private const int botWidth = 2;
 		private const int botHeight = 2;
 		private const int maxBotsNumber = worldWidth * worldHeight;
+		private const int reportFrequency = 100;
 
 
 		public System.Windows.Forms.Timer timer;
@@ -36,7 +37,7 @@ namespace WindowsFormsApp1
 		public Life(Painter painter, Tester test)
 		{
 			_painter = painter;
-			_painter.Configure(worldWidth, worldHeight, botWidth, botHeight);
+			_painter.Configure(worldWidth, worldHeight, botWidth, botHeight, reportFrequency);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
@@ -68,6 +69,7 @@ namespace WindowsFormsApp1
 		public void Start()
 		{
 			//timer.Enabled = true;
+			_test.BeginInterval(1);
 			for (; ; )
 			{
 				Step();
@@ -82,7 +84,6 @@ namespace WindowsFormsApp1
 
 		private void Step()
 		{
-			_test.BeginInterval(1);
 			WorldStep();
 			_test.EndBeginInterval(1, 2);
 			RedrawWorld();
@@ -107,18 +108,18 @@ namespace WindowsFormsApp1
 
 			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
 			{
-				_painter.DrawBotOnFrame(bots[botNumber]);
-				//if (bots[botNumber].Moved || !bots[botNumber].OnceDrawed)
-				//{
-				//	_painter.DrawBotOnFrame(bots[botNumber]);
-				//	bots[botNumber].OnceDrawed = true;
-				//}
+				//_painter.DrawBotOnFrame(bots[botNumber]);
+				if (bots[botNumber].Moved || !bots[botNumber].OnceDrawed)
+				{
+					_painter.DrawBotOnFrame(bots[botNumber]);
+					bots[botNumber].OnceDrawed = true;
+				}
 			}
 			_test.EndBeginInterval(3, 4);
 
 			_painter.PaintFrame();
 			//await Task.Delay(1);
-			_test.EndInterval(4);
+			_test.EndBeginInterval(4, 1);
 		}
 	}
 }

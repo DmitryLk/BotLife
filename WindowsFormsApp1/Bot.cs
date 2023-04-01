@@ -11,6 +11,8 @@ namespace WindowsFormsApp1
 	{
 		public int X;
 		public int Y;
+		public int OldX;
+		public int OldY;
 		public int Vx;
 		public int Vy;
 		public bool Moved;
@@ -20,6 +22,8 @@ namespace WindowsFormsApp1
 		{
 			X = rnd.Next(1, maxX);
 			Y = rnd.Next(1, maxY);
+			OldX = X;
+			OldY = Y;
 			//Vx = rnd.Next(-1, 2);
 			//Vy = rnd.Next(-1, 2);
 
@@ -101,6 +105,8 @@ namespace WindowsFormsApp1
 
 			Moved = X != newX || Y != newY;
 
+			OldX = X;
+			OldY = Y;
 			X = newX;
 			Y = newY;
 		}
