@@ -13,7 +13,7 @@ namespace WindowsFormsApp1
 {
 	public partial class Form1 : Form
 	{
-		public Main main;
+		public Game main;
 
 		public Form1()
 		{
@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
 
 			var test = new Tester();
 			var painter = new Painter(pictureBox1, label1, textBox1, test);
-			main = new Main(painter, test);
+			main = new Game(painter, test);
 		}
 
 		private async void button1_Click(object sender, EventArgs e)

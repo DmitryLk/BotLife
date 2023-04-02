@@ -97,9 +97,9 @@ namespace WindowsFormsApp1
 		public void Move()
 		{
 			var newX = X + Vx;
-			if (newX >= 500)
+			if (newX >= MaxX)
 			{
-				newX = 499;
+				newX = MaxX-1;
 				Vx = -Vx;
 			}
 			if (newX < 0)
@@ -110,9 +110,9 @@ namespace WindowsFormsApp1
 
 
 			var newY = Y + Vy;
-			if (newY >= 500)
+			if (newY >= MaxY)
 			{
-				newY = 499;
+				newY = MaxY-1;
 				Vy = -Vy;
 			}
 			if (newY < 0)

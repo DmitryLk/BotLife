@@ -2,10 +2,10 @@
   "MaxPictureBoxWidth": 1000,
   "MaxPictureBoxHeight": 1000,
 
-  "WorldWidth": 1000,
-  "WorldHeight": 1000,
-  "BotWidth": 1,
-  "BotHeight": 1,
+  "WorldWidth": 500,
+  "WorldHeight": 500,
+  "BotWidth": 2,
+  "BotHeight": 2,
 
   "StartBotsNumber": 40000,
   "MaxBotsNumber": 40000,

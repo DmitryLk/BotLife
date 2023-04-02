@@ -67,9 +67,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WorldOptions.cs" />
     <Compile Include="ImageWrapper.cs" />
     <Compile Include="World.cs" />
-    <Compile Include="WorldOptions.cs" />
+    <Compile Include="GameOptions.cs" />
     <Compile Include="Tester.cs" />
     <Compile Include="Painter.cs" />
     <Compile Include="Form1.cs">
@@ -79,7 +80,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Bot.cs" />
-    <Compile Include="Main.cs" />
+    <Compile Include="Game.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
