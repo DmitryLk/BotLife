@@ -50,10 +50,10 @@ namespace WindowsFormsApp1
 			_world = new World(worldOptions);
 
 			_test = test;
-			_test.InitInterval(1, "BotsAction();");
-			_test.InitInterval(2, "RedrawWorld();");
-			_test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
-			_test.InitInterval(4, "PaintFrame();");
+			_test.InitInterval(0, "BotsAction();");
+			_test.InitInterval(1, "RedrawWorld();");
+			_test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
+			_test.InitInterval(3, "PaintFrame();");
 		}
 
 		private GameOptions LoadConfig()
@@ -70,7 +70,7 @@ namespace WindowsFormsApp1
 		public async Task Start()
 		{
 			//timer.Enabled = true;
-			_test.BeginInterval(1);
+			_test.BeginInterval(0);
 
 			while (true)
 			{
@@ -90,7 +90,7 @@ namespace WindowsFormsApp1
 			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
 			//_world.Step();
 
-			_test.EndBeginInterval(1, 2);
+			_test.EndBeginInterval(0, 1);
 
 			RedrawWorld();
 		}
@@ -99,24 +99,23 @@ namespace WindowsFormsApp1
 		private void RedrawWorld()
 		{
 			_painter.StartNewFrame();
-			_test.EndBeginInterval(2, 3);
+			_test.EndBeginInterval(1, 2);
 
 			for (var botNumber = 0; botNumber < _world.CurrentBotsNumber; botNumber++)
 			{
 				var bot = _world.Bots[botNumber];
 
-				//_painter.DrawBotOnFrame(bots[botNumber]);
 				if (bot.Moved || bot.NoDrawed)
 				{
 					_painter.DrawBotOnFrame(bot);
 					bot.NoDrawed = false;
 				}
 			}
-			_test.EndBeginInterval(3, 4);
+			_test.EndBeginInterval(2, 3);
 
 			_painter.PaintFrame();
 			//await Task.Delay(1);
-			_test.EndBeginInterval(4, 1);
+			_test.EndBeginInterval(3, 0);
 		}
 	}
 }

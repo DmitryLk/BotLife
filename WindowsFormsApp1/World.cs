@@ -4,7 +4,7 @@ namespace WindowsFormsApp1
 {
 	public class World
 	{
-		private int[,] world;
+		private uint[,] world; // чтобы можно было узнать по координатам что там находится
 		public Bot[] Bots;
 		public int CurrentBotsNumber;
 		Random _rnd = new Random(Guid.NewGuid().GetHashCode());
@@ -12,7 +12,7 @@ namespace WindowsFormsApp1
 		public World(WorldOptions options)
 		{
 			// CREATE WORLD
-			world = new int[options.WorldWidth, options.WorldHeight];
+			world = new uint[options.WorldWidth, options.WorldHeight];
 			Bots = new Bot[options.MaxBotsNumber];
 
 			// Создание ботов

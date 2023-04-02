@@ -32,34 +32,34 @@ namespace WindowsFormsApp1
 				new Exception("if (i > numberOfIntervals)");
 			}
 
-			if (_intervals[i - 1] == null)
+			if (_intervals[i] == null)
 			{
-				_intervals[i - 1] = new Interval();
+				_intervals[i] = new Interval();
 			}
 
-			_intervals[i - 1].Active = true;
-			_intervals[i - 1].Num = i;
-			_intervals[i - 1].Name = name;
-			_intervals[i - 1].TotalMeasurement = 0;
-			_intervals[i - 1].NumberOfMeasurement = 0;
+			_intervals[i].Active = true;
+			_intervals[i].Num = i;
+			_intervals[i].Name = name;
+			_intervals[i].TotalMeasurement = 0;
+			_intervals[i].NumberOfMeasurement = 0;
 		}
 
 		public void BeginInterval(int i)
 		{
-			_intervals[i - 1].LastMeasurement = Stopwatch.GetTimestamp();
+			_intervals[i].LastMeasurement = Stopwatch.GetTimestamp();
 		}
 
 		public void EndInterval(int i)
 		{
-			_intervals[i - 1].TotalMeasurement += Stopwatch.GetTimestamp() - _intervals[i - 1].LastMeasurement;
-			_intervals[i - 1].NumberOfMeasurement++;
+			_intervals[i].TotalMeasurement += Stopwatch.GetTimestamp() - _intervals[i].LastMeasurement;
+			_intervals[i].NumberOfMeasurement++;
 		}
 
 		public void EndBeginInterval(int end, int begin)
 		{
-			_intervals[begin - 1].LastMeasurement = Stopwatch.GetTimestamp();
-			_intervals[end - 1].TotalMeasurement += _intervals[begin - 1].LastMeasurement - _intervals[end - 1].LastMeasurement;
-			_intervals[end - 1].NumberOfMeasurement++;
+			_intervals[begin].LastMeasurement = Stopwatch.GetTimestamp();
+			_intervals[end].TotalMeasurement += _intervals[begin].LastMeasurement - _intervals[end].LastMeasurement;
+			_intervals[end].NumberOfMeasurement++;
 		}
 
 		public string GetText()
@@ -80,7 +80,7 @@ namespace WindowsFormsApp1
 			{
 				if (i != null && i.Active)
 				{
-					sb.AppendLine($"{i.Num}. {i.Name} {i.ElapsedMs} mcs ({100*i.ElapsedMs/sumElapsedMs }%)");
+					sb.AppendLine($"{i.Num+1}. {i.Name} {i.ElapsedMs} mcs ({100*i.ElapsedMs/sumElapsedMs }%)");
 				}
 			}
 

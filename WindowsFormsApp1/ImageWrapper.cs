@@ -79,7 +79,21 @@ namespace WindowsFormsApp1
 			{
 				var ind = x * 4 + y * stride;
 
-				if (!_useCopy)
+				if (_useCopy)
+				{
+					for (var j = 0; j < size; j++)
+					{
+						for (var i = 0; i < size; i++)
+						{
+							outData[ind++] = color.B;
+							outData[ind++] = color.G;
+							outData[ind++] = color.R;
+							outData[ind++] = 255;
+						}
+						ind += stride - size * 4;
+					}
+				}
+				else
 				{
 					curpos = ((byte*)bmpData.Scan0) + ind;
 
@@ -93,20 +107,6 @@ namespace WindowsFormsApp1
 							*(curpos++) = 255;
 						}
 						curpos += stride - size * 4;
-					}
-				}
-				else
-				{
-					for (var j = 0; j < size; j++)
-					{
-						for (var i = 0; i < size; i++)
-						{
-							outData[ind++] = color.B;
-							outData[ind++] = color.G;
-							outData[ind++] = color.R;
-							outData[ind++] = 255;
-						}
-						ind += stride - size * 4;
 					}
 				}
 			}
