@@ -14,11 +14,11 @@ namespace WindowsFormsApp1
 		/// <summary>
 		/// Ширина изображения
 		/// </summary>
-		public int Width { get; private set; }
+		public int _width { get; private set; }
 		/// <summary>
 		/// Высота изображения
 		/// </summary>
-		public int Height { get; private set; }
+		public int _height { get; private set; }
 		/// <summary>
 		/// Цвет по-умолачнию (используется при выходе координат за пределы изображения)
 		/// </summary>
@@ -35,12 +35,14 @@ namespace WindowsFormsApp1
 		/// Создание обертки поверх bitmap.
 		/// </summary>
 		/// <param name="copySourceToOutput">Копирует исходное изображение в выходной буфер</param>
-		public ImageWrapper(Bitmap bmp, bool useCopy, bool copySourceToOutput = false)
+		public ImageWrapper(Bitmap bmp, int width, int height, bool useCopy, bool copySourceToOutput = false)
 		{
 			_useCopy = useCopy;
-			Width = bmp.Width;
-			Height = bmp.Height;
+			_width = width;
+			_height = height;
 			this.bmp = bmp;
+
+		
 
 			bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 			stride = bmpData.Stride;
@@ -50,7 +52,7 @@ namespace WindowsFormsApp1
 
 			if (_useCopy)
 			{
-				outData = copySourceToOutput ? (byte[])data.Clone() : new byte[stride * Height];
+				outData = copySourceToOutput ? (byte[])data.Clone() : new byte[stride * _height];
 			}
 		}
 
@@ -61,7 +63,7 @@ namespace WindowsFormsApp1
 		{
 			byte* curpos;
 
-			if (x >= 0 && x < Width && y >= 0 && y < Height)
+			if (x >= 0 && x < _width && y >= 0 && y < _height)
 			{
 				var i = x * 4 + y * stride;
 
@@ -73,7 +75,7 @@ namespace WindowsFormsApp1
 					*(curpos + 2) = color.R;
 					*(curpos + 3) = 255;
 
-					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height)
+					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height)
 					{
 						*(curpos + 4) = color.B;
 						*(curpos + 5) = color.G;
@@ -81,7 +83,7 @@ namespace WindowsFormsApp1
 						*(curpos + 7) = 255;
 					}
 
-					if (x >= 0 && x < Width && y >= 0 && y < Height - 1)
+					if (x >= 0 && x < _width && y >= 0 && y < _height - 1)
 					{
 						*(curpos + stride) = color.B;
 						*(curpos + stride + 1) = color.G;
@@ -89,7 +91,7 @@ namespace WindowsFormsApp1
 						*(curpos + stride + 3) = 255;
 					}
 
-					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height - 1)
+					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height - 1)
 					{
 						*(curpos + stride + 4) = color.B;
 						*(curpos + stride + 5) = color.G;
@@ -104,7 +106,7 @@ namespace WindowsFormsApp1
 					outData[i + 2] = color.R;
 					outData[i + 3] = 255;
 
-					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height)
+					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height)
 					{
 						outData[i + 4] = color.B;
 						outData[i + 5] = color.G;
@@ -112,7 +114,7 @@ namespace WindowsFormsApp1
 						outData[i + 7] = 255;
 					}
 
-					if (x >= 0 && x < Width && y >= 0 && y < Height - 1)
+					if (x >= 0 && x < _width && y >= 0 && y < _height - 1)
 					{
 						outData[i + stride] = color.B;
 						outData[i + stride + 1] = color.G;
@@ -120,7 +122,7 @@ namespace WindowsFormsApp1
 						outData[i + stride + 3] = 255;
 					}
 
-					if (x >= 0 && x < Width - 1 && y >= 0 && y < Height - 1)
+					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height - 1)
 					{
 						outData[i + stride + 4] = color.B;
 						outData[i + stride + 5] = color.G;
@@ -150,7 +152,7 @@ namespace WindowsFormsApp1
 
 		int GetIndex(int x, int y)
 		{
-			return (x < 0 || x >= Width || y < 0 || y >= Height) ? -1 : x * 4 + y * stride;
+			return (x < 0 || x >= _width || y < 0 || y >= _height) ? -1 : x * 4 + y * stride;
 		}
 
 
@@ -212,8 +214,8 @@ namespace WindowsFormsApp1
 		/// </summary>
 		public IEnumerator<Point> GetEnumerator()
 		{
-			for (int y = 0; y < Height; y++)
-				for (int x = 0; x < Width; x++)
+			for (int y = 0; y < _height; y++)
+				for (int x = 0; x < _width; x++)
 					yield return new Point(x, y);
 		}
 

@@ -16,7 +16,7 @@ namespace WindowsFormsApp1
 		public int Vx;
 		public int Vy;
 		public bool Moved;
-		public bool OnceDrawed;
+		public bool NoDrawed;
 
 		public Bot(Random rnd, int maxX, int maxY)
 		{
@@ -40,7 +40,7 @@ namespace WindowsFormsApp1
 			}
 
 			Moved = false;
-			OnceDrawed = false;	
+			NoDrawed = true;	
 		}
 
 		public void Step()

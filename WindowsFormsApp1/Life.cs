@@ -29,7 +29,7 @@ namespace WindowsFormsApp1
 		private int currentBotsNumber;
 
 		public Painter _painter;
-		public Tester _test;
+		public Tester ___test;
 
 
 		Random _rnd = new Random(Guid.NewGuid().GetHashCode());
@@ -44,11 +44,11 @@ namespace WindowsFormsApp1
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
-			_test = test;
-			_test.InitInterval(1, "BotsAction();");
-			_test.InitInterval(2, "RedrawWorld();");
-			_test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
-			_test.InitInterval(4, "PaintFrame();");
+			___test = test;
+			___test.InitInterval(1, "BotsAction();");
+			___test.InitInterval(2, "RedrawWorld();");
+			___test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
+			___test.InitInterval(4, "PaintFrame();");
 
 			InitWorld();
 		}
@@ -66,13 +66,13 @@ namespace WindowsFormsApp1
 			currentBotsNumber = startBotsNumber;
 		}
 
-		public void Start()
+		public async Task Start()
 		{
 			//timer.Enabled = true;
-			_test.BeginInterval(1);
+			___test.BeginInterval(1);
 			for (; ; )
 			{
-				Step();
+				await Step();
 			}
 		}
 
@@ -82,10 +82,14 @@ namespace WindowsFormsApp1
 		//}
 
 
-		private void Step()
+		private async Task Step()
 		{
+			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
+			//await Task.Run(() => WorldStep());
 			WorldStep();
-			_test.EndBeginInterval(1, 2);
+
+
+			___test.EndBeginInterval(1, 2);
 			RedrawWorld();
 		}
 
@@ -104,22 +108,22 @@ namespace WindowsFormsApp1
 		private void RedrawWorld()
 		{
 			_painter.StartNewFrame();
-			_test.EndBeginInterval(2, 3);
+			___test.EndBeginInterval(2, 3);
 
 			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
 			{
 				//_painter.DrawBotOnFrame(bots[botNumber]);
-				if (bots[botNumber].Moved || !bots[botNumber].OnceDrawed)
+				if (bots[botNumber].Moved || bots[botNumber].NoDrawed)
 				{
 					_painter.DrawBotOnFrame(bots[botNumber]);
-					bots[botNumber].OnceDrawed = true;
+					bots[botNumber].NoDrawed = false;
 				}
 			}
-			_test.EndBeginInterval(3, 4);
+			___test.EndBeginInterval(3, 4);
 
 			_painter.PaintFrame();
 			//await Task.Delay(1);
-			_test.EndBeginInterval(4, 1);
+			___test.EndBeginInterval(4, 1);
 		}
 	}
 }

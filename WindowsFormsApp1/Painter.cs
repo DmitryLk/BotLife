@@ -76,7 +76,7 @@ namespace WindowsFormsApp1
 		{
 			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
 			//_gr.Clear(_fon);
-			_iw = new ImageWrapper(_btmp, false);
+			_iw = new ImageWrapper(_btmp, _worldWidth * _botWidth, _worldHeight * _botHeight, false);
 			//_gr.Clear(Form.ActiveForm.BackColor);
 			//_pb.Invalidate();
 		}
@@ -111,7 +111,28 @@ namespace WindowsFormsApp1
 
 			//_pb.Image = _btmp2;
 			//_pb.Update();
+
+			//if (_pb.InvokeRequired)
+			//{
+			//	_pb.BeginInvoke(new Action(() => _pb.Refresh()));
+			//}
+			//else
+			//	_pb.Refresh();
+
+
 			_pb.Refresh();
+			//if (_pb.InvokeRequired)
+			//{
+			//	_pb.Invoke((MethodInvoker)delegate
+			//	{
+			//		_pb.Refresh();
+			//	});
+			//}
+			//else
+			//	_pb.Refresh();
+
+
+
 
 			_cnt++;
 			if (_cnt % _reportFrequency == 0)
@@ -120,11 +141,33 @@ namespace WindowsFormsApp1
 				if (tms == 0) new Exception("tms == 0");
 				var fps = _reportFrequency / tms;
 				_dt = DateTime.Now;
+
 				_label.Text = "fps: " + fps.ToString("#");
 				_label.Update();
-
 				_textBox.Text = _test.GetText();
 				_textBox.Update();
+
+				//if (_label.InvokeRequired)
+				//{
+				//	_label.Invoke((MethodInvoker)delegate
+				//	{
+				//		_label.Text = "fps: " + fps.ToString("#");
+				//	});
+				//}
+				//else
+				//	_label.Text = "fps: " + fps.ToString("#");
+				////_label.Update();
+
+				//if (_textBox.InvokeRequired)
+				//{
+				//	_textBox.Invoke((MethodInvoker)delegate
+				//	{
+				//		_textBox.Text = _test.GetText();
+				//	});
+				//}
+				//else
+				//	_textBox.Text = _test.GetText();
+				////_textBox.Update();
 			}
 		}
 

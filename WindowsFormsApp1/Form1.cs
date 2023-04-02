@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,10 +24,16 @@ namespace WindowsFormsApp1
 			life = new Life(painter, test);
 		}
 
-		private void button1_Click(object sender, EventArgs e)
+		private async void button1_Click(object sender, EventArgs e)
 		{
+
 			life.Start();
+			//await Task.Factory.StartNew(() => life.Start(), TaskCreationOptions.LongRunning);
+			//var thread = new System.Threading.Thread(() => life.Start());
+			//thread.Start();
 		}
+
+
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
