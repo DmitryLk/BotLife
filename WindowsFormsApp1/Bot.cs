@@ -57,18 +57,23 @@ namespace WindowsFormsApp1
 			GenPointer = 1;
 
 			// Скорость?
-			//Vx = rnd.Next(-1, 2);
-			//Vy = rnd.Next(-1, 2);
-			if (rnd.Next(100) > 97)
+			do
 			{
 				Vx = rnd.Next(-1, 2);
 				Vy = rnd.Next(-1, 2);
 			}
-			else
-			{
-				Vx = 0;
-				Vy = 0;
-			}
+			while (Vx == 0 && Vy == 0);
+
+			//if (rnd.Next(100) > 97)
+			//{
+			//	Vx = rnd.Next(-1, 2);
+			//	Vy = rnd.Next(-1, 2);
+			//}
+			//else
+			//{
+			//	Vx = 0;
+			//	Vy = 0;
+			//}
 
 			MaxX = maxX;
 			MaxY = maxY;

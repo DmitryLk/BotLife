@@ -30,8 +30,8 @@ namespace WindowsFormsApp1
 
 			for (var botNumber = 0; botNumber < CurrentBotsNumber; botNumber++)
 			{
-				Bots[botNumber].Live();
-				//Bots[botNumber].Move();
+				//Bots[botNumber].Live();
+				Bots[botNumber].Move();
 			}
 		}
 	}
