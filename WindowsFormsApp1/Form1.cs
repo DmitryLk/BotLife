@@ -13,21 +13,21 @@ namespace WindowsFormsApp1
 {
 	public partial class Form1 : Form
 	{
-		public Main life;
+		public Main main;
 
 		public Form1()
 		{
 			InitializeComponent();
-			var test = new Tester();
 
+			var test = new Tester();
 			var painter = new Painter(pictureBox1, label1, textBox1, test);
-			life = new Main(painter, test);
+			main = new Main(painter, test);
 		}
 
 		private async void button1_Click(object sender, EventArgs e)
 		{
 
-			life.Start();
+			main.Start();
 			//await Task.Factory.StartNew(() => life.Start(), TaskCreationOptions.LongRunning);
 			//var thread = new System.Threading.Thread(() => life.Start());
 			//thread.Start();

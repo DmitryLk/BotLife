@@ -29,8 +29,6 @@ namespace WindowsFormsApp1
 		private Label _label;
 		private TextBox _textBox;
 
-		private int _worldWidth;
-		private int _worldHeight;
 		private int _botWidth;
 		private int _botHeight;
 		private int _cnt;
@@ -53,30 +51,30 @@ namespace WindowsFormsApp1
 			_test = test;
 		}
 
-		public void Configure(int worldWidth, int worldHeight, int botWidth, int botHeight, int reportFrequency)
+		public void Configure(int bitmapWidth, int bitmapHeight, int botWidth, int botHeight, int reportFrequency)
 		{
-			_worldHeight = worldHeight;
-			_worldWidth = worldWidth;
+			_pb.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
+
 			_botHeight = botHeight;
 			_botWidth = botWidth;
 			_reportFrequency = reportFrequency;
-
 
 			//_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
 			//_gr = Graphics.FromImage(_btmp);
 
 			// Инициализация при запуске
-			_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
+			_btmp = new Bitmap(bitmapWidth, bitmapHeight);
 			_pb.Image = _btmp;
 			//_gr = Graphics.FromImage(_pb.Image);
 
+			_iw = new ImageWrapper(_btmp, false);
 		}
 
 		public void StartNewFrame()
 		{
 			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
 			//_gr.Clear(_fon);
-			_iw = new ImageWrapper(_btmp, _worldWidth * _botWidth, _worldHeight * _botHeight, false);
+			_iw.StartEditing();
 			//_gr.Clear(Form.ActiveForm.BackColor);
 			//_pb.Invalidate();
 		}
@@ -93,10 +91,10 @@ namespace WindowsFormsApp1
 			//Color.FromKnownColor(KnownColor.ActiveCaption)
 			if (bot.X != bot.OldX || bot.Y != bot.OldY)
 			{
-				_iw.FillSquare(bot.OldX * _botWidth, bot.OldY * _botHeight, Color.FromKnownColor(KnownColor.ActiveCaption));
+				_iw.FillSquare(bot.OldX * _botWidth, bot.OldY * _botHeight, _botWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
 			}
 
-			_iw.FillSquare(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
+			_iw.FillSquare(bot.X * _botWidth, bot.Y * _botHeight, _botWidth, Color.Red);
 
 
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
@@ -107,7 +105,7 @@ namespace WindowsFormsApp1
 
 		public void PaintFrame()
 		{
-			_iw.Dispose();
+			_iw.EndEditing();
 
 			//_pb.Image = _btmp2;
 			//_pb.Update();

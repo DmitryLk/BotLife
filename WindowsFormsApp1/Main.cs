@@ -31,25 +31,27 @@ namespace WindowsFormsApp1
 		public Main(Painter painter, Tester test)
 		{
 			_cfg = LoadConfig();
+
+			var bitmapWidth = _cfg.WorldWidth * _cfg.BotWidth;
+			var bitmapHeight = _cfg.WorldHeight * _cfg.BotHeight;
 			_painter = painter;
-			_test = test;
+			_painter.Configure(bitmapWidth, bitmapHeight, _cfg.BotWidth, _cfg.BotHeight, _cfg.ReportFrequency);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
-			_painter.Configure(_cfg.WorldWidth, _cfg.WorldHeight, _cfg.BotWidth, _cfg.BotHeight, _cfg.ReportFrequency);
+			_world = new World();
+
+
+			_test = test;
 			_test.InitInterval(1, "BotsAction();");
 			_test.InitInterval(2, "RedrawWorld();");
 			_test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
 			_test.InitInterval(4, "PaintFrame();");
 
-			InitWorld();
-		}
-
-		public void InitWorld()
-		{
+			// CREATE WORLD
 			world = new int[_cfg.WorldWidth, _cfg.WorldHeight];
 			bots = new Bot[_cfg.MaxBotsNumber];
 
@@ -59,6 +61,10 @@ namespace WindowsFormsApp1
 				bots[botNumber] = new Bot(_rnd, _cfg.WorldWidth, _cfg.WorldHeight);
 			}
 			currentBotsNumber = _cfg.StartBotsNumber;
+		}
+
+		public void CreateWorld()
+		{
 		}
 
 		private WorldOptions LoadConfig() 
@@ -76,7 +82,8 @@ namespace WindowsFormsApp1
 		{
 			//timer.Enabled = true;
 			_test.BeginInterval(1);
-			for (; ; )
+			
+			while(true)
 			{
 				await Step();
 			}
@@ -91,10 +98,8 @@ namespace WindowsFormsApp1
 		private async Task Step()
 		{
 			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
-			//await Task.Run(() => WorldStep());
-			WorldStep();
-
-
+			await Task.Run(() => WorldStep());
+			//WorldStep();
 			_test.EndBeginInterval(1, 2);
 			RedrawWorld();
 		}
@@ -104,10 +109,10 @@ namespace WindowsFormsApp1
 			//Parallel.For(0, currentBotsNumber, i => bots[i].Move());
 
 
-			for (var botNumber = 0; botNumber < _cfg.StartBotsNumber; botNumber++)
+			for (var botNumber = 0; botNumber < currentBotsNumber; botNumber++)
 			{
-				//bots[botNumber].Step();
-				bots[botNumber].Move();
+				bots[botNumber].Live();
+				//bots[botNumber].Move();
 			}
 		}
 
@@ -116,7 +121,7 @@ namespace WindowsFormsApp1
 			_painter.StartNewFrame();
 			_test.EndBeginInterval(2, 3);
 
-			for (var botNumber = 0; botNumber < _cfg.StartBotsNumber; botNumber++)
+			for (var botNumber = 0; botNumber < currentBotsNumber; botNumber++)
 			{
 				//_painter.DrawBotOnFrame(bots[botNumber]);
 				if (bots[botNumber].Moved || bots[botNumber].NoDrawed)

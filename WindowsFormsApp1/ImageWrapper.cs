@@ -28,23 +28,26 @@ namespace WindowsFormsApp1
 		private byte[] outData;//выходной буфер
 		private int stride;
 		private bool _useCopy;
+		private bool _copySourceToOutput;
 		private BitmapData bmpData;
-		private Bitmap bmp;
+		private Bitmap _bmp;
 
 		/// <summary>
 		/// Создание обертки поверх bitmap.
 		/// </summary>
 		/// <param name="copySourceToOutput">Копирует исходное изображение в выходной буфер</param>
-		public ImageWrapper(Bitmap bmp, int width, int height, bool useCopy, bool copySourceToOutput = false)
+		public ImageWrapper(Bitmap bmp, bool useCopy, bool copySourceToOutput = false)
 		{
 			_useCopy = useCopy;
-			_width = width;
-			_height = height;
-			this.bmp = bmp;
+			_copySourceToOutput = copySourceToOutput;
+			_width = bmp.Width;
+			_height = bmp.Height;
+			_bmp = bmp;
+		}
 
-		
-
-			bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+		public void StartEditing()
+		{
+			bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 			stride = bmpData.Stride;
 
 			//data = new byte[stride * Height];
@@ -52,87 +55,65 @@ namespace WindowsFormsApp1
 
 			if (_useCopy)
 			{
-				outData = copySourceToOutput ? (byte[])data.Clone() : new byte[stride * _height];
+				outData = _copySourceToOutput ? (byte[])data.Clone() : new byte[stride * _height];
 			}
+		}
+
+		public void EndEditing()
+		{
+			if (_useCopy)
+			{
+				System.Runtime.InteropServices.Marshal.Copy(outData, 0, bmpData.Scan0, outData.Length);
+			}
+			_bmp.UnlockBits(bmpData);
 		}
 
 		/// <summary>
 		/// Заносит квадрат
 		/// </summary>
-		public unsafe void FillSquare(int x, int y, Color color)
+		public unsafe void FillSquare(int x, int y, int size, Color color)
 		{
 			byte* curpos;
 
-			if (x >= 0 && x < _width && y >= 0 && y < _height)
+			if (x >= 0 && x < _width - size && y >= 0 && y < _height - size)
 			{
-				var i = x * 4 + y * stride;
+				var ind = x * 4 + y * stride;
 
 				if (!_useCopy)
 				{
-					curpos = ((byte*)bmpData.Scan0) + i;
-					*(curpos) = color.B;
-					*(curpos + 1) = color.G;
-					*(curpos + 2) = color.R;
-					*(curpos + 3) = 255;
+					curpos = ((byte*)bmpData.Scan0) + ind;
 
-					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height)
+					for (var j = 0; j < size; j++)
 					{
-						*(curpos + 4) = color.B;
-						*(curpos + 5) = color.G;
-						*(curpos + 6) = color.R;
-						*(curpos + 7) = 255;
-					}
-
-					if (x >= 0 && x < _width && y >= 0 && y < _height - 1)
-					{
-						*(curpos + stride) = color.B;
-						*(curpos + stride + 1) = color.G;
-						*(curpos + stride + 2) = color.R;
-						*(curpos + stride + 3) = 255;
-					}
-
-					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height - 1)
-					{
-						*(curpos + stride + 4) = color.B;
-						*(curpos + stride + 5) = color.G;
-						*(curpos + stride + 6) = color.R;
-						*(curpos + stride + 7) = 255;
+						for (var i = 0; i < size; i++)
+						{
+							*(curpos++) = color.B;
+							*(curpos++) = color.G;
+							*(curpos++) = color.R;
+							*(curpos++) = 255;
+						}
+						curpos += stride - size * 4;
 					}
 				}
 				else
 				{
-					outData[i] = color.B;
-					outData[i + 1] = color.G;
-					outData[i + 2] = color.R;
-					outData[i + 3] = 255;
-
-					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height)
+					for (var j = 0; j < size; j++)
 					{
-						outData[i + 4] = color.B;
-						outData[i + 5] = color.G;
-						outData[i + 6] = color.R;
-						outData[i + 7] = 255;
-					}
-
-					if (x >= 0 && x < _width && y >= 0 && y < _height - 1)
-					{
-						outData[i + stride] = color.B;
-						outData[i + stride + 1] = color.G;
-						outData[i + stride + 2] = color.R;
-						outData[i + stride + 3] = 255;
-					}
-
-					if (x >= 0 && x < _width - 1 && y >= 0 && y < _height - 1)
-					{
-						outData[i + stride + 4] = color.B;
-						outData[i + stride + 5] = color.G;
-						outData[i + stride + 6] = color.R;
-						outData[i + stride + 7] = 255;
+						for (var i = 0; i < size; i++)
+						{
+							outData[ind++] = color.B;
+							outData[ind++] = color.G;
+							outData[ind++] = color.R;
+							outData[ind++] = 255;
+						}
+						ind += stride - size * 4;
 					}
 				}
-
 			}
 		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 		/// <summary>
 		/// Заносит в bitmap выходной буфер и снимает лок.
@@ -140,15 +121,9 @@ namespace WindowsFormsApp1
 		/// </summary>
 		public void Dispose()
 		{
-			if (_useCopy)
-			{
-				System.Runtime.InteropServices.Marshal.Copy(outData, 0, bmpData.Scan0, outData.Length);
-			}
-			bmp.UnlockBits(bmpData);
+			_bmp.UnlockBits(bmpData);
 		}
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		int GetIndex(int x, int y)
 		{
