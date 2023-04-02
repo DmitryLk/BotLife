@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,65 +13,69 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WindowsFormsApp1
 {
-	public class Life
+	public class Main
 	{
-		// Settings
-		private const int startBotsNumber = 40000;
-		private const int worldWidth = 500;
-		private const int worldHeight = 500;
-		private const int botWidth = 2;
-		private const int botHeight = 2;
-		private const int maxBotsNumber = worldWidth * worldHeight;
-		private const int reportFrequency = 100;
-
-
 		public System.Windows.Forms.Timer timer;
 		private int[,] world;
 		private Bot[] bots;
 		private int currentBotsNumber;
+		private WorldOptions _cfg;
 
 		public Painter _painter;
-		public Tester ___test;
+		public World _world;
+		public Tester _test;
 
 
 		Random _rnd = new Random(Guid.NewGuid().GetHashCode());
 
-		public Life(Painter painter, Tester test)
+		public Main(Painter painter, Tester test)
 		{
+			_cfg = LoadConfig();
 			_painter = painter;
-			_painter.Configure(worldWidth, worldHeight, botWidth, botHeight, reportFrequency);
+			_test = test;
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
-			___test = test;
-			___test.InitInterval(1, "BotsAction();");
-			___test.InitInterval(2, "RedrawWorld();");
-			___test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
-			___test.InitInterval(4, "PaintFrame();");
+			_painter.Configure(_cfg.WorldWidth, _cfg.WorldHeight, _cfg.BotWidth, _cfg.BotHeight, _cfg.ReportFrequency);
+			_test.InitInterval(1, "BotsAction();");
+			_test.InitInterval(2, "RedrawWorld();");
+			_test.InitInterval(3, "DrawBotOnFrame(bots[botNumber]);");
+			_test.InitInterval(4, "PaintFrame();");
 
 			InitWorld();
 		}
 
 		public void InitWorld()
 		{
-			world = new int[worldWidth, worldHeight];
-			bots = new Bot[maxBotsNumber];
+			world = new int[_cfg.WorldWidth, _cfg.WorldHeight];
+			bots = new Bot[_cfg.MaxBotsNumber];
 
 			// Создание ботов
-			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
+			for (var botNumber = 0; botNumber < _cfg.StartBotsNumber; botNumber++)
 			{
-				bots[botNumber] = new Bot(_rnd, worldWidth, worldHeight);
+				bots[botNumber] = new Bot(_rnd, _cfg.WorldWidth, _cfg.WorldHeight);
 			}
-			currentBotsNumber = startBotsNumber;
+			currentBotsNumber = _cfg.StartBotsNumber;
+		}
+
+		private WorldOptions LoadConfig() 
+		{
+			using (StreamReader r = new StreamReader("config.json"))
+			{
+				string json = r.ReadToEnd();
+				//dynamic array = JsonConvert.DeserializeObject(json);
+				WorldOptions config = JsonConvert.DeserializeObject<WorldOptions>(json);
+				return config;
+			}
 		}
 
 		public async Task Start()
 		{
 			//timer.Enabled = true;
-			___test.BeginInterval(1);
+			_test.BeginInterval(1);
 			for (; ; )
 			{
 				await Step();
@@ -89,7 +95,7 @@ namespace WindowsFormsApp1
 			WorldStep();
 
 
-			___test.EndBeginInterval(1, 2);
+			_test.EndBeginInterval(1, 2);
 			RedrawWorld();
 		}
 
@@ -98,7 +104,7 @@ namespace WindowsFormsApp1
 			//Parallel.For(0, currentBotsNumber, i => bots[i].Move());
 
 
-			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
+			for (var botNumber = 0; botNumber < _cfg.StartBotsNumber; botNumber++)
 			{
 				//bots[botNumber].Step();
 				bots[botNumber].Move();
@@ -108,9 +114,9 @@ namespace WindowsFormsApp1
 		private void RedrawWorld()
 		{
 			_painter.StartNewFrame();
-			___test.EndBeginInterval(2, 3);
+			_test.EndBeginInterval(2, 3);
 
-			for (var botNumber = 0; botNumber < startBotsNumber; botNumber++)
+			for (var botNumber = 0; botNumber < _cfg.StartBotsNumber; botNumber++)
 			{
 				//_painter.DrawBotOnFrame(bots[botNumber]);
 				if (bots[botNumber].Moved || bots[botNumber].NoDrawed)
@@ -119,11 +125,11 @@ namespace WindowsFormsApp1
 					bots[botNumber].NoDrawed = false;
 				}
 			}
-			___test.EndBeginInterval(3, 4);
+			_test.EndBeginInterval(3, 4);
 
 			_painter.PaintFrame();
 			//await Task.Delay(1);
-			___test.EndBeginInterval(4, 1);
+			_test.EndBeginInterval(4, 1);
 		}
 	}
 }

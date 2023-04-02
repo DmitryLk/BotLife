@@ -13,7 +13,7 @@ namespace WindowsFormsApp1
 {
 	public partial class Form1 : Form
 	{
-		public Life life;
+		public Main life;
 
 		public Form1()
 		{
@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
 			var test = new Tester();
 
 			var painter = new Painter(pictureBox1, label1, textBox1, test);
-			life = new Life(painter, test);
+			life = new Main(painter, test);
 		}
 
 		private async void button1_Click(object sender, EventArgs e)

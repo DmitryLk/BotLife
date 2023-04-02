@@ -1,0 +1,9 @@
+{
+  "StartBotsNumber": 40000,
+  "WorldWidth": 500,
+  "WorldHeight": 500,
+  "BotWidth": 2,
+  "BotHeight": 2,
+  "MaxBotsNumber": 40000,
+  "ReportFrequency": 100
+}
