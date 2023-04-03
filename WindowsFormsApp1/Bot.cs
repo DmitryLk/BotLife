@@ -8,31 +8,6 @@ using System.Xml;
 
 namespace WindowsFormsApp1
 {
-	public enum Direction
-	{
-		Up = 0,
-		UpRight = 1,
-		Right = 2,
-		DownRight = 3,
-		Down = 4,
-		DownLeft = 5,
-		Left = 6,
-		UpLeft = 7
-	}
-
-
-	public enum Content
-	{
-		Empty = 0,
-		Wall = 1,
-		Organic = 2,
-		Relative = 3,
-		Alien = 4,
-		Poison = 5,
-		Food = 6,
-		Edge = 7
-	}
-
 	public class Bot
 	{
 		public int X;
@@ -42,11 +17,13 @@ namespace WindowsFormsApp1
 		public bool Moved;              // Сдвинулся или нет
 		public bool NoDrawed;           // Еще ни разу не рисовался
 
+        public byte[] Code;
+        public int Pointer;
+        public Direction Dir;         // Направление бота
+
+
 		private int _vx;
 		private int _vy;
-		private Direction _dir;         // Направление бота
-		private byte[] _code;
-		private int _pointer;
 		private int _maxX;
 		private int _maxY;
 
@@ -59,15 +36,15 @@ namespace WindowsFormsApp1
 			OldY = Y;
 
 			// Направление бота
-			_dir = (Direction)rnd.Next(0, 8);
+			Dir = (Direction)rnd.Next(0, 8);
 
 			// Гены
-			_code = new byte[64];
+			Code = new byte[64];
 			for (var i = 0; i < 64; i++)
 			{
-				_code[i] = (byte)rnd.Next(64);
+				Code[i] = (byte)rnd.Next(64);
 			}
-			_pointer = 0;
+			Pointer = 0;
 
 			// Скорость?
 			//do
@@ -95,34 +72,10 @@ namespace WindowsFormsApp1
 			NoDrawed = true;
 		}
 
-
-		private Content GetContent(int x, int y)
-		{
-			return Content.Wall;
-		}
-
-		private (int dX, int dY) GetDeltaDirection(Direction dir1, Direction dir2)
-		{
-			return (((int)dir1 + (int)dir2) % 8) switch
-			{
-				0 => (0, -1),
-				1 => (1, -1),
-				2 => (1, 0),
-				3 => (1, 1),
-				4 => (0, 1),
-				5 => (-1, 1),
-				6 => (-1, 0),
-				7 => (-1, -1),
-				_ => throw new Exception("return (((int)dir1 + (int)dir2) % 8) switch"),
-			};
-		}
-
-
-
 		public void Live()
 		{
 			// Получаем команду
-			var cmdCode = _code[_pointer];
+			var cmdCode = Code[Pointer];
 
 			// Выполняем команду
 			switch (cmdCode)
@@ -138,7 +91,7 @@ namespace WindowsFormsApp1
 
 
 				case 0: //Движение вперед
-					var (dX, dy) = GetDeltaDirection(_dir, Direction.Up);
+					var (dX, dy) = GetDeltaDirection(Dir, Direction.Up);
 					var nX = X + dX;
 					var nY = Y + dy;
 					var cont = GetContent(nX, nY);
@@ -150,7 +103,7 @@ namespace WindowsFormsApp1
 					break;
 
 				case 25:
-					_pointer++;
+					Pointer++;
 					break;
 
 				default:
@@ -202,7 +155,7 @@ namespace WindowsFormsApp1
 Алгоритм:
 1. Суммируем направление бота и движения
 2. По полученному суммарному направлению вычисляем дельта координаты клетки на которую предполагается передвинуться
-
+3. Узнаем что находится на этой клетке
 
 ВОЗРАСТ = ЗДОРОВЬЕ = ЭНЕРГИЯ
 У бота есть здоровье и каждый ход оно уменьшается на единицу.
