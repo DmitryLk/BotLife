@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace WindowsFormsApp1
 {
@@ -19,12 +20,6 @@ namespace WindowsFormsApp1
 		UpLeft = 7
 	}
 
-	// пусто - 2
-	// стена - 3
-	// органика - 4
-	// бот - 5
-	// свой - 6
-	// чужой - 6
 
 	public enum Content
 	{
@@ -101,23 +96,23 @@ namespace WindowsFormsApp1
 		}
 
 
-		private Content GetContent()
+		private Content GetContent(int x, int y)
 		{
 			return Content.Wall;
 		}
 
-		private (int, int) CombineTwoDirection(Direction dir1, Direction dir2)
+		private (int dX, int dY) GetDeltaDirection(Direction dir1, Direction dir2)
 		{
 			return (((int)dir1 + (int)dir2) % 8) switch
 			{
-				0 => (-1, 0),
-				1 => (-1, 1),
-				2 => (-1, 2),
-				3 => (-1, 3),
-				4 => (-1, 4),
-				5 => (-1, 5),
-				6 => (-1, 6),
-				7 => (-1, 7),
+				0 => (0, -1),
+				1 => (1, -1),
+				2 => (1, 0),
+				3 => (1, 1),
+				4 => (0, 1),
+				5 => (-1, 1),
+				6 => (-1, 0),
+				7 => (-1, -1),
 				_ => throw new Exception("return (((int)dir1 + (int)dir2) % 8) switch"),
 			};
 		}
@@ -143,6 +138,10 @@ namespace WindowsFormsApp1
 
 
 				case 0: //Движение вперед
+					var (dX, dy) = GetDeltaDirection(_dir, Direction.Up);
+					var nX = X + dX;
+					var nY = Y + dy;
+					var cont = GetContent(nX, nY);
 					Move();
 					break;
 
@@ -266,7 +265,8 @@ namespace WindowsFormsApp1
 		// органика - 4
 		// бот - 5
 		// свой - 6
-		// чужой - 6
+		// чужой - 7
+
 
 		// Поворот бота
 		// 24 - 0
