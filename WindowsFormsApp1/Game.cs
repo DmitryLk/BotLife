@@ -8,46 +8,38 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WindowsFormsApp1
 {
-	public class Game
+    public class Game
 	{
 		public Painter _painter;
 		public World _world;
 		public Tester _test;
 
 		public System.Windows.Forms.Timer timer;
-		private GameOptions _cfg;
+		private GameOptions _options;
 
 
 
 		public Game(Painter painter, Tester test)
 		{
-			_cfg = LoadConfig();
+			_options = LoadConfig();
 
-			var bitmapWidth = _cfg.WorldWidth * _cfg.BotWidth;
-			var bitmapHeight = _cfg.WorldHeight * _cfg.BotHeight;
+			var bitmapWidth = _options.WorldWidth * _options.BotWidth;
+			var bitmapHeight = _options.WorldHeight * _options.BotHeight;
 			_painter = painter;
-			_painter.Configure(bitmapWidth, bitmapHeight, _cfg.BotWidth, _cfg.BotHeight, _cfg.ReportFrequency);
+			_painter.Configure(bitmapWidth, bitmapHeight, _options.BotWidth, _options.BotHeight, _options.ReportFrequency);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
-			var worldOptions = new WorldOptions
-			{
-				StartBotsNumber = _cfg.StartBotsNumber,
-				MaxBotsNumber = _cfg.MaxBotsNumber,
-				WorldHeight = _cfg.WorldHeight,
-				WorldWidth = _cfg.WorldWidth
-			};
-
-
-			_world = new World(worldOptions);
+			_world = new World(_options);
 
 			_test = test;
 			_test.InitInterval(0, "BotsAction();");
@@ -105,10 +97,10 @@ namespace WindowsFormsApp1
 			{
 				var bot = _world.Bots[botNumber];
 
-				if (bot.Moved || bot.NoDrawed)
+				if (bot.Moved || bot.P.NoDrawed)
 				{
 					_painter.DrawBotOnFrame(bot);
-					bot.NoDrawed = false;
+					bot.P.NoDrawed = false;
 				}
 			}
 			_test.EndBeginInterval(2, 3);

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = System.Windows.Forms.Label;
@@ -136,7 +137,7 @@ namespace WindowsFormsApp1
 			if (_cnt % _reportFrequency == 0)
 			{
 				var tms = (DateTime.Now - _dt).TotalSeconds;
-				if (tms == 0) new Exception("tms == 0");
+				if (tms == 0) throw new Exception("tms == 0");
 				var fps = _reportFrequency / tms;
 				_dt = DateTime.Now;
 

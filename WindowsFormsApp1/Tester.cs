@@ -29,7 +29,7 @@ namespace WindowsFormsApp1
 		{
 			if (i > numberOfIntervals)
 			{
-				new Exception("if (i > numberOfIntervals)");
+				throw new Exception("if (i > numberOfIntervals)");
 			}
 
 			if (_intervals[i] == null)

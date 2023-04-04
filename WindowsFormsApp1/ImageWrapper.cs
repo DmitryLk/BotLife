@@ -9,7 +9,7 @@ namespace WindowsFormsApp1
 	/// Обертка над Bitmap для быстрого чтения и изменения пикселов.
 	/// Также, класс контролирует выход за пределы изображения: при чтении за границей изображения - возвращает DefaultColor, при записи за границей изображения - игнорирует присвоение.
 	/// </summary>
-	public class ImageWrapper : IDisposable, IEnumerable<Point>
+	public class ImageWrapper : IDisposable, IEnumerable<System.Drawing.Point>
 	{
 		/// <summary>
 		/// Ширина изображения
@@ -161,7 +161,7 @@ namespace WindowsFormsApp1
 		/// Возвращает пиксел из исходнго изображения.
 		/// Либо заносит пиксел в выходной буфер.
 		/// </summary>
-		public Color this[Point p]
+		public Color this[System.Drawing.Point p]
 		{
 			get { return this[p.X, p.Y]; }
 			set { this[p.X, p.Y] = value; }
@@ -171,7 +171,7 @@ namespace WindowsFormsApp1
 		/// Заносит в выходной буфер значение цвета, заданные в double.
 		/// Допускает выход double за пределы 0-255.
 		/// </summary>
-		public void SetPixel(Point p, double r, double g, double b)
+		public void SetPixel(System.Drawing.Point p, double r, double g, double b)
 		{
 			if (r < 0) r = 0;
 			if (r >= 256) r = 255;
@@ -187,11 +187,11 @@ namespace WindowsFormsApp1
 		/// <summary>
 		/// Перечисление всех точек изображения
 		/// </summary>
-		public IEnumerator<Point> GetEnumerator()
+		public IEnumerator<System.Drawing.Point> GetEnumerator()
 		{
 			for (int y = 0; y < _height; y++)
 				for (int x = 0; x < _width; x++)
-					yield return new Point(x, y);
+					yield return new System.Drawing.Point(x, y);
 		}
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
