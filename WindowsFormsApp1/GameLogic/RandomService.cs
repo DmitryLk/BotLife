@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -20,12 +21,12 @@ namespace WindowsFormsApp1.GameLogic
     public class RandomService
     {
         private Random _rnd = new Random(Guid.NewGuid().GetHashCode());
-        private GameOptions _options;
+        private WorldData _data;
 
-        public RandomService(GameOptions options)
+        public RandomService(WorldData data)
         {
             _rnd = new Random(Guid.NewGuid().GetHashCode());
-            _options = options;
+			_data = data;
         }
 
         public Direction GetRandomDirection()
@@ -35,20 +36,24 @@ namespace WindowsFormsApp1.GameLogic
 
         public byte GetRandomBotCode()
         {
-            return (byte)_rnd.Next(_options.MaxCode + 1);
+            return (byte)_rnd.Next(_data.MaxCode + 1);
         }
 
-        public int GetRandomWorldX()
-        {
-            return _rnd.Next(0, _options.WorldWidth);
-        }
+		public Point GetRandomEmptyPoint()
+		{
+			var p = new Point();
+			var i = 0;
+			do
+			{
+				p.X = _rnd.Next(0, _data.WorldWidth);
+				p.Y = _rnd.Next(0, _data.WorldHeight);
+			}
+			while (CellAllreadyOccupied(p.X, p.Y) && ++i < 100);
 
-        public int GetRandomWorldY()
-        {
-            return _rnd.Next(0, _options.WorldHeight);
-        }
+			return p;
+		}
 
-        public (int, int) GetRandomSpeed()
+		public (int, int) GetRandomSpeed()
         {
             //do
             //{
@@ -63,5 +68,40 @@ namespace WindowsFormsApp1.GameLogic
             }
             return (0, 0);
         }
-    }
+
+		private bool CellAllreadyOccupied(int x, int y)
+		{
+			return _data.World[x, y] != 0;
+		}
+
+
+		private unsafe Guid GuidRandomCachedInstance()
+		{
+			var bytes = stackalloc byte[16];
+			var dst = bytes;
+
+			var random = ThreadSafeRandom.ObtainThreadStaticRandom();
+			for (var i = 0; i < 4; i++)
+			{
+				*(int*)dst = random.Next();
+				dst += 4;
+			}
+
+			return *(Guid*)bytes;
+		}
+	}
+
+	internal static class ThreadSafeRandom
+	{
+		[ThreadStatic]
+		private static Random random;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Random ObtainThreadStaticRandom() => ObtainRandom();
+
+		private static Random ObtainRandom()
+		{
+			return random ?? (random = new Random(Guid.NewGuid().GetHashCode()));
+		}
+	}
 }

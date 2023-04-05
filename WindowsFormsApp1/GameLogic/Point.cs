@@ -12,7 +12,6 @@ namespace WindowsFormsApp1.GameLogic
     {
         public int X;
         public int Y;
-        public bool NoDrawed = true;           // Еще ни разу не рисовался
 
         public Point(int x, int y)
         {

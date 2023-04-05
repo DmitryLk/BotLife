@@ -90,12 +90,12 @@ namespace WindowsFormsApp1
 			//Color.Empty
 			//Color.FromArgb(255,128,128,128)
 			//Color.FromKnownColor(KnownColor.ActiveCaption)
-			if (bot.X != bot.OldX || bot.Y != bot.OldY)
+			if (bot.P.X != bot.Old.X || bot.P.Y != bot.Old.Y)
 			{
-				_iw.FillSquare(bot.OldX * _botWidth, bot.OldY * _botHeight, _botWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
+				_iw.FillSquare(bot.Old.X * _botWidth, bot.Old.Y * _botHeight, _botWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
 			}
 
-			_iw.FillSquare(bot.X * _botWidth, bot.Y * _botHeight, _botWidth, Color.Red);
+			_iw.FillSquare(bot.P.X * _botWidth, bot.P.Y * _botHeight, _botWidth, Color.Red);
 
 
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;

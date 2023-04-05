@@ -9,65 +9,72 @@ using WindowsFormsApp1.Enums;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class Bot
-    {
-        public Point P;
-        public Point Old;
-        public bool Moved;              // Сдвинулся или нет
+	public abstract class Bot
+	{
+		public bool NoDrawed = true;           // Еще ни разу не рисовался
+		protected WorldData _data;
+		protected Point _p;
+		protected Point _old;
+		protected Direction _dir;         // Направление бота
+		protected uint _num;         // Номер бота
+		private int _vx;
+		private int _vy;
+		private bool _moved;              // Сдвинулся или нет
 
-        public byte[] Code;
-        public int Pointer;
-        public Direction Dir;         // Направление бота
-
-
-        public int Vx;
-        public int Vy;
-        public int MaxX;
-        public int MaxY;
-
-        public Bot(int maxX, int maxY)
-        {
-            MaxX = maxX;
-            MaxY = maxY;
-
-            Moved = false;
-        }
-
-
-        public void Move()
-        {
-            var newX = X + Vx;
-            if (newX >= MaxX)
-            {
-                newX = MaxX - 1;
-                Vx = -Vx;
-            }
-            if (newX < 0)
-            {
-                newX = 0;
-                Vx = -Vx;
-            }
+		public Bot(WorldData data, Point p, Direction dir, uint botNumber, int vx, int vy)
+		{
+			_data = data;
+			_moved = false;
+			_p = p;
+			_dir = dir;
+			_num = botNumber;
+			_vx = vx;
+			_vy = vy;
+			_old = new Point(p.X, p.Y);
+		}
 
 
-            var newY = Y + Vy;
-            if (newY >= MaxY)
-            {
-                newY = MaxY - 1;
-                Vy = -Vy;
-            }
-            if (newY < 0)
-            {
-                newY = 0;
-                Vy = -Vy;
-            }
+		public abstract void Step();
 
-            Moved = X != newX || Y != newY;
+		public bool Moved()
+		{ 
+			return _moved;
+		}
 
-            OldX = X;
-            OldY = Y;
-            X = newX;
-            Y = newY;
-        }
-    }
+		public void Move()
+		{
+			var newX = _p.X + _vx;
+			if (newX >= _data.WorldWidth)
+			{
+				newX = _data.WorldWidth - 1;
+				_vx = -_vx;
+			}
+			if (newX < 0)
+			{
+				newX = 0;
+				_vx = -_vx;
+			}
+
+
+			var newY = _p.Y + _vy;
+			if (newY >= _data.WorldHeight)
+			{
+				newY = _data.WorldHeight - 1;
+				_vy = -_vy;
+			}
+			if (newY < 0)
+			{
+				newY = 0;
+				_vy = -_vy;
+			}
+
+			_moved = _p.X != newX || _p.Y != newY;
+
+			_old.X = _p.X;
+			_old.Y = _p.Y;
+			_p.X = newX;
+			_p.Y = newY;
+		}
+	}
 }
 

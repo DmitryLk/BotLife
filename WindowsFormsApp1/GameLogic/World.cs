@@ -3,274 +3,57 @@ using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using WindowsFormsApp1.Enums;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class World
-    {
-        private const int MinBotIndex = 1;
-        private const int MaxBotIndex = 65499;
+	public class World
+	{
+		private RandomService _randomService;
+		private Seeder _seeder;
+		private static WorldData _data;
 
-        private uint[,] _world; // чтобы можно было узнать по координатам что там находится
-        private int _worldWidth;
-        private int _worldHeight;
+		public World(WorldData data)
+		{
+			_data = data;
+			_randomService = new RandomService(_data);
+			_seeder = new Seeder(_data, _randomService);
+		}
 
-        private RandomService _randomService;
-        private GameOptions _options;
+		public void Initialize()
+		{
+			// Засевание объектов
+			_seeder.SeedItems();
 
-        public Bot[] Bots;
-        public Point[] Foods;
-        public Point[] Organic;
-        public Point[] Minerals;
-        public Point[] Walls;
-        public Point[] Poison;
-
-        public int CurrentBotsNumber;
-
-        public World(GameOptions options)
-        {
-            _worldHeight = options.WorldHeight;
-            _worldWidth = options.WorldWidth;
-            _world = new uint[_worldWidth, _worldHeight];
-
-            _randomService = new RandomService(options);
-            _options = options;
-
-            GenerateWorld();
-        }
-
-        private void GenerateWorld()
-        {
-            // Засевание объектов
-            SeedItems();
-
-            // Засевание ботов
-            SeedBots();
-        }
-
-        private void SeedBots()
-        {
-            Bots = new Bot[_options.MaxBotsNumber];
-            for (var botNumber = 0; botNumber < _options.StartBotsNumber; botNumber++)
-            {
-                var bot = Bots[botNumber] = new Bot(_options.WorldWidth, _options.WorldHeight);
-
-                // Координаты бота
-                bot.P = GetRandomEmptyPoint();
-                bot.Old = new Point(bot.P.X, bot.P.Y);
-
-                // Направление бота
-                bot.Dir = _randomService.GetRandomDirection();
-
-                // Код бота
-                bot.Code = new byte[_options.CodeLength];
-                for (var i = 0; i < _options.CodeLength; i++)
-                {
-                    bot.Code[i] = _randomService.GetRandomBotCode();
-                }
-                bot.Pointer = 0;
-
-                // Скорость бота (?)
-                (bot.Vx, bot.Vy) = _randomService.GetRandomSpeed();
-            }
-            CurrentBotsNumber = _options.StartBotsNumber;
-        }
+			// Засевание ботов
+			_seeder.SeedBots();
+		}
 
 
-        private void SeedItems()
-        {
-            // Заполнение Food
-            if (_options.SeedFood)
-            {
-                Foods = new Point[_options.SeedFoodNumber];
-                for (var i = 0; i < _options.SeedFoodNumber; i++)
-                {
-                    Foods[i] = GetRandomEmptyPoint();
-                }
-            }
-
-            // Заполнение Organic
-            if (_options.SeedOrganic)
-            {
-                Organic = new Point[_options.SeedOrganicNumber];
-                for (var i = 0; i < _options.SeedOrganicNumber; i++)
-                {
-                    Organic[i] = GetRandomEmptyPoint();
-                }
-            }
-
-            // Заполнение Minerals
-            if (_options.SeedMinerals)
-            {
-                Minerals = new Point[_options.SeedMineralsNumber];
-                for (var i = 0; i < _options.SeedMineralsNumber; i++)
-                {
-                    Minerals[i] = GetRandomEmptyPoint();
-                }
-            }
-
-            // Заполнение Walls
-            if (_options.SeedWalls)
-            {
-                Walls = new Point[_options.SeedWallsNumber];
-                for (var i = 0; i < _options.SeedWallsNumber; i++)
-                {
-                    Walls[i] = GetRandomEmptyPoint();
-                }
-            }
-
-            // Заполнение Poison
-            if (_options.SeedPoison)
-            {
-                Poison = new Point[_options.SeedPoisonNumber];
-                for (var i = 0; i < _options.SeedPoisonNumber; i++)
-                {
-                    Poison[i] = GetRandomEmptyPoint();
-                }
-            }
-        }
-
-        public void Step()
-        {
-            //Parallel.For(0, currentBotsNumber, i => Bots[i].Move());
-
-            for (var botNumber = 0; botNumber < CurrentBotsNumber; botNumber++)
-            {
-                BotAction(Bots[botNumber]);
-                //Bots[botNumber].Live();
-                //Bots[botNumber].Move();
-            }
-        }
-
-
-
-
-        private void TryToMove(Bot b, Direction dir)
-        {
-            var (dX, dy) = GetDeltaDirection(b.Dir, dir);
-            var nX = b.P.X + dX;
-            var nY = b.P.Y + dy;
-
-            if (nX < 0) nX += _worldWidth;
-            if (nX >= _worldWidth) nX -= _worldWidth;
-
-            var cont = GetCellContent(nX, nY);
-        }
-
-        //===========================================
-        private bool IsCellEmpty(int x, int y)
-        {
-            return _world[x, y] == 0;
-        }
-
-        private GetContent GetCellContent(int x, int y)
-        {
-            if (y < 0) return GetContent.Edge;
-            if (y >= _worldHeight) return GetContent.Edge;
-
-            var c = _world[x, y];
-
-            return с switch
-            {
-                0 => GetContent.Empty,
-                > 1 && <= MaxBotIndex => GetContent.B
-            };
-
-
-            // c >= 65500 зарезервированы
-            // 0 - пусто
-            // 1-65499 - bots
-            // 65500 - food
-            // 65501 - organic
-            // 65502 - mineral
-            // 65503 - wall
-            // 65504 - poison
-
-            return GetContent.Wall;
-        }
-
-
-
-        //==============================================
-        private void BotAction(Bot b)
-        {
-            // Получаем команду
-            var cmdCode = b.Code[b.Pointer];
-
-            // Выполняем команду
-            switch (cmdCode)
-            {
-                //Up = 0,
-                //UpRight = 1,
-                //Right = 2,
-                //DownRight = 3,
-                //Down = 4,
-                //DownLeft = 5,
-                //Left = 6,
-                //UpLeft = 7
-
-
-                case 0: //Движение вперед
-					TryToMove(b, Direction.Up);
-                    break;
-
-                case 1: //Движение вперед-вправо
-					TryToMove(b, Direction.UpRight);
-                    break;
-
-
-
-                case 25:
-                    b.Pointer++;
-                    break;
-
-                default:
-                    throw new Exception("switch cmd");
-                    break;
-            };
-
-        }
-
-        private (int dX, int dY) GetDeltaDirection(Direction dir1, Direction dir2)
-        {
-            return (((int)dir1 + (int)dir2) % 8) switch
-            {
-                0 => (0, -1),
-                1 => (1, -1),
-                2 => (1, 0),
-                3 => (1, 1),
-                4 => (0, 1),
-                5 => (-1, 1),
-                6 => (-1, 0),
-                7 => (-1, -1),
-                _ => throw new Exception("return (((int)dir1 + (int)dir2) % 8) switch"),
-            };
-        }
-
-        private Point GetRandomEmptyPoint()
-        {
-            var p = new Point();
-            var i = 0;
-            do
-            {
-				p.X = _randomService.GetRandomWorldX();
-                p.Y = _randomService.GetRandomWorldY();
-            }
-            while (!IsCellEmpty(p.X, p.Y) && ++i < 100);
-
-            return p;
-        }
-
-    }
+		public void Step()
+		{
+			//Parallel.For(0, currentBotsNumber, i => Bots[i].Move());
+			for (uint botNumber = 1; botNumber < _data.CurrentBotsNumber; botNumber++)
+			{
+				_data.Bots[botNumber].Step();
+				//Bots[botNumber].Live();
+				//Bots[botNumber].Move();
+			}
+		}
+	}
 }
 
 
 /*
-ДВИЖЕНИЕ
-Алгоритм:
-1. Суммируем направление бота и движения
-2. По полученному суммарному направлению вычисляем дельта координаты клетки на которую предполагается передвинуться
-3. Узнаем что находится на этой клетке
+// ДВИЖЕНИЕ
+// Алгоритм:
+// 1. Суммируем направление бота и движения
+// 2. По полученному суммарному направлению вычисляем дельта координаты клетки на которую предполагается передвинуться
+// 3. Узнаем что находится на этой клетке
+// 4.1. Переход на клетку если там empty poison
+// 4.2. Не переход на клетку если там  wall edge
+// 4.3. Непонятно переход на клетку если там  food mineral organic
+
 
 ВОЗРАСТ = ЗДОРОВЬЕ = ЭНЕРГИЯ
 У бота есть здоровье и каждый ход оно уменьшается на единицу.
@@ -287,6 +70,7 @@ namespace WindowsFormsApp1.GameLogic
 ЯД
 если бот зайдет на клетку с ядом то он погибнет
 Если вначале схватить яд то он преобразуется в еду
+ _healthPointChange = -PoisonDamage;
 
 БОТ
 типа стена
@@ -335,6 +119,15 @@ namespace WindowsFormsApp1.GameLogic
 		// свой - 6
 		// чужой - 7
 
+        // c >= 65500 зарезервированы
+        // 0 - пусто
+        // 1-65499 - bots
+        // 65500 - food
+        // 65501 - organic
+        // 65502 - mineral
+        // 65503 - wall
+        // 65504 - poison
+
 
 		// Поворот бота
 		// 24 - 0
@@ -347,6 +140,71 @@ namespace WindowsFormsApp1.GameLogic
 		// 31 - 315
 
 
- 
- 
+//поменять направление на противоположное
+//мина
+//притворится мертвым
+//=== радиация, которая действует на ботов в самом верхнем слое мира ====
+//............  время года  .....................................
+if $cyc < 15  // разрешенно не более 15 команд
+
+
+//...............  сменить направление относительно   ....
+			if ($command == 23)
+//...............  сменить направление абсолютно   ....
+			if ($command == 24)
+//...............  фотосинтез ................
+			if ($command == 25)
+//...............  шаг  в относительном напралении  .................    
+			if ($command == 26)
+//...............  шаг   в абсолютном направлении     .................    
+			if ($command == 27)
+//..............   съесть в относительном напралении       ...............
+			if ($command == 28)
+//..............   съесть  в абсолютном направлении      ...............
+			if ($command == 29)
+//.............   посмотреть  в относительном напралении ...................................
+			if ($command == 30) 
+//.............   посмотреть в абсолютном направлении ...................................
+			if ($command == 31)// пусто - 2 стена - 3 органик - 4 бот -5 родня -  6
+// делиться - если у бота больше энергии или минералов, чем у соседа, то они распределяются поровну          
+//.............   делится   в относительном напралении  ........................
+			if (($command == 32) || ($command == 42))    // здесь я увеличил шансы появления этой команды                   
+ //.............   делится  в абсолютном направлении ........................
+			if (($command == 33) || ($command == 51))     // здесь я увеличил шансы появления этой команды                    
+// отдать - безвозмездно отдать часть энергии и минералов соседу			
+//.............   отдать   в относительном напралении  ........................
+			if (($command == 34) || ($command == 50) )     // здесь я увеличил шансы появления этой команды                    
+//.............   отдать  в абсолютном направлении  ........................
+			if (($command == 35) || ($command == 52) )       // здесь я увеличил шансы появления этой команды                    
+//...................   выравнится по горизонтали  ...............................
+			if ($command == 36)
+//...................  какой мой уровень (на какой высоте бот)  .........
+			if ($command == 37)
+//...................  какое моё здоровье  ...............................
+			if ($command == 38)
+//...................сколько  минералов ...............................
+			if ($command == 39)
+//...........  многоклеточность ( создание потомка, приклееного к боту )......
+			if ($command == 40)  
+//...............  деление (создание свободноживущего потомка) ................
+			if ($command == 41)      
+//...............  окружен ли бот    ................
+			if ($command == 43)   
+//.............. приход энергии есть? ........................
+			if ($command == 44)  
+//............... минералы прибавляются? ............................
+			if ($command == 45)  
+//.............. многоклеточный ли я ? ........................ 
+			if ($command == 46)  
+//.................. преобразовать минералы в энерию ...................
+			if ($command == 47) 
+//................      мутировать   ................................... 
+// спорная команда, во время её выполнения меняются случайным образом две случайные команды 
+// читал, что микроорганизмы могут усилить вероятность мутации своего генома в неблагоприятных условиях       
+			if ($command == 48)
+//................   генная атака  ...................................
+			if ($command == 49)
+//................    если ни с одной команд не совпало ................. 
+//................    значит безусловный переход        .................
+//.....   прибавляем к указателю текущей команды значение команды   .....
  */

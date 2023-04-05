@@ -18,10 +18,13 @@ namespace WindowsFormsApp1
 		public bool SeedWalls;
 		public bool SeedPoison;
 
-		public int StartBotsNumber;
-		public int MaxBotsNumber;
+		public uint StartBotsNumber;
+		public uint MaxBotsNumber;
 		public int WorldWidth;
 		public int WorldHeight;
+
+		public bool UpDownEdge;
+		public bool LeftRightEdge;
 
 		public int SeedFoodNumber;
 		public int SeedOrganicNumber;

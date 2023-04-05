@@ -8,10 +8,10 @@ using System.Xml;
 
 namespace WindowsFormsApp1.Enums
 {
-    public enum ContentItem
+    public enum CellContent
     {
         Empty = 0,
-        Food = 65500,
+        Grass = 65500,
         Organic = 65501,
         Mineral = 65502,
         Wall = 65503,
