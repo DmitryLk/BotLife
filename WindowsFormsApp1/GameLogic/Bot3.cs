@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 
 namespace WindowsFormsApp1.GameLogic
@@ -14,8 +14,8 @@ namespace WindowsFormsApp1.GameLogic
 	{
 
 
-		public Bot3(WorldData data, Point p, Direction dir, uint botNumber, int vx, int vy)
-			: base(data, p, dir, botNumber, vx, vy)
+		public Bot3(WorldData data, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
+			: base(data, p, dir, botNumber, en, vx, vy)
 		{
 		}
 

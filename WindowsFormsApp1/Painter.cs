@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -21,7 +22,6 @@ namespace WindowsFormsApp1
 	{
 		private PictureBox _pb;
 		private Bitmap _btmp;
-		private Bitmap _btmp2;
 		private Graphics _gr;
 		private ImageWrapper _iw;
 
@@ -30,8 +30,8 @@ namespace WindowsFormsApp1
 		private Label _label;
 		private TextBox _textBox;
 
-		private int _botWidth;
-		private int _botHeight;
+		private int _cellWidth;
+		private int _cellHeight;
 		private int _cnt;
 		private DateTime _dt;
 		private int _reportFrequency;
@@ -52,12 +52,12 @@ namespace WindowsFormsApp1
 			_test = test;
 		}
 
-		public void Configure(int bitmapWidth, int bitmapHeight, int botWidth, int botHeight, int reportFrequency)
+		public void Configure(int bitmapWidth, int bitmapHeight, int cellWidth, int cellHeight, int reportFrequency)
 		{
 			_pb.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
 
-			_botHeight = botHeight;
-			_botWidth = botWidth;
+			_cellHeight = cellHeight;
+			_cellWidth = cellWidth;
 			_reportFrequency = reportFrequency;
 
 			//_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
@@ -90,18 +90,31 @@ namespace WindowsFormsApp1
 			//Color.Empty
 			//Color.FromArgb(255,128,128,128)
 			//Color.FromKnownColor(KnownColor.ActiveCaption)
+
 			if (bot.P.X != bot.Old.X || bot.P.Y != bot.Old.Y)
 			{
-				_iw.FillSquare(bot.Old.X * _botWidth, bot.Old.Y * _botHeight, _botWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
+				_iw.FillSquare(bot.P.X * _cellWidth, bot.P.Y * _cellHeight, _cellWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
 			}
 
-			_iw.FillSquare(bot.P.X * _botWidth, bot.P.Y * _botHeight, _botWidth, Color.Red);
+			_iw.FillSquare(bot.P.X * _cellWidth, bot.P.Y * _cellHeight, _cellWidth, Color.Red);
 
 
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight + 1] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight + 1] = Color.Red;
+		}
+
+		public void DrawItemOnFrame(ChangedItem item)
+		{
+			if (item.Added)
+			{
+				_iw.FillSquare(item.X * _cellWidth, item.Y * _cellHeight, _cellWidth, Color.Blue);
+			}
+			else 
+			{
+				_iw.FillSquare(item.X * _cellWidth, item.Y * _cellHeight, _cellWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
+			}
 		}
 
 		public void PaintFrame()

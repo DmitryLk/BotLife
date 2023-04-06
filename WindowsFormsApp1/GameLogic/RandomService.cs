@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -10,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -18,7 +18,7 @@ using TextBox = System.Windows.Forms.TextBox;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class RandomService
+	public class RandomService
     {
         private Random _rnd = new Random(Guid.NewGuid().GetHashCode());
         private WorldData _data;

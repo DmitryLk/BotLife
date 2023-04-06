@@ -1,35 +1,40 @@
 {
+  // Настройки экрана
   "MaxPictureBoxWidth": 1000,
   "MaxPictureBoxHeight": 1000,
-  "BotWidth": 1,
-  "BotHeight": 1,
+  "CellWidth": 1,
+  "CellHeight": 1,
   "ReportFrequency": 100,
-  "CodeLength": 64,
-  "MaxCode": 63,
-
 
   // Настройки мира
-  "SeedFood": true,
-  "SeedOrganic": true,
-  "SeedMinerals": true,
-  "SeedWalls": true,
-  "SeedPoison": true,
-
   "StartBotsNumber": 40000,
   "MaxBotsNumber": 40000,
   "WorldWidth": 1000,
   "WorldHeight": 1000,
-
   "UpDownEdge": true,
   "LeftRightEdge": false,
 
+
+  // Настройки Seeder
+  "SeedFood": true,
+  "SeedOrganic": false,
+  "SeedMinerals": false,
+  "SeedWalls": false,
+  "SeedPoison": false,
   "SeedFoodNumber": 1000,
-  "SeedOrganicNumber": 1000,
-  "SeedMineralsNumber": 1000,
-  "SeedWallsNumber": 1000,
-  "SeedPoisonNumber": 1000
+  "SeedOrganicNumber": 0,
+  "SeedMineralsNumber": 0,
+  "SeedWallsNumber": 0,
+  "SeedPoisonNumber": 0,
+  "SeedBotEnergy": 100,
+
+  // Настройки генома ботов
+  "CodeLength": 64,
+  "MaxCode": 63,
+  "MaxUncompleteJump": 15,
 
 
   //Grass
-  
+  "FoodEnergy": 50
+
 }

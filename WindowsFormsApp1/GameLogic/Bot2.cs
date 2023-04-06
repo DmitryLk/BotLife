@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 
 namespace WindowsFormsApp1.GameLogic
@@ -15,8 +15,8 @@ namespace WindowsFormsApp1.GameLogic
 		private byte[] _code;
 		private int _pointer;
 
-		public Bot2(WorldData data, Point p, Direction dir, uint botNumber, int vx, int vy)
-			: base(data, p, dir, botNumber, vx, vy)
+		public Bot2(WorldData data, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
+			: base(data, p, dir, botNumber, en, vx, vy)
 
 		{
 		}
@@ -89,21 +89,8 @@ namespace WindowsFormsApp1.GameLogic
 			// 4.2. Не переход на клетку если там  wall edge
 			// 4.3. Непонятно переход на клетку если там  food mineral organic
 
-			var (dX, dy) = _data.GetDeltaDirection(_dir, dir);
-			var nX = _p.X + dX;
-			var nY = _p.Y + dy;
-
-			if (!_data.LeftRightEdge)
-			{
-				if (nX < 0) nX += _data.WorldWidth;
-				if (nX >= _data.WorldWidth) nX -= _data.WorldWidth;
-			}
-
-			if (!_data.UpDownEdge)
-			{
-				if (nY < 0) nY += _data.WorldHeight;
-				if (nY >= _data.WorldHeight) nY -= _data.WorldHeight;
-			}
+			// 1. Узнаем координаты предполагаемого перемещения
+			var (nX, nY) = GetCoordinatesByDirection(dir);
 
 
 			//var refContent = _data.GetRefContent(nX, nY);
@@ -124,6 +111,39 @@ namespace WindowsFormsApp1.GameLogic
 				RefContent.Organic => 4,
 			};
 
+		}
+
+		private (int nX, int nY) GetCoordinatesByDirection(Direction dir)
+		{
+			var (dX, dY) = dir switch
+			{
+				Direction.Up => (0, -1),
+				Direction.UpRight => (1, -1),
+				Direction.Right => (1, 0),
+				Direction.DownRight => (1, 1),
+				Direction.Down => (0, 1),
+				Direction.DownLeft => (-1, 1),
+				Direction.Left => (-1, 0),
+				Direction.UpLeft => (-1, -1),
+				_ => throw new Exception("var (dX, dy) = dir switch"),
+			};
+
+			var nX = P.X + dX;
+			var nY = P.Y + dY;
+
+			// Проверка перехода сквозь экран
+			if (!_data.LeftRightEdge)
+			{
+				if (nX < 0) nX += _data.WorldWidth;
+				if (nX >= _data.WorldWidth) nX -= _data.WorldWidth;
+			}
+			if (!_data.UpDownEdge)
+			{
+				if (nY < 0) nY += _data.WorldHeight;
+				if (nY >= _data.WorldHeight) nY -= _data.WorldHeight;
+			}
+
+			return (nX, nY);
 		}
 	}
 }

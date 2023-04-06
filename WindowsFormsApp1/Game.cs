@@ -8,6 +8,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
+using WindowsFormsApp1.Dto;
+using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -20,19 +23,16 @@ namespace WindowsFormsApp1
 		public World _world;
 		public WorldData _data;
 		public Tester _test;
-
 		public System.Windows.Forms.Timer timer;
-
-
 
 		public Game(Painter painter, Tester test)
 		{
 			var options = LoadConfig();
 
-			var bitmapWidth = options.WorldWidth * options.BotWidth;
-			var bitmapHeight = options.WorldHeight * options.BotHeight;
+			var bitmapWidth = options.WorldWidth * options.CellWidth;
+			var bitmapHeight = options.WorldHeight * options.CellHeight;
 			_painter = painter;
-			_painter.Configure(bitmapWidth, bitmapHeight, options.BotWidth, options.BotHeight, options.ReportFrequency);
+			_painter.Configure(bitmapWidth, bitmapHeight, options.CellWidth, options.CellHeight, options.ReportFrequency);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
@@ -48,7 +48,6 @@ namespace WindowsFormsApp1
 			_test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
 			_test.InitInterval(3, "PaintFrame();");
 		}
-
 
 		public async Task Start()
 		{
@@ -76,16 +75,22 @@ namespace WindowsFormsApp1
 			_painter.StartNewFrame();
 			_test.EndBeginInterval(1, 2);
 
-			for (var botNumber = 0; botNumber < _data.CurrentBotsNumber; botNumber++)
+			for (var i = 0; i < _data.NumberOfChangedBots; i++)
 			{
-				var bot = _data.Bots[botNumber];
+				var bot = _data.Bots[_data.ChangedBots[i]];
 
-				if (bot.Moved() || bot.NoDrawed)
-				{
-					_painter.DrawBotOnFrame(bot);
-					bot.NoDrawed = false;
-				}
+				_painter.DrawBotOnFrame(bot);
 			}
+			_data.NumberOfChangedBots = 0;
+
+			for (var i = 0; i < _data.NumberOfChangedItems; i++)
+			{
+				var item = _data.ChangedItems[i];
+
+				_painter.DrawItemOnFrame(item);
+			}
+			_data.NumberOfChangedItems = 0;
+
 			_test.EndBeginInterval(2, 3);
 
 			_painter.PaintFrame();

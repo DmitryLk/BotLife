@@ -3,37 +3,43 @@ using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Xml.Linq;
+using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class Seeder
+	public class Seeder
 	{
-        private uint[,] _world; // чтобы можно было узнать по координатам что там находится
+		private uint[,] _world; // чтобы можно было узнать по координатам что там находится
 
-        private RandomService _randomService;
-        private WorldData _data;
+		private RandomService _randomService;
+		private WorldData _data;
 
-        public Seeder(WorldData data, RandomService randomService)
-        {
+		public Seeder(WorldData data, RandomService randomService)
+		{
 			randomService = _randomService;
 			_data = data;
 		}
 
 		public void SeedBots()
-        {
+		{
 			_data.Bots = new Bot[_data.MaxBotsNumber];
-            for (uint botNumber = 1; botNumber <= _data.StartBotsNumber; botNumber++)
-            {
+			_data.ChangedBots = new uint[_data.MaxBotsNumber];
+			_data.NumberOfChangedBots = 0;
+			for (uint botNumber = 1; botNumber <= _data.StartBotsNumber; botNumber++)
+			{
 
 				// Координаты бота
 				var p = _randomService.GetRandomEmptyPoint();
 
-                // Направление бота
-                var dir = _randomService.GetRandomDirection();
+				// Направление бота
+				var dir = _randomService.GetRandomDirection();
 
-                // Скорость бота (?)
-                var (vx, vy) = _randomService.GetRandomSpeed();
+				// Энергия бота
+				var en = _data.SeedBotEnergy;
+
+				// Скорость бота (?)
+				var (vx, vy) = _randomService.GetRandomSpeed();
 
 				// Создание кода бота
 				var code = new byte[_data.CodeLength];
@@ -44,66 +50,90 @@ namespace WindowsFormsApp1.GameLogic
 				var pointer = 0;
 				var codeHash = Guid.NewGuid();
 
-				var bot = new Bot1(_data, p, dir, botNumber, vx, vy, code, pointer, codeHash);
+				var bot = new Bot1(_data, p, dir, botNumber, en, vx, vy, code, pointer, codeHash);
 				_data.Bots[botNumber] = bot;
 				_data.World[p.X, p.Y] = botNumber;
-
+				_data.ChangedBots[_data.NumberOfChangedBots] = botNumber;
+				_data.NumberOfChangedBots++;
 			}
 			_data.CurrentBotsNumber = _data.StartBotsNumber;
-        }
-
+		}
 
 		public void SeedItems()
-        {
-            // Заполнение Food
-            if (_data.SeedFood)
-            {
-				_data.Grass = new Point[_data.SeedFoodNumber];
-                for (var i = 0; i < _data.SeedFoodNumber; i++)
-                {
-					_data.Grass[i] = _randomService.GetRandomEmptyPoint();
-                }
-            }
+		{
+			_data.ChangedItems = new ChangedItem[
+				_data.SeedFoodNumber +
+				_data.SeedOrganicNumber +
+				_data.SeedMineralsNumber +
+				_data.SeedWallsNumber +
+				_data.SeedPoisonNumber];
+			_data.NumberOfChangedItems = 0;
 
-            // Заполнение Organic
-            if (_data.SeedOrganic)
-            {
-				_data.Organic = new Point[_data.SeedOrganicNumber];
-                for (var i = 0; i < _data.SeedOrganicNumber; i++)
-                {
-					_data.Organic[i] = _randomService.GetRandomEmptyPoint();
-                }
-            }
 
-            // Заполнение Minerals
-            if (_data.SeedMinerals)
-            {
-				_data.Minerals = new Point[_data.SeedMineralsNumber];
-                for (var i = 0; i < _data.SeedMineralsNumber; i++)
-                {
-					_data.Minerals[i] = _randomService.GetRandomEmptyPoint();
-                }
-            }
+			// Заполнение Grass
+			if (_data.SeedFood)
+			{
+				for (var i = 0; i < _data.SeedFoodNumber; i++)
+				{
+					var p = _randomService.GetRandomEmptyPoint();
+					_data.World[p.X, p.Y] = (uint)CellContent.Grass;
 
-            // Заполнение Walls
-            if (_data.SeedWalls)
-            {
-				_data.Walls = new Point[_data.SeedWallsNumber];
-                for (var i = 0; i < _data.SeedWallsNumber; i++)
-                {
-					_data.Walls[i] = _randomService.GetRandomEmptyPoint();
-                }
-            }
+					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem {X = p.X, Y = p.Y, CellContent = CellContent.Grass, Added = true};
+					_data.NumberOfChangedItems++;
+				}
+			}
 
-            // Заполнение Poison
-            if (_data.SeedPoison)
-            {
-				_data.Poison = new Point[_data.SeedPoisonNumber];
-                for (var i = 0; i < _data.SeedPoisonNumber; i++)
-                {
-					_data.Poison[i] = _randomService.GetRandomEmptyPoint();
-                }
-            }
-        }
-    }
+			// Заполнение Organic
+			if (_data.SeedOrganic)
+			{
+				for (var i = 0; i < _data.SeedOrganicNumber; i++)
+				{
+					var p = _randomService.GetRandomEmptyPoint();
+					_data.World[p.X, p.Y] = (uint)CellContent.Organic;
+
+					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Organic, Added = true };
+					_data.NumberOfChangedItems++;
+				}
+			}
+
+			// Заполнение Minerals
+			if (_data.SeedMinerals)
+			{
+				for (var i = 0; i < _data.SeedMineralsNumber; i++)
+				{
+					var p = _randomService.GetRandomEmptyPoint();
+					_data.World[p.X, p.Y] = (uint)CellContent.Mineral;
+
+					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Mineral, Added = true };
+					_data.NumberOfChangedItems++;
+				}
+			}
+
+			// Заполнение Walls
+			if (_data.SeedWalls)
+			{
+				for (var i = 0; i < _data.SeedWallsNumber; i++)
+				{
+					var p = _randomService.GetRandomEmptyPoint();
+					_data.World[p.X, p.Y] = (uint)CellContent.Wall;
+
+					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Wall, Added = true };
+					_data.NumberOfChangedItems++;
+				}
+			}
+
+			// Заполнение Poison
+			if (_data.SeedPoison)
+			{
+				for (var i = 0; i < _data.SeedPoisonNumber; i++)
+				{
+					var p = _randomService.GetRandomEmptyPoint();
+					_data.World[p.X, p.Y] = (uint)CellContent.Poison;
+
+					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Poison, Added = true };
+					_data.NumberOfChangedItems++;
+				}
+			}
+		}
+	}
 }
