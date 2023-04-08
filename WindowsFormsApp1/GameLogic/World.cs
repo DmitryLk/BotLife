@@ -9,15 +9,15 @@ namespace WindowsFormsApp1.GameLogic
 {
 	public class World
 	{
-		private RandomService _randomService;
+		private Func _func;
 		private Seeder _seeder;
 		private static WorldData _data;
 
 		public World(WorldData data)
 		{
 			_data = data;
-			_randomService = new RandomService(_data);
-			_seeder = new Seeder(_data, _randomService);
+			_func = new Func(_data);
+			_seeder = new Seeder(_data, _func);
 		}
 
 		public void Initialize()
@@ -52,7 +52,7 @@ namespace WindowsFormsApp1.GameLogic
 // 1. Суммируем направление бота и движения
 // 2. По полученному суммарному направлению вычисляем дельта координаты клетки на которую предполагается передвинуться
 // 3. Узнаем что находится на этой клетке
-// 4.1. Переход на клетку если там empty poison
+// 4.1. Переход на клетку если там free poison
 // 4.2. Не переход на клетку если там  wall edge
 // 4.3. Непонятно переход на клетку если там  food mineral organic
 

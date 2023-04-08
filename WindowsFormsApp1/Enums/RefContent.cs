@@ -12,7 +12,7 @@ namespace WindowsFormsApp1.Enums
 
 	public enum RefContent
 	{
-		Empty = 2,
+		Free = 2,
 		Wall = 3,
 		Organic = 4,
 		Bot = 5,

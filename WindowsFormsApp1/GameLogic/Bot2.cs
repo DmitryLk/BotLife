@@ -15,8 +15,8 @@ namespace WindowsFormsApp1.GameLogic
 		private byte[] _code;
 		private int _pointer;
 
-		public Bot2(WorldData data, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
-			: base(data, p, dir, botNumber, en, vx, vy)
+		public Bot2(WorldData data, Func func, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
+			: base(data, func, p, dir, botNumber, en, vx, vy)
 
 		{
 		}
@@ -31,7 +31,15 @@ namespace WindowsFormsApp1.GameLogic
 			return _code[_pointer];
 		}
 
-		public override void Step()
+		public override void Death()
+		{ 
+		}
+
+		protected override void Reproduction()
+		{ 
+		}
+
+	public override void Step()
 		{
 			// Получаем команду
 			var cmdCode = GetNextCommand();
@@ -85,7 +93,7 @@ namespace WindowsFormsApp1.GameLogic
 			// 1. Суммируем направление бота и движения
 			// 2. По полученному суммарному направлению вычисляем дельта координаты клетки на которую предполагается передвинуться
 			// 3. Узнаем что находится на этой клетке
-			// 4.1. Переход на клетку если там empty poison
+			// 4.1. Переход на клетку если там free poison
 			// 4.2. Не переход на клетку если там  wall edge
 			// 4.3. Непонятно переход на клетку если там  food mineral organic
 
@@ -94,7 +102,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			//var refContent = _data.GetRefContent(nX, nY);
-			var refContent = RefContent.Empty;
+			var refContent = RefContent.Free;
 
 			// надо определить родственник ли бот
 
@@ -106,7 +114,7 @@ namespace WindowsFormsApp1.GameLogic
 			//смещение условного перехода 2-пусто  3-стена  4-органика 5-бот 6-родня
 			_pointer += cont switch
 			{
-				RefContent.Empty => 2,
+				RefContent.Free => 2,
 				RefContent.Wall => 3,
 				RefContent.Organic => 4,
 			};

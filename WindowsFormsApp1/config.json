@@ -31,11 +31,13 @@
   "CodeLength": 64,
   "MaxCode": 63,
   "MaxUncompleteJump": 15,
+  "MutationProbabilityPercent": 25,
 
 
   //Energy
   "FoodEnergy": 50,
   "InitialBotEnergy": 100,
-  "ReproductionBotEnergy": 300
+  "ReproductionBotEnergy": 300,
+  "BiteEnergy": 100
 
 }

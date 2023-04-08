@@ -82,7 +82,7 @@ namespace WindowsFormsApp1
 
 				_painter.DrawCellOnFrame(obj.X, obj.Y, obj.RefContent switch 
 				{ 
-					RefContent.Empty => null,
+					RefContent.Free => null,
 					RefContent.Grass => Color.Blue,
 					RefContent.Bot => Color.Red,
 					RefContent.Relative => Color.Red,

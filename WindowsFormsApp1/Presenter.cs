@@ -87,7 +87,7 @@ namespace WindowsFormsApp1
 
 			//Color.LightGray
 			//Form.ActiveForm.BackColor
-			//Color.Empty
+			//Color.Free
 			//Color.FromArgb(255,128,128,128)
 			//Color.FromKnownColor(KnownColor.ActiveCaption)
 

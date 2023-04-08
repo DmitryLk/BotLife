@@ -14,8 +14,15 @@ namespace WindowsFormsApp1.GameLogic
 	{
 
 
-		public Bot3(WorldData data, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
-			: base(data, p, dir, botNumber, en, vx, vy)
+		public Bot3(WorldData data, Func func, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
+			: base(data, func, p, dir, botNumber, en, vx, vy)
+		{
+		}
+
+		public override void Death()
+		{
+		}
+		protected override void Reproduction()
 		{
 		}
 

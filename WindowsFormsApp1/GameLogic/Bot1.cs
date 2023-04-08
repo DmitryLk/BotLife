@@ -22,12 +22,15 @@ namespace WindowsFormsApp1.GameLogic
 		public Guid GrandParentCodeHash;
 
 
-		public Bot1(WorldData data, Point p, Direction dir, uint botNumber, int en, int vx, int vy, byte[] code, int pointer, Guid hashCode)
-			: base(data, p, dir, botNumber, en, vx, vy)
+		public Bot1(WorldData data, Func func, Point p, Direction dir, uint botNumber, int en, int vx, int vy,
+			byte[] code, int pointer, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
+			: base(data, func, p, dir, botNumber, en, vx, vy)
 		{
 			_code = code;
 			_pointer = pointer;
-			BotCodeHash = hashCode;
+			BotCodeHash = codeHash;
+			ParentCodeHash = codeHashPar;
+			GrandParentCodeHash = codeHashGrPar;
 		}
 
 		public override void Step()
@@ -54,7 +57,7 @@ namespace WindowsFormsApp1.GameLogic
 					case 23: (shift, stepComplete) = RotateInRelativeDirection(); break;  //поворот относительно
 					case 24: (shift, stepComplete) = RotateInAbsoluteDirection(); break;  //поворот абсолютно
 					// ФОТОСИНТЕЗ
-					case 25: (shift, stepComplete) = Photosynthesis(); break;  //фотосинтез
+					//case 25: (shift, stepComplete) = Photosynthesis(); break;  //фотосинтез
 					// ДВИЖЕНИЕ
 					case 26: (shift, stepComplete) = StepInRelativeDirection(); break;  //шаг в относительном напралении
 					case 27: (shift, stepComplete) = StepInAbsoluteDirection(); break;  //шаг в абсолютном направлении
@@ -74,22 +77,20 @@ namespace WindowsFormsApp1.GameLogic
 			while (!stepComplete && cntJump < _data.MaxUncompleteJump);
 
 			_age++;
-			_energy--;
+			Energy--;
 
 			// todo обработка деления и смерти
 			//Die
-			if (_energy < 0)
+			if (Energy <= 0)
 			{
+				Death();
 			}
 
 			//Reproduction
-			if (_energy >= _data.ReproductionBotEnergy)
+			if (Energy >= _data.ReproductionBotEnergy)
 			{
+				Reproduction();
 			}
-
-
-
-
 
 			// 0-7		движение
 			// 8-15		схватить еду или нейтрализовать яд
@@ -127,19 +128,127 @@ namespace WindowsFormsApp1.GameLogic
 			//................   генная атака  ...................................			if ($command == 49)
 		}
 
-		private void Death()
+		public override void Death()
 		{
+			_data.World[P.X, P.Y] = (uint)CellContent.Free;
+			_func.ChangeCell(P.X, P.Y, RefContent.Free); // при следующей отрисовке бот стерется с экрана
 
-			_data.ChangeCell(P.X, P.Y, RefContent.Empty); // при следующей отрисовке бот стерется с экрана
-			// надо его убрать из массива ботов
-			_data.Bots
+			// надо его убрать из массива ботов, переставив последнего бота на его место
+			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
 
+			//1
+			if (_ind > _data.CurrentBotsNumber)
+			{
+				throw new Exception("if (_ind > _data.CurrentBotsNumber)");
+			}
+
+			//2
+			if (_ind < _data.CurrentBotsNumber)
+			{
+				_data.Bots[_ind] = _data.Bots[_data.CurrentBotsNumber];
+				_data.Bots[_data.CurrentBotsNumber] = null;
+				_data.Bots[_ind].ChangeInd(_ind);
+				//после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
+			}
+
+			//3
+			if (_ind == _data.CurrentBotsNumber)
+			{
+				_data.Bots[_data.CurrentBotsNumber] = null;
+			}
+
+			_data.CurrentBotsNumber--;
 		}
+
+		protected override void Reproduction()
+		{
+			// Создание нового бота
+			// Узнать есть ли рядом ячейка свободная
+			var p = GetRandomFreeCellNearby();
+			if (p != null)
+			{
+				_data.CurrentBotsNumber++;
+				var botNumber = _data.CurrentBotsNumber;
+				var (code, codeHash, codeHashPar, codeHashGrPar) = GetCodeCopy();
+				_func.CreateNewBot(p, botNumber, code, codeHash, codeHashPar, codeHashGrPar);
+				Energy -= _data.InitialBotEnergy;
+			}
+
+			// Если рядом нет свободной ячейки то варианты:
+			// - просто накапливать энергию дальше
+			// - передать энергию соседу
+			// - в случайном месте создать нового бота
+			// - в ближайшем пустом месте создать нового бота
+			// - в ближайшем пустом месте рядом с родственником (найти по цепочке родственников бота с пустыми соседними ячейками)
+			// - умереть
+			// - взорваться
+			// - создавать бота на Organic, Mineral, Poison(?), Grass
+			// todo сделать чтобы если нет места для появления бота на каждом шаге не была очередная попытка воспроизводства
+		}
+
+		private (byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar) GetCodeCopy()
+		{
+			// Копирование кода бота
+			Guid codeHash;
+			Guid codeHashPar;
+			Guid codeHashGrPar;
+			var code = new byte[_data.CodeLength];
+			for (var i = 0; i < _data.CodeLength; i++)
+			{
+				code[i] = _code[i];
+			}
+
+			if (_func.Mutation())
+			{
+				code[_func.GetRandomBotCodeIndex()] = _func.GetRandomBotCode();
+				codeHash = Guid.NewGuid();
+				codeHashPar = BotCodeHash;
+				codeHashGrPar = ParentCodeHash;
+			}
+			else
+			{
+				codeHash = BotCodeHash;
+				codeHashPar = ParentCodeHash;
+				codeHashGrPar = GrandParentCodeHash;
+			}
+
+			return (code, codeHash, codeHashPar, codeHashGrPar);
+		}
+
 		private (int shift, bool stepComplete) EatInRelativeDirection()
 		{
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемой еды
-			var dir = DirRel();
+			var dir = GetDirRelative();
+			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
+			var (refContent, nX, nY, cont) = GetCellInfo3(dir);
+
+			// 3. Узнаем съедобно ли это
+			if (refContent == RefContent.Grass)
+			{
+				EatGrass(nX, nY);
+			}
+
+			if (refContent == RefContent.Bot ||
+				refContent == RefContent.Relative)
+			{
+				EatBot(nX, nY, cont);
+			}
+
+			if (refContent == RefContent.Organic ||
+				refContent == RefContent.Mineral ||
+				refContent == RefContent.Poison)
+			{
+			}
+
+			return ((int)refContent, true);
+		}
+
+		private (int shift, bool stepComplete) EatInAbsoluteDirection()
+		{
+			// Алгоритм:
+			// 1. Узнаем направление предполагаемой еды
+			var dir = GetDirAbsolute();
 			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
 			var (refContent, nX, nY, cont) = GetCellInfo3(dir);
 
@@ -166,31 +275,32 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void EatGrass(int nX, int nY)
 		{
-			_energy += _data.FoodEnergy;
+			Energy += _data.FoodEnergy;
 
-			_data.World[nX, nY] = (uint)CellContent.Empty;
-
-			_data.ChangeCell(nX, nY, RefContent.Empty);
+			_data.World[nX, nY] = (uint)CellContent.Free;
+			_func.ChangeCell(nX, nY, RefContent.Free);
 		}
-
 
 
 		private void EatBot(int nX, int nY, uint cont)
 		{
 			var eatedBot = _data.Bots[cont];
-			_energy += eatedBot;
+			var energyCanEat = eatedBot.Energy > _data.BiteEnergy ? _data.BiteEnergy : eatedBot.Energy;
 
-			_data.World[nX, nY] = (uint)CellContent.Empty;
+			Energy += energyCanEat;
+			eatedBot.Energy =- energyCanEat;
 
-			_data.ChangeCell(nX, nY, RefContent.Empty);
+			if (eatedBot.Energy <= 0)
+			{
+				eatedBot.Death();
+			}
 		}
-
 
 		private (int shift, bool stepComplete) LookAtRelativeDirection()
 		{
 			// Алгоритм:
 			// 1. Узнаем новое направление
-			var dir = DirRel();
+			var dir = GetDirRelative();
 
 			// 2. Узнаем по направлению новые координаты, что там находится и последующее смещение кода
 			var refContent = GetCellInfo1(dir);
@@ -202,7 +312,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			// Алгоритм:
 			// 1. Узнаем новое направление
-			var dir = DirAbs();
+			var dir = GetDirAbsolute();
 
 			// 2. Узнаем по направлению новые координаты, что там находится и последующее смещение кода
 			var refContent = GetCellInfo1(dir);
@@ -214,7 +324,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			// Алгоритм:
 			// 1. Узнаем новое направление
-			var dir = DirRel();
+			var dir = GetDirRelative();
 			// 2. Меняем направление бота
 			_dir = dir;
 			return (2, false);
@@ -224,7 +334,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			// Алгоритм:
 			// 1. Узнаем новое направление
-			var dir = DirAbs();
+			var dir = GetDirAbsolute();
 			// 2. Меняем направление бота
 			_dir = dir;
 			return (2, false);
@@ -234,11 +344,11 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемого движения
-			var dir = DirRel();
+			var dir = GetDirRelative();
 			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
 			var (refContent, nX, nY) = GetCellInfo2(dir);
 			// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-			if (refContent == RefContent.Empty || refContent == RefContent.Poison)
+			if (refContent == RefContent.Free || refContent == RefContent.Poison)
 			{
 				Move(nX, nY);
 			}
@@ -250,11 +360,11 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемого движения
-			var dir = DirAbs();
+			var dir = GetDirAbsolute();
 			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
 			var (refContent, nX, nY) = GetCellInfo2(dir);
 			// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-			if (refContent == RefContent.Empty || refContent == RefContent.Poison)
+			if (refContent == RefContent.Free || refContent == RefContent.Poison)
 			{
 				Move(nX, nY);
 			}
@@ -314,8 +424,6 @@ namespace WindowsFormsApp1.GameLogic
 		// Перемещение бота
 		private void Move(int nX, int nY)
 		{
-			_data.World[P.X, P.Y] = (uint)CellContent.Empty;
-			_data.World[nX, nY] = _ind;
 
 			Old.X = P.X;
 			Old.Y = P.Y;
@@ -323,8 +431,12 @@ namespace WindowsFormsApp1.GameLogic
 			P.Y = nY;
 			// todo добавить обработку если наступил на яд
 
-			_data.ChangeCell(Old.X, Old.Y, RefContent.Empty);
-			_data.ChangeCell(P.X, P.Y, RefContent.Bot);
+
+			_data.World[Old.X, Old.Y] = (uint)CellContent.Free;
+			_func.ChangeCell(Old.X, Old.Y, RefContent.Free);
+
+			_data.World[nX, nY] = _ind;
+			_func.ChangeCell(nX, nY, RefContent.Bot);
 		}
 
 
@@ -339,54 +451,62 @@ namespace WindowsFormsApp1.GameLogic
 
 			return cont switch
 			{
-				0 => RefContent.Empty,
-				> 0 and < 65500 => RefContentByBotRelativity(cont),
+				0 => RefContent.Free,
 				65500 => RefContent.Grass,
 				65501 => RefContent.Organic,
 				65502 => RefContent.Mineral,
 				65503 => RefContent.Wall,
 				65504 => RefContent.Poison,
-				_ => throw new Exception("return cont switch")
+				_ => cont >= 1 && cont <= _data.CurrentBotsNumber ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
 			};
 		}
 
 		private (RefContent refContent, uint cont) GetRefContentAndCont(int x, int y)
 		{
-			//смещение условного перехода 2-пусто  3-стена  4-органика 5-бот 6-родня
 			if (y < 0 || y >= _data.WorldHeight || x < 0 || x >= _data.WorldWidth) return (RefContent.Edge, 0);
 
 			var cont = _data.World[x, y];
 
 			return (cont switch
 			{
-				0 => RefContent.Empty,
-				> 0 and < 65500 => RefContentByBotRelativity(cont),
+				0 => RefContent.Free,
 				65500 => RefContent.Grass,
 				65501 => RefContent.Organic,
 				65502 => RefContent.Mineral,
 				65503 => RefContent.Wall,
 				65504 => RefContent.Poison,
-				_ => throw new Exception("return cont switch")
+				_ => cont >= 1 && cont <= _data.CurrentBotsNumber ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
 			}, cont);
+		}
+
+		private RefContent GetRefContentWithoutRelative(int x, int y)
+		{
+			if (y < 0 || y >= _data.WorldHeight || x < 0 || x >= _data.WorldWidth) return RefContent.Edge;
+
+			var cont = _data.World[x, y];
+
+			return cont switch
+			{
+				0 => RefContent.Free,
+				65500 => RefContent.Grass,
+				65501 => RefContent.Organic,
+				65502 => RefContent.Mineral,
+				65503 => RefContent.Wall,
+				65504 => RefContent.Poison,
+				_ => cont >= 1 && cont <= _data.CurrentBotsNumber ? RefContent.Bot : throw new Exception("return cont switch")
+			};
 		}
 
 		private RefContent RefContentByBotRelativity(uint cont)
 		{
-			if (cont > 0 && cont <= _data.MaxBotsNumber)
+			// надо определить родственник ли бот
+			if (IsRelative((Bot1)_data.Bots[cont]))
 			{
-				// надо определить родственник ли бот
-				if (IsRelative((Bot1)_data.Bots[cont]))
-				{
-					return RefContent.Relative;
-				}
-				else
-				{
-					return RefContent.Bot;
-				}
+				return RefContent.Relative;
 			}
 			else
 			{
-				throw new Exception("if (cont > 0 && cont <= _data.MaxBotsNumber)");
+				return RefContent.Bot;
 			}
 		}
 
@@ -396,6 +516,26 @@ namespace WindowsFormsApp1.GameLogic
 			if (ParentCodeHash == b2.BotCodeHash || ParentCodeHash == b2.ParentCodeHash || ParentCodeHash == b2.GrandParentCodeHash) return true;
 			if (GrandParentCodeHash == b2.BotCodeHash || GrandParentCodeHash == b2.ParentCodeHash || GrandParentCodeHash == b2.GrandParentCodeHash) return true;
 			return false;
+		}
+
+		private Point GetRandomFreeCellNearby()
+		{
+			RefContent refContent;
+			int x;
+			int y;
+			var i = 0;
+
+			var dir = _func.GetRandomDirection();
+			do
+			{
+				dir = DirIncrement(dir);
+				(x, y) = GetCoordinatesByDirection(dir);
+				refContent = GetRefContentWithoutRelative(x, y);
+				i++;
+			}
+			while (refContent != RefContent.Free && i <= 8);
+
+			return refContent == RefContent.Free ? new Point(x, y) : null;
 		}
 
 		// Метод вернет всегда координаты отличные от текущих
@@ -445,13 +585,17 @@ namespace WindowsFormsApp1.GameLogic
 			_pointer = (_pointer + shift) % _data.CodeLength;
 		}
 
-		private Direction DirAbs()
+		private Direction GetDirAbsolute()
 		{
 			return (Direction)(((int)GetNextCommand()) % 8);
 		}
-		private Direction DirRel()
+		private Direction GetDirRelative()
 		{
 			return (Direction)(((int)GetNextCommand() + (int)_dir) % 8);
+		}
+		private Direction DirIncrement(Direction dir)
+		{
+			return (Direction)(((int)dir + 1) % 8);
 		}
 	}
 }

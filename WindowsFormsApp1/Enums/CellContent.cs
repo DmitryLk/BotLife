@@ -10,7 +10,7 @@ namespace WindowsFormsApp1.Enums
 {
     public enum CellContent
     {
-        Empty = 0,
+        Free = 0,
         Grass = 65500,
         Organic = 65501,
         Mineral = 65502,

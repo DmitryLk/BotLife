@@ -1,0 +1,166 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using WindowsFormsApp1.Dto;
+using WindowsFormsApp1.Enums;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Label = System.Windows.Forms.Label;
+using TextBox = System.Windows.Forms.TextBox;
+
+namespace WindowsFormsApp1.GameLogic
+{
+	public class Func
+	{
+		private Random _rnd = new Random(Guid.NewGuid().GetHashCode());
+		private WorldData _data;
+
+		public Func(WorldData data)
+		{
+			_rnd = new Random(Guid.NewGuid().GetHashCode());
+			_data = data;
+		}
+
+
+		public void CreateNewBot(Point p, uint botNumber, byte[] code,  Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
+		{
+			var dir = GetRandomDirection();
+			var en = _data.InitialBotEnergy;
+			var (vx, vy) = GetRandomSpeed();
+			var pointer = 0;
+
+			var bot = new Bot1(_data, this, p, dir, botNumber, en, vx, vy, code, pointer, codeHash, codeHashPar, codeHashGrPar);
+
+			_data.Bots[botNumber] = bot;
+
+			_data.World[p.X, p.Y] = botNumber;
+			ChangeCell(p.X, p.Y, RefContent.Bot);
+		}
+
+		// Запись в буфер измененных ячеек для последующей отрисовки
+		public void ChangeCell(int x, int y, RefContent refContent)
+		{
+			//todo не перерисовывать если на первоначальном экране ячейка такого же цвета
+
+			if (_data.ChWorld[x, y] != 0)
+			{
+				// В этой клетке уже были изменения после последнего рисования
+				_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					RefContent = refContent
+				};
+			}
+			else
+			{
+				// В этой клетке еще не было изменений после последнего рисования
+				_data.ChangedCells[_data.NumberOfChangedCells] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					RefContent = RefContent.Free
+				};
+				_data.NumberOfChangedCells++;
+				_data.ChWorld[x, y] = _data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
+			}
+		}
+
+		#region Random
+		public Direction GetRandomDirection()
+		{
+			return (Direction)_rnd.Next(0, 8);
+		}
+
+		public byte GetRandomBotCode()
+		{
+			return (byte)_rnd.Next(_data.MaxCode + 1);
+		}
+		public int GetRandomBotCodeIndex()
+		{
+			return _rnd.Next(_data.CodeLength);
+		}
+
+		public bool Mutation()
+		{
+			return _rnd.Next(100) < _data.MutationProbabilityPercent;
+		}
+
+		public Point GetRandomFreeCell()
+		{
+			int x;
+			int y;
+			var i = 0;
+
+			do
+			{
+				x = _rnd.Next(0, _data.WorldWidth);
+				y = _rnd.Next(0, _data.WorldHeight);
+			}
+			while (CellIsBusy(x, y) && ++i < 100);
+
+			return new Point(x, y);
+		}
+
+		public (int, int) GetRandomSpeed()
+		{
+			//do
+			//{
+			//	_vx = rnd.Next(-1, 2);
+			//	_vy = rnd.Next(-1, 2);
+			//}
+			//while (_vx == 0 && _vy == 0);
+
+			if (_rnd.Next(100) > 97)
+			{
+				return (_rnd.Next(-1, 2), _rnd.Next(-1, 2));
+			}
+			return (0, 0);
+		}
+
+		private bool CellIsBusy(int x, int y)
+		{
+			return _data.World[x, y] != 0;
+		}
+
+
+		private unsafe Guid GuidRandomCachedInstance()
+		{
+			var bytes = stackalloc byte[16];
+			var dst = bytes;
+
+			var random = ThreadSafeRandom.ObtainThreadStaticRandom();
+			for (var i = 0; i < 4; i++)
+			{
+				*(int*)dst = random.Next();
+				dst += 4;
+			}
+
+			return *(Guid*)bytes;
+		}
+
+		#endregion
+	}
+
+	internal static class ThreadSafeRandom
+	{
+		[ThreadStatic]
+		private static Random random;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Random ObtainThreadStaticRandom() => ObtainRandom();
+
+		private static Random ObtainRandom()
+		{
+			return random ?? (random = new Random(Guid.NewGuid().GetHashCode()));
+		}
+	}
+}

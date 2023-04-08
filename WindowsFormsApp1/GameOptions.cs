@@ -31,9 +31,11 @@ namespace WindowsFormsApp1
 		public int CodeLength;
 		public int MaxCode;
 		public int MaxUncompleteJump;
+		public int MutationProbabilityPercent;
 
 		public int FoodEnergy;
 		public int InitialBotEnergy;
 		public int ReproductionBotEnergy;
+		public int BiteEnergy;
 	}
 }
