@@ -19,27 +19,29 @@ namespace WindowsFormsApp1
 {
 	public class Game
 	{
-		public Presenter _painter;
+		public Presenter _presenter;
 		public World _world;
 		public WorldData _data;
 		public Tester _test;
 		public System.Windows.Forms.Timer timer;
 
-		public Game(Presenter painter, Tester test)
+		public bool Started;
+		public bool PausedMode;
+		public Game(Presenter presenter, Tester test)
 		{
 			var options = LoadConfig();
+			_data = new WorldData(options);
 
 			var bitmapWidth = options.WorldWidth * options.CellWidth;
 			var bitmapHeight = options.WorldHeight * options.CellHeight;
-			_painter = painter;
-			_painter.Configure(bitmapWidth, bitmapHeight, options.CellWidth, options.CellHeight, options.ReportFrequency);
+			_presenter = presenter;
+			_presenter.Configure(_data, bitmapWidth, bitmapHeight, options.CellWidth, options.CellHeight, options.ReportFrequency);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
-			_data = new WorldData(options);
 			_world = new World(_data);
 
 			_test = test;
@@ -47,46 +49,60 @@ namespace WindowsFormsApp1
 			_test.InitInterval(1, "RedrawWorld();");
 			_test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
 			_test.InitInterval(3, "PaintFrame();");
+
+			Started = false;
+			PausedMode = true;
 		}
 
 		public async Task Start()
 		{
+			Started = true;
 			//timer.Enabled = true;
 			_world.Initialize();
 			_test.BeginInterval(0);
 
-			while (true)
+			while (!PausedMode)
 			{
 				await Step();
 			}
 		}
 
-		private async Task Step()
+		public async Task Work()
 		{
-			await Task.Run(() => _world.Step());
+			do
+			{
+				await Step();
+			}
+			while (!PausedMode);
+		}
+
+		public async Task Step()
+		{
+			 await Task.Run(() => _world.Step());
 			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
 			//_world.Step();
 			_test.EndBeginInterval(0, 1);
 			RedrawWorld();
+			//await Task.Delay(5000);
 		}
 
 		private void RedrawWorld()
 		{
-			_painter.StartNewFrame();
+			_presenter.StartNewFrame();
 			_test.EndBeginInterval(1, 2);
 
-			// Рисование изменений на экране
+			// Рисование изменений на битмапе экрана (сразу не отображаются)
 			for (var i = 0; i < _data.NumberOfChangedCells; i++)
 			{
 				var obj = _data.ChangedCells[i];
 
-				_painter.DrawCellOnFrame(obj.X, obj.Y, obj.RefContent switch 
+				_presenter.DrawCellOnFrame(obj.X, obj.Y, obj.RefContent switch 
 				{ 
 					RefContent.Free => null,
-					RefContent.Grass => Color.Blue,
+					RefContent.Grass => Color.Green,
 					RefContent.Bot => Color.Red,
 					RefContent.Relative => Color.Red,
-					_ => Color.Green
+					_ => Color.Black
 				});
 				_data.ChWorld[obj.X, obj.Y] = 0;
 			}
@@ -95,7 +111,7 @@ namespace WindowsFormsApp1
 
 			_test.EndBeginInterval(2, 3);
 
-			_painter.PaintFrame();
+			_presenter.PaintFrame();
 			//await Task.Delay(1);
 			_test.EndBeginInterval(3, 0);
 		}

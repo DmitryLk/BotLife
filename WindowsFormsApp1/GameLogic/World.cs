@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
+using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using static System.Windows.Forms.Design.AxImporter;
 
@@ -22,7 +23,16 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Initialize()
 		{
+			// Создать все игровые массивы
+			_data.World = new uint[_data.WorldWidth, _data.WorldHeight];
+			_data.Bots = new Bot[_data.MaxBotsNumber];
+			_data.ChWorld = new uint[_data.WorldWidth, _data.WorldHeight];
+			_data.ChangedCells = new ChangedCell[_data.MaxBotsNumber];
+
 			_data.NumberOfChangedCells = 0;
+			_data.MaxBotNumber = 0;
+			_data.CurrentStep = 0;
+
 
 			// Засевание объектов
 			_seeder.SeedItems();
@@ -35,12 +45,14 @@ namespace WindowsFormsApp1.GameLogic
 		public void Step()
 		{
 			//Parallel.For(0, currentBotsNumber, i => Bots[i].Move());
-			for (uint botNumber = 1; botNumber < _data.CurrentBotsNumber; botNumber++)
+			for (uint botNumber = 1; botNumber < _data.CurrentNumberOfBots; botNumber++)
 			{
+				
 				_data.Bots[botNumber].Step();
 				//Bots[botNumber].Live();
 				//Bots[botNumber].Move();
 			}
+			_data.CurrentStep++;
 		}
 	}
 }

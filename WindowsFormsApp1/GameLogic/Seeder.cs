@@ -21,7 +21,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void SeedBots()
 		{
-			for (uint botNumber = 1; botNumber <= _data.StartBotsNumber; botNumber++)
+			for (uint botIndex = 1; botIndex <= _data.StartNumberOfBots; botIndex++)
 			{
 
 				// Координаты бота
@@ -35,9 +35,9 @@ namespace WindowsFormsApp1.GameLogic
 				}
 				var codeHash = Guid.NewGuid();
 
-				_func.CreateNewBot(p, botNumber, code, codeHash, Guid.Empty, Guid.Empty);
+				_func.CreateNewBot(p, botIndex, code, codeHash, Guid.Empty, Guid.Empty);
 			}
-			_data.CurrentBotsNumber = _data.StartBotsNumber;
+			_data.CurrentNumberOfBots = _data.StartNumberOfBots;
 			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
 		}
 

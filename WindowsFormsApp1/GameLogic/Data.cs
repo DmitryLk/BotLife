@@ -10,7 +10,8 @@ namespace WindowsFormsApp1.GameLogic
 {
 	public class WorldData
 	{
-		public uint StartBotsNumber;
+		//INITIAL SETTINGS
+		public uint StartNumberOfBots;
 		public uint MaxBotsNumber;
 		public int WorldWidth;
 		public int WorldHeight;
@@ -42,36 +43,21 @@ namespace WindowsFormsApp1.GameLogic
 		public Bot[] Bots;
 
 
+		//VARIABLE CURRENT PARAMETERS
 		//Для поддержки эффективной перерисовки
 		public uint[,] ChWorld;
 		public ChangedCell[] ChangedCells;
 		public uint NumberOfChangedCells;
 
 
-		public uint CurrentBotsNumber;
-
-		//public Point[] Grass;
-		//public Point[] Organic;
-		//public Point[] Minerals;
-		//public Point[] Walls;
-		//public Point[] Poison;
-
-		//public uint[] ChangedGrass;
-		//public uint[] ChangedOrganic;
-		//public uint[] ChangedMinerals;
-		//public uint[] ChangedWalls;
-		//public uint[] ChangedPoison;
-
-		//public uint NumberOfChangedGrass;
-		//public uint NumberOfChangedOrganic;
-		//public uint NumberOfChangedMinerals;
-		//public uint NumberOfChangedWalls;
-		//public uint NumberOfChangedPoison;
+		public uint CurrentNumberOfBots;
+		public uint CurrentStep;
+		public uint MaxBotNumber;
 
 
 		public WorldData(GameOptions options)
 		{
-			StartBotsNumber = options.StartBotsNumber;
+			StartNumberOfBots = options.StartBotsNumber;
 			MaxBotsNumber = options.MaxBotsNumber;
 			WorldWidth = options.WorldWidth;
 			WorldHeight = options.WorldHeight;
@@ -98,12 +84,6 @@ namespace WindowsFormsApp1.GameLogic
 			FoodEnergy = options.FoodEnergy;
 			ReproductionBotEnergy = options.ReproductionBotEnergy;
 			BiteEnergy = options.BiteEnergy;
-
-			// Создать все игровые массивы
-			World = new uint[WorldWidth, WorldHeight];
-			Bots = new Bot[MaxBotsNumber];
-			ChWorld = new uint[WorldWidth, WorldHeight];
-			ChangedCells = new ChangedCell[MaxBotsNumber];
 		}
 	}
 }

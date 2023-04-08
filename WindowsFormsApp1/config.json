@@ -2,16 +2,16 @@
   // Настройки экрана
   "MaxPictureBoxWidth": 1000,
   "MaxPictureBoxHeight": 1000,
-  "CellWidth": 1,
-  "CellHeight": 1,
-  "ReportFrequency": 100,
+  "CellWidth": 5,
+  "CellHeight": 5,
+  "ReportFrequency": 1,
 
   // Настройки мира
-  "StartBotsNumber": 40000,
-  "MaxBotsNumber": 40000,
-  "WorldWidth": 1000,
-  "WorldHeight": 1000,
-  "UpDownEdge": true,
+  "StartBotsNumber": 1000,
+  "MaxBotsNumber": 200000,
+  "WorldWidth": 200,
+  "WorldHeight": 200,
+  "UpDownEdge": false,
   "LeftRightEdge": false,
 
 
@@ -35,7 +35,7 @@
 
 
   //Energy
-  "FoodEnergy": 50,
+  "FoodEnergy": 2000,
   "InitialBotEnergy": 100,
   "ReproductionBotEnergy": 300,
   "BiteEnergy": 100

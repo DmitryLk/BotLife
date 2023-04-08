@@ -30,27 +30,43 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		public void CreateNewBot(Point p, uint botNumber, byte[] code,  Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
+		public void CreateNewBot(Point p, uint botIndex, byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
 		{
 			var dir = GetRandomDirection();
 			var en = _data.InitialBotEnergy;
 			var (vx, vy) = GetRandomSpeed();
 			var pointer = 0;
+			var botNumber = ++_data.MaxBotNumber;
 
-			var bot = new Bot1(_data, this, p, dir, botNumber, en, vx, vy, code, pointer, codeHash, codeHashPar, codeHashGrPar);
+			var bot = new Bot1(_data, this, p, dir, botNumber, botIndex, en, vx, vy, code, pointer, codeHash, codeHashPar, codeHashGrPar);
 
-			_data.Bots[botNumber] = bot;
+			_data.Bots[botIndex] = bot;
 
-			_data.World[p.X, p.Y] = botNumber;
+			_data.World[p.X, p.Y] = botIndex;
 			ChangeCell(p.X, p.Y, RefContent.Bot);
 		}
 
 		// Запись в буфер измененных ячеек для последующей отрисовки
 		public void ChangeCell(int x, int y, RefContent refContent)
 		{
-			//todo не перерисовывать если на первоначальном экране ячейка такого же цвета
+			//public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
+			//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и тип объекта чтобы по нему определить цвет
+			//public uint NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
 
-			if (_data.ChWorld[x, y] != 0)
+			//todo не перерисовывать если на первоначальном экране ячейка такого же цвета
+			if (_data.ChWorld[x, y] == 0)
+			{
+				// В этой клетке еще не было изменений после последнего рисования
+				_data.ChangedCells[_data.NumberOfChangedCells] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					RefContent = refContent
+				};
+				_data.NumberOfChangedCells++;
+				_data.ChWorld[x, y] = _data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
+			}
+			else
 			{
 				// В этой клетке уже были изменения после последнего рисования
 				_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
@@ -59,18 +75,6 @@ namespace WindowsFormsApp1.GameLogic
 					Y = y,
 					RefContent = refContent
 				};
-			}
-			else
-			{
-				// В этой клетке еще не было изменений после последнего рисования
-				_data.ChangedCells[_data.NumberOfChangedCells] = new ChangedCell
-				{
-					X = x,
-					Y = y,
-					RefContent = RefContent.Free
-				};
-				_data.NumberOfChangedCells++;
-				_data.ChWorld[x, y] = _data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
 			}
 		}
 

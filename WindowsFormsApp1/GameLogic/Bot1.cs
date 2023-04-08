@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -22,9 +23,9 @@ namespace WindowsFormsApp1.GameLogic
 		public Guid GrandParentCodeHash;
 
 
-		public Bot1(WorldData data, Func func, Point p, Direction dir, uint botNumber, int en, int vx, int vy,
+		public Bot1(WorldData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy,
 			byte[] code, int pointer, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
-			: base(data, func, p, dir, botNumber, en, vx, vy)
+			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
 		{
 			_code = code;
 			_pointer = pointer;
@@ -56,15 +57,15 @@ namespace WindowsFormsApp1.GameLogic
 					// ПОВОРОТ
 					case 23: (shift, stepComplete) = RotateInRelativeDirection(); break;  //поворот относительно
 					case 24: (shift, stepComplete) = RotateInAbsoluteDirection(); break;  //поворот абсолютно
-					// ФОТОСИНТЕЗ
-					//case 25: (shift, stepComplete) = Photosynthesis(); break;  //фотосинтез
-					// ДВИЖЕНИЕ
+																						  // ФОТОСИНТЕЗ
+																						  //case 25: (shift, stepComplete) = Photosynthesis(); break;  //фотосинтез
+																						  // ДВИЖЕНИЕ
 					case 26: (shift, stepComplete) = StepInRelativeDirection(); break;  //шаг в относительном напралении
 					case 27: (shift, stepComplete) = StepInAbsoluteDirection(); break;  //шаг в абсолютном направлении
-					// СЪЕСТЬ
+																						// СЪЕСТЬ
 					case 28: (shift, stepComplete) = EatInRelativeDirection(); break;  //съесть в относительном напралении
 					case 29: (shift, stepComplete) = EatInAbsoluteDirection(); break;  //съесть  в абсолютном направлении
-					// ПОСМОТРЕТЬ
+																					   // ПОСМОТРЕТЬ
 					case 30: (shift, stepComplete) = LookAtRelativeDirection(); break;  //посмотреть  в относительном напралении
 					case 31: (shift, stepComplete) = LookAtAbsoluteDirection(); break;  //посмотреть  в абсолютном напралении
 					default: shift = cmdCode; stepComplete = false; break;
@@ -130,34 +131,63 @@ namespace WindowsFormsApp1.GameLogic
 
 		public override void Death()
 		{
+			//var idx = _data.World[P.X, P.Y];
+			//if (idx != _ind)
+			//{
+			//	throw new Exception("var idx = _data.World[P.X, P.Y];");
+			//}
+
 			_data.World[P.X, P.Y] = (uint)CellContent.Free;
 			_func.ChangeCell(P.X, P.Y, RefContent.Free); // при следующей отрисовке бот стерется с экрана
+
+			//idx = _data.World[P.X, P.Y];
+			//if (idx != 0)
+			//{
+			//	throw new Exception("var idx = _data.World[P.X, P.Y];");
+			//}
+
+
 
 			// надо его убрать из массива ботов, переставив последнего бота на его место
 			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
 
 			//1
-			if (_ind > _data.CurrentBotsNumber)
+			if (Index > _data.CurrentNumberOfBots)
 			{
 				throw new Exception("if (_ind > _data.CurrentBotsNumber)");
 			}
 
 			//2
-			if (_ind < _data.CurrentBotsNumber)
+			if (Index < _data.CurrentNumberOfBots)
 			{
-				_data.Bots[_ind] = _data.Bots[_data.CurrentBotsNumber];
-				_data.Bots[_data.CurrentBotsNumber] = null;
-				_data.Bots[_ind].ChangeInd(_ind);
+				// Перенос последнего бота в освободившееся отверстие
+				if (_data.Bots[_data.CurrentNumberOfBots] == null)
+				{
+					throw new Exception("if (_data.Bots[_data.CurrentNumberOfBots] == null)");
+				}
+
+				var lastBot = _data.Bots[_data.CurrentNumberOfBots];
+				_data.Bots[Index] = lastBot;
+				lastBot.Index = Index;
+				_data.World[lastBot.P.X, lastBot.P.Y] = Index;
+				//_func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
 				//после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
 			}
 
-			//3
-			if (_ind == _data.CurrentBotsNumber)
-			{
-				_data.Bots[_data.CurrentBotsNumber] = null;
-			}
+			// Укарачиваем массив
+			_data.Bots[_data.CurrentNumberOfBots] = null;
+			_data.CurrentNumberOfBots--;
 
-			_data.CurrentBotsNumber--;
+			//for (var j = 0; j < _data.WorldHeight; j++)
+			//{
+			//	for (var i = 0; i < _data.WorldWidth; i++)
+			//	{
+			//		if (_data.World[j, i] > _data.CurrentNumberOfBots && _data.World[j, i] < 65000)
+			//		{
+			//			throw new Exception("if (_data.World[j, i] > _data.CurrentNumberOfBots)");
+			//		}
+			//	}
+			//}
 		}
 
 		protected override void Reproduction()
@@ -167,10 +197,10 @@ namespace WindowsFormsApp1.GameLogic
 			var p = GetRandomFreeCellNearby();
 			if (p != null)
 			{
-				_data.CurrentBotsNumber++;
-				var botNumber = _data.CurrentBotsNumber;
+				_data.CurrentNumberOfBots++;
+				var botIndex = _data.CurrentNumberOfBots;
 				var (code, codeHash, codeHashPar, codeHashGrPar) = GetCodeCopy();
-				_func.CreateNewBot(p, botNumber, code, codeHash, codeHashPar, codeHashGrPar);
+				_func.CreateNewBot(p, botIndex, code, codeHash, codeHashPar, codeHashGrPar);
 				Energy -= _data.InitialBotEnergy;
 			}
 
@@ -288,7 +318,7 @@ namespace WindowsFormsApp1.GameLogic
 			var energyCanEat = eatedBot.Energy > _data.BiteEnergy ? _data.BiteEnergy : eatedBot.Energy;
 
 			Energy += energyCanEat;
-			eatedBot.Energy =- energyCanEat;
+			eatedBot.Energy -= energyCanEat;
 
 			if (eatedBot.Energy <= 0)
 			{
@@ -435,7 +465,7 @@ namespace WindowsFormsApp1.GameLogic
 			_data.World[Old.X, Old.Y] = (uint)CellContent.Free;
 			_func.ChangeCell(Old.X, Old.Y, RefContent.Free);
 
-			_data.World[nX, nY] = _ind;
+			_data.World[nX, nY] = Index;
 			_func.ChangeCell(nX, nY, RefContent.Bot);
 		}
 
@@ -445,6 +475,8 @@ namespace WindowsFormsApp1.GameLogic
 		private RefContent GetRefContent(int x, int y)
 		{
 			//смещение условного перехода 2-пусто  3-стена  4-органика 5-бот 6-родня
+
+			// Если координаты попадают за экран то вернуть RefContent.Edge
 			if (y < 0 || y >= _data.WorldHeight || x < 0 || x >= _data.WorldWidth) return RefContent.Edge;
 
 			var cont = _data.World[x, y];
@@ -457,7 +489,7 @@ namespace WindowsFormsApp1.GameLogic
 				65502 => RefContent.Mineral,
 				65503 => RefContent.Wall,
 				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= _data.CurrentBotsNumber ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
+				_ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
 			};
 		}
 
@@ -475,7 +507,7 @@ namespace WindowsFormsApp1.GameLogic
 				65502 => RefContent.Mineral,
 				65503 => RefContent.Wall,
 				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= _data.CurrentBotsNumber ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
+				_ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
 			}, cont);
 		}
 
@@ -493,7 +525,7 @@ namespace WindowsFormsApp1.GameLogic
 				65502 => RefContent.Mineral,
 				65503 => RefContent.Wall,
 				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= _data.CurrentBotsNumber ? RefContent.Bot : throw new Exception("return cont switch")
+				_ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? RefContent.Bot : throw new Exception("return cont switch")
 			};
 		}
 

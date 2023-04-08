@@ -24,10 +24,11 @@ namespace WindowsFormsApp1
 		private Bitmap _btmp;
 		private Graphics _gr;
 		private ImageWrapper _iw;
+		private WorldData _data;
 
 		private SolidBrush _br;
 		private Color _fon;
-		private Label _label;
+		private Label[] _labels;
 		private TextBox _textBox;
 
 		private int _cellWidth;
@@ -38,10 +39,10 @@ namespace WindowsFormsApp1
 
 		public Tester _test;
 
-		public Presenter(PictureBox pb, Label label, TextBox textBox, Tester test)
+		public Presenter(PictureBox pb, Label[] labels, TextBox textBox, Tester test)
 		{
 			_pb = pb;
-			_label = label;
+			_labels = labels;
 			_textBox = textBox;
 
 			_br = new SolidBrush(Color.Red);
@@ -52,8 +53,9 @@ namespace WindowsFormsApp1
 			_test = test;
 		}
 
-		public void Configure(int bitmapWidth, int bitmapHeight, int cellWidth, int cellHeight, int reportFrequency)
+		public void Configure(WorldData data, int bitmapWidth, int bitmapHeight, int cellWidth, int cellHeight, int reportFrequency)
 		{
+			_data = data;
 			_pb.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
 
 			_cellHeight = cellHeight;
@@ -142,8 +144,12 @@ namespace WindowsFormsApp1
 				var fps = _reportFrequency / tms;
 				_dt = DateTime.Now;
 
-				_label.Text = "fps: " + fps.ToString("#");
-				_label.Update();
+				_labels[0].Text = "fps: " + fps.ToString("#");
+				_labels[0].Update();
+
+				_labels[1].Text = "step: " + _data.CurrentStep;
+				_labels[1].Update();
+
 				_textBox.Text = _test.GetText();
 				_textBox.Update();
 

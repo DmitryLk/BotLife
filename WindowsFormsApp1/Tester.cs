@@ -69,7 +69,7 @@ namespace WindowsFormsApp1
 
 			foreach (var i in _intervals)
 			{
-				if (i != null && i.Active)
+				if (i != null && i.Active && i.NumberOfMeasurement != 0)
 				{
 					i.ElapsedMs = (int)(1000000L * i.TotalMeasurement / i.NumberOfMeasurement / _frequency);
 					sumElapsedMs += i.ElapsedMs;

@@ -13,26 +13,56 @@ namespace WindowsFormsApp1
 {
 	public partial class Form1 : Form
 	{
-		public Game main;
+		public Game game;
 
 		public Form1()
 		{
 			InitializeComponent();
 
 			var test = new Tester();
-			var painter = new Presenter(pictureBox1, label1, textBox1, test);
-			main = new Game(painter, test);
+			var painter = new Presenter(pictureBox1, new[] { label1, label2 }, textBox1, test);
+			game = new Game(painter, test);
 		}
 
 		private async void button1_Click(object sender, EventArgs e)
 		{
+			if (e is MouseEventArgs)
+			{
+				if (!game.Started)
+				{
+					game.Start();
+					button1.Enabled = false;
+				}
+			}
+			else
+			{
+				// Not mouse click...
+			}
 
-			main.Start();
 			//await Task.Factory.StartNew(() => life.Start(), TaskCreationOptions.LongRunning);
 			//var thread = new System.Threading.Thread(() => life.Start());
 			//thread.Start();
 		}
 
+		private void Form1_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (game.Started)
+			{
+				if (e.KeyCode == Keys.P)
+				{
+					game.PausedMode = !game.PausedMode;
+					if (!game.PausedMode)
+					{
+						game.Work();
+					}
+				}
+
+				if (e.KeyCode == Keys.Space)
+				{
+					game.Work();
+				}
+			}
+		}
 
 
 		private void Form1_Load(object sender, EventArgs e)

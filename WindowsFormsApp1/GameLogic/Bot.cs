@@ -14,23 +14,23 @@ namespace WindowsFormsApp1.GameLogic
 		public Point P;
 		public Point Old;
 		public int Energy;
+		public uint Index;         // Индекс бота (может меняться)
 
 		protected WorldData _data;
 		protected Func _func;
 		protected Direction _dir;         // Направление бота
 		protected uint _num;         // Номер бота (остается постоянным)
-		protected uint _ind;         // Индекс бота (может меняться)
 		protected int _age;
 		private int _vx;
 		private int _vy;
 
-		public Bot(WorldData data, Func func, Point p, Direction dir, uint botNumber, int en, int vx, int vy)
+		public Bot(WorldData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
 		{
 			_data = data;
 			_func = func;
 			_dir = dir;
 			_num = botNumber;
-			_ind = botNumber;
+			Index = botIndex;
 			Energy = en;
 			_age = 0;
 
@@ -46,11 +46,6 @@ namespace WindowsFormsApp1.GameLogic
 
 		protected abstract void Reproduction();
 
-		public void ChangeInd(uint newInd)
-		{
-			_ind = newInd;
-		}
-		
 		public void Move()
 		{
 			var newX = P.X + _vx;
