@@ -22,6 +22,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Initialize()
 		{
+			_data.NumberOfChangedCells = 0;
+
 			// Засевание объектов
 			_seeder.SeedItems();
 

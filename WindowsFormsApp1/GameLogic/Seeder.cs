@@ -10,8 +10,6 @@ namespace WindowsFormsApp1.GameLogic
 {
 	public class Seeder
 	{
-		private uint[,] _world; // чтобы можно было узнать по координатам что там находится
-
 		private RandomService _randomService;
 		private WorldData _data;
 
@@ -23,9 +21,6 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void SeedBots()
 		{
-			_data.Bots = new Bot[_data.MaxBotsNumber];
-			_data.ChangedBots = new uint[_data.MaxBotsNumber];
-			_data.NumberOfChangedBots = 0;
 			for (uint botNumber = 1; botNumber <= _data.StartBotsNumber; botNumber++)
 			{
 
@@ -36,7 +31,7 @@ namespace WindowsFormsApp1.GameLogic
 				var dir = _randomService.GetRandomDirection();
 
 				// Энергия бота
-				var en = _data.SeedBotEnergy;
+				var en = _data.InitialBotEnergy;
 
 				// Скорость бота (?)
 				var (vx, vy) = _randomService.GetRandomSpeed();
@@ -53,23 +48,14 @@ namespace WindowsFormsApp1.GameLogic
 				var bot = new Bot1(_data, p, dir, botNumber, en, vx, vy, code, pointer, codeHash);
 				_data.Bots[botNumber] = bot;
 				_data.World[p.X, p.Y] = botNumber;
-				_data.ChangedBots[_data.NumberOfChangedBots] = botNumber;
-				_data.NumberOfChangedBots++;
+
+				_data.ChangeCell(p.X, p.Y, RefContent.Bot);
 			}
 			_data.CurrentBotsNumber = _data.StartBotsNumber;
 		}
 
 		public void SeedItems()
 		{
-			_data.ChangedItems = new ChangedItem[
-				_data.SeedFoodNumber +
-				_data.SeedOrganicNumber +
-				_data.SeedMineralsNumber +
-				_data.SeedWallsNumber +
-				_data.SeedPoisonNumber];
-			_data.NumberOfChangedItems = 0;
-
-
 			// Заполнение Grass
 			if (_data.SeedFood)
 			{
@@ -78,8 +64,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _randomService.GetRandomEmptyPoint();
 					_data.World[p.X, p.Y] = (uint)CellContent.Grass;
 
-					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem {X = p.X, Y = p.Y, CellContent = CellContent.Grass, Added = true};
-					_data.NumberOfChangedItems++;
+					_data.ChangeCell(p.X, p.Y, RefContent.Grass);
 				}
 			}
 
@@ -91,8 +76,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _randomService.GetRandomEmptyPoint();
 					_data.World[p.X, p.Y] = (uint)CellContent.Organic;
 
-					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Organic, Added = true };
-					_data.NumberOfChangedItems++;
+					_data.ChangeCell(p.X, p.Y, RefContent.Organic);
 				}
 			}
 
@@ -104,8 +88,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _randomService.GetRandomEmptyPoint();
 					_data.World[p.X, p.Y] = (uint)CellContent.Mineral;
 
-					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Mineral, Added = true };
-					_data.NumberOfChangedItems++;
+					_data.ChangeCell(p.X, p.Y, RefContent.Mineral);
 				}
 			}
 
@@ -117,8 +100,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _randomService.GetRandomEmptyPoint();
 					_data.World[p.X, p.Y] = (uint)CellContent.Wall;
 
-					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Wall, Added = true };
-					_data.NumberOfChangedItems++;
+					_data.ChangeCell(p.X, p.Y, RefContent.Wall);
 				}
 			}
 
@@ -130,8 +112,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _randomService.GetRandomEmptyPoint();
 					_data.World[p.X, p.Y] = (uint)CellContent.Poison;
 
-					_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = p.X, Y = p.Y, CellContent = CellContent.Poison, Added = true };
-					_data.NumberOfChangedItems++;
+					_data.ChangeCell(p.X, p.Y, RefContent.Poison);
 				}
 			}
 		}

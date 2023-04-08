@@ -26,7 +26,6 @@
   "SeedMineralsNumber": 0,
   "SeedWallsNumber": 0,
   "SeedPoisonNumber": 0,
-  "SeedBotEnergy": 100,
 
   // Настройки генома ботов
   "CodeLength": 64,
@@ -34,7 +33,9 @@
   "MaxUncompleteJump": 15,
 
 
-  //Grass
-  "FoodEnergy": 50
+  //Energy
+  "FoodEnergy": 50,
+  "InitialBotEnergy": 100,
+  "ReproductionBotEnergy": 300
 
 }

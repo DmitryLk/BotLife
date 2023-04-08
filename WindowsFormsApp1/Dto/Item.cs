@@ -9,11 +9,10 @@ using WindowsFormsApp1.Enums;
 
 namespace WindowsFormsApp1.Dto
 {
-    public class ChangedItem
+    public class ChangedCell
 	{
         public int X;
 		public int Y;
-		public CellContent CellContent;
-		public bool Added;
+		public RefContent RefContent;
 	}
 }

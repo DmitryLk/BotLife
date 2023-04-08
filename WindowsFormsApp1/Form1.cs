@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
 			InitializeComponent();
 
 			var test = new Tester();
-			var painter = new Painter(pictureBox1, label1, textBox1, test);
+			var painter = new Presenter(pictureBox1, label1, textBox1, test);
 			main = new Game(painter, test);
 		}
 

@@ -48,7 +48,7 @@ namespace WindowsFormsApp1.GameLogic
 				p.X = _rnd.Next(0, _data.WorldWidth);
 				p.Y = _rnd.Next(0, _data.WorldHeight);
 			}
-			while (CellAllreadyOccupied(p.X, p.Y) && ++i < 100);
+			while (CellIsBusy(p.X, p.Y) && ++i < 100);
 
 			return p;
 		}
@@ -69,7 +69,7 @@ namespace WindowsFormsApp1.GameLogic
             return (0, 0);
         }
 
-		private bool CellAllreadyOccupied(int x, int y)
+		private bool CellIsBusy(int x, int y)
 		{
 			return _data.World[x, y] != 0;
 		}

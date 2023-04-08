@@ -18,7 +18,7 @@ using TextBox = System.Windows.Forms.TextBox;
 
 namespace WindowsFormsApp1
 {
-	public class Painter : IDisposable
+	public class Presenter : IDisposable
 	{
 		private PictureBox _pb;
 		private Bitmap _btmp;
@@ -38,14 +38,14 @@ namespace WindowsFormsApp1
 
 		public Tester _test;
 
-		public Painter(PictureBox pb, Label label, TextBox textBox, Tester test)
+		public Presenter(PictureBox pb, Label label, TextBox textBox, Tester test)
 		{
 			_pb = pb;
 			_label = label;
 			_textBox = textBox;
 
 			_br = new SolidBrush(Color.Red);
-			_fon = Color.Gray;
+			_fon = Color.FromKnownColor(KnownColor.ActiveCaption);
 			_cnt = 0;
 			_dt = DateTime.Now;
 
@@ -80,7 +80,7 @@ namespace WindowsFormsApp1
 			//_pb.Invalidate();
 		}
 
-		public void DrawBotOnFrame(Bot bot)
+		public void DrawCellOnFrame(int x, int y, Color? color = null)
 		{
 			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
 			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
@@ -91,30 +91,18 @@ namespace WindowsFormsApp1
 			//Color.FromArgb(255,128,128,128)
 			//Color.FromKnownColor(KnownColor.ActiveCaption)
 
-			if (bot.P.X != bot.Old.X || bot.P.Y != bot.Old.Y)
-			{
-				_iw.FillSquare(bot.P.X * _cellWidth, bot.P.Y * _cellHeight, _cellWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
-			}
+			//if (bot.P.X != bot.Old.X || bot.P.Y != bot.Old.Y)
+			//{
+			//	_iw.FillSquare(bot.P.X * _cellWidth, bot.P.Y * _cellHeight, _cellWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
+			//}
 
-			_iw.FillSquare(bot.P.X * _cellWidth, bot.P.Y * _cellHeight, _cellWidth, Color.Red);
+			_iw.FillSquare(x * _cellWidth, y * _cellHeight, _cellWidth, color ?? _fon);
 
 
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight + 1] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight + 1] = Color.Red;
-		}
-
-		public void DrawItemOnFrame(ChangedItem item)
-		{
-			if (item.Added)
-			{
-				_iw.FillSquare(item.X * _cellWidth, item.Y * _cellHeight, _cellWidth, Color.Blue);
-			}
-			else 
-			{
-				_iw.FillSquare(item.X * _cellWidth, item.Y * _cellHeight, _cellWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
-			}
 		}
 
 		public void PaintFrame()

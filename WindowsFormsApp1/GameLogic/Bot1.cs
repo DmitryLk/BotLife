@@ -53,15 +53,15 @@ namespace WindowsFormsApp1.GameLogic
 					// ПОВОРОТ
 					case 23: (shift, stepComplete) = RotateInRelativeDirection(); break;  //поворот относительно
 					case 24: (shift, stepComplete) = RotateInAbsoluteDirection(); break;  //поворот абсолютно
-																						  // ФОТОСИНТЕЗ
+					// ФОТОСИНТЕЗ
 					case 25: (shift, stepComplete) = Photosynthesis(); break;  //фотосинтез
-																			   // ДВИЖЕНИЕ
+					// ДВИЖЕНИЕ
 					case 26: (shift, stepComplete) = StepInRelativeDirection(); break;  //шаг в относительном напралении
 					case 27: (shift, stepComplete) = StepInAbsoluteDirection(); break;  //шаг в абсолютном направлении
-																						// СЪЕСТЬ
+					// СЪЕСТЬ
 					case 28: (shift, stepComplete) = EatInRelativeDirection(); break;  //съесть в относительном напралении
 					case 29: (shift, stepComplete) = EatInAbsoluteDirection(); break;  //съесть  в абсолютном направлении
-																					   // ПОСМОТРЕТЬ
+					// ПОСМОТРЕТЬ
 					case 30: (shift, stepComplete) = LookAtRelativeDirection(); break;  //посмотреть  в относительном напралении
 					case 31: (shift, stepComplete) = LookAtAbsoluteDirection(); break;  //посмотреть  в абсолютном напралении
 					default: shift = cmdCode; stepComplete = false; break;
@@ -77,6 +77,19 @@ namespace WindowsFormsApp1.GameLogic
 			_energy--;
 
 			// todo обработка деления и смерти
+			//Die
+			if (_energy < 0)
+			{
+			}
+
+			//Reproduction
+			if (_energy >= _data.ReproductionBotEnergy)
+			{
+			}
+
+
+
+
 
 			// 0-7		движение
 			// 8-15		схватить еду или нейтрализовать яд
@@ -114,6 +127,14 @@ namespace WindowsFormsApp1.GameLogic
 			//................   генная атака  ...................................			if ($command == 49)
 		}
 
+		private void Death()
+		{
+
+			_data.ChangeCell(P.X, P.Y, RefContent.Empty); // при следующей отрисовке бот стерется с экрана
+			// надо его убрать из массива ботов
+			_data.Bots
+
+		}
 		private (int shift, bool stepComplete) EatInRelativeDirection()
 		{
 			// Алгоритм:
@@ -131,7 +152,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (refContent == RefContent.Bot ||
 				refContent == RefContent.Relative)
 			{
-				EatBot(nX, nY);
+				EatBot(nX, nY, cont);
 			}
 
 			if (refContent == RefContent.Organic ||
@@ -147,18 +168,21 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			_energy += _data.FoodEnergy;
 
-			_data.World[P.X, P.Y] = (uint)CellContent.Empty;
-			_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = nX, Y = nY, Added = false, CellContent = CellContent.Grass };
-			_data.NumberOfChangedItems++;
+			_data.World[nX, nY] = (uint)CellContent.Empty;
+
+			_data.ChangeCell(nX, nY, RefContent.Empty);
 		}
 
-		private void EatBot(int nX, int nY)
-		{
-			_energy += _data.FoodEnergy;
 
-			_data.World[P.X, P.Y] = (uint)CellContent.Empty;
-			_data.ChangedItems[_data.NumberOfChangedItems] = new ChangedItem { X = nX, Y = nY, Added = false, CellContent = CellContent.Grass };
-			_data.NumberOfChangedItems++;
+
+		private void EatBot(int nX, int nY, uint cont)
+		{
+			var eatedBot = _data.Bots[cont];
+			_energy += eatedBot;
+
+			_data.World[nX, nY] = (uint)CellContent.Empty;
+
+			_data.ChangeCell(nX, nY, RefContent.Empty);
 		}
 
 
@@ -277,12 +301,21 @@ namespace WindowsFormsApp1.GameLogic
 
 
 		//////////////////////////////////////////////////////////////////
+		//			##     ##  #######  ##     ## ######## 
+		//			###   ### ##     ## ##     ## ##       
+		//			#### #### ##     ## ##     ## ##       
+		//			## ### ## ##     ## ##     ## ######   
+		//			##     ## ##     ##  ##   ##  ##       
+		//			##     ## ##     ##   ## ##   ##       
+		//			##     ##  #######     ###    ######## 
+		//////////////////////////////////////////////////////////////////
+
 
 		// Перемещение бота
 		private void Move(int nX, int nY)
 		{
 			_data.World[P.X, P.Y] = (uint)CellContent.Empty;
-			_data.World[nX, nY] = _num;
+			_data.World[nX, nY] = _ind;
 
 			Old.X = P.X;
 			Old.Y = P.Y;
@@ -290,8 +323,8 @@ namespace WindowsFormsApp1.GameLogic
 			P.Y = nY;
 			// todo добавить обработку если наступил на яд
 
-			_data.ChangedBots[_data.NumberOfChangedBots] = _num;
-			_data.NumberOfChangedBots++;
+			_data.ChangeCell(Old.X, Old.Y, RefContent.Empty);
+			_data.ChangeCell(P.X, P.Y, RefContent.Bot);
 		}
 
 
@@ -365,7 +398,7 @@ namespace WindowsFormsApp1.GameLogic
 			return false;
 		}
 
-
+		// Метод вернет всегда координаты отличные от текущих
 		private (int nX, int nY) GetCoordinatesByDirection(Direction dir)
 		{
 			var (dX, dY) = dir switch

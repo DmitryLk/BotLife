@@ -19,13 +19,13 @@ namespace WindowsFormsApp1
 {
 	public class Game
 	{
-		public Painter _painter;
+		public Presenter _painter;
 		public World _world;
 		public WorldData _data;
 		public Tester _test;
 		public System.Windows.Forms.Timer timer;
 
-		public Game(Painter painter, Tester test)
+		public Game(Presenter painter, Tester test)
 		{
 			var options = LoadConfig();
 
@@ -75,21 +75,23 @@ namespace WindowsFormsApp1
 			_painter.StartNewFrame();
 			_test.EndBeginInterval(1, 2);
 
-			for (var i = 0; i < _data.NumberOfChangedBots; i++)
+			// Рисование изменений на экране
+			for (var i = 0; i < _data.NumberOfChangedCells; i++)
 			{
-				var bot = _data.Bots[_data.ChangedBots[i]];
+				var obj = _data.ChangedCells[i];
 
-				_painter.DrawBotOnFrame(bot);
+				_painter.DrawCellOnFrame(obj.X, obj.Y, obj.RefContent switch 
+				{ 
+					RefContent.Empty => null,
+					RefContent.Grass => Color.Blue,
+					RefContent.Bot => Color.Red,
+					RefContent.Relative => Color.Red,
+					_ => Color.Green
+				});
+				_data.ChWorld[obj.X, obj.Y] = 0;
 			}
-			_data.NumberOfChangedBots = 0;
-
-			for (var i = 0; i < _data.NumberOfChangedItems; i++)
-			{
-				var item = _data.ChangedItems[i];
-
-				_painter.DrawItemOnFrame(item);
-			}
-			_data.NumberOfChangedItems = 0;
+			_data.NumberOfChangedCells = 0;
+			//======================================
 
 			_test.EndBeginInterval(2, 3);
 

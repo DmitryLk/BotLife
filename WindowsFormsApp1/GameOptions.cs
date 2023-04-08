@@ -27,12 +27,13 @@ namespace WindowsFormsApp1
 		public int SeedMineralsNumber;
 		public int SeedWallsNumber;
 		public int SeedPoisonNumber;
-		public int SeedBotEnergy;
 
 		public int CodeLength;
 		public int MaxCode;
 		public int MaxUncompleteJump;
 
 		public int FoodEnergy;
+		public int InitialBotEnergy;
+		public int ReproductionBotEnergy;
 	}
 }

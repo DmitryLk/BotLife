@@ -27,21 +27,25 @@ namespace WindowsFormsApp1.GameLogic
 		public int SeedMineralsNumber;
 		public int SeedWallsNumber;
 		public int SeedPoisonNumber;
-		public int SeedBotEnergy;
 
 		public int CodeLength;
 		public int MaxCode;
 		public int MaxUncompleteJump;
 
 		public int FoodEnergy;
+		public int InitialBotEnergy;
+		public int ReproductionBotEnergy;
 
 
 		public uint[,] World; // чтобы можно было узнать по координатам что там находится
 		public Bot[] Bots;
-		public uint[] ChangedBots;
-		public uint NumberOfChangedBots;
-		public ChangedItem[] ChangedItems;
-		public uint NumberOfChangedItems;
+
+
+		//Для поддержки эффективной перерисовки
+		public uint[,] ChWorld;
+		public ChangedCell[] ChangedCells;
+		public uint NumberOfChangedCells;
+
 
 		//public Point[] Grass;
 		//public Point[] Organic;
@@ -82,15 +86,50 @@ namespace WindowsFormsApp1.GameLogic
 			SeedMineralsNumber = options.SeedMineralsNumber;
 			SeedWallsNumber = options.SeedWallsNumber;
 			SeedPoisonNumber = options.SeedPoisonNumber;
-			SeedBotEnergy = options.SeedBotEnergy;
 
 			CodeLength = options.CodeLength;
 			MaxCode = options.MaxCode;
 			MaxUncompleteJump = options.MaxUncompleteJump;
 
+			InitialBotEnergy = options.InitialBotEnergy;
 			FoodEnergy = options.FoodEnergy;
+			ReproductionBotEnergy = options.ReproductionBotEnergy;
 
+			// Создать все игровые массивы
 			World = new uint[WorldWidth, WorldHeight];
+			Bots = new Bot[MaxBotsNumber];
+			ChWorld = new uint[WorldWidth, WorldHeight];
+			ChangedCells = new ChangedCell[MaxBotsNumber];
+		}
+
+
+		// Запись в буфер измененных ячеек для последующей отрисовки
+		public void ChangeCell(int x, int y, RefContent refContent)
+		{
+			//todo не перерисовывать если на первоначальном экране ячейка такого же цвета
+
+			if (ChWorld[x, y] != 0)
+			{
+				// В этой клетке уже были изменения после последнего рисования
+				ChangedCells[ChWorld[x, y] - 1] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					RefContent = refContent
+				};
+			}
+			else
+			{
+				// В этой клетке еще не было изменений после последнего рисования
+				ChangedCells[NumberOfChangedCells] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					RefContent = RefContent.Empty
+				};
+				NumberOfChangedCells++;
+				ChWorld[x, y] = NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
+			}
 		}
 	}
 }

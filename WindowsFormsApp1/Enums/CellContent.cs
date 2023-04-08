@@ -15,6 +15,6 @@ namespace WindowsFormsApp1.Enums
         Organic = 65501,
         Mineral = 65502,
         Wall = 65503,
-        Poison = 65504,
+        Poison = 65504
     }
 }
