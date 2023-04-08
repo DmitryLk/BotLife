@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,7 @@ using System.Xml;
 using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
+using Point = WindowsFormsApp1.Dto.Point;
 
 namespace WindowsFormsApp1.GameLogic
 {
@@ -23,9 +25,9 @@ namespace WindowsFormsApp1.GameLogic
 		public Guid GrandParentCodeHash;
 
 
-		public Bot1(WorldData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy,
-			byte[] code, int pointer, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
-			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
+		public Bot1(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy,
+			byte[] code, int pointer, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar, Color color)
+			: base(data, func, p, dir, botNumber, botIndex, en, color, vx, vy)
 		{
 			_code = code;
 			_pointer = pointer;
@@ -78,7 +80,7 @@ namespace WindowsFormsApp1.GameLogic
 			while (!stepComplete && cntJump < _data.MaxUncompleteJump);
 
 			_age++;
-			Energy--;
+			//Energy--;
 
 			// todo обработка деления и смерти
 			//Die
@@ -138,7 +140,7 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 
 			_data.World[P.X, P.Y] = (uint)CellContent.Free;
-			_func.ChangeCell(P.X, P.Y, RefContent.Free); // при следующей отрисовке бот стерется с экрана
+			_func.ChangeCell(P.X, P.Y, null); // при следующей отрисовке бот стерется с экрана
 
 			//idx = _data.World[P.X, P.Y];
 			//if (idx != 0)
@@ -178,6 +180,8 @@ namespace WindowsFormsApp1.GameLogic
 			_data.Bots[_data.CurrentNumberOfBots] = null;
 			_data.CurrentNumberOfBots--;
 
+			_data.DeathCnt++;
+
 			//for (var j = 0; j < _data.WorldHeight; j++)
 			//{
 			//	for (var i = 0; i < _data.WorldWidth; i++)
@@ -199,9 +203,10 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				_data.CurrentNumberOfBots++;
 				var botIndex = _data.CurrentNumberOfBots;
-				var (code, codeHash, codeHashPar, codeHashGrPar) = GetCodeCopy();
-				_func.CreateNewBot(p, botIndex, code, codeHash, codeHashPar, codeHashGrPar);
+				var (code, codeHash, codeHashPar, codeHashGrPar, color) = GetCodeCopy();
+				_func.CreateNewBot(p, botIndex, code, codeHash, codeHashPar, codeHashGrPar, color);
 				Energy -= _data.InitialBotEnergy;
+				_data.ReproductionCnt++;
 			}
 
 			// Если рядом нет свободной ячейки то варианты:
@@ -216,12 +221,13 @@ namespace WindowsFormsApp1.GameLogic
 			// todo сделать чтобы если нет места для появления бота на каждом шаге не была очередная попытка воспроизводства
 		}
 
-		private (byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar) GetCodeCopy()
+		private (byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar, Color color) GetCodeCopy()
 		{
 			// Копирование кода бота
 			Guid codeHash;
 			Guid codeHashPar;
 			Guid codeHashGrPar;
+			Color color;
 			var code = new byte[_data.CodeLength];
 			for (var i = 0; i < _data.CodeLength; i++)
 			{
@@ -234,15 +240,18 @@ namespace WindowsFormsApp1.GameLogic
 				codeHash = Guid.NewGuid();
 				codeHashPar = BotCodeHash;
 				codeHashGrPar = ParentCodeHash;
+				color = _func.GetRandomColor();
+				_data.MutationCnt++;
 			}
 			else
 			{
 				codeHash = BotCodeHash;
 				codeHashPar = ParentCodeHash;
 				codeHashGrPar = GrandParentCodeHash;
+				color = _color;
 			}
 
-			return (code, codeHash, codeHashPar, codeHashGrPar);
+			return (code, codeHash, codeHashPar, codeHashGrPar, color);
 		}
 
 		private (int shift, bool stepComplete) EatInRelativeDirection()
@@ -308,7 +317,7 @@ namespace WindowsFormsApp1.GameLogic
 			Energy += _data.FoodEnergy;
 
 			_data.World[nX, nY] = (uint)CellContent.Free;
-			_func.ChangeCell(nX, nY, RefContent.Free);
+			_func.ChangeCell(nX, nY, null);
 		}
 
 
@@ -463,10 +472,10 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			_data.World[Old.X, Old.Y] = (uint)CellContent.Free;
-			_func.ChangeCell(Old.X, Old.Y, RefContent.Free);
+			_func.ChangeCell(Old.X, Old.Y, null);
 
 			_data.World[nX, nY] = Index;
-			_func.ChangeCell(nX, nY, RefContent.Bot);
+			_func.ChangeCell(nX, nY, _color);
 		}
 
 

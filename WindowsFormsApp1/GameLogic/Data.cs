@@ -2,15 +2,23 @@
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
+using System.Text;
 using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace WindowsFormsApp1.GameLogic
 {
-	public class WorldData
+	public class GameData
 	{
 		//INITIAL SETTINGS
+		public int CellWidth;
+		public int CellHeight;
+		public int ReportFrequencyDrawed;
+		public int ReportFrequencyNoDrawed;
+		public int ReportFrequencyCurrent;
+
 		public uint StartNumberOfBots;
 		public uint MaxBotsNumber;
 		public int WorldWidth;
@@ -39,24 +47,35 @@ namespace WindowsFormsApp1.GameLogic
 		public int ReproductionBotEnergy;
 		public int BiteEnergy;
 
+
+		//VARIABLE CURRENT PARAMETERS
 		public uint[,] World; // чтобы можно было узнать по координатам что там находится
 		public Bot[] Bots;
 
+		public bool Started;
+		public bool PausedMode;
+		public bool Drawed;
 
-		//VARIABLE CURRENT PARAMETERS
 		//Для поддержки эффективной перерисовки
 		public uint[,] ChWorld;
 		public ChangedCell[] ChangedCells;
 		public uint NumberOfChangedCells;
 
-
+		public bool Mutation;
 		public uint CurrentNumberOfBots;
 		public uint CurrentStep;
 		public uint MaxBotNumber;
+		public uint DeathCnt;
+		public uint ReproductionCnt;
+		public uint MutationCnt;
 
-
-		public WorldData(GameOptions options)
+		public GameData(GameOptions options)
 		{
+			CellWidth = options.CellWidth;
+			CellHeight = options.CellHeight;
+			ReportFrequencyDrawed = options.ReportFrequencyDrawed;
+			ReportFrequencyNoDrawed = options.ReportFrequencyNoDrawed;
+
 			StartNumberOfBots = options.StartBotsNumber;
 			MaxBotsNumber = options.MaxBotsNumber;
 			WorldWidth = options.WorldWidth;
@@ -84,6 +103,20 @@ namespace WindowsFormsApp1.GameLogic
 			FoodEnergy = options.FoodEnergy;
 			ReproductionBotEnergy = options.ReproductionBotEnergy;
 			BiteEnergy = options.BiteEnergy;
+		}
+
+		public string GetText()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"Step: {CurrentStep}");
+			sb.AppendLine($"CurrentNumberOfBots: {CurrentNumberOfBots}");
+			sb.AppendLine($"NumberOfChangedCells: {NumberOfChangedCells}");
+
+			sb.AppendLine($"deathCnt: {DeathCnt}");
+			sb.AppendLine($"reproductionCnt: {ReproductionCnt}");
+			sb.AppendLine($"mutationCnt: {MutationCnt}");
+			return sb.ToString();
 		}
 	}
 }

@@ -46,19 +46,21 @@ namespace WindowsFormsApp1
 
 		public void BeginInterval(int i)
 		{
-			_intervals[i].LastMeasurement = Stopwatch.GetTimestamp();
+			_intervals[i].LastMeasurementTimestamp = Stopwatch.GetTimestamp();
 		}
 
 		public void EndInterval(int i)
 		{
-			_intervals[i].TotalMeasurement += Stopwatch.GetTimestamp() - _intervals[i].LastMeasurement;
+			_intervals[i].LastMeasurement = Stopwatch.GetTimestamp() - _intervals[i].LastMeasurementTimestamp;
+			_intervals[i].TotalMeasurement += _intervals[i].LastMeasurement;
 			_intervals[i].NumberOfMeasurement++;
 		}
 
 		public void EndBeginInterval(int end, int begin)
 		{
-			_intervals[begin].LastMeasurement = Stopwatch.GetTimestamp();
-			_intervals[end].TotalMeasurement += _intervals[begin].LastMeasurement - _intervals[end].LastMeasurement;
+			_intervals[begin].LastMeasurementTimestamp = Stopwatch.GetTimestamp();
+			_intervals[end].LastMeasurement = _intervals[begin].LastMeasurementTimestamp - _intervals[end].LastMeasurementTimestamp;
+			_intervals[end].TotalMeasurement += _intervals[end].LastMeasurement;
 			_intervals[end].NumberOfMeasurement++;
 		}
 
@@ -71,7 +73,8 @@ namespace WindowsFormsApp1
 			{
 				if (i != null && i.Active && i.NumberOfMeasurement != 0)
 				{
-					i.ElapsedMs = (int)(1000000L * i.TotalMeasurement / i.NumberOfMeasurement / _frequency);
+					//i.ElapsedMs = (int)(1000000L * i.TotalMeasurement / i.NumberOfMeasurement / _frequency);
+					i.ElapsedMs = (int)(1000000L * i.LastMeasurement / _frequency);
 					sumElapsedMs += i.ElapsedMs;
 				}
 			}
@@ -94,6 +97,7 @@ namespace WindowsFormsApp1
 		public int Num;
 		public string Name;
 		public long LastMeasurement;
+		public long LastMeasurementTimestamp;
 		public long TotalMeasurement;
 		public int NumberOfMeasurement;
 		public int ElapsedMs;

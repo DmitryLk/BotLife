@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
@@ -11,9 +12,9 @@ namespace WindowsFormsApp1.GameLogic
 	public class Seeder
 	{
 		private Func _func;
-		private WorldData _data;
+		private GameData _data;
 
-		public Seeder(WorldData data, Func func)
+		public Seeder(GameData data, Func func)
 		{
 			_func = func;
 			_data = data;
@@ -34,8 +35,9 @@ namespace WindowsFormsApp1.GameLogic
 					code[i] = _func.GetRandomBotCode();
 				}
 				var codeHash = Guid.NewGuid();
+				var color = _func.GetRandomColor();
 
-				_func.CreateNewBot(p, botIndex, code, codeHash, Guid.Empty, Guid.Empty);
+				_func.CreateNewBot(p, botIndex, code, codeHash, Guid.Empty, Guid.Empty, color);
 			}
 			_data.CurrentNumberOfBots = _data.StartNumberOfBots;
 			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
@@ -51,7 +53,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _func.GetRandomFreeCell();
 
 					_data.World[p.X, p.Y] = (uint)CellContent.Grass;
-					_func.ChangeCell(p.X, p.Y, RefContent.Grass);
+					_func.ChangeCell(p.X, p.Y, Color.Green);
 				}
 			}
 
@@ -63,7 +65,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _func.GetRandomFreeCell();
 
 					_data.World[p.X, p.Y] = (uint)CellContent.Organic;
-					_func.ChangeCell(p.X, p.Y, RefContent.Organic);
+					_func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 
@@ -75,7 +77,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _func.GetRandomFreeCell();
 
 					_data.World[p.X, p.Y] = (uint)CellContent.Mineral;
-					_func.ChangeCell(p.X, p.Y, RefContent.Mineral);
+					_func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 
@@ -87,7 +89,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _func.GetRandomFreeCell();
 
 					_data.World[p.X, p.Y] = (uint)CellContent.Wall;
-					_func.ChangeCell(p.X, p.Y, RefContent.Wall);
+					_func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 
@@ -99,7 +101,7 @@ namespace WindowsFormsApp1.GameLogic
 					var p = _func.GetRandomFreeCell();
 
 					_data.World[p.X, p.Y] = (uint)CellContent.Poison;
-					_func.ChangeCell(p.X, p.Y, RefContent.Poison);
+					_func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 		}

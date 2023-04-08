@@ -8,7 +8,8 @@ namespace WindowsFormsApp1
 		public int MaxPictureBoxHeight;
 		public int CellWidth;
 		public int CellHeight;
-		public int ReportFrequency;
+		public int ReportFrequencyDrawed;
+		public int ReportFrequencyNoDrawed;
 
 		public uint StartBotsNumber;
 		public uint MaxBotsNumber;

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
+using Point = WindowsFormsApp1.Dto.Point;
 
 namespace WindowsFormsApp1.GameLogic
 {
@@ -15,8 +17,8 @@ namespace WindowsFormsApp1.GameLogic
 		private byte[] _code;
 		private int _pointer;
 
-		public Bot2(WorldData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
-			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
+		public Bot2(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy, Color color)
+			: base(data, func, p, dir, botNumber, botIndex, en, color, vx, vy)
 
 		{
 		}

@@ -2,15 +2,16 @@
   // Настройки экрана
   "MaxPictureBoxWidth": 1000,
   "MaxPictureBoxHeight": 1000,
-  "CellWidth": 5,
-  "CellHeight": 5,
-  "ReportFrequency": 1,
+  "CellWidth": 2,
+  "CellHeight": 2,
+  "ReportFrequencyDrawed": 1,
+  "ReportFrequencyNoDrawed": 100,
 
   // Настройки мира
   "StartBotsNumber": 1000,
-  "MaxBotsNumber": 200000,
-  "WorldWidth": 200,
-  "WorldHeight": 200,
+  "MaxBotsNumber": 250000,
+  "WorldWidth": 500,
+  "WorldHeight": 500,
   "UpDownEdge": false,
   "LeftRightEdge": false,
 
@@ -31,7 +32,7 @@
   "CodeLength": 64,
   "MaxCode": 63,
   "MaxUncompleteJump": 15,
-  "MutationProbabilityPercent": 25,
+  "MutationProbabilityPercent": 1,
 
 
   //Energy

@@ -24,26 +24,26 @@ namespace WindowsFormsApp1
 		private Bitmap _btmp;
 		private Graphics _gr;
 		private ImageWrapper _iw;
-		private WorldData _data;
+		private GameData _data;
 
 		private SolidBrush _br;
 		private Color _fon;
 		private Label[] _labels;
-		private TextBox _textBox;
+		private TextBox[] _textBoxes;
 
 		private int _cellWidth;
 		private int _cellHeight;
 		private int _cnt;
 		private DateTime _dt;
-		private int _reportFrequency;
 
 		public Tester _test;
 
-		public Presenter(PictureBox pb, Label[] labels, TextBox textBox, Tester test)
+		public Presenter(GameData data, PictureBox pb, Label[] labels, TextBox[] textBoxes, Tester test)
 		{
+			_data = data;
 			_pb = pb;
 			_labels = labels;
-			_textBox = textBox;
+			_textBoxes = textBoxes;
 
 			_br = new SolidBrush(Color.Red);
 			_fon = Color.FromKnownColor(KnownColor.ActiveCaption);
@@ -51,16 +51,15 @@ namespace WindowsFormsApp1
 			_dt = DateTime.Now;
 
 			_test = test;
-		}
 
-		public void Configure(WorldData data, int bitmapWidth, int bitmapHeight, int cellWidth, int cellHeight, int reportFrequency)
-		{
-			_data = data;
+			var bitmapWidth = _data.WorldWidth * _data.CellWidth;
+			var bitmapHeight = _data.WorldHeight * _data.CellHeight;
+
+
 			_pb.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
 
-			_cellHeight = cellHeight;
-			_cellWidth = cellWidth;
-			_reportFrequency = reportFrequency;
+			_cellHeight = _data.CellHeight;
+			_cellWidth = _data.CellWidth;
 
 			//_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
 			//_gr = Graphics.FromImage(_btmp);
@@ -71,6 +70,7 @@ namespace WindowsFormsApp1
 			//_gr = Graphics.FromImage(_pb.Image);
 
 			_iw = new ImageWrapper(_btmp, false);
+
 		}
 
 		public void StartNewFrame()
@@ -132,26 +132,29 @@ namespace WindowsFormsApp1
 			//}
 			//else
 			//	_pb.Refresh();
+		}
 
-
-
-
+		public void PrintInfo()
+		{
 			_cnt++;
-			if (_cnt % _reportFrequency == 0)
+			if (_cnt % _data.ReportFrequencyCurrent == 0)
 			{
 				var tms = (DateTime.Now - _dt).TotalSeconds;
 				if (tms == 0) throw new Exception("tms == 0");
-				var fps = _reportFrequency / tms;
+				var fps = _data.ReportFrequencyCurrent / tms;
 				_dt = DateTime.Now;
 
 				_labels[0].Text = "fps: " + fps.ToString("#");
 				_labels[0].Update();
 
-				_labels[1].Text = "step: " + _data.CurrentStep;
-				_labels[1].Update();
+				//_labels[1].Text = "step: " + _data.CurrentStep;
+				//_labels[1].Update();
 
-				_textBox.Text = _test.GetText();
-				_textBox.Update();
+				_textBoxes[0].Text = _test.GetText();
+				_textBoxes[0].Update();
+
+				_textBoxes[1].Text = _data.GetText();
+				_textBoxes[1].Update();
 
 				//if (_label.InvokeRequired)
 				//{

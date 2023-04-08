@@ -21,21 +21,15 @@ namespace WindowsFormsApp1
 	{
 		public Presenter _presenter;
 		public World _world;
-		public WorldData _data;
+		public GameData _data;
 		public Tester _test;
 		public System.Windows.Forms.Timer timer;
 
-		public bool Started;
-		public bool PausedMode;
-		public Game(Presenter presenter, Tester test)
+		public Game(Presenter presenter, Tester test, GameData data)
 		{
-			var options = LoadConfig();
-			_data = new WorldData(options);
+			_data = data;
 
-			var bitmapWidth = options.WorldWidth * options.CellWidth;
-			var bitmapHeight = options.WorldHeight * options.CellHeight;
 			_presenter = presenter;
-			_presenter.Configure(_data, bitmapWidth, bitmapHeight, options.CellWidth, options.CellHeight, options.ReportFrequency);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
@@ -49,22 +43,19 @@ namespace WindowsFormsApp1
 			_test.InitInterval(1, "RedrawWorld();");
 			_test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
 			_test.InitInterval(3, "PaintFrame();");
+			_test.InitInterval(4, "PrintInfo();");
 
-			Started = false;
-			PausedMode = true;
+			_data.Started = false;
+			_data.PausedMode = true;
+			_data.Drawed = true;
+			_data.ReportFrequencyCurrent = _data.ReportFrequencyDrawed;
 		}
 
 		public async Task Start()
 		{
-			Started = true;
+			_data.Started = true;
 			//timer.Enabled = true;
 			_world.Initialize();
-			_test.BeginInterval(0);
-
-			while (!PausedMode)
-			{
-				await Step();
-			}
 		}
 
 		public async Task Work()
@@ -73,17 +64,34 @@ namespace WindowsFormsApp1
 			{
 				await Step();
 			}
-			while (!PausedMode);
+			while (!_data.PausedMode);
 		}
 
 		public async Task Step()
 		{
-			 await Task.Run(() => _world.Step());
+			_test.BeginInterval(0);
+			await Task.Run(() => _world.Step());
+			_test.EndBeginInterval(0, 1);
 			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
 			//_world.Step();
-			_test.EndBeginInterval(0, 1);
-			RedrawWorld();
+			if (_data.Drawed)
+			{
+				RedrawWorld();
+			}
+			else 
+			{
+				_test.EndBeginInterval(1, 2);
+				_test.EndBeginInterval(2, 3);
+				_test.EndBeginInterval(3, 4);
+			}
+			_presenter.PrintInfo();
+			_test.EndBeginInterval(4, 0);
 			//await Task.Delay(5000);
+		}
+
+		public void MutationToggle()
+		{
+			_data.Mutation = !_data.Mutation;
 		}
 
 		private void RedrawWorld()
@@ -96,14 +104,7 @@ namespace WindowsFormsApp1
 			{
 				var obj = _data.ChangedCells[i];
 
-				_presenter.DrawCellOnFrame(obj.X, obj.Y, obj.RefContent switch 
-				{ 
-					RefContent.Free => null,
-					RefContent.Grass => Color.Green,
-					RefContent.Bot => Color.Red,
-					RefContent.Relative => Color.Red,
-					_ => Color.Black
-				});
+				_presenter.DrawCellOnFrame(obj.X, obj.Y, obj.Color);
 				_data.ChWorld[obj.X, obj.Y] = 0;
 			}
 			_data.NumberOfChangedCells = 0;
@@ -113,19 +114,9 @@ namespace WindowsFormsApp1
 
 			_presenter.PaintFrame();
 			//await Task.Delay(1);
-			_test.EndBeginInterval(3, 0);
+			_test.EndBeginInterval(3, 4);
 		}
 
-		private GameOptions LoadConfig()
-		{
-			using (StreamReader r = new StreamReader("config.json"))
-			{
-				string json = r.ReadToEnd();
-				//dynamic array = JsonConvert.DeserializeObject(json);
-				GameOptions config = JsonConvert.DeserializeObject<GameOptions>(json);
-				return config;
-			}
-		}
 
 		//private void timer_Tick(object sender, EventArgs e)
 		//{

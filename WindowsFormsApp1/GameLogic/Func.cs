@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -14,6 +15,7 @@ using WindowsFormsApp1.Enums;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = System.Windows.Forms.Label;
+using Point = WindowsFormsApp1.Dto.Point;
 using TextBox = System.Windows.Forms.TextBox;
 
 namespace WindowsFormsApp1.GameLogic
@@ -21,16 +23,16 @@ namespace WindowsFormsApp1.GameLogic
 	public class Func
 	{
 		private Random _rnd = new Random(Guid.NewGuid().GetHashCode());
-		private WorldData _data;
+		private GameData _data;
 
-		public Func(WorldData data)
+		public Func(GameData data)
 		{
 			_rnd = new Random(Guid.NewGuid().GetHashCode());
 			_data = data;
 		}
 
 
-		public void CreateNewBot(Point p, uint botIndex, byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar)
+		public void CreateNewBot(Point p, uint botIndex, byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar, Color color)
 		{
 			var dir = GetRandomDirection();
 			var en = _data.InitialBotEnergy;
@@ -38,19 +40,19 @@ namespace WindowsFormsApp1.GameLogic
 			var pointer = 0;
 			var botNumber = ++_data.MaxBotNumber;
 
-			var bot = new Bot1(_data, this, p, dir, botNumber, botIndex, en, vx, vy, code, pointer, codeHash, codeHashPar, codeHashGrPar);
+			var bot = new Bot1(_data, this, p, dir, botNumber, botIndex, en, vx, vy, code, pointer, codeHash, codeHashPar, codeHashGrPar, color);
 
 			_data.Bots[botIndex] = bot;
 
 			_data.World[p.X, p.Y] = botIndex;
-			ChangeCell(p.X, p.Y, RefContent.Bot);
+			ChangeCell(p.X, p.Y, color);
 		}
 
 		// Запись в буфер измененных ячеек для последующей отрисовки
-		public void ChangeCell(int x, int y, RefContent refContent)
+		public void ChangeCell(int x, int y, Color? color)
 		{
 			//public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
-			//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и тип объекта чтобы по нему определить цвет
+			//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
 			//public uint NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
 
 			//todo не перерисовывать если на первоначальном экране ячейка такого же цвета
@@ -61,7 +63,7 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					X = x,
 					Y = y,
-					RefContent = refContent
+					Color = color
 				};
 				_data.NumberOfChangedCells++;
 				_data.ChWorld[x, y] = _data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
@@ -69,12 +71,13 @@ namespace WindowsFormsApp1.GameLogic
 			else
 			{
 				// В этой клетке уже были изменения после последнего рисования
-				_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
-				{
-					X = x,
-					Y = y,
-					RefContent = refContent
-				};
+				_data.ChangedCells[_data.ChWorld[x, y] - 1].Color = color;
+				//_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
+				//{
+				//	X = x,
+				//	Y = y,
+				//	Color = color
+				//};
 			}
 		}
 
@@ -88,6 +91,12 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			return (byte)_rnd.Next(_data.MaxCode + 1);
 		}
+
+		public Color GetRandomColor()
+		{
+			return  Color.FromArgb(_rnd.Next(256), _rnd.Next(256), _rnd.Next(256));
+		}
+
 		public int GetRandomBotCodeIndex()
 		{
 			return _rnd.Next(_data.CodeLength);
@@ -95,7 +104,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public bool Mutation()
 		{
-			return _rnd.Next(100) < _data.MutationProbabilityPercent;
+			return _data.Mutation && _rnd.Next(100) < _data.MutationProbabilityPercent;
 		}
 
 		public Point GetRandomFreeCell()

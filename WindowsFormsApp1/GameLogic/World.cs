@@ -12,9 +12,9 @@ namespace WindowsFormsApp1.GameLogic
 	{
 		private Func _func;
 		private Seeder _seeder;
-		private static WorldData _data;
+		private static GameData _data;
 
-		public World(WorldData data)
+		public World(GameData data)
 		{
 			_data = data;
 			_func = new Func(_data);
@@ -32,6 +32,12 @@ namespace WindowsFormsApp1.GameLogic
 			_data.NumberOfChangedCells = 0;
 			_data.MaxBotNumber = 0;
 			_data.CurrentStep = 0;
+
+			_data.Mutation = true;
+
+			_data.DeathCnt = 0;
+			_data.ReproductionCnt = 0;
+			_data.MutationCnt = 0;
 
 
 			// Засевание объектов
