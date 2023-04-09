@@ -17,8 +17,8 @@ namespace WindowsFormsApp1.GameLogic
 		private byte[] _code;
 		private int _pointer;
 
-		public Bot2(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy, Color color)
-			: base(data, func, p, dir, botNumber, botIndex, en, color, vx, vy)
+		public Bot2(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
+			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
 
 		{
 		}

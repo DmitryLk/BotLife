@@ -81,20 +81,13 @@ namespace WindowsFormsApp1
 					}
 					else
 					{
-						if (false)//form2.Disposing)
+						if (!form2.Visible)
 						{
-							form2 = new Form2(this);
+							form2.Visible = true;
 						}
 						else
 						{
-							if (!form2.Visible)
-							{
-								form2.Visible = true;
-							}
-							else
-							{
-								form2.Visible = false;
-							}
+							form2.Visible = false;
 						}
 					}
 				}
@@ -110,6 +103,15 @@ namespace WindowsFormsApp1
 				}
 
 				if (e.KeyCode == Keys.Up)
+				{
+				}
+				if (e.KeyCode == Keys.Down)
+				{
+				}
+				if (e.KeyCode == Keys.Left)
+				{
+				}
+				if (e.KeyCode == Keys.Right)
 				{
 				}
 

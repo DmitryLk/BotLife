@@ -40,6 +40,12 @@
   "InitialBotEnergy": 100,
   "ReproductionBotEnergy": 300,
   "BiteEnergy": 100,
-  "DeltaEnergyOnStep":  -1
+  "DeltaEnergyOnStep": 0,
+
+
+  //Lens
+  "LensWidth": 10,
+  "LensHeight": 10
+
 
 }

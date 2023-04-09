@@ -29,15 +29,9 @@ namespace WindowsFormsApp1.GameLogic
 				var p = _func.GetRandomFreeCell();
 
 				// Создание кода бота
-				var code = new byte[_data.CodeLength];
-				for (var i = 0; i < _data.CodeLength; i++)
-				{
-					code[i] = _func.GetRandomBotCode();
-				}
-				var codeHash = Guid.NewGuid();
-				var color = _func.GetRandomColor();
+				var genom = new Genom(_data, _func);
 
-				_func.CreateNewBot(p, botIndex, code, codeHash, Guid.Empty, Guid.Empty, color);
+				_func.CreateNewBot(p, botIndex, genom);
 			}
 			_data.CurrentNumberOfBots = _data.StartNumberOfBots;
 			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2

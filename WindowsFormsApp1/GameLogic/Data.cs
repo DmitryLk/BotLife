@@ -103,9 +103,9 @@ namespace WindowsFormsApp1.GameLogic
 			BiteEnergy = options.BiteEnergy;
 			DeltaEnergyOnStep = options.DeltaEnergyOnStep;
 
-	}
+		}
 
-	public string GetText(double fps)
+		public string GetText(double fps)
 		{
 			var sb = new StringBuilder();
 

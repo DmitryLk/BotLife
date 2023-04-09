@@ -23,11 +23,10 @@ namespace WindowsFormsApp1.GameLogic
 		protected Direction _dir;         // Направление бота
 		protected uint _num;         // Номер бота (остается постоянным)
 		protected int _age;
-		protected Color _color;
 		private int _vx;
 		private int _vy;
 
-		public Bot(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, Color color, int vx, int vy)
+		public Bot(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
 		{
 			_data = data;
 			_func = func;
@@ -35,7 +34,6 @@ namespace WindowsFormsApp1.GameLogic
 			_num = botNumber;
 			Index = botIndex;
 			Energy = en;
-			_color = color;
 			_age = 0;
 
 			_vx = vx;

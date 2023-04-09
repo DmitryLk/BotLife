@@ -31,6 +31,7 @@ namespace WindowsFormsApp1
 		public bool PausedMode;
 		public bool Drawed;
 		public bool Worked;
+		public bool Lens;
 
 		private readonly object _sync = new object();
 		private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
@@ -60,6 +61,7 @@ namespace WindowsFormsApp1
 			Started = false;
 			PausedMode = false;
 			Drawed = true;
+			Lens = false;
 			_data.ReportFrequencyCurrent = _data.ReportFrequencyDrawed;
 		}
 

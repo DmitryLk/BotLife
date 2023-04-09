@@ -18,22 +18,15 @@ namespace WindowsFormsApp1.GameLogic
 	// Бот с океана foo52
 	public class Bot1 : Bot
 	{
-		private byte[] _code;
+		public Genom Genom;
 		private int _pointer;
-		public Guid BotCodeHash;
-		public Guid ParentCodeHash;
-		public Guid GrandParentCodeHash;
 
-
-		public Bot1(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy,
-			byte[] code, int pointer, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar, Color color)
-			: base(data, func, p, dir, botNumber, botIndex, en, color, vx, vy)
+		// Может вызываться только из func.CreateNewBot()
+		public Bot1(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, Genom genom, int pointer, int vx, int vy)
+			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
 		{
-			_code = code;
 			_pointer = pointer;
-			BotCodeHash = codeHash;
-			ParentCodeHash = codeHashPar;
-			GrandParentCodeHash = codeHashGrPar;
+			Genom = genom;
 		}
 
 		public override void Step()
@@ -51,7 +44,7 @@ namespace WindowsFormsApp1.GameLogic
 			do
 			{
 				// 1. Определяем команду которую будет делать бот
-				var cmdCode = GetCurrentCommand();
+				var cmdCode = Genom.GetCurrentCommand(_pointer);
 
 				// 2. Выполняем команду
 				switch (cmdCode)
@@ -80,7 +73,7 @@ namespace WindowsFormsApp1.GameLogic
 			while (!stepComplete && cntJump < _data.MaxUncompleteJump);
 
 			_age++;
-			//Energy =+ _data.DeltaEnergyOnStep;
+			Energy += _data.DeltaEnergyOnStep;
 
 			// todo обработка деления и смерти
 			//Die
@@ -181,7 +174,7 @@ namespace WindowsFormsApp1.GameLogic
 			_data.CurrentNumberOfBots--;
 
 			_data.DeathCnt++;
-
+			Genom.Bots--;
 			//for (var j = 0; j < _data.WorldHeight; j++)
 			//{
 			//	for (var i = 0; i < _data.WorldWidth; i++)
@@ -203,8 +196,9 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				_data.CurrentNumberOfBots++;
 				var botIndex = _data.CurrentNumberOfBots;
-				var (code, codeHash, codeHashPar, codeHashGrPar, color) = GetCodeCopy();
-				_func.CreateNewBot(p, botIndex, code, codeHash, codeHashPar, codeHashGrPar, color);
+				var genom = _func.Mutation() ? new Genom(_data, _func, Genom) : Genom;
+				
+				_func.CreateNewBot(p, botIndex, genom);
 				Energy -= _data.InitialBotEnergy;
 				_data.ReproductionCnt++;
 			}
@@ -221,38 +215,6 @@ namespace WindowsFormsApp1.GameLogic
 			// todo сделать чтобы если нет места для появления бота на каждом шаге не была очередная попытка воспроизводства
 		}
 
-		private (byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar, Color color) GetCodeCopy()
-		{
-			// Копирование кода бота
-			Guid codeHash;
-			Guid codeHashPar;
-			Guid codeHashGrPar;
-			Color color;
-			var code = new byte[_data.CodeLength];
-			for (var i = 0; i < _data.CodeLength; i++)
-			{
-				code[i] = _code[i];
-			}
-
-			if (_func.Mutation())
-			{
-				code[_func.GetRandomBotCodeIndex()] = _func.GetRandomBotCode();
-				codeHash = Guid.NewGuid();
-				codeHashPar = BotCodeHash;
-				codeHashGrPar = ParentCodeHash;
-				color = _func.GetRandomColor();
-				_data.MutationCnt++;
-			}
-			else
-			{
-				codeHash = BotCodeHash;
-				codeHashPar = ParentCodeHash;
-				codeHashGrPar = GrandParentCodeHash;
-				color = _color;
-			}
-
-			return (code, codeHash, codeHashPar, codeHashGrPar, color);
-		}
 
 		private (int shift, bool stepComplete) EatInRelativeDirection()
 		{
@@ -476,7 +438,7 @@ namespace WindowsFormsApp1.GameLogic
 			_func.ChangeCell(Old.X, Old.Y, null);
 
 			_data.World[nX, nY] = Index;
-			_func.ChangeCell(nX, nY, _color);
+			_func.ChangeCell(nX, nY, Genom.Color);
 		}
 
 
@@ -542,7 +504,7 @@ namespace WindowsFormsApp1.GameLogic
 		private RefContent RefContentByBotRelativity(uint cont)
 		{
 			// надо определить родственник ли бот
-			if (IsRelative((Bot1)_data.Bots[cont]))
+			if (Genom.IsRelative(((Bot1)_data.Bots[cont]).Genom))
 			{
 				return RefContent.Relative;
 			}
@@ -550,14 +512,6 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				return RefContent.Bot;
 			}
-		}
-
-		private bool IsRelative(Bot1 b2)
-		{
-			if (BotCodeHash == b2.BotCodeHash || BotCodeHash == b2.ParentCodeHash || BotCodeHash == b2.GrandParentCodeHash) return true;
-			if (ParentCodeHash == b2.BotCodeHash || ParentCodeHash == b2.ParentCodeHash || ParentCodeHash == b2.GrandParentCodeHash) return true;
-			if (GrandParentCodeHash == b2.BotCodeHash || GrandParentCodeHash == b2.ParentCodeHash || GrandParentCodeHash == b2.GrandParentCodeHash) return true;
-			return false;
 		}
 
 		private Point GetRandomFreeCellNearby()
@@ -614,14 +568,6 @@ namespace WindowsFormsApp1.GameLogic
 			return (nX, nY);
 		}
 
-		public byte GetCurrentCommand()
-		{
-			return _code[_pointer];
-		}
-		private byte GetNextCommand()
-		{
-			return _code[_pointer + 1 >= _data.CodeLength ? 0 : _pointer + 1];
-		}
 		private void ShiftCodePointer(int shift)
 		{
 			_pointer = (_pointer + shift) % _data.CodeLength;
@@ -629,11 +575,11 @@ namespace WindowsFormsApp1.GameLogic
 
 		private Direction GetDirAbsolute()
 		{
-			return (Direction)(((int)GetNextCommand()) % 8);
+			return (Direction)(((int)Genom.GetNextCommand(_pointer)) % 8);
 		}
 		private Direction GetDirRelative()
 		{
-			return (Direction)(((int)GetNextCommand() + (int)_dir) % 8);
+			return (Direction)(((int)Genom.GetNextCommand(_pointer) + (int)_dir) % 8);
 		}
 		private Direction DirIncrement(Direction dir)
 		{

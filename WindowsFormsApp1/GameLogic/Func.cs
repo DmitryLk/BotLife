@@ -32,7 +32,8 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		public void CreateNewBot(Point p, uint botIndex, byte[] code, Guid codeHash, Guid codeHashPar, Guid codeHashGrPar, Color color)
+		// Создать нового бота можно только через этот метод им пользуется Seeder и Reproduction
+		public void CreateNewBot(Point p, uint botIndex, Genom genom)
 		{
 			var dir = GetRandomDirection();
 			var en = _data.InitialBotEnergy;
@@ -40,13 +41,18 @@ namespace WindowsFormsApp1.GameLogic
 			var pointer = 0;
 			var botNumber = ++_data.MaxBotNumber;
 
-			var bot = new Bot1(_data, this, p, dir, botNumber, botIndex, en, vx, vy, code, pointer, codeHash, codeHashPar, codeHashGrPar, color);
+			genom.Bots++;
+			var bot = new Bot1(_data, this, p, dir, botNumber, botIndex, en, genom, pointer, vx, vy);
+
+
+
 
 			_data.Bots[botIndex] = bot;
 
 			_data.World[p.X, p.Y] = botIndex;
-			ChangeCell(p.X, p.Y, color);
+			ChangeCell(p.X, p.Y, genom.Color);
 		}
+
 
 		// Запись в буфер измененных ячеек для последующей отрисовки
 		public void ChangeCell(int x, int y, Color? color)
