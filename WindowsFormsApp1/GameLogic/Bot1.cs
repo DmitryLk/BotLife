@@ -280,6 +280,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 			}
 
+			// todo если релатив возвращать что просто бот как у foo52 ?
 			return ((int)refContent, true);
 		}
 

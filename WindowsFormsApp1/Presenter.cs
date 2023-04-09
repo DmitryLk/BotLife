@@ -38,9 +38,8 @@ namespace WindowsFormsApp1
 
 		public Tester _test;
 
-		public Presenter(GameData data, PictureBox pb, Label[] labels, TextBox[] textBoxes, Tester test)
+		public Presenter(PictureBox pb, Label[] labels, TextBox[] textBoxes, Tester test)
 		{
-			_data = data;
 			_pb = pb;
 			_labels = labels;
 			_textBoxes = textBoxes;
@@ -51,6 +50,12 @@ namespace WindowsFormsApp1
 			_dt = DateTime.Now;
 
 			_test = test;
+
+		}
+
+		public void Configure(GameData data)
+		{
+			_data = data;
 
 			var bitmapWidth = _data.WorldWidth * _data.CellWidth;
 			var bitmapHeight = _data.WorldHeight * _data.CellHeight;
@@ -72,7 +77,6 @@ namespace WindowsFormsApp1
 			_iw = new ImageWrapper(_btmp, false);
 
 		}
-
 		public void StartNewFrame()
 		{
 			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);

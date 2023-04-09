@@ -52,9 +52,6 @@ namespace WindowsFormsApp1.GameLogic
 		public uint[,] World; // чтобы можно было узнать по координатам что там находится
 		public Bot[] Bots;
 
-		public bool Started;
-		public bool PausedMode;
-		public bool Drawed;
 
 		//Для поддержки эффективной перерисовки
 		public uint[,] ChWorld;

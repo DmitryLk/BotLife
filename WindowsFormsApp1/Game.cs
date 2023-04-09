@@ -13,6 +13,7 @@ using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.Design.AxImporter;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WindowsFormsApp1
@@ -22,14 +23,20 @@ namespace WindowsFormsApp1
 		public Presenter _presenter;
 		public World _world;
 		public GameData _data;
-		public Tester _test;
+		public Tester TEST;
 		public System.Windows.Forms.Timer timer;
 
-		public Game(Presenter presenter, Tester test, GameData data)
+		public bool Started;
+		public bool PausedMode;
+		public bool Drawed;
+
+		public Game(Presenter presenter, Tester test)
 		{
-			_data = data;
+			var options = LoadConfig();
+			_data = new GameData(options);
 
 			_presenter = presenter;
+			_presenter.Configure(_data);
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
@@ -38,22 +45,22 @@ namespace WindowsFormsApp1
 
 			_world = new World(_data);
 
-			_test = test;
-			_test.InitInterval(0, "BotsAction();");
-			_test.InitInterval(1, "RedrawWorld();");
-			_test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
-			_test.InitInterval(3, "PaintFrame();");
-			_test.InitInterval(4, "PrintInfo();");
+			TEST = test;
+			TEST.InitInterval(0, "BotsAction();");
+			TEST.InitInterval(1, "RedrawWorld();");
+			TEST.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
+			TEST.InitInterval(3, "PaintFrame();");
+			TEST.InitInterval(4, "PrintInfo();");
 
-			_data.Started = false;
-			_data.PausedMode = true;
-			_data.Drawed = true;
+			Started = false;
+			PausedMode = true;
+			Drawed = true;
 			_data.ReportFrequencyCurrent = _data.ReportFrequencyDrawed;
 		}
 
 		public async Task Start()
 		{
-			_data.Started = true;
+			Started = true;
 			//timer.Enabled = true;
 			_world.Initialize();
 		}
@@ -64,40 +71,47 @@ namespace WindowsFormsApp1
 			{
 				await Step();
 			}
-			while (!_data.PausedMode);
+			while (!PausedMode);
 		}
 
-		public async Task Step()
-		{
-			_test.BeginInterval(0);
-			await Task.Run(() => _world.Step());
-			_test.EndBeginInterval(0, 1);
-			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
-			//_world.Step();
-			if (_data.Drawed)
-			{
-				RedrawWorld();
-			}
-			else 
-			{
-				_test.EndBeginInterval(1, 2);
-				_test.EndBeginInterval(2, 3);
-				_test.EndBeginInterval(3, 4);
-			}
-			_presenter.PrintInfo();
-			_test.EndBeginInterval(4, 0);
-			//await Task.Delay(5000);
-		}
 
 		public void MutationToggle()
 		{
 			_data.Mutation = !_data.Mutation;
 		}
 
+		public void DrawedToggle()
+		{
+			Drawed = !Drawed;
+			_data.ReportFrequencyCurrent = Drawed ? _data.ReportFrequencyDrawed : _data.ReportFrequencyNoDrawed;
+		}
+
+		private async Task Step()
+		{
+			TEST.BeginInterval(0);
+			await Task.Run(() => _world.Step());
+			TEST.EndBeginInterval(0, 1);
+			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
+			//_world.Step();
+			if (Drawed)
+			{
+				RedrawWorld();
+			}
+			else
+			{
+				TEST.EndBeginInterval(1, 2);
+				TEST.EndBeginInterval(2, 3);
+				TEST.EndBeginInterval(3, 4);
+			}
+			_presenter.PrintInfo();
+			TEST.EndBeginInterval(4, 0);
+			//await Task.Delay(5000);
+		}
+
 		private void RedrawWorld()
 		{
 			_presenter.StartNewFrame();
-			_test.EndBeginInterval(1, 2);
+			TEST.EndBeginInterval(1, 2);
 
 			// Рисование изменений на битмапе экрана (сразу не отображаются)
 			for (var i = 0; i < _data.NumberOfChangedCells; i++)
@@ -110,13 +124,23 @@ namespace WindowsFormsApp1
 			_data.NumberOfChangedCells = 0;
 			//======================================
 
-			_test.EndBeginInterval(2, 3);
+			TEST.EndBeginInterval(2, 3);
 
 			_presenter.PaintFrame();
 			//await Task.Delay(1);
-			_test.EndBeginInterval(3, 4);
+			TEST.EndBeginInterval(3, 4);
 		}
 
+		private GameOptions LoadConfig()
+		{
+			using (StreamReader r = new StreamReader("config.json"))
+			{
+				string json = r.ReadToEnd();
+				//dynamic array = JsonConvert.DeserializeObject(json);
+				GameOptions config = JsonConvert.DeserializeObject<GameOptions>(json);
+				return config;
+			}
+		}
 
 		//private void timer_Tick(object sender, EventArgs e)
 		//{

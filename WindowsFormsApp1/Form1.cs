@@ -19,18 +19,15 @@ namespace WindowsFormsApp1
 	{
 		public Game game;
 		public Form2 form2;
-		public GameData _data;
 
 		public Form1()
 		{
 			InitializeComponent();
 
-			var options = LoadConfig();
-			_data = new GameData(options);
 
 			var test = new Tester();
-			var painter = new Presenter(_data, pictureBox1, new[] { label1 }, new[] { textBox1, textBox2 }, test);
-			game = new Game(painter, test, _data);
+			var presenter = new Presenter(pictureBox1, new[] { label1 }, new[] { textBox1, textBox2 }, test);
+			game = new Game(presenter, test);
 
 
 		}
@@ -39,7 +36,7 @@ namespace WindowsFormsApp1
 		{
 			if (e is MouseEventArgs)
 			{
-				if (!_data.Started)
+				if (!game.Started)
 				{
 					game.Start();
 					button1.Enabled = false;
@@ -57,12 +54,12 @@ namespace WindowsFormsApp1
 
 		public void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (_data.Started)
+			if (game.Started)
 			{
 				if (e.KeyCode == Keys.P)
 				{
-					_data.PausedMode = !_data.PausedMode;
-					if (!_data.PausedMode)
+					game.PausedMode = !game.PausedMode;
+					if (!game.PausedMode)
 					{
 						game.Work();
 					}
@@ -107,8 +104,7 @@ namespace WindowsFormsApp1
 
 				if (e.KeyCode == Keys.D)
 				{
-					_data.Drawed = !_data.Drawed;
-					_data.ReportFrequencyCurrent = _data.Drawed ? _data.ReportFrequencyDrawed : _data.ReportFrequencyNoDrawed;
+					game.DrawedToggle();
 				}
 
 				if (e.KeyCode == Keys.Up)
@@ -118,16 +114,6 @@ namespace WindowsFormsApp1
 			}
 		}
 
-		private GameOptions LoadConfig()
-		{
-			using (StreamReader r = new StreamReader("config.json"))
-			{
-				string json = r.ReadToEnd();
-				//dynamic array = JsonConvert.DeserializeObject(json);
-				GameOptions config = JsonConvert.DeserializeObject<GameOptions>(json);
-				return config;
-			}
-		}
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
