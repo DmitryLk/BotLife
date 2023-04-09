@@ -74,7 +74,8 @@ namespace WindowsFormsApp1
 			_pb.Image = _btmp;
 			//_gr = Graphics.FromImage(_pb.Image);
 
-			_iw = new ImageWrapper(_btmp, false);
+			//_iw = new ImageWrapper(_btmp, true, true);
+			_iw = new ImageWrapper(_btmp, BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray);
 
 		}
 		public void StartNewFrame()
@@ -113,6 +114,7 @@ namespace WindowsFormsApp1
 
 		public void PaintFrame()
 		{
+			_iw.IntervalEditing();
 			_iw.EndEditing();
 
 			//_pb.Image = _btmp2;

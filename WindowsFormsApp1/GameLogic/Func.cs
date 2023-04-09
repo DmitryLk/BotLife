@@ -54,7 +54,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		// Запись в буфер измененных ячеек для последующей отрисовки
+		// Список измененных ячеек для последующей отрисовки
 		public void ChangeCell(int x, int y, Color? color)
 		{
 			//public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell

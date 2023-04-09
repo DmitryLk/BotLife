@@ -4,7 +4,7 @@
   "MaxPictureBoxHeight": 1000,
   "CellWidth": 2,
   "CellHeight": 2,
-  "ReportFrequencyDrawed": 1,
+  "ReportFrequencyDrawed": 100,
   "ReportFrequencyNoDrawed": 100,
 
   // Настройки мира

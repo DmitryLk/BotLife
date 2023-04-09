@@ -58,6 +58,7 @@ namespace WindowsFormsApp1.GameLogic
 		public uint[,] ChWorld;
 		public ChangedCell[] ChangedCells;
 		public uint NumberOfChangedCells;
+		public uint NumberOfChangedCellsForInfo;
 
 		public bool Mutation;
 		public uint CurrentNumberOfBots;
@@ -112,7 +113,7 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Fps: {fps.ToString("#")}");
 			sb.AppendLine($"Step: {CurrentStep}");
 			sb.AppendLine($"CurrentNumberOfBots: {CurrentNumberOfBots}");
-			sb.AppendLine($"NumberOfChangedCells: {NumberOfChangedCells}");
+			sb.AppendLine($"NumberOfChangedCells: {NumberOfChangedCellsForInfo}");
 
 			sb.AppendLine($"deathCnt: {DeathCnt}");
 			sb.AppendLine($"reproductionCnt: {ReproductionCnt}");

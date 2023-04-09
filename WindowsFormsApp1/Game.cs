@@ -99,6 +99,11 @@ namespace WindowsFormsApp1
 			_data.Mutation = !_data.Mutation;
 		}
 
+		public void LensToggle()
+		{
+			Lens = !Lens;
+		}
+
 		public void DrawedToggle()
 		{
 			Drawed = !Drawed;
@@ -133,6 +138,7 @@ namespace WindowsFormsApp1
 			TEST.EndBeginInterval(1, 2);
 
 			// Рисование изменений на битмапе экрана (сразу не отображаются)
+			_data.NumberOfChangedCellsForInfo = _data.NumberOfChangedCells;
 			for (var i = 0; i < _data.NumberOfChangedCells; i++)
 			{
 				var obj = _data.ChangedCells[i];

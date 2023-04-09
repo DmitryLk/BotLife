@@ -174,7 +174,11 @@ namespace WindowsFormsApp1.GameLogic
 			_data.CurrentNumberOfBots--;
 
 			_data.DeathCnt++;
+			
+			
 			Genom.Bots--;
+			//todo если геном больше не используется (Bots=0) то удалять геном чтоб память не забивал
+
 			//for (var j = 0; j < _data.WorldHeight; j++)
 			//{
 			//	for (var i = 0; i < _data.WorldWidth; i++)

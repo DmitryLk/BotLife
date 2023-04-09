@@ -102,6 +102,12 @@ namespace WindowsFormsApp1
 					game.DrawedToggle();
 				}
 
+
+				if (e.KeyCode == Keys.L)
+				{
+					game.LensToggle();
+				}
+
 				if (e.KeyCode == Keys.Up)
 				{
 				}

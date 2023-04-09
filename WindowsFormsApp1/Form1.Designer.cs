@@ -32,7 +32,11 @@
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.textBox2 = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
+			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.trackBar1 = new System.Windows.Forms.TrackBar();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// pictureBox1
@@ -80,11 +84,32 @@
 			this.label2.Text = "label2";
 			this.label2.Click += new System.EventHandler(this.label2_Click);
 			// 
+			// numericUpDown1
+			// 
+			this.numericUpDown1.Location = new System.Drawing.Point(1210, 566);
+			this.numericUpDown1.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            -2147483648});
+			this.numericUpDown1.Name = "numericUpDown1";
+			this.numericUpDown1.Size = new System.Drawing.Size(70, 23);
+			this.numericUpDown1.TabIndex = 7;
+			// 
+			// trackBar1
+			// 
+			this.trackBar1.Location = new System.Drawing.Point(1210, 515);
+			this.trackBar1.Name = "trackBar1";
+			this.trackBar1.Size = new System.Drawing.Size(162, 45);
+			this.trackBar1.TabIndex = 8;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1398, 1061);
+			this.Controls.Add(this.trackBar1);
+			this.Controls.Add(this.numericUpDown1);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.textBox2);
 			this.Controls.Add(this.textBox1);
@@ -100,6 +125,8 @@
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -111,6 +138,8 @@
 		private System.Windows.Forms.TextBox textBox1;
 		private System.Windows.Forms.TextBox textBox2;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.NumericUpDown numericUpDown1;
+		private System.Windows.Forms.TrackBar trackBar1;
 	}
 }
 

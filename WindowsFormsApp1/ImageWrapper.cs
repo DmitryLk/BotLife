@@ -5,67 +5,123 @@ using System;
 
 namespace WindowsFormsApp1
 {
+	public enum BitmapCopyType
+	{
+		EditDirectlyScreenBitmap_Fastest = 1,
+		EditCopyScreenBitmap = 2,
+		EditEmptyArray = 3,
+		EditCopyScreenBitmapWithAdditionalArray = 4
+	}
+
 	/// <summary>
 	/// Обертка над Bitmap для быстрого чтения и изменения пикселов.
 	/// Также, класс контролирует выход за пределы изображения: при чтении за границей изображения - возвращает DefaultColor, при записи за границей изображения - игнорирует присвоение.
 	/// </summary>
 	public class ImageWrapper : IDisposable, IEnumerable<System.Drawing.Point>
 	{
-		/// <summary>
-		/// Ширина изображения
-		/// </summary>
-		public int _width { get; private set; }
-		/// <summary>
-		/// Высота изображения
-		/// </summary>
-		public int _height { get; private set; }
-		/// <summary>
-		/// Цвет по-умолачнию (используется при выходе координат за пределы изображения)
-		/// </summary>
-		public Color DefaultColor { get; set; }
+		public int _width;
+		public int _height;
+		public Color DefaultColor;
 
-		private byte[] data;//буфер исходного изображения
-		private byte[] outData;//выходной буфер
-		private int stride;
-		private bool _useCopy;
-		private bool _copySourceToOutput;
-		private BitmapData bmpData;
+		private byte[] editArray;   //массив для редактирования
+		private byte[] mainScreenBufferWithoutLens;// промежуточный экран
+
+		private int _stride;
+		private BitmapData _bmpData;
 		private Bitmap _bmp;
+		private int _length;
+		private bool _useEditArray;
+		BitmapCopyType _type;
+
 
 		/// <summary>
 		/// Создание обертки поверх bitmap.
 		/// </summary>
 		/// <param name="copySourceToOutput">Копирует исходное изображение в выходной буфер</param>
-		public ImageWrapper(Bitmap bmp, bool useCopy, bool copySourceToOutput = false)
+		public ImageWrapper(Bitmap bmp, BitmapCopyType type)
 		{
-			_useCopy = useCopy;
-			_copySourceToOutput = copySourceToOutput;
+			_type = type;
 			_width = bmp.Width;
 			_height = bmp.Height;
 			_bmp = bmp;
+			_length = _width * _height * 4;
+
+			_useEditArray = 
+				_type == BitmapCopyType.EditCopyScreenBitmap || 
+				_type == BitmapCopyType.EditEmptyArray || 
+				_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray;
+
+			if (_useEditArray)
+			{
+				editArray = new byte[_length];
+			}
+
+			if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
+			{
+				mainScreenBufferWithoutLens = new byte[_length];
+			}
 		}
 
 		public void StartEditing()
 		{
-			bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-			stride = bmpData.Stride;
-
-			//data = new byte[stride * Height];
-			//System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, data, 0, data.Length);
-
-			if (_useCopy)
+			if (_type == BitmapCopyType.EditDirectlyScreenBitmap_Fastest)
 			{
-				outData = _copySourceToOutput ? (byte[])data.Clone() : new byte[stride * _height];
+				_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+				_stride = _bmpData.Stride;
+			}
+
+			if (_type == BitmapCopyType.EditCopyScreenBitmap)
+			{
+				_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+				_stride = _bmpData.Stride;
+
+				// скопировать экранный битмап в массив для редактирования
+				System.Runtime.InteropServices.Marshal.Copy(_bmpData.Scan0, editArray, 0, _length);
+			}
+
+			if (_type == BitmapCopyType.EditEmptyArray)
+			{
+				_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+				// заново бсолютно всё рисуем на пустом массиве
+				editArray = new byte[_stride * _height];
+			}
+
+			if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
+			{
+				_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+				// скопировать из массива экрана без дополнительных рисунков в буфер редактирования
+				Buffer.BlockCopy(mainScreenBufferWithoutLens, 0, editArray, 0, _length);
+			}
+		}
+
+		// После отрисовки всех ботов сохранить образец и продолжить рисовать на буфере редиктирования дополнительную графику
+		public void IntervalEditing()
+		{
+			if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
+			{
+				// скопировать из массива экрана без дополнительных рисунков в буфер редактирования
+				Buffer.BlockCopy(editArray, 0, mainScreenBufferWithoutLens, 0, _length);
 			}
 		}
 
 		public void EndEditing()
 		{
-			if (_useCopy)
+			if (_type == BitmapCopyType.EditDirectlyScreenBitmap_Fastest)
 			{
-				System.Runtime.InteropServices.Marshal.Copy(outData, 0, bmpData.Scan0, outData.Length);
 			}
-			_bmp.UnlockBits(bmpData);
+
+			if (_type == BitmapCopyType.EditCopyScreenBitmap)
+			{
+				// скопировать массив в экранный битмап
+				System.Runtime.InteropServices.Marshal.Copy(editArray, 0, _bmpData.Scan0, editArray.Length);
+			}
+
+			if (_type == BitmapCopyType.EditEmptyArray || _type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
+			{
+				System.Runtime.InteropServices.Marshal.Copy(editArray, 0, _bmpData.Scan0, editArray.Length);
+			}
+
+			_bmp.UnlockBits(_bmpData);
 		}
 
 		/// <summary>
@@ -77,25 +133,25 @@ namespace WindowsFormsApp1
 
 			if (x >= 0 && x < _width - size && y >= 0 && y < _height - size)
 			{
-				var ind = x * 4 + y * stride;
+				var ind = x * 4 + y * _stride;
 
-				if (_useCopy)
+				if (_useEditArray)
 				{
 					for (var j = 0; j < size; j++)
 					{
 						for (var i = 0; i < size; i++)
 						{
-							outData[ind++] = color.B;
-							outData[ind++] = color.G;
-							outData[ind++] = color.R;
-							outData[ind++] = 255;
+							editArray[ind++] = color.B;
+							editArray[ind++] = color.G;
+							editArray[ind++] = color.R;
+							editArray[ind++] = 255;
 						}
-						ind += stride - size * 4;
+						ind += _stride - size * 4;
 					}
 				}
 				else
 				{
-					curpos = ((byte*)bmpData.Scan0) + ind;
+					curpos = ((byte*)_bmpData.Scan0) + ind;
 
 					for (var j = 0; j < size; j++)
 					{
@@ -106,7 +162,7 @@ namespace WindowsFormsApp1
 							*(curpos++) = color.R;
 							*(curpos++) = 255;
 						}
-						curpos += stride - size * 4;
+						curpos += _stride - size * 4;
 					}
 				}
 			}
@@ -121,67 +177,67 @@ namespace WindowsFormsApp1
 		/// </summary>
 		public void Dispose()
 		{
-			_bmp.UnlockBits(bmpData);
+			_bmp.UnlockBits(_bmpData);
 		}
 
 
-		int GetIndex(int x, int y)
-		{
-			return (x < 0 || x >= _width || y < 0 || y >= _height) ? -1 : x * 4 + y * stride;
-		}
+		//int GetIndex(int x, int y)
+		//{
+		//	return (x < 0 || x >= _width || y < 0 || y >= _height) ? -1 : x * 4 + y * _stride;
+		//}
 
 
-		/// <summary>
-		/// Возвращает пиксел из исходнго изображения.
-		/// Либо заносит пиксел в выходной буфер.
-		/// </summary>
-		public Color this[int x, int y]
-		{
-			get
-			{
-				var i = GetIndex(x, y);
-				return i < 0 ? DefaultColor : Color.FromArgb(data[i + 3], data[i + 2], data[i + 1], data[i]);
-			}
+		///// <summary>
+		///// Возвращает пиксел из исходнго изображения.
+		///// Либо заносит пиксел в выходной буфер.
+		///// </summary>
+		//public Color this[int x, int y]
+		//{
+		//	get
+		//	{
+		//		var i = GetIndex(x, y);
+		//		return i < 0 ? DefaultColor : Color.FromArgb(data[i + 3], data[i + 2], data[i + 1], data[i]);
+		//	}
 
-			set
-			{
-				var i = GetIndex(x, y);
-				if (i >= 0)
-				{
-					outData[i] = value.B;
-					outData[i + 1] = value.G;
-					outData[i + 2] = value.R;
-					outData[i + 3] = value.A;
-				};
-			}
-		}
+		//	set
+		//	{
+		//		var i = GetIndex(x, y);
+		//		if (i >= 0)
+		//		{
+		//			outData[i] = value.B;
+		//			outData[i + 1] = value.G;
+		//			outData[i + 2] = value.R;
+		//			outData[i + 3] = value.A;
+		//		};
+		//	}
+		//}
 
 
-		/// <summary>
-		/// Возвращает пиксел из исходнго изображения.
-		/// Либо заносит пиксел в выходной буфер.
-		/// </summary>
-		public Color this[System.Drawing.Point p]
-		{
-			get { return this[p.X, p.Y]; }
-			set { this[p.X, p.Y] = value; }
-		}
+		///// <summary>
+		///// Возвращает пиксел из исходнго изображения.
+		///// Либо заносит пиксел в выходной буфер.
+		///// </summary>
+		//public Color this[System.Drawing.Point p]
+		//{
+		//	get { return this[p.X, p.Y]; }
+		//	set { this[p.X, p.Y] = value; }
+		//}
 
-		/// <summary>
-		/// Заносит в выходной буфер значение цвета, заданные в double.
-		/// Допускает выход double за пределы 0-255.
-		/// </summary>
-		public void SetPixel(System.Drawing.Point p, double r, double g, double b)
-		{
-			if (r < 0) r = 0;
-			if (r >= 256) r = 255;
-			if (g < 0) g = 0;
-			if (g >= 256) g = 255;
-			if (b < 0) b = 0;
-			if (b >= 256) b = 255;
+		///// <summary>
+		///// Заносит в выходной буфер значение цвета, заданные в double.
+		///// Допускает выход double за пределы 0-255.
+		///// </summary>
+		//public void SetPixel(System.Drawing.Point p, double r, double g, double b)
+		//{
+		//	if (r < 0) r = 0;
+		//	if (r >= 256) r = 255;
+		//	if (g < 0) g = 0;
+		//	if (g >= 256) g = 255;
+		//	if (b < 0) b = 0;
+		//	if (b >= 256) b = 255;
 
-			this[p.X, p.Y] = Color.FromArgb((int)r, (int)g, (int)b);
-		}
+		//	this[p.X, p.Y] = Color.FromArgb((int)r, (int)g, (int)b);
+		//}
 
 
 		/// <summary>
@@ -199,14 +255,14 @@ namespace WindowsFormsApp1
 			return GetEnumerator();
 		}
 
-		/// <summary>
-		/// Меняет местами входной и выходной буферы
-		/// </summary>
-		public void SwapBuffers()
-		{
-			//var temp = data;
-			//data = outData;
-			//outData = temp;
-		}
+		///// <summary>
+		///// Меняет местами входной и выходной буферы
+		///// </summary>
+		//public void SwapBuffers()
+		//{
+		//	//var temp = data;
+		//	//data = outData;
+		//	//outData = temp;
+		//}
 	}
 }
