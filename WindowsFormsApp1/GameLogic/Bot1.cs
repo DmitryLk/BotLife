@@ -80,7 +80,7 @@ namespace WindowsFormsApp1.GameLogic
 			while (!stepComplete && cntJump < _data.MaxUncompleteJump);
 
 			_age++;
-			//Energy--;
+			//Energy =+ _data.DeltaEnergyOnStep;
 
 			// todo обработка деления и смерти
 			//Die

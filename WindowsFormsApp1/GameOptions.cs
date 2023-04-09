@@ -38,5 +38,6 @@ namespace WindowsFormsApp1
 		public int InitialBotEnergy;
 		public int ReproductionBotEnergy;
 		public int BiteEnergy;
+		public int DeltaEnergyOnStep;
 	}
 }

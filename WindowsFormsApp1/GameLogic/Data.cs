@@ -46,6 +46,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int InitialBotEnergy;
 		public int ReproductionBotEnergy;
 		public int BiteEnergy;
+		public int DeltaEnergyOnStep;
 
 
 		//VARIABLE CURRENT PARAMETERS
@@ -100,12 +101,15 @@ namespace WindowsFormsApp1.GameLogic
 			FoodEnergy = options.FoodEnergy;
 			ReproductionBotEnergy = options.ReproductionBotEnergy;
 			BiteEnergy = options.BiteEnergy;
-		}
+			DeltaEnergyOnStep = options.DeltaEnergyOnStep;
 
-		public string GetText()
+	}
+
+	public string GetText(double fps)
 		{
 			var sb = new StringBuilder();
 
+			sb.AppendLine($"Fps: {fps.ToString("#")}");
 			sb.AppendLine($"Step: {CurrentStep}");
 			sb.AppendLine($"CurrentNumberOfBots: {CurrentNumberOfBots}");
 			sb.AppendLine($"NumberOfChangedCells: {NumberOfChangedCells}");

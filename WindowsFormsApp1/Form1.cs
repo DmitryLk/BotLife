@@ -26,48 +26,50 @@ namespace WindowsFormsApp1
 
 
 			var test = new Tester();
-			var presenter = new Presenter(pictureBox1, new[] { label1 }, new[] { textBox1, textBox2 }, test);
+			var presenter = new Presenter(pictureBox1, new Label[] { }, new[] { textBox1, textBox2 }, test);
 			game = new Game(presenter, test);
 
 
+			label2.Text = $@"	S - start
+								P - pause mode
+								space - step
+								M - mutation on/off
+								D - draw on/off";
+
+
 		}
 
-		private async void button1_Click(object sender, EventArgs e)
+		public async void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e is MouseEventArgs)
+			bool needToRunLife = false;
+			if (!game.Started)
 			{
-				if (!game.Started)
+				if (e.KeyCode == Keys.S)
 				{
-					game.Start();
-					button1.Enabled = false;
+					await game.Start();
+					needToRunLife = true;
 				}
 			}
-			else
-			{
-				// Not mouse click...
-			}
 
-			//await Task.Factory.StartNew(() => life.Start(), TaskCreationOptions.LongRunning);
-			//var thread = new System.Threading.Thread(() => life.Start());
-			//thread.Start();
-		}
 
-		public void Form1_KeyDown(object sender, KeyEventArgs e)
-		{
 			if (game.Started)
 			{
+
 				if (e.KeyCode == Keys.P)
 				{
 					game.PausedMode = !game.PausedMode;
 					if (!game.PausedMode)
 					{
-						game.Work();
+						needToRunLife = true;
 					}
 				}
 
 				if (e.KeyCode == Keys.Space)
 				{
-					game.Work();
+					if (game.PausedMode)
+					{
+						needToRunLife = true;
+					}
 				}
 
 				if (e.KeyCode == Keys.F)
@@ -77,7 +79,7 @@ namespace WindowsFormsApp1
 						form2 = new Form2(this);
 						form2.ShowDialog();
 					}
-					else 
+					else
 					{
 						if (false)//form2.Disposing)
 						{
@@ -112,6 +114,12 @@ namespace WindowsFormsApp1
 				}
 
 			}
+
+
+			if (needToRunLife)
+			{
+				game.Work();
+			}
 		}
 
 
@@ -142,6 +150,11 @@ namespace WindowsFormsApp1
 
 				form2.Close();
 			}
+
+		}
+
+		private void label2_Click(object sender, EventArgs e)
+		{
 
 		}
 	}

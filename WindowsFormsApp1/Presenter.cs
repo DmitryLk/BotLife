@@ -148,16 +148,10 @@ namespace WindowsFormsApp1
 				var fps = _data.ReportFrequencyCurrent / tms;
 				_dt = DateTime.Now;
 
-				_labels[0].Text = "fps: " + fps.ToString("#");
-				_labels[0].Update();
-
-				//_labels[1].Text = "step: " + _data.CurrentStep;
-				//_labels[1].Update();
-
 				_textBoxes[0].Text = _test.GetText();
 				_textBoxes[0].Update();
 
-				_textBoxes[1].Text = _data.GetText();
+				_textBoxes[1].Text = _data.GetText(fps);
 				_textBoxes[1].Update();
 
 				//if (_label.InvokeRequired)

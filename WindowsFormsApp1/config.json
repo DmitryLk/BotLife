@@ -39,6 +39,7 @@
   "FoodEnergy": 2000,
   "InitialBotEnergy": 100,
   "ReproductionBotEnergy": 300,
-  "BiteEnergy": 100
+  "BiteEnergy": 100,
+  "DeltaEnergyOnStep":  -1
 
 }

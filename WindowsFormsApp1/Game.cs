@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -29,6 +30,10 @@ namespace WindowsFormsApp1
 		public bool Started;
 		public bool PausedMode;
 		public bool Drawed;
+		public bool Worked;
+
+		private readonly object _sync = new object();
+		private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
 		public Game(Presenter presenter, Tester test)
 		{
@@ -53,7 +58,7 @@ namespace WindowsFormsApp1
 			TEST.InitInterval(4, "PrintInfo();");
 
 			Started = false;
-			PausedMode = true;
+			PausedMode = false;
 			Drawed = true;
 			_data.ReportFrequencyCurrent = _data.ReportFrequencyDrawed;
 		}
@@ -67,11 +72,23 @@ namespace WindowsFormsApp1
 
 		public async Task Work()
 		{
-			do
+			if (Worked) return;
+			await _semaphoreSlim.WaitAsync();
+			try
 			{
-				await Step();
+				if (Worked) return;
+				Worked = true;
+				do
+				{
+					await Step();
+				}
+				while (!PausedMode);
+				Worked = false;
 			}
-			while (!PausedMode);
+			finally
+			{
+				_semaphoreSlim.Release();
+			}
 		}
 
 
