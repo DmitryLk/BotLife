@@ -151,6 +151,12 @@ namespace WindowsFormsApp1
 
 			TEST.EndBeginInterval(2, 3);
 
+			if (Lens)
+			{
+				_presenter.IntermediateFrameSave();  // сохранить в промежуточный массив экран без дополнительной графики
+				// рмсование дополнительной графики
+			}
+
 			_presenter.PaintFrame();
 			//await Task.Delay(1);
 			TEST.EndBeginInterval(3, 4);

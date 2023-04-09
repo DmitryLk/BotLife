@@ -75,7 +75,7 @@ namespace WindowsFormsApp1
 			//_gr = Graphics.FromImage(_pb.Image);
 
 			//_iw = new ImageWrapper(_btmp, true, true);
-			_iw = new ImageWrapper(_btmp, BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray);
+			_iw = new ImageWrapper(_btmp, BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 
 		}
 		public void StartNewFrame()
@@ -110,6 +110,11 @@ namespace WindowsFormsApp1
 			//_iw[bot.X * _botWidth, bot.Y * _botHeight + 1] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight] = Color.Red;
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight + 1] = Color.Red;
+		}
+
+		public void IntermediateFrameSave()
+		{
+			_iw.IntervalEditing();
 		}
 
 		public void PaintFrame()
