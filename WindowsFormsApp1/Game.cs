@@ -155,7 +155,7 @@ namespace WindowsFormsApp1
                         _ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? ((Bot1)_data.Bots[cont]).Genom.Color : throw new Exception("var color = cont switch")
                     };
 
-                    _presenter.DrawObjectOnLensFrame(x, y, color);
+                    _presenter.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color);
                 }
             }
             _presenter.SendLensFrameToScreen();

@@ -23,10 +23,14 @@ namespace WindowsFormsApp1
         private PictureBox _mainPictureBox;
         private Bitmap _mainBitmap;
         private ImageWrapper _mainImageWrapper;
+        private int _cellWidth;
+        private int _cellHeight;
 
 		private PictureBox _lensPictureBox;
         private Bitmap _lensBitmap;
         private ImageWrapper _lensImageWrapper;
+        private int _lensCellHeight;
+        private int _lensCellWidth;
 
 		private Graphics _gr;
 		private GameData _data;
@@ -35,8 +39,6 @@ namespace WindowsFormsApp1
 		private Label[] _labels;
 		private TextBox[] _textBoxes;
 
-		private int _cellWidth;
-		private int _cellHeight;
 		private int _cnt;
 		private DateTime _dt;
 
@@ -62,16 +64,20 @@ namespace WindowsFormsApp1
 
 		public void ConfigureMainBitmap()
         {
+            _cellHeight = _data.CellHeight;
+            _cellWidth = _data.CellWidth;
             var mainBitmapWidth = _data.WorldWidth * _data.CellWidth;
             var mainBitmapHeight = _data.WorldHeight * _data.CellHeight;
             _mainPictureBox.Size = new System.Drawing.Size(mainBitmapWidth, mainBitmapHeight);
             _mainBitmap = new Bitmap(mainBitmapWidth, mainBitmapHeight);
             _mainPictureBox.Image = _mainBitmap;
             _mainImageWrapper = new ImageWrapper(_mainBitmap);
-        }
+		}
 
-        public void ConfigureLensBitmap()
+		public void ConfigureLensBitmap()
         {
+            _lensCellHeight = _data.LensCellWidth;
+			_lensCellWidth = _data.LensCellHeight;
             var lensBitmapWidth = _data.LensWidth * _data.LensCellWidth;
             var lensBitmapHeight = _data.LensHeight * _data.LensCellHeight;
             _lensPictureBox.Size = new System.Drawing.Size(lensBitmapWidth, lensBitmapHeight);
@@ -114,20 +120,20 @@ namespace WindowsFormsApp1
             _lensImageWrapper.StartEditing(type);
         }
 
-        public void DrawObjectOnLensFrame(int x, int y, Color? color = null)
+		public void DrawObjectOnLensFrame(int x, int y, Color? color = null)
         {
-            _lensImageWrapper.FillSquare(x * _cellWidth, y * _cellHeight, _cellWidth, color ?? _fon);
+            _lensImageWrapper.FillSquare(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, color ?? _fon);
         }
 
-        public void DrawLensOnLensFrame(int x, int y, int sizeX, int sizeY, Color color)
-        {
-            _lensImageWrapper.Square(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
-        }
+        //public void DrawLensOnLensFrame(int x, int y, int sizeX, int sizeY, Color color)
+        //{
+        //    _lensImageWrapper.Square(x * _lensCellWidth, y * _lensCellHeight, sizeX * _lensCellWidth, sizeY * _lensCellHeight, color);
+        //}
 
-        public void IntermediateLensFrameSave()
-        {
-            _lensImageWrapper.IntervalEditing();
-        }
+        //public void IntermediateLensFrameSave()
+        //{
+        //    _lensImageWrapper.IntervalEditing();
+        //}
 
         public void SendLensFrameToScreen()
         {
