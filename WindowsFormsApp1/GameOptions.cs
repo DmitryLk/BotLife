@@ -40,7 +40,9 @@ namespace WindowsFormsApp1
 		public int BiteEnergy;
 		public int DeltaEnergyOnStep;
 
-		public int LensWidth;
-		public int LensHeight;
+        public int LensWidth;
+        public int LensHeight;
+        public int LensCellWidth;
+        public int LensCellHeight;
 	}
 }

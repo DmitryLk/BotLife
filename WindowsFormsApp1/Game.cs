@@ -105,7 +105,7 @@ namespace WindowsFormsApp1
 
 		private void RedrawWorld(bool additionalGraphics)
 		{
-			_presenter.StartNewFrame(additionalGraphics);
+			_presenter.StartNewFrame(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 			TEST.EndBeginInterval(1, 2);
 
 			// Рисование изменений на битмапе экрана (сразу не отображаются)
@@ -128,7 +128,7 @@ namespace WindowsFormsApp1
 				if (_data.Lens) DrawLens();
 			}
 
-			_presenter.PaintFrame();
+			_presenter.SendFrameToScreen();
 			//await Task.Delay(1);
 			TEST.EndBeginInterval(3, 4);
 		}
@@ -138,25 +138,27 @@ namespace WindowsFormsApp1
 		{
 			_presenter.DrawLensOnFrame(_data.LensX, _data.LensY, _data.LensWidth, _data.LensHeight, Color.Gray);  // рмсование лупы
 
-			//Color? color;
-			//// Выберем из _data.World[nX, nY] все что попадет в лупу
-			//for (var y = _data.LensY; y < _data.LensY + _data.LensHeight; y++)
-			//{
-			//	for (var x = _data.LensX; x < _data.LensX + _data.LensWidth; x++)
-			//	{
+            _presenter.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
+            Color? color;
+            // Выберем из _data.World[nX, nY] все что попадет в лупу
+            for (var y = _data.LensY; y < _data.LensY + _data.LensHeight; y++)
+            {
+                for (var x = _data.LensX; x < _data.LensX + _data.LensWidth; x++)
+                {
 
-			//		var cont = _data.World[x, y];
+                    var cont = _data.World[x, y];
 
-			//		color = cont switch
-			//		{
-			//			0 => null,
-			//			65500 => Color.Green,
-			//			_ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? ((Bot1)_data.Bots[cont]).Genom.Color : throw new Exception("var color = cont switch")
-			//		};
+                    color = cont switch
+                    {
+                        0 => null,
+                        65500 => Color.Green,
+                        _ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? ((Bot1)_data.Bots[cont]).Genom.Color : throw new Exception("var color = cont switch")
+                    };
 
-			//		_presenter.DrawObjectOnLens(x, y, color);
-			//	}
-			//}
+                    _presenter.DrawObjectOnLensFrame(x, y, color);
+                }
+            }
+            _presenter.SendLensFrameToScreen();
 		}
 
 

@@ -21,10 +21,14 @@ namespace WindowsFormsApp1
 	public class Presenter : IDisposable
 	{
         private PictureBox _mainPictureBox;
-        private PictureBox _lensPictureBox;
-		private Bitmap _mainBitmap;
+        private Bitmap _mainBitmap;
+        private ImageWrapper _mainImageWrapper;
+
+		private PictureBox _lensPictureBox;
+        private Bitmap _lensBitmap;
+        private ImageWrapper _lensImageWrapper;
+
 		private Graphics _gr;
-		private ImageWrapper _mainImageWrapper;
 		private GameData _data;
 
 		private Color _fon;
@@ -51,23 +55,36 @@ namespace WindowsFormsApp1
 
             _test = test;
             _data = data;
-            
-            ConfigureMainBitmap();
+
+			ConfigureMainBitmap();
+            ConfigureLensBitmap();
         }
 
 		public void ConfigureMainBitmap()
-		{
-			var bitmapWidth = _data.WorldWidth * _data.CellWidth;
-			var bitmapHeight = _data.WorldHeight * _data.CellHeight;
-			_mainPictureBox.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
-            _mainBitmap = new Bitmap(bitmapWidth, bitmapHeight);
+        {
+            var mainBitmapWidth = _data.WorldWidth * _data.CellWidth;
+            var mainBitmapHeight = _data.WorldHeight * _data.CellHeight;
+            _mainPictureBox.Size = new System.Drawing.Size(mainBitmapWidth, mainBitmapHeight);
+            _mainBitmap = new Bitmap(mainBitmapWidth, mainBitmapHeight);
             _mainPictureBox.Image = _mainBitmap;
-			_mainImageWrapper = new ImageWrapper(_mainBitmap);
-		}
+            _mainImageWrapper = new ImageWrapper(_mainBitmap);
+        }
 
-        public void StartNewFrame(bool additionalGraphics)
+        public void ConfigureLensBitmap()
+        {
+            var lensBitmapWidth = _data.LensWidth * _data.LensCellWidth;
+            var lensBitmapHeight = _data.LensHeight * _data.LensCellHeight;
+            _lensPictureBox.Size = new System.Drawing.Size(lensBitmapWidth, lensBitmapHeight);
+            _lensBitmap = new Bitmap(lensBitmapWidth, lensBitmapHeight);
+            _lensPictureBox.Image = _lensBitmap;
+            _lensImageWrapper = new ImageWrapper(_lensBitmap);
+        }
+
+
+		//MAIN////////////////////////////////////////////////////////////////////////////////////////////////////
+		public void StartNewFrame(BitmapCopyType type)
 		{
-			_mainImageWrapper.StartEditing(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+			_mainImageWrapper.StartEditing(type);
 		}
 
 		public void DrawObjectOnFrame(int x, int y, Color? color = null)
@@ -85,11 +102,39 @@ namespace WindowsFormsApp1
 			_mainImageWrapper.IntervalEditing();
 		}
 
-		public void PaintFrame()
+		public void SendFrameToScreen()
 		{
 			_mainImageWrapper.EndEditing();
 			_mainPictureBox.Refresh();
 		}
+		
+        //LENS////////////////////////////////////////////////////////////////////////////////////////////////////
+		public void StartNewLensFrame(BitmapCopyType type)
+        {
+            _lensImageWrapper.StartEditing(type);
+        }
+
+        public void DrawObjectOnLensFrame(int x, int y, Color? color = null)
+        {
+            _lensImageWrapper.FillSquare(x * _cellWidth, y * _cellHeight, _cellWidth, color ?? _fon);
+        }
+
+        public void DrawLensOnLensFrame(int x, int y, int sizeX, int sizeY, Color color)
+        {
+            _lensImageWrapper.Square(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
+        }
+
+        public void IntermediateLensFrameSave()
+        {
+            _lensImageWrapper.IntervalEditing();
+        }
+
+        public void SendLensFrameToScreen()
+        {
+            _lensImageWrapper.EndEditing();
+            _lensPictureBox.Refresh();
+        }
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		public void PrintInfo()
 		{
