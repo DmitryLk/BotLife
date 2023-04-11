@@ -136,7 +136,7 @@ namespace WindowsFormsApp1
 
 		private void DrawLens()
 		{
-			_presenter.DrawLensOnFrame(_data.LensX, _data.LensY, _data.LensWidth, _data.LensHeight, Color.Gray);  // рмсование лупы
+			_presenter.DrawLensOnFrame(_data.LensX, _data.LensY, _data.LensWidth, _data.LensHeight, Color.Black);  // рмсование лупы
 
             _presenter.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
             Color? color;
@@ -158,7 +158,9 @@ namespace WindowsFormsApp1
                     _presenter.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color);
                 }
             }
-            _presenter.SendLensFrameToScreen();
+			_presenter.DrawCursorOnLens(_data.CursorX, _data.CursorY, Color.Black);  // рмсование курсора.
+
+			_presenter.SendLensFrameToScreen();
 		}
 
 
@@ -199,10 +201,7 @@ namespace WindowsFormsApp1
 			if (_data.Drawed && _data.Lens && _data.LensX > 0)
 			{
 				_data.LensX--;
-				if (_data.PausedMode)
-				{
-					RedrawWorld(_data.Lens);
-				}
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
 			}
 		}
 		public void LensRight()
@@ -210,10 +209,7 @@ namespace WindowsFormsApp1
 			if (_data.Drawed && _data.Lens && _data.LensX < _data.WorldWidth - _data.LensWidth)
 			{
 				_data.LensX++;
-				if (_data.PausedMode)
-				{
-					RedrawWorld(_data.Lens);
-				}
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
 			}
 		}
 		public void LensUp()
@@ -221,10 +217,7 @@ namespace WindowsFormsApp1
 			if (_data.Drawed && _data.Lens && _data.LensY > 0)
 			{
 				_data.LensY--;
-				if (_data.PausedMode)
-				{
-					RedrawWorld(_data.Lens);
-				}
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
 			}
 		}
 		public void LensDown()
@@ -232,12 +225,44 @@ namespace WindowsFormsApp1
 			if (_data.Lens && _data.LensY < _data.WorldHeight - _data.LensHeight)
 			{
 				_data.LensY++;
-				if (_data.PausedMode)
-				{
-					RedrawWorld(_data.Lens);
-				}
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
 			}
 		}
+
+		public void CursorLeft()
+		{
+			if (_data.Drawed && _data.Lens && _data.CursorX > 0)
+			{
+				_data.CursorX--;
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
+			}
+		}
+		public void CursorRight()
+		{
+			if (_data.Drawed && _data.Lens && _data.CursorX < _data.LensWidth-1)
+			{
+				_data.CursorX++;
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
+			}
+		}
+		public void CursorUp()
+		{
+			if (_data.Drawed && _data.Lens && _data.CursorY > 0)
+			{
+				_data.CursorY--;
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
+			}
+		}
+		public void CursorDown()
+		{
+			if (_data.Drawed && _data.Lens && _data.CursorY < _data.LensCellHeight-1)
+			{
+				_data.CursorY++;
+				if (_data.PausedMode) RedrawWorld(_data.Lens);
+			}
+		}
+
+
 		#endregion
 
 		//private void timer_Tick(object sender, EventArgs e)

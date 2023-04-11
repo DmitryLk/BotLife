@@ -122,8 +122,13 @@ namespace WindowsFormsApp1
 
 		public void DrawObjectOnLensFrame(int x, int y, Color? color = null)
         {
-            _lensImageWrapper.FillSquare(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, color ?? _fon);
+            _lensImageWrapper.FillSquare(x * _lensCellWidth+1, y * _lensCellHeight+1, _lensCellWidth-2, color ?? _fon);
         }
+
+		public void DrawCursorOnLens(int x, int y, Color? color = null)
+		{
+			_lensImageWrapper.Square(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
+		}
 
         //public void DrawLensOnLensFrame(int x, int y, int sizeX, int sizeY, Color color)
         //{

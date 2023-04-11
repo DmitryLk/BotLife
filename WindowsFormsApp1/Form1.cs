@@ -120,6 +120,28 @@ namespace WindowsFormsApp1
 				{
 					Game.LensRight();
 				}
+
+
+
+				if (e.KeyCode == Keys.Home)
+				{
+					Game.CursorUp();
+
+				}
+				if (e.KeyCode == Keys.End)
+				{
+					Game.CursorDown();
+
+				}
+				if (e.KeyCode == Keys.Delete)
+				{
+					Game.CursorLeft();
+
+				}
+				if (e.KeyCode == Keys.PageDown)
+				{
+					Game.CursorRight();
+				}
 			}
 
 
