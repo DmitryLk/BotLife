@@ -23,10 +23,11 @@ namespace WindowsFormsApp1
 		public Form1()
 		{
 			InitializeComponent();
-
+			form2 = new Form2(this);
+			var lensPictureBox = form2.GetLensPictureBox();
 
 			var test = new Tester();
-			var presenter = new Presenter(pictureBox1, new Label[] { }, new[] { textBox1, textBox2 }, test);
+			var presenter = new Presenter(pictureBox1, lensPictureBox,   new Label[] { }, new[] { textBox1, textBox2 }, test);
 			game = new Game(presenter, test);
 
 
@@ -57,8 +58,8 @@ namespace WindowsFormsApp1
 
 				if (e.KeyCode == Keys.P)
 				{
-					game.PausedMode = !game.PausedMode;
-					if (!game.PausedMode)
+					game.PausedToggle();
+					if (!game.Paused)
 					{
 						needToRunLife = true;
 					}
@@ -66,29 +67,23 @@ namespace WindowsFormsApp1
 
 				if (e.KeyCode == Keys.Space)
 				{
-					if (game.PausedMode)
+					if (game.Paused)
 					{
 						needToRunLife = true;
 					}
 				}
 
-				if (e.KeyCode == Keys.F)
+				if (e.KeyCode == Keys.L)
 				{
-					if (form2 == null)
+					if (!form2.Visible)
 					{
-						form2 = new Form2(this);
-						form2.ShowDialog();
+						game.Lens(true);
+						form2.Visible = true;
 					}
 					else
 					{
-						if (!form2.Visible)
-						{
-							form2.Visible = true;
-						}
-						else
-						{
-							form2.Visible = false;
-						}
+						game.Lens(false);
+						form2.Visible = false;
 					}
 				}
 
@@ -103,24 +98,26 @@ namespace WindowsFormsApp1
 				}
 
 
-				if (e.KeyCode == Keys.L)
-				{
-					game.LensToggle();
-				}
 
 				if (e.KeyCode == Keys.Up)
 				{
+					game.LensUp();
+
 				}
 				if (e.KeyCode == Keys.Down)
 				{
+					game.LensDown();
+
 				}
 				if (e.KeyCode == Keys.Left)
 				{
+					game.LensLeft();
+
 				}
 				if (e.KeyCode == Keys.Right)
 				{
+					game.LensRight();
 				}
-
 			}
 
 

@@ -508,14 +508,10 @@ namespace WindowsFormsApp1.GameLogic
 		private RefContent RefContentByBotRelativity(uint cont)
 		{
 			// надо определить родственник ли бот
-			if (Genom.IsRelative(((Bot1)_data.Bots[cont]).Genom))
-			{
-				return RefContent.Relative;
-			}
-			else
-			{
-				return RefContent.Bot;
-			}
+			
+			return Genom.IsRelative(((Bot1)_data.Bots[cont]).Genom) 
+				? RefContent.Relative 
+				: RefContent.Bot;
 		}
 
 		private Point GetRandomFreeCellNearby()

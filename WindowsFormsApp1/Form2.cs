@@ -19,6 +19,11 @@ namespace WindowsFormsApp1
 			InitializeComponent();
 		}
 
+		public PictureBox GetLensPictureBox()
+		{
+			return pictureBox1;
+		}
+
 		private void Form2_Load(object sender, EventArgs e)
 		{
 
@@ -33,6 +38,11 @@ namespace WindowsFormsApp1
 		{
 			e.Cancel = true;
 			this.Hide();
+		}
+
+		private void pictureBox1_Click(object sender, EventArgs e)
+		{
+
 		}
 	}
 }

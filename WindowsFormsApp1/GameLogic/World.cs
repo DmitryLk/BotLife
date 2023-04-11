@@ -23,23 +23,6 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Initialize()
 		{
-			// Создать все игровые массивы
-			_data.World = new uint[_data.WorldWidth, _data.WorldHeight];
-			_data.Bots = new Bot[_data.MaxBotsNumber];
-			_data.ChWorld = new uint[_data.WorldWidth, _data.WorldHeight];
-			_data.ChangedCells = new ChangedCell[_data.MaxBotsNumber];
-
-			_data.NumberOfChangedCells = 0;
-			_data.MaxBotNumber = 0;
-			_data.CurrentStep = 0;
-
-			_data.Mutation = true;
-
-			_data.DeathCnt = 0;
-			_data.ReproductionCnt = 0;
-			_data.MutationCnt = 0;
-
-
 			// Засевание объектов
 			_seeder.SeedItems();
 
@@ -65,6 +48,16 @@ namespace WindowsFormsApp1.GameLogic
 
 
 /*
+ * 
+//Координаты бота могут быть от 0 до _data.WorldWidth-1 включительно и по y также
+//допустим WorldWidth=500 и cellwidth =2 тогда крайнее левопе положение бота 0,1 , а правое положение бота 998,999
+//Координаты LensX могут быть от 0 до _data.WorldWidth - _data.LensWidth включительно и по y также
+//Допустим размер линзы 20  (cellwidth =2) и она прижата в левый верхний угол
+//тогда левая и верхняя  граница будут идти по 0(реальный)
+//а правая и нижняя по 39 
+
+
+
 // ДВИЖЕНИЕ
 // Алгоритм:
 // 1. Суммируем направление бота и движения

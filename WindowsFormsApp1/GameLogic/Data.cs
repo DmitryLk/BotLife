@@ -17,7 +17,6 @@ namespace WindowsFormsApp1.GameLogic
 		public int CellHeight;
 		public int ReportFrequencyDrawed;
 		public int ReportFrequencyNoDrawed;
-		public int ReportFrequencyCurrent;
 
 		public uint StartNumberOfBots;
 		public uint MaxBotsNumber;
@@ -48,10 +47,21 @@ namespace WindowsFormsApp1.GameLogic
 		public int BiteEnergy;
 		public int DeltaEnergyOnStep;
 
+		public int LensWidth;
+		public int LensHeight;
+
 
 		//VARIABLE CURRENT PARAMETERS
 		public uint[,] World; // чтобы можно было узнать по координатам что там находится
 		public Bot[] Bots;
+
+		// Настройки игры
+		public bool Started;
+		public bool PausedMode;
+		public bool Drawed;
+		public bool Worked;
+		public bool Lens;
+		public bool Mutation;
 
 
 		//Для поддержки эффективной перерисовки
@@ -60,13 +70,17 @@ namespace WindowsFormsApp1.GameLogic
 		public uint NumberOfChangedCells;
 		public uint NumberOfChangedCellsForInfo;
 
-		public bool Mutation;
 		public uint CurrentNumberOfBots;
 		public uint CurrentStep;
 		public uint MaxBotNumber;
 		public uint DeathCnt;
 		public uint ReproductionCnt;
 		public uint MutationCnt;
+		public int ReportFrequencyCurrent;
+
+		public int LensX;
+		public int LensY;
+
 
 		public GameData(GameOptions options)
 		{
@@ -104,6 +118,37 @@ namespace WindowsFormsApp1.GameLogic
 			BiteEnergy = options.BiteEnergy;
 			DeltaEnergyOnStep = options.DeltaEnergyOnStep;
 
+			LensWidth = options.LensWidth;
+			LensHeight = options.LensHeight;
+		}
+
+		public void Initialize()
+		{
+			// Создать все игровые массивы
+			World = new uint[WorldWidth, WorldHeight];
+			Bots = new Bot[MaxBotsNumber];
+			ChWorld = new uint[WorldWidth, WorldHeight];
+			ChangedCells = new ChangedCell[MaxBotsNumber];
+
+			Mutation = true;
+			Started = false;
+			PausedMode = false;
+			Drawed = true;
+			Lens = false;
+
+			NumberOfChangedCells = 0;
+			MaxBotNumber = 0;
+			CurrentStep = 0;
+
+
+			DeathCnt = 0;
+			ReproductionCnt = 0;
+			MutationCnt = 0;
+
+			ReportFrequencyCurrent = ReportFrequencyDrawed;
+
+			LensX = 10;
+			LensY = 10;
 		}
 
 		public string GetText(double fps)

@@ -38,7 +38,7 @@ namespace WindowsFormsApp1
 
 		public Tester _test;
 
-		public Presenter(PictureBox pb, Label[] labels, TextBox[] textBoxes, Tester test)
+		public Presenter(PictureBox pb, PictureBox lensPb, Label[] labels, TextBox[] textBoxes, Tester test)
 		{
 			_pb = pb;
 			_labels = labels;
@@ -75,19 +75,19 @@ namespace WindowsFormsApp1
 			//_gr = Graphics.FromImage(_pb.Image);
 
 			//_iw = new ImageWrapper(_btmp, true, true);
-			_iw = new ImageWrapper(_btmp, BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+			_iw = new ImageWrapper(_btmp);
 
 		}
-		public void StartNewFrame()
+		public void StartNewFrame(bool additionalGraphics)
 		{
 			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
 			//_gr.Clear(_fon);
-			_iw.StartEditing();
+			_iw.StartEditing(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 			//_gr.Clear(Form.ActiveForm.BackColor);
 			//_pb.Invalidate();
 		}
 
-		public void DrawCellOnFrame(int x, int y, Color? color = null)
+		public void DrawObjectOnFrame(int x, int y, Color? color = null)
 		{
 			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
 			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
@@ -112,6 +112,11 @@ namespace WindowsFormsApp1
 			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight + 1] = Color.Red;
 		}
 
+		public void DrawLensOnFrame(int x, int y, int sizeX, int sizeY, Color color)
+		{
+			_iw.Square(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
+		}
+
 		public void IntermediateFrameSave()
 		{
 			_iw.IntervalEditing();
@@ -119,7 +124,6 @@ namespace WindowsFormsApp1
 
 		public void PaintFrame()
 		{
-			_iw.IntervalEditing();
 			_iw.EndEditing();
 
 			//_pb.Image = _btmp2;
