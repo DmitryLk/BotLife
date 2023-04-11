@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Xml.Linq;
+using Newtonsoft.Json;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using static System.Windows.Forms.Design.AxImporter;
@@ -82,48 +84,15 @@ namespace WindowsFormsApp1.GameLogic
 		public int LensY;
 
 
-		public GameData(GameOptions options)
+		public GameData()
 		{
-			CellWidth = options.CellWidth;
-			CellHeight = options.CellHeight;
-			ReportFrequencyDrawed = options.ReportFrequencyDrawed;
-			ReportFrequencyNoDrawed = options.ReportFrequencyNoDrawed;
-
-			StartNumberOfBots = options.StartBotsNumber;
-			MaxBotsNumber = options.MaxBotsNumber;
-			WorldWidth = options.WorldWidth;
-			WorldHeight = options.WorldHeight;
-			UpDownEdge = options.UpDownEdge;
-			LeftRightEdge = options.LeftRightEdge;
-
-			SeedFood = options.SeedFood;
-			SeedOrganic = options.SeedOrganic;
-			SeedMinerals = options.SeedMinerals;
-			SeedWalls = options.SeedWalls;
-			SeedPoison = options.SeedPoison;
-			SeedFoodNumber = options.SeedFoodNumber;
-			SeedOrganicNumber = options.SeedOrganicNumber;
-			SeedMineralsNumber = options.SeedMineralsNumber;
-			SeedWallsNumber = options.SeedWallsNumber;
-			SeedPoisonNumber = options.SeedPoisonNumber;
-
-			CodeLength = options.CodeLength;
-			MaxCode = options.MaxCode;
-			MaxUncompleteJump = options.MaxUncompleteJump;
-			MutationProbabilityPercent = options.MutationProbabilityPercent;
-
-			InitialBotEnergy = options.InitialBotEnergy;
-			FoodEnergy = options.FoodEnergy;
-			ReproductionBotEnergy = options.ReproductionBotEnergy;
-			BiteEnergy = options.BiteEnergy;
-			DeltaEnergyOnStep = options.DeltaEnergyOnStep;
-
-			LensWidth = options.LensWidth;
-			LensHeight = options.LensHeight;
 		}
 
 		public void Initialize()
 		{
+            var options = LoadConfig();
+            MapOptions(options);
+
 			// Создать все игровые массивы
 			World = new uint[WorldWidth, WorldHeight];
 			Bots = new Bot[MaxBotsNumber];
@@ -165,5 +134,56 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"mutationCnt: {MutationCnt}");
 			return sb.ToString();
 		}
+
+        private GameOptions LoadConfig()
+        {
+            using (StreamReader r = new StreamReader("config.json"))
+            {
+                string json = r.ReadToEnd();
+                //dynamic array = JsonConvert.DeserializeObject(json);
+                GameOptions config = JsonConvert.DeserializeObject<GameOptions>(json);
+                return config;
+            }
+        }
+
+        public void MapOptions(GameOptions options)
+        {
+            CellWidth = options.CellWidth;
+            CellHeight = options.CellHeight;
+            ReportFrequencyDrawed = options.ReportFrequencyDrawed;
+            ReportFrequencyNoDrawed = options.ReportFrequencyNoDrawed;
+
+            StartNumberOfBots = options.StartBotsNumber;
+            MaxBotsNumber = options.MaxBotsNumber;
+            WorldWidth = options.WorldWidth;
+            WorldHeight = options.WorldHeight;
+            UpDownEdge = options.UpDownEdge;
+            LeftRightEdge = options.LeftRightEdge;
+
+            SeedFood = options.SeedFood;
+            SeedOrganic = options.SeedOrganic;
+            SeedMinerals = options.SeedMinerals;
+            SeedWalls = options.SeedWalls;
+            SeedPoison = options.SeedPoison;
+            SeedFoodNumber = options.SeedFoodNumber;
+            SeedOrganicNumber = options.SeedOrganicNumber;
+            SeedMineralsNumber = options.SeedMineralsNumber;
+            SeedWallsNumber = options.SeedWallsNumber;
+            SeedPoisonNumber = options.SeedPoisonNumber;
+
+            CodeLength = options.CodeLength;
+            MaxCode = options.MaxCode;
+            MaxUncompleteJump = options.MaxUncompleteJump;
+            MutationProbabilityPercent = options.MutationProbabilityPercent;
+
+            InitialBotEnergy = options.InitialBotEnergy;
+            FoodEnergy = options.FoodEnergy;
+            ReproductionBotEnergy = options.ReproductionBotEnergy;
+            BiteEnergy = options.BiteEnergy;
+            DeltaEnergyOnStep = options.DeltaEnergyOnStep;
+
+            LensWidth = options.LensWidth;
+            LensHeight = options.LensHeight;
+        }
 	}
 }

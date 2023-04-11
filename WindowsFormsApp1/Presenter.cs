@@ -20,13 +20,13 @@ namespace WindowsFormsApp1
 {
 	public class Presenter : IDisposable
 	{
-		private PictureBox _pb;
-		private Bitmap _btmp;
+        private PictureBox _mainPictureBox;
+        private PictureBox _lensPictureBox;
+		private Bitmap _mainBitmap;
 		private Graphics _gr;
-		private ImageWrapper _iw;
+		private ImageWrapper _mainImageWrapper;
 		private GameData _data;
 
-		private SolidBrush _br;
 		private Color _fon;
 		private Label[] _labels;
 		private TextBox[] _textBoxes;
@@ -38,115 +38,57 @@ namespace WindowsFormsApp1
 
 		public Tester _test;
 
-		public Presenter(PictureBox pb, PictureBox lensPb, Label[] labels, TextBox[] textBoxes, Tester test)
+		public Presenter(GameData data, PictureBox mainPictureBox, PictureBox lensPictureBox, Label[] labels, TextBox[] textBoxes, Tester test)
 		{
-			_pb = pb;
+            _mainPictureBox = mainPictureBox;
+            _lensPictureBox = lensPictureBox;
 			_labels = labels;
 			_textBoxes = textBoxes;
 
-			_br = new SolidBrush(Color.Red);
 			_fon = Color.FromKnownColor(KnownColor.ActiveCaption);
 			_cnt = 0;
 			_dt = DateTime.Now;
 
-			_test = test;
+            _test = test;
+            _data = data;
+            
+            ConfigureMainBitmap();
+        }
 
-		}
-
-		public void Configure(GameData data)
+		public void ConfigureMainBitmap()
 		{
-			_data = data;
-
 			var bitmapWidth = _data.WorldWidth * _data.CellWidth;
 			var bitmapHeight = _data.WorldHeight * _data.CellHeight;
-
-
-			_pb.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
-
-			_cellHeight = _data.CellHeight;
-			_cellWidth = _data.CellWidth;
-
-			//_btmp = new Bitmap(worldWidth * botWidth, worldHeight * botHeight);
-			//_gr = Graphics.FromImage(_btmp);
-
-			// Инициализация при запуске
-			_btmp = new Bitmap(bitmapWidth, bitmapHeight);
-			_pb.Image = _btmp;
-			//_gr = Graphics.FromImage(_pb.Image);
-
-			//_iw = new ImageWrapper(_btmp, true, true);
-			_iw = new ImageWrapper(_btmp);
-
+			_mainPictureBox.Size = new System.Drawing.Size(bitmapWidth, bitmapHeight);
+            _mainBitmap = new Bitmap(bitmapWidth, bitmapHeight);
+            _mainPictureBox.Image = _mainBitmap;
+			_mainImageWrapper = new ImageWrapper(_mainBitmap);
 		}
-		public void StartNewFrame(bool additionalGraphics)
+
+        public void StartNewFrame(bool additionalGraphics)
 		{
-			//_btmp2 = new Bitmap(_worldWidth * _botWidth, _worldHeight * _botHeight);
-			//_gr.Clear(_fon);
-			_iw.StartEditing(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-			//_gr.Clear(Form.ActiveForm.BackColor);
-			//_pb.Invalidate();
+			_mainImageWrapper.StartEditing(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 		}
 
 		public void DrawObjectOnFrame(int x, int y, Color? color = null)
 		{
-			//_gr.FillRectangle(_br, bot.X * _botWidth, bot.Y * _botHeight, _botWidth, _botHeight);
-			//_btmp.SetPixel(bot.X * _botWidth, bot.Y * _botHeight, Color.Red);
-
-			//Color.LightGray
-			//Form.ActiveForm.BackColor
-			//Color.Free
-			//Color.FromArgb(255,128,128,128)
-			//Color.FromKnownColor(KnownColor.ActiveCaption)
-
-			//if (bot.P.X != bot.Old.X || bot.P.Y != bot.Old.Y)
-			//{
-			//	_iw.FillSquare(bot.P.X * _cellWidth, bot.P.Y * _cellHeight, _cellWidth, Color.FromKnownColor(KnownColor.ActiveCaption));
-			//}
-
-			_iw.FillSquare(x * _cellWidth, y * _cellHeight, _cellWidth, color ?? _fon);
-
-
-			//_iw[bot.X * _botWidth, bot.Y * _botHeight] = Color.Red;
-			//_iw[bot.X * _botWidth, bot.Y * _botHeight + 1] = Color.Red;
-			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight] = Color.Red;
-			//_iw[bot.X * _botWidth + 1, bot.Y * _botHeight + 1] = Color.Red;
+			_mainImageWrapper.FillSquare(x * _cellWidth, y * _cellHeight, _cellWidth, color ?? _fon);
 		}
 
 		public void DrawLensOnFrame(int x, int y, int sizeX, int sizeY, Color color)
 		{
-			_iw.Square(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
+			_mainImageWrapper.Square(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
 		}
 
 		public void IntermediateFrameSave()
 		{
-			_iw.IntervalEditing();
+			_mainImageWrapper.IntervalEditing();
 		}
 
 		public void PaintFrame()
 		{
-			_iw.EndEditing();
-
-			//_pb.Image = _btmp2;
-			//_pb.Update();
-
-			//if (_pb.InvokeRequired)
-			//{
-			//	_pb.BeginInvoke(new Action(() => _pb.Refresh()));
-			//}
-			//else
-			//	_pb.Refresh();
-
-
-			_pb.Refresh();
-			//if (_pb.InvokeRequired)
-			//{
-			//	_pb.Invoke((MethodInvoker)delegate
-			//	{
-			//		_pb.Refresh();
-			//	});
-			//}
-			//else
-			//	_pb.Refresh();
+			_mainImageWrapper.EndEditing();
+			_mainPictureBox.Refresh();
 		}
 
 		public void PrintInfo()
@@ -164,37 +106,14 @@ namespace WindowsFormsApp1
 
 				_textBoxes[1].Text = _data.GetText(fps);
 				_textBoxes[1].Update();
-
-				//if (_label.InvokeRequired)
-				//{
-				//	_label.Invoke((MethodInvoker)delegate
-				//	{
-				//		_label.Text = "fps: " + fps.ToString("#");
-				//	});
-				//}
-				//else
-				//	_label.Text = "fps: " + fps.ToString("#");
-				////_label.Update();
-
-				//if (_textBox.InvokeRequired)
-				//{
-				//	_textBox.Invoke((MethodInvoker)delegate
-				//	{
-				//		_textBox.Text = _test.GetText();
-				//	});
-				//}
-				//else
-				//	_textBox.Text = _test.GetText();
-				////_textBox.Update();
 			}
 		}
 
 		public void Dispose()
 		{
-			_btmp.Dispose();
+			_mainBitmap.Dispose();
 			_gr.Dispose();
-			_iw.Dispose();
-			_br.Dispose();
+			_mainImageWrapper.Dispose();
 		}
 	}
 }

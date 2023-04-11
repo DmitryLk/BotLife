@@ -17,18 +17,22 @@ namespace WindowsFormsApp1
 {
 	public partial class Form1 : Form
 	{
-		public Game game;
-		public Form2 form2;
+		public Game Game;
+		public Form2 Form2;
 
 		public Form1()
 		{
 			InitializeComponent();
-			form2 = new Form2(this);
-			var lensPictureBox = form2.GetLensPictureBox();
 
+
+			Form2 = new Form2(this);
+			var lensPictureBox = Form2.GetLensPictureBox();
 			var test = new Tester();
-			var presenter = new Presenter(pictureBox1, lensPictureBox,   new Label[] { }, new[] { textBox1, textBox2 }, test);
-			game = new Game(presenter, test);
+            var data = new GameData();
+            data.Initialize();
+
+			var presenter = new Presenter(data, pictureBox1, lensPictureBox,   new Label[] { }, new[] { textBox1, textBox2 }, test);
+			Game = new Game(data, presenter, test);
 
 
 			label2.Text = $@"	S - start
@@ -36,30 +40,28 @@ namespace WindowsFormsApp1
 								space - step
 								M - mutation on/off
 								D - draw on/off";
-
-
 		}
 
 		public async void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
 			bool needToRunLife = false;
-			if (!game.Started)
+			if (!Game.Started)
 			{
 				if (e.KeyCode == Keys.S)
 				{
-					await game.Start();
+					await Game.Start();
 					needToRunLife = true;
 				}
 			}
 
 
-			if (game.Started)
+			if (Game.Started)
 			{
 
 				if (e.KeyCode == Keys.P)
 				{
-					game.PausedToggle();
-					if (!game.Paused)
+					Game.PausedToggle();
+					if (!Game.Paused)
 					{
 						needToRunLife = true;
 					}
@@ -67,7 +69,7 @@ namespace WindowsFormsApp1
 
 				if (e.KeyCode == Keys.Space)
 				{
-					if (game.Paused)
+					if (Game.Paused)
 					{
 						needToRunLife = true;
 					}
@@ -75,55 +77,55 @@ namespace WindowsFormsApp1
 
 				if (e.KeyCode == Keys.L)
 				{
-					if (!form2.Visible)
+					if (!Form2.Visible)
 					{
-						game.Lens(true);
-						form2.Visible = true;
+						Game.Lens(true);
+						Form2.Visible = true;
 					}
 					else
 					{
-						game.Lens(false);
-						form2.Visible = false;
+						Game.Lens(false);
+						Form2.Visible = false;
 					}
 				}
 
 				if (e.KeyCode == Keys.M)
 				{
-					game.MutationToggle();
+					Game.MutationToggle();
 				}
 
 				if (e.KeyCode == Keys.D)
 				{
-					game.DrawedToggle();
+					Game.DrawedToggle();
 				}
 
 
 
 				if (e.KeyCode == Keys.Up)
 				{
-					game.LensUp();
+					Game.LensUp();
 
 				}
 				if (e.KeyCode == Keys.Down)
 				{
-					game.LensDown();
+					Game.LensDown();
 
 				}
 				if (e.KeyCode == Keys.Left)
 				{
-					game.LensLeft();
+					Game.LensLeft();
 
 				}
 				if (e.KeyCode == Keys.Right)
 				{
-					game.LensRight();
+					Game.LensRight();
 				}
 			}
 
 
 			if (needToRunLife)
 			{
-				game.Work();
+				Game.Work();
 			}
 		}
 
@@ -150,10 +152,10 @@ namespace WindowsFormsApp1
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if (form2 != null)
+			if (Form2 != null)
 			{
 
-				form2.Close();
+				Form2.Close();
 			}
 
 		}

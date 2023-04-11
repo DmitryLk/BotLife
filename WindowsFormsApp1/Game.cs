@@ -32,14 +32,10 @@ namespace WindowsFormsApp1
 		private readonly object _sync = new object();
 		private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
-		public Game(Presenter presenter, Tester test)
+		public Game(GameData data, Presenter presenter, Tester test)
 		{
-			var options = LoadConfig();
-			_data = new GameData(options);
-			_data.Initialize();
-
-			_presenter = presenter;
-			_presenter.Configure(_data);
+            _data = data;
+            _presenter = presenter;
 
 			//timer = new System.Windows.Forms.Timer();
 			//timer.Tick += new System.EventHandler(timer_Tick);
@@ -164,16 +160,6 @@ namespace WindowsFormsApp1
 		}
 
 
-		private GameOptions LoadConfig()
-		{
-			using (StreamReader r = new StreamReader("config.json"))
-			{
-				string json = r.ReadToEnd();
-				//dynamic array = JsonConvert.DeserializeObject(json);
-				GameOptions config = JsonConvert.DeserializeObject<GameOptions>(json);
-				return config;
-			}
-		}
 
 		#region for Form
 		public void MutationToggle()
