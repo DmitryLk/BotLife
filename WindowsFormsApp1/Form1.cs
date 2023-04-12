@@ -26,12 +26,20 @@ namespace WindowsFormsApp1
 
 
 			Form2 = new Form2(this);
-			var lensPictureBox = Form2.GetLensPictureBox();
+			var (lensPictureBox, cursorPictureBox) = Form2.GetLensFormPictureBox();
 			var test = new Tester();
             var data = new GameData();
             data.Initialize();
 
-			var presenter = new Presenter(data, pictureBox1, lensPictureBox,   new Label[] { }, new[] { textBox1, textBox2 }, test);
+			var presenter = new Presenter(
+                data,
+                test,
+				pictureBox1, 
+                lensPictureBox, 
+                cursorPictureBox,   
+                new Label[] { }, 
+                new[] { textBox1, textBox2 });
+
 			Game = new Game(data, presenter, test);
 
 
