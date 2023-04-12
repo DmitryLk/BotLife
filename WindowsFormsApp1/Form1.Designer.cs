@@ -34,9 +34,13 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
 			this.trackBar1 = new System.Windows.Forms.TrackBar();
+			this.checkBox1 = new System.Windows.Forms.CheckBox();
+			this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+			this.dataGridView1 = new System.Windows.Forms.DataGridView();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// pictureBox1
@@ -86,7 +90,7 @@
 			// 
 			// numericUpDown1
 			// 
-			this.numericUpDown1.Location = new System.Drawing.Point(1210, 566);
+			this.numericUpDown1.Location = new System.Drawing.Point(1210, 760);
 			this.numericUpDown1.Minimum = new decimal(new int[] {
             10,
             0,
@@ -98,16 +102,48 @@
 			// 
 			// trackBar1
 			// 
-			this.trackBar1.Location = new System.Drawing.Point(1210, 515);
+			this.trackBar1.Location = new System.Drawing.Point(1213, 693);
 			this.trackBar1.Name = "trackBar1";
 			this.trackBar1.Size = new System.Drawing.Size(162, 45);
 			this.trackBar1.TabIndex = 8;
+			// 
+			// checkBox1
+			// 
+			this.checkBox1.AutoSize = true;
+			this.checkBox1.Location = new System.Drawing.Point(1197, 800);
+			this.checkBox1.Name = "checkBox1";
+			this.checkBox1.Size = new System.Drawing.Size(83, 19);
+			this.checkBox1.TabIndex = 9;
+			this.checkBox1.Text = "checkBox1";
+			this.checkBox1.UseVisualStyleBackColor = true;
+			// 
+			// checkedListBox1
+			// 
+			this.checkedListBox1.FormattingEnabled = true;
+			this.checkedListBox1.Location = new System.Drawing.Point(1210, 867);
+			this.checkedListBox1.Name = "checkedListBox1";
+			this.checkedListBox1.Size = new System.Drawing.Size(128, 94);
+			this.checkedListBox1.TabIndex = 10;
+			// 
+			// dataGridView1
+			// 
+			this.dataGridView1.AllowUserToAddRows = false;
+			this.dataGridView1.AllowUserToDeleteRows = false;
+			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridView1.Location = new System.Drawing.Point(1218, 515);
+			this.dataGridView1.Name = "dataGridView1";
+			this.dataGridView1.ReadOnly = true;
+			this.dataGridView1.Size = new System.Drawing.Size(151, 152);
+			this.dataGridView1.TabIndex = 11;
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1398, 1061);
+			this.Controls.Add(this.dataGridView1);
+			this.Controls.Add(this.checkedListBox1);
+			this.Controls.Add(this.checkBox1);
 			this.Controls.Add(this.trackBar1);
 			this.Controls.Add(this.numericUpDown1);
 			this.Controls.Add(this.label2);
@@ -127,6 +163,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -140,6 +177,9 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.NumericUpDown numericUpDown1;
 		private System.Windows.Forms.TrackBar trackBar1;
+		private System.Windows.Forms.CheckBox checkBox1;
+		private System.Windows.Forms.CheckedListBox checkedListBox1;
+		private System.Windows.Forms.DataGridView dataGridView1;
 	}
 }
 
