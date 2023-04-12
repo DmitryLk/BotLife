@@ -35,6 +35,10 @@ namespace WindowsFormsApp1
         private PictureBox _cursorPictureBox;
         private Bitmap _cursorBitmap;
         private ImageWrapper _cursorImageWrapper;
+        private int _codeCellWidth;
+        private int _codeCellHeight;
+        private int _xStartCodeCell;
+
 
         private Graphics _gr;
         private GameData _data;
@@ -105,10 +109,18 @@ namespace WindowsFormsApp1
         {
             var cursorBitmapWidth = 200;
             var cursorBitmapHeight = 200;
+
+            _codeCellWidth = (int)((cursorBitmapWidth * 0.8) / 8);
+            _codeCellHeight = (int)(cursorBitmapHeight / 8);
+            _xStartCodeCell = (int)(cursorBitmapWidth * 0.2);
+
+
+
             _cursorPictureBox.Size = new System.Drawing.Size(cursorBitmapWidth, cursorBitmapHeight);
             _cursorBitmap = new Bitmap(cursorBitmapWidth, cursorBitmapHeight);
-            _cursorPictureBox.Image = _lensBitmap;
-            _cursorImageWrapper = new ImageWrapper(_lensBitmap);
+            _cursorPictureBox.Image = _cursorBitmap;
+            _cursorImageWrapper = new ImageWrapper(_cursorBitmap);
+            _gr = Graphics.FromImage(_cursorBitmap);
         }
 
         //MAIN////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +136,7 @@ namespace WindowsFormsApp1
 
         public void DrawLensOnFrame(int x, int y, int sizeX, int sizeY, Color color)
         {
-            _mainImageWrapper.Square(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
+            _mainImageWrapper.EmptySquare(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
         }
 
         public void IntermediateFrameSave()
@@ -151,18 +163,8 @@ namespace WindowsFormsApp1
 
         public void DrawCursorOnLens(int x, int y, Color? color = null)
         {
-            _lensImageWrapper.Square(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
+            _lensImageWrapper.EmptySquare(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
         }
-
-        //public void DrawLensOnLensFrame(int x, int y, int sizeX, int sizeY, Color color)
-        //{
-        //    _lensImageWrapper.Square(x * _lensCellWidth, y * _lensCellHeight, sizeX * _lensCellWidth, sizeY * _lensCellHeight, color);
-        //}
-
-        //public void IntermediateLensFrameSave()
-        //{
-        //    _lensImageWrapper.IntervalEditing();
-        //}
 
         public void SendLensFrameToScreen()
         {
@@ -176,25 +178,10 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.StartEditing(type);
         }
 
-        public void DrawObjectOnCursorFrame(int x, int y, Color? color = null)
+        public void DrawCodeOnCursorFrame(int x, int y, string code, Color? color = null)
         {
-            _cursorImageWrapper.Square(x * _lensCellWidth + 1, y * _lensCellHeight + 1, _lensCellWidth - 2, _lensCellHeight - 2, color ?? _fon);
+            _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
         }
-
-        //public void DrawCursorOnLens(int x, int y, Color? color = null)
-        //{
-        //    _cursorImageWrapper.Square(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
-        //}
-
-        //public void DrawLensOnLensFrame(int x, int y, int sizeX, int sizeY, Color color)
-        //{
-        //    _cursorImageWrapper.Square(x * _lensCellWidth, y * _lensCellHeight, sizeX * _lensCellWidth, sizeY * _lensCellHeight, color);
-        //}
-
-        //public void IntermediateLensFrameSave()
-        //{
-        //    _cursorImageWrapper.IntervalEditing();
-        //}
 
         public void SendCursorFrameToScreen()
         {
@@ -219,6 +206,21 @@ namespace WindowsFormsApp1
                 _textBoxes[1].Text = _data.GetText(fps);
                 _textBoxes[1].Update();
             }
+        }
+
+        public void PrintObjectInfo(Bot1 bot)
+        {
+            //_cnt++;
+            //if (_cnt % _data.ReportFrequencyCurrent == 0)
+            //{
+            //    var tms = (DateTime.Now - _dt).TotalSeconds;
+            //    if (tms == 0) throw new Exception("tms == 0");
+            //    var fps = _data.ReportFrequencyCurrent / tms;
+            //    _dt = DateTime.Now;
+
+            //    _textBoxes[2].Text = _test.GetText();
+            //    _textBoxes[2].Update();
+            //}
         }
 
         public void Dispose()

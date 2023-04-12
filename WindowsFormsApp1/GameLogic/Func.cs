@@ -105,7 +105,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public int GetRandomBotCodeIndex()
 		{
-			return _rnd.Next(_data.CodeLength);
+			return _rnd.Next(_data.GenomLength);
 		}
 
 		public bool Mutation()

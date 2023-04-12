@@ -44,7 +44,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 		public byte GetNextCommand(int pointer)
 		{
-			return Code[pointer + 1 >= _data.CodeLength ? 0 : pointer + 1];
+			return Code[pointer + 1 >= _data.GenomLength ? 0 : pointer + 1];
 		}
 
 		public bool IsRelative(Genom genom2)
@@ -59,13 +59,13 @@ namespace WindowsFormsApp1.GameLogic
 		// Создание нового генома, абсолютно нового или мутированную копию предка
 		private void CreateGenom(Genom parent)
 		{
-			Code = new byte[_data.CodeLength];
+			Code = new byte[_data.GenomLength];
 			GenomHash = Guid.NewGuid();
 			Color = _func.GetRandomColor();
 
 			if (parent == null)
 			{
-				for (var i = 0; i < _data.CodeLength; i++)
+				for (var i = 0; i < _data.GenomLength; i++)
 				{
 					Code[i] = _func.GetRandomBotCode();
 				}
@@ -74,7 +74,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			else
 			{
-				for (var i = 0; i < _data.CodeLength; i++)
+				for (var i = 0; i < _data.GenomLength; i++)
 				{
 					Code[i] = parent.Code[i];
 				}

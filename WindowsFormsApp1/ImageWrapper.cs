@@ -152,8 +152,11 @@ namespace WindowsFormsApp1
 			}
 		}
 
+
+        //DRAWING//////////////////////////////////////////////////////////////////
+
 		/// <summary>
-		/// Заносит квадрат
+		/// Рисует закрашенный квадрат
 		/// </summary>
 		public unsafe void FillSquare(int x, int y, int size, Color color)
 		{
@@ -181,7 +184,7 @@ namespace WindowsFormsApp1
 				}
 				else
 				{
-					curpos = ((byte*)_bmpData.Scan0) + ind;
+					curpos = (byte*)_bmpData.Scan0 + ind;
 
 					for (var j = 0; j < size; j++)
 					{
@@ -198,10 +201,10 @@ namespace WindowsFormsApp1
 			}
 		}
 
-		/// <summary>
-		/// Заносит пустой квадрат
-		/// </summary>
-		public unsafe void Square(int x, int y, int sizeX, int sizeY, Color color)
+        /// <summary>
+        /// Рисует пустой квадрат
+        /// </summary>
+		public unsafe void EmptySquare(int x, int y, int sizeX, int sizeY, Color color)
 		{
 			byte* curpos;
 

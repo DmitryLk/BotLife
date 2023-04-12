@@ -29,7 +29,7 @@ namespace WindowsFormsApp1
 		public int SeedWallsNumber;
 		public int SeedPoisonNumber;
 
-		public int CodeLength;
+		public int GenomLength;
 		public int MaxCode;
 		public int MaxUncompleteJump;
 		public int MutationProbabilityPercent;

@@ -134,11 +134,13 @@ namespace WindowsFormsApp1
                     if (cursorCont >= 1 && cursorCont <= _data.CurrentNumberOfBots)
                     {
                         var bot = (Bot1)_data.Bots[cursorCont];
-                        DrawBotCursorInfo(bot.Genom);
+                        DrawBotCursorInfo(bot.Genom, bot.Pointer);
+                        _presenter.PrintObjectInfo(bot);
                     }
                     else
                     {
                         DrawEmptyCursorInfo();
+                        _presenter.PrintObjectInfo(null);
                     }
                 }
             }
@@ -179,27 +181,19 @@ namespace WindowsFormsApp1
 
 
         // информация по курсору
-        private void DrawBotCursorInfo(Genom genom)
+        private void DrawBotCursorInfo(Genom genom, int cur)
         {
             _presenter.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
             Color? color;
-            // Выберем из _data.World[nX, nY] все что попадет в лупу
-            for (var y = _data.LensY; y < _data.LensY + _data.LensHeight; y++)
+
+            for (var i = 0; i < _data.GenomLength; i++)
             {
-                for (var x = _data.LensX; x < _data.LensX + _data.LensWidth; x++)
-                {
+                var code = genom.Code[i];
+                var x = i % 8;
+                var y = i / 8;
+                color = i == cur ? Color.Aqua : Color.DarkCyan;
 
-                    var cont = _data.World[x, y];
-
-                    color = cont switch
-                    {
-                        0 => null,
-                        65500 => Color.Green,
-                        _ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? ((Bot1)_data.Bots[cont]).Genom.Color : throw new Exception("var color = cont switch")
-                    };
-
-                    _presenter.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color);
-                }
+                _presenter.DrawCodeOnCursorFrame(x , y , code.ToString(), color);
             }
             _presenter.SendCursorFrameToScreen();
         }

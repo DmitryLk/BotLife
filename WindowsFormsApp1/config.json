@@ -29,7 +29,7 @@
   "SeedPoisonNumber": 0,
 
   // Настройки генома ботов
-  "CodeLength": 64,
+  "GenomLength": 64,
   "MaxCode": 63,
   "MaxUncompleteJump": 10,
   "MutationProbabilityPercent": 1,

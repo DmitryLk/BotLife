@@ -19,13 +19,13 @@ namespace WindowsFormsApp1.GameLogic
 	public class Bot1 : Bot
 	{
 		public Genom Genom;
-		private int _pointer;
+        public int Pointer;
 
 		// Может вызываться только из func.CreateNewBot()
 		public Bot1(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, Genom genom, int pointer, int vx, int vy)
 			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
 		{
-			_pointer = pointer;
+			Pointer = pointer;
 			Genom = genom;
 		}
 
@@ -44,7 +44,7 @@ namespace WindowsFormsApp1.GameLogic
 			do
 			{
 				// 1. Определяем команду которую будет делать бот
-				var cmdCode = Genom.GetCurrentCommand(_pointer);
+				var cmdCode = Genom.GetCurrentCommand(Pointer);
 
 				// 2. Выполняем команду
 				switch (cmdCode)
@@ -570,16 +570,16 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void ShiftCodePointer(int shift)
 		{
-			_pointer = (_pointer + shift) % _data.CodeLength;
+			Pointer = (Pointer + shift) % _data.GenomLength;
 		}
 
 		private Direction GetDirAbsolute()
 		{
-			return (Direction)(((int)Genom.GetNextCommand(_pointer)) % 8);
+			return (Direction)(((int)Genom.GetNextCommand(Pointer)) % 8);
 		}
 		private Direction GetDirRelative()
 		{
-			return (Direction)(((int)Genom.GetNextCommand(_pointer) + (int)_dir) % 8);
+			return (Direction)(((int)Genom.GetNextCommand(Pointer) + (int)_dir) % 8);
 		}
 		private Direction DirIncrement(Direction dir)
 		{

@@ -26,7 +26,7 @@ namespace WindowsFormsApp1
 
 
 			Form2 = new Form2(this);
-			var (lensPictureBox, cursorPictureBox) = Form2.GetLensFormPictureBox();
+			var (lensPictureBox, cursorPictureBox, objTextBox) = Form2.GetControlsLensForm();
 			var test = new Tester();
             var data = new GameData();
             data.Initialize();
@@ -38,7 +38,7 @@ namespace WindowsFormsApp1
                 lensPictureBox, 
                 cursorPictureBox,   
                 new Label[] { }, 
-                new[] { textBox1, textBox2 });
+                new[] { textBox1, textBox2, objTextBox});
 
 			Game = new Game(data, presenter, test);
 

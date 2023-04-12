@@ -38,7 +38,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int SeedWallsNumber;
 		public int SeedPoisonNumber;
 
-		public int CodeLength;
+		public int GenomLength;
 		public int MaxCode;
 		public int MaxUncompleteJump;
 		public int MutationProbabilityPercent;
@@ -177,7 +177,7 @@ namespace WindowsFormsApp1.GameLogic
 			SeedWallsNumber = options.SeedWallsNumber;
 			SeedPoisonNumber = options.SeedPoisonNumber;
 
-			CodeLength = options.CodeLength;
+			GenomLength = options.GenomLength;
 			MaxCode = options.MaxCode;
 			MaxUncompleteJump = options.MaxUncompleteJump;
 			MutationProbabilityPercent = options.MutationProbabilityPercent;
