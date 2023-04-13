@@ -332,7 +332,7 @@ namespace WindowsFormsApp1.GameLogic
             // 1. Узнаем новое направление
             var dir = GetDirRelative();
             // 2. Меняем направление бота
-            _dir = dir;
+            Dir = dir;
             return (2, false);
         }
 
@@ -342,7 +342,7 @@ namespace WindowsFormsApp1.GameLogic
             // 1. Узнаем новое направление
             var dir = GetDirAbsolute();
             // 2. Меняем направление бота
-            _dir = dir;
+            Dir = dir;
             return (2, false);
         }
 
@@ -579,7 +579,7 @@ namespace WindowsFormsApp1.GameLogic
         }
         private Direction GetDirRelative()
         {
-            return (Direction)(((int)Genom.GetNextCommand(Pointer) + (int)_dir) % 8);
+            return (Direction)(((int)Genom.GetNextCommand(Pointer) + (int)Dir) % 8);
         }
         private Direction DirIncrement(Direction dir)
         {
@@ -595,13 +595,18 @@ namespace WindowsFormsApp1.GameLogic
 
             sb.AppendLine($"Pointer: {Pointer}");
             sb.AppendLine($"Energy: {Energy}");
-            sb.AppendLine($"_dir: {_dir}");
+            sb.AppendLine($"_dir: {Dir}");
 
-            sb.AppendLine($"Genom.Bots: {Genom.Bots}");
-            sb.AppendLine($"Genom.Color: {Genom.Color}");
-            sb.AppendLine($"Genom.GenomHash: {Genom.GenomHash}");
-            sb.AppendLine($"Genom.ParentGenomHash: {Genom.ParentGenomHash}");
-            sb.AppendLine($"Genom.GrandParentGenomHash: {Genom.GrandParentGenomHash}");
+            sb.AppendLine($"");
+            sb.AppendLine($"Genom");
+
+
+            sb.AppendLine($"Bots: {Genom.Bots}");
+            sb.AppendLine($"Level: {Genom.Level}");
+            sb.AppendLine($"Color: R{Genom.Color.R} G{Genom.Color.G} B{Genom.Color.B} A{Genom.Color.A}");
+            sb.AppendLine($"Hash: {Genom.GenomHash.ToString().Substring(0, 8)}");
+            sb.AppendLine($"ParentHash: {Genom.ParentGenomHash.ToString().Substring(0, 8)}");
+            sb.AppendLine($"GrandParentHash: {Genom.GrandParentGenomHash.ToString().Substring(0, 8)}");
 
             return sb.ToString();
         }

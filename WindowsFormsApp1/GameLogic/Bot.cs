@@ -17,10 +17,10 @@ namespace WindowsFormsApp1.GameLogic
 		public Point Old;
 		public int Energy;
 		public uint Index;         // Индекс бота (может меняться)
+        public Direction Dir;         // Направление бота
 
 		protected GameData _data;
 		protected Func _func;
-		protected Direction _dir;         // Направление бота
 		protected uint _num;         // Номер бота (остается постоянным)
 		protected int _age;
 		private int _vx;
@@ -30,7 +30,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			_data = data;
 			_func = func;
-			_dir = dir;
+			Dir = dir;
 			_num = botNumber;
 			Index = botIndex;
 			Energy = en;

@@ -23,7 +23,8 @@ namespace WindowsFormsApp1.GameLogic
 		public Guid ParentGenomHash;
 		public Guid GrandParentGenomHash;
 		public Color Color;
-		public int Bots; 
+        public int Bots;
+        public int Level;
 
 		private GameData _data;
 		private Func _func;
@@ -71,7 +72,8 @@ namespace WindowsFormsApp1.GameLogic
 				}
 				ParentGenomHash = Guid.Empty;
 				GrandParentGenomHash = Guid.Empty;
-			}
+                Level = 1;
+            }
 			else
 			{
 				for (var i = 0; i < _data.GenomLength; i++)
@@ -85,7 +87,8 @@ namespace WindowsFormsApp1.GameLogic
 				ParentGenomHash = parent.GenomHash;
 				GrandParentGenomHash = parent.ParentGenomHash;
 				_data.MutationCnt++;
-			}
+                Level = parent.Level + 1;
+            }
 		}
 	}
 }

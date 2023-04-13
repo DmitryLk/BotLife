@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1.Dto;
+using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -175,8 +176,21 @@ namespace WindowsFormsApp1
             _lensImageWrapper.StartEditing(type);
         }
 
-        public void DrawObjectOnLensFrame(int x, int y, Color? color = null)
+        public void DrawObjectOnLensFrame(int x, int y, Color? color, Direction? dir)
         {
+            var (dX, dY) = dir switch
+            {
+                Direction.Up => (0, -1),
+                Direction.UpRight => (1, -1),
+                Direction.Right => (1, 0),
+                Direction.DownRight => (1, 1),
+                Direction.Down => (0, 1),
+                Direction.DownLeft => (-1, 1),
+                Direction.Left => (-1, 0),
+                Direction.UpLeft => (-1, -1),
+                _ => throw new Exception("var (dX, dy) = dir switch"),
+            };
+
             _lensImageWrapper.FillSquare(x * _lensCellWidth + 1, y * _lensCellHeight + 1, _lensCellWidth - 2, color ?? _fon);
         }
 

@@ -151,6 +151,7 @@ namespace WindowsFormsApp1
 
             _PRESENTER.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
             Color? color;
+            Direction? dir;
             // Выберем из _data.World[nX, nY] все что попадет в лупу
             for (var y = _data.LensY; y < _data.LensY + _data.LensHeight; y++)
             {
@@ -158,15 +159,28 @@ namespace WindowsFormsApp1
                 {
 
                     var cont = _data.World[x, y];
+                    color = null;
+                    dir = null;
 
-                    color = cont switch
+                    if (cont == 0)
                     {
-                        0 => null,
-                        65500 => Color.Green,
-                        _ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? ((Bot1)_data.Bots[cont]).Genom.Color : throw new Exception("var color = cont switch")
-                    };
+                    }
+                    else if (cont == 65500)
+                    {
+                        color = Color.Green;
+                    }
+                    else if (cont >= 1 && cont <= _data.CurrentNumberOfBots)
+                    {
+                        color = ((Bot1)_data.Bots[cont]).Genom.Color;
+                        dir = ((Bot1)_data.Bots[cont]).Dir;
+                    }
+                    else
+                    {
+                        throw new Exception("var color = cont switch");
+                    }
 
-                    _PRESENTER.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color);
+
+                    _PRESENTER.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color, dir);
                 }
             }
             _PRESENTER.DrawCursorOnLens(_data.CursorX, _data.CursorY, Color.Black);  // рмсование курсора.
