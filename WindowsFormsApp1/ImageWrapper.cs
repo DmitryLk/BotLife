@@ -3,6 +3,7 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System;
 
+
 namespace WindowsFormsApp1
 {
 	public enum BitmapCopyType
@@ -24,7 +25,9 @@ namespace WindowsFormsApp1
 		//public Color DefaultColor;
 
 		private byte[] _editArray;   //массив для редактирования
-		private byte[] _mainScreenBufferWithoutLens;// промежуточный экран
+        private byte[] _mainScreenBufferWithoutLens;// промежуточный экран
+        private byte[] _clear; // для очистки
+
 
 		private int _stride;
 		private BitmapData _bmpData;
@@ -37,7 +40,7 @@ namespace WindowsFormsApp1
 		/// Создание обертки поверх bitmap.
 		/// </summary>
 		/// <param name="copySourceToOutput">Копирует исходное изображение в выходной буфер</param>
-		public ImageWrapper(Bitmap bmp)
+		public ImageWrapper(Bitmap bmp, bool canClear)
 		{
 			_width = bmp.Width;
 			_height = bmp.Height;
@@ -46,6 +49,13 @@ namespace WindowsFormsApp1
 			_stride = _width * 4;
 
 			_editArray = new byte[_length];
+
+            if (canClear)
+            {
+                _clear = new byte[_length];
+            }
+
+
 			_mainScreenBufferWithoutLens = new byte[_length];
 			//if (_useEditArray)
 			//{
@@ -83,7 +93,7 @@ namespace WindowsFormsApp1
                 Switching_From_EditCopyScreenBitmapWithAdditionalArray();
 				
                 // заново абсолютно всё рисуем на пустом массиве для редактирования
-				_editArray = new byte[_stride * _height];
+				_editArray = new byte[_length];
 			}
 
 			if (type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
@@ -96,8 +106,14 @@ namespace WindowsFormsApp1
 			_type = type;
 		}
 
+        public void ClearBitmap()
+        {
+            _bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            System.Runtime.InteropServices.Marshal.Copy(_clear, 0, _bmpData.Scan0, _length);
+			_bmp.UnlockBits(_bmpData);
+        }
 
-        private void Switching_To_EditCopyScreenBitmapWithAdditionalArray()
+		private void Switching_To_EditCopyScreenBitmapWithAdditionalArray()
         {
             if (_type != BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
             {

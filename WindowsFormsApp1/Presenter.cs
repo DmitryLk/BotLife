@@ -42,7 +42,8 @@ namespace WindowsFormsApp1
         private int _codeCellHeight;
         private int _xStartCodeCell;
         private Brush _textBrush;
-
+        private Font _font;
+        private StringFormat _stringFormat;
 
         private Graphics _cursorGraphics;
         private GameData _data;
@@ -93,7 +94,7 @@ namespace WindowsFormsApp1
             _mainPictureBox.Size = new System.Drawing.Size(mainBitmapWidth, mainBitmapHeight);
             _mainBitmap = new Bitmap(mainBitmapWidth, mainBitmapHeight);
             _mainPictureBox.Image = _mainBitmap;
-            _mainImageWrapper = new ImageWrapper(_mainBitmap);
+            _mainImageWrapper = new ImageWrapper(_mainBitmap, false);
         }
 
         public void ConfigureLensBitmap()
@@ -105,7 +106,7 @@ namespace WindowsFormsApp1
             _lensPictureBox.Size = new System.Drawing.Size(lensBitmapWidth, lensBitmapHeight);
             _lensBitmap = new Bitmap(lensBitmapWidth, lensBitmapHeight);
             _lensPictureBox.Image = _lensBitmap;
-            _lensImageWrapper = new ImageWrapper(_lensBitmap);
+            _lensImageWrapper = new ImageWrapper(_lensBitmap, false);
         }
 
 
@@ -118,16 +119,27 @@ namespace WindowsFormsApp1
             _codeCellHeight = (int)(cursorBitmapHeight / 8);
             _xStartCodeCell = (int)(cursorBitmapWidth * 0.2);
 
-
-
             _cursorPictureBox.Size = new System.Drawing.Size(cursorBitmapWidth, cursorBitmapHeight);
             _cursorBitmap = new Bitmap(cursorBitmapWidth, cursorBitmapHeight);
             _cursorPictureBox.Image = _cursorBitmap;
-            _cursorImageWrapper = new ImageWrapper(_cursorBitmap);
-            
+            _cursorImageWrapper = new ImageWrapper(_cursorBitmap, true);
+
+            //For text
             _cursorGraphics = Graphics.FromImage(_cursorBitmap);
             _textBrush = new SolidBrush(Color.Black);
-
+            _cursorGraphics.SmoothingMode = SmoothingMode.AntiAlias;
+            //_cursorGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            //_cursorGraphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            _cursorGraphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            _cursorGraphics.TextContrast = 0;
+            //_font = new Font("Arial", 10);
+            //_font = new Font("Microsoft Sans Serif", 10);
+            //_font = new Font("Times", 10);
+            //_font = new Font("Calibri", 10);
+            _font = new Font(FontFamily.GenericSansSerif, 10, FontStyle.Bold);
+            _stringFormat = new StringFormat();
+            _stringFormat.LineAlignment = StringAlignment.Center;
+            _stringFormat.Alignment = StringAlignment.Center;
         }
 
         //MAIN////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,71 +197,27 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.StartEditing(type);
         }
 
+        public void ClearGraphicsOnCursorFrame()
+        {
+            //_cursorGraphics.Clear(_fon);
+            //_cursorGraphics.Clear(Color.White);
+            _cursorImageWrapper.ClearBitmap();
+        }
+
         public void DrawCodeOnCursorFrame(int x, int y, Color? color = null)
         {
             _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
         }
 
-        public void DrawTextOnCursorFrame(int x, int y, string code, Color? color = null)
+        public void DrawTextOnCursorFrame(int x, int y, string code)
         {
-
-            //public void DrawString(string? s, System.Drawing.Font font, System.Drawing.Brush brush, System.Drawing.PointF point) { throw new System.PlatformNotSupportedException(System.SR.SystemDrawingCommon_PlatformNotSupported); }
-            //public void DrawString(string? s, System.Drawing.Font font, System.Drawing.Brush brush, System.Drawing.PointF point, System.Drawing.StringFormat? format) { throw new System.PlatformNotSupportedException(System.SR.SystemDrawingCommon_PlatformNotSupported); }
-            //public void DrawString(string? s, System.Drawing.Font font, System.Drawing.Brush brush, System.Drawing.RectangleF layoutRectangle) { throw new System.PlatformNotSupportedException(System.SR.SystemDrawingCommon_PlatformNotSupported); }
-            //public void DrawString(string? s, System.Drawing.Font font, System.Drawing.Brush brush, System.Drawing.RectangleF layoutRectangle, System.Drawing.StringFormat? format) { throw new System.PlatformNotSupportedException(System.SR.SystemDrawingCommon_PlatformNotSupported); }
-            //public void DrawString(string? s, System.Drawing.Font font, System.Drawing.Brush brush, float x, float y) { throw new System.PlatformNotSupportedException(System.SR.SystemDrawingCommon_PlatformNotSupported); }
-            //public void DrawString(string? s, System.Drawing.Font font, System.Drawing.Brush brush, float x, float y, System.Drawing.StringFormat? format) { throw new System.PlatformNotSupportedException(System.SR.SystemDrawingCommon_PlatformNotSupported); }
-
-
-            //var font = new Font("Arial", 10);
-            //var font = new Font("Microsoft Sans Serif", 10);
-            //var font = new Font("Times", 10);
-            var font = new Font(FontFamily.GenericSansSerif, 10, FontStyle.Bold);
-
-            StringFormat stringFormat = new StringFormat();
-            stringFormat.LineAlignment = StringAlignment.Center;
-            stringFormat.Alignment = StringAlignment.Center;
-
-            //_cursorGraphics.SmoothingMode = SmoothingMode.AntiAlias;
-            //_cursorGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            //_cursorGraphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            _cursorGraphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-
-            _cursorGraphics.TextContrast = 0;
-
-            _cursorGraphics.DrawString(code, font, _textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, stringFormat);
-
+            _cursorGraphics.DrawString(code, _font, _textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, _stringFormat);
             //_cursorGraphics.Flush();
-
-            //image.Image = bmp;
-
-            //imageToByteArray
-
-            //var bm = CreateBitmapImage("MyText");
-            //bm.Save(Response.OutputStream, ImageFormat.Jpeg);
-            //Response.ContentType = "image/jpeg";
-            //Response.Flush();
-            //Response.End();
-
-            //Font font = new Font(fontname, fontsize);
-            //graphics.FillRectangle(new SolidBrush(bgcolor), 0, 0, bmp.Width, bmp.Height);
-            //graphics.DrawString(txt, font, new SolidBrush(fcolor), 0, 0);
-            //graphics.Flush();
-            //font.Dispose();
-            //graphics.Dispose();
         }
 
         public void SendCursorFrameToScreen()
         {
             _cursorImageWrapper.EndEditing();
-            _cursorPictureBox.Refresh();
-        }
-        public void SendCursorFrameToScreenWithoutRefresh()
-        {
-            _cursorImageWrapper.EndEditing();
-        }
-        public void CursorFrameRefreshScreen()
-        {
             _cursorPictureBox.Refresh();
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,6 +242,17 @@ namespace WindowsFormsApp1
 
         public void PrintObjectInfo(Bot1 bot)
         {
+            if (bot != null)
+            {
+                _textBoxes[2].Text = bot.GetText();
+                _textBoxes[2].Update();
+            }
+            else
+            {
+                _textBoxes[2].Text = "";
+                _textBoxes[2].Update();
+            }
+
             //_cnt++;
             //if (_cnt % _data.ReportFrequencyCurrent == 0)
             //{

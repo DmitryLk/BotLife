@@ -182,34 +182,32 @@ namespace WindowsFormsApp1
             {
                 var bot = (Bot1)_data.Bots[cursorCont];
 
-                _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
+                //TEXT
+                _PRESENTER.ClearGraphicsOnCursorFrame();
+                for (var i = 0; i < _data.GenomLength; i++)
+                {
+                    var code = bot.Genom.Code[i];
+                    var x = i % 8;
+                    var y = i / 8;
+                    _PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString());
+                }
+
+                //IMAGES
+                _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
                 Color? color;
 
                 for (var i = 0; i < _data.GenomLength; i++)
                 {
                     var x = i % 8;
                     var y = i / 8;
-                    color = i == bot.Pointer ? Color.Aqua : Color.DarkCyan;
+                    color = i == bot.Pointer ? Color.Red : Color.DarkCyan;
 
                     _PRESENTER.DrawCodeOnCursorFrame(x, y, color);
                 }
+                _PRESENTER.SendCursorFrameToScreen();
 
-                _PRESENTER.SendCursorFrameToScreenWithoutRefresh();
-
-                for (var i = 0; i < _data.GenomLength; i++)
-                {
-                    var code = bot.Genom.Code[i];
-                    var x = i % 8;
-                    var y = i / 8;
-                    color = i == bot.Pointer ? Color.Aqua : Color.DarkCyan;
-
-                    _PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), color);
-                }
-
-                _PRESENTER.CursorFrameRefreshScreen();
 
                 _PRESENTER.PrintObjectInfo(bot);
-
             }
             else
             {
