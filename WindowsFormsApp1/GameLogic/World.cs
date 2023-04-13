@@ -14,10 +14,10 @@ namespace WindowsFormsApp1.GameLogic
 		private Seeder _seeder;
 		private static GameData _data;
 
-		public World(GameData data)
+		public World(GameData data, Func func)
 		{
 			_data = data;
-			_func = new Func(_data);
+			_func = func;
 			_seeder = new Seeder(_data, _func);
 		}
 

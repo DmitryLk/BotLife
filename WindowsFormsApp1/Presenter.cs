@@ -48,6 +48,7 @@ namespace WindowsFormsApp1
 
         private Graphics _cursorGraphics;
         private GameData _data;
+        private Func _func;
 
         private Color _fon;
         private Label[] _labels;
@@ -60,6 +61,7 @@ namespace WindowsFormsApp1
 
         public Presenter(
             GameData data,
+            Func func,
             Tester test,
             PictureBox mainPictureBox,
             PictureBox lensPictureBox,
@@ -80,6 +82,7 @@ namespace WindowsFormsApp1
 
             _test = test;
             _data = data;
+            _func = func;
 
             ConfigureMainBitmap();
             ConfigureLensBitmap();
@@ -178,20 +181,20 @@ namespace WindowsFormsApp1
 
         public void DrawObjectOnLensFrame(int x, int y, Color? color, Direction? dir)
         {
-            var (dX, dY) = dir switch
-            {
-                Direction.Up => (0, -1),
-                Direction.UpRight => (1, -1),
-                Direction.Right => (1, 0),
-                Direction.DownRight => (1, 1),
-                Direction.Down => (0, 1),
-                Direction.DownLeft => (-1, 1),
-                Direction.Left => (-1, 0),
-                Direction.UpLeft => (-1, -1),
-                _ => throw new Exception("var (dX, dy) = dir switch"),
-            };
+
 
             _lensImageWrapper.FillSquare(x * _lensCellWidth + 1, y * _lensCellHeight + 1, _lensCellWidth - 2, color ?? _fon);
+
+            if (dir.HasValue)
+            {
+                var (dX, dY) = _func.GetDeltaDirection(dir.Value);
+
+                _lensImageWrapper.Line(_lensCellWidth * x + _lensCellWidth / 2,
+                    _lensCellHeight * y + _lensCellHeight / 2,
+                    _lensCellWidth * x + _lensCellWidth * (1 + dX) / 2,
+                    _lensCellHeight * y + _lensCellHeight * (1 + dY) / 2,
+                    Color.Red);
+            }
         }
 
         public void DrawCursorOnLens(int x, int y, Color? color = null)

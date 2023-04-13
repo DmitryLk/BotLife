@@ -25,6 +25,7 @@ namespace WindowsFormsApp1
         public Presenter _PRESENTER;
         public World _world;
         public GameData _data;
+        public Func _func;
         public Tester _test;
         public System.Windows.Forms.Timer timer;
 
@@ -32,9 +33,10 @@ namespace WindowsFormsApp1
         private readonly object _sync = new object();
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
-        public Game(GameData data, Presenter presenter, Tester test)
+        public Game(GameData data, Func func, Tester test, Presenter presenter)
         {
             _data = data;
+            _func = func;
             _PRESENTER = presenter;
 
             //timer = new System.Windows.Forms.Timer();
@@ -42,7 +44,7 @@ namespace WindowsFormsApp1
             //timer.Interval = 1;
             //timer.Enabled = false;
 
-            _world = new World(_data);
+            _world = new World(_data, _func);
 
             _test = test;
             _test.InitInterval(0, "BotsAction();");

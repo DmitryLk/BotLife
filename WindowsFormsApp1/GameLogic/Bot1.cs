@@ -537,18 +537,7 @@ namespace WindowsFormsApp1.GameLogic
         // Метод вернет всегда координаты отличные от текущих
         private (int nX, int nY) GetCoordinatesByDirection(Direction dir)
         {
-            var (dX, dY) = dir switch
-            {
-                Direction.Up => (0, -1),
-                Direction.UpRight => (1, -1),
-                Direction.Right => (1, 0),
-                Direction.DownRight => (1, 1),
-                Direction.Down => (0, 1),
-                Direction.DownLeft => (-1, 1),
-                Direction.Left => (-1, 0),
-                Direction.UpLeft => (-1, -1),
-                _ => throw new Exception("var (dX, dy) = dir switch"),
-            };
+            var (dX, dY) = _func.GetDeltaDirection(dir);
 
             var nX = P.X + dX;
             var nY = P.Y + dY;
@@ -590,6 +579,7 @@ namespace WindowsFormsApp1.GameLogic
         {
             var sb = new StringBuilder();
 
+            sb.AppendLine($"Age: {_age}");
             sb.AppendLine($"Num: {_num}");
             sb.AppendLine($"Index: {Index}");
 
@@ -597,16 +587,15 @@ namespace WindowsFormsApp1.GameLogic
             sb.AppendLine($"Energy: {Energy}");
             sb.AppendLine($"_dir: {Dir}");
 
-            sb.AppendLine($"");
-            sb.AppendLine($"Genom");
-
-
+            sb.AppendLine("");
+            sb.AppendLine($"Genom {Genom.Level}");
             sb.AppendLine($"Bots: {Genom.Bots}");
-            sb.AppendLine($"Level: {Genom.Level}");
+
+            sb.AppendLine("");
             sb.AppendLine($"Color: R{Genom.Color.R} G{Genom.Color.G} B{Genom.Color.B} A{Genom.Color.A}");
             sb.AppendLine($"Hash: {Genom.GenomHash.ToString().Substring(0, 8)}");
-            sb.AppendLine($"ParentHash: {Genom.ParentGenomHash.ToString().Substring(0, 8)}");
-            sb.AppendLine($"GrandParentHash: {Genom.GrandParentGenomHash.ToString().Substring(0, 8)}");
+            sb.AppendLine($"Parent: {Genom.ParentGenomHash.ToString().Substring(0, 8)}");
+            sb.AppendLine($"Grand: {Genom.GrandParentGenomHash.ToString().Substring(0, 8)}");
 
             return sb.ToString();
         }

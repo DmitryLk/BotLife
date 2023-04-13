@@ -87,6 +87,25 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
+        public (int, int) GetDeltaDirection(Direction dir)
+        {
+            return dir switch
+            {
+                Direction.Up => (0, -1),
+                Direction.UpRight => (1, -1),
+                Direction.Right => (1, 0),
+                Direction.DownRight => (1, 1),
+                Direction.Down => (0, 1),
+                Direction.DownLeft => (-1, 1),
+                Direction.Left => (-1, 0),
+                Direction.UpLeft => (-1, -1),
+                _ => throw new Exception("var (dX, dy) = dir switch"),
+            };
+
+
+
+		}
+
 		#region Random
 		public Direction GetRandomDirection()
 		{

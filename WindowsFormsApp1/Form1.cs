@@ -29,10 +29,13 @@ namespace WindowsFormsApp1
 			var (lensPictureBox, cursorPictureBox, objTextBox) = Form2.GetControlsLensForm();
 			var test = new Tester();
             var data = new GameData();
-            data.Initialize();
+            var func = new Func(data);
+
+			data.Initialize();
 
 			var presenter = new Presenter(
                 data,
+				func,
                 test,
 				pictureBox1, 
                 lensPictureBox, 
@@ -40,7 +43,7 @@ namespace WindowsFormsApp1
                 new Label[] { }, 
                 new[] { textBox1, textBox2, objTextBox});
 
-			Game = new Game(data, presenter, test);
+			Game = new Game(data, func, test, presenter);
 
 
 			label2.Text = $@"	S - start
