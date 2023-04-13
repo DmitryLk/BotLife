@@ -205,7 +205,22 @@ namespace WindowsFormsApp1
                     var code = bot.Genom.Code[i];
                     var x = i % 8;
                     var y = i / 8;
-                    _PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString());
+
+
+                    var textColor = code switch
+                    {
+                        23 => Color.Green,  //поворот
+                        24 => Color.Green,
+                        26 => Color.Brown,  //шаг
+                        27 => Color.Brown,
+                        28 => Color.Red,    //съесть
+                        29 => Color.Red,
+                        30 => Color.BlueViolet,  //посмотреть
+                        31 => Color.BlueViolet,
+                        _ => Color.Black
+                    };
+
+                    _PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
                 }
 
                 //IMAGES

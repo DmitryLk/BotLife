@@ -43,7 +43,8 @@ namespace WindowsFormsApp1
         private int _codeCellHeight;
         private int _xStartCodeCell;
         private Brush _textBrush;
-        private Font _font;
+        private Font _font1;
+        private Font _font2;
         private StringFormat _stringFormat;
 
         private Graphics _cursorGraphics;
@@ -140,7 +141,8 @@ namespace WindowsFormsApp1
             //_font = new Font("Microsoft Sans Serif", 10);
             //_font = new Font("Times", 10);
             //_font = new Font("Calibri", 10);
-            _font = new Font(FontFamily.GenericSansSerif, 10, FontStyle.Bold);
+            _font1 = new Font(FontFamily.GenericSansSerif, 14, FontStyle.Bold);
+            _font2 = new Font("Calibri", 10, FontStyle.Regular);
             _stringFormat = new StringFormat();
             _stringFormat.LineAlignment = StringAlignment.Center;
             _stringFormat.Alignment = StringAlignment.Center;
@@ -226,9 +228,10 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
         }
 
-        public void DrawTextOnCursorFrame(int x, int y, string code)
+        public void DrawTextOnCursorFrame(int x, int y, string code, Color color)
         {
-            _cursorGraphics.DrawString(code, _font, _textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, _stringFormat);
+            var textBrush = new SolidBrush(color);
+            _cursorGraphics.DrawString(code, color == Color.Black ? _font2 : _font1, textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, _stringFormat);
             //_cursorGraphics.Flush();
         }
 
