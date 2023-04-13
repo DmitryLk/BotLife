@@ -22,10 +22,10 @@ namespace WindowsFormsApp1
 {
     public class Game
     {
-        public Presenter _presenter;
+        public Presenter _PRESENTER;
         public World _world;
         public GameData _data;
-        public Tester TEST;
+        public Tester _test;
         public System.Windows.Forms.Timer timer;
 
 
@@ -35,7 +35,7 @@ namespace WindowsFormsApp1
         public Game(GameData data, Presenter presenter, Tester test)
         {
             _data = data;
-            _presenter = presenter;
+            _PRESENTER = presenter;
 
             //timer = new System.Windows.Forms.Timer();
             //timer.Tick += new System.EventHandler(timer_Tick);
@@ -44,12 +44,12 @@ namespace WindowsFormsApp1
 
             _world = new World(_data);
 
-            TEST = test;
-            TEST.InitInterval(0, "BotsAction();");
-            TEST.InitInterval(1, "RedrawWorld();");
-            TEST.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
-            TEST.InitInterval(3, "PaintFrame();");
-            TEST.InitInterval(4, "PrintInfo();");
+            _test = test;
+            _test.InitInterval(0, "BotsAction();");
+            _test.InitInterval(1, "RedrawWorld();");
+            _test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
+            _test.InitInterval(3, "PaintFrame();");
+            _test.InitInterval(4, "PrintInfo();");
 
         }
 
@@ -83,79 +83,73 @@ namespace WindowsFormsApp1
 
         private async Task Step()
         {
-            TEST.BeginInterval(0);
+            _test.BeginInterval(0);
             await Task.Run(() => _world.Step());
-            TEST.EndBeginInterval(0, 1);
+            _test.EndBeginInterval(0, 1);
+
             //await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
             //_world.Step();
+
             if (_data.Drawed)
             {
                 RedrawWorld(_data.Lens);
             }
             else
             {
-                TEST.EndBeginInterval(1, 2);
-                TEST.EndBeginInterval(2, 3);
-                TEST.EndBeginInterval(3, 4);
+                _test.EndBeginInterval(1, 2);
+                _test.EndBeginInterval(2, 3);
+                _test.EndBeginInterval(3, 4);
             }
-            _presenter.PrintInfo();
-            TEST.EndBeginInterval(4, 0);
+            
+            _PRESENTER.PrintInfo();
+            
+            _test.EndBeginInterval(4, 0);
             //await Task.Delay(5000);
         }
 
         private void RedrawWorld(bool additionalGraphics)
         {
-            _presenter.StartNewFrame(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-            TEST.EndBeginInterval(1, 2);
+            _PRESENTER.StartNewFrame(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+            
+            _test.EndBeginInterval(1, 2);
 
-            // Рисование изменений на битмапе экрана (сразу не отображаются)
+            // Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
+            //======================================
             _data.NumberOfChangedCellsForInfo = _data.NumberOfChangedCells;
             for (var i = 0; i < _data.NumberOfChangedCells; i++)
             {
                 var obj = _data.ChangedCells[i];
 
-                _presenter.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
+                _PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
                 _data.ChWorld[obj.X, obj.Y] = 0;
             }
             _data.NumberOfChangedCells = 0;
             //======================================
 
-            TEST.EndBeginInterval(2, 3);
+            _test.EndBeginInterval(2, 3);
 
-            if (additionalGraphics)
-            {
-                _presenter.IntermediateFrameSave();  // сохранить в промежуточный массив экран без дополнительной графики
-                if (_data.Lens)
-                {
-                    DrawLens();
+            if (additionalGraphics) AdditionalGraphics();
 
-                    var cursorCont = _data.World[_data.LensX + _data.CursorX, _data.LensY + _data.CursorY];
-
-                    if (cursorCont >= 1 && cursorCont <= _data.CurrentNumberOfBots)
-                    {
-                        var bot = (Bot1)_data.Bots[cursorCont];
-                        DrawBotCursorInfo(bot.Genom, bot.Pointer);
-                        _presenter.PrintObjectInfo(bot);
-                    }
-                    else
-                    {
-                        DrawEmptyCursorInfo();
-                        _presenter.PrintObjectInfo(null);
-                    }
-                }
-            }
-
-            _presenter.SendFrameToScreen();
+            _PRESENTER.SendFrameToScreen();
             //await Task.Delay(1);
-            TEST.EndBeginInterval(3, 4);
+            _test.EndBeginInterval(3, 4);
         }
 
+        private void AdditionalGraphics()
+        {
+            _PRESENTER.IntermediateFrameSave();  // сохранить в промежуточный массив экран без дополнительной графики
+            if (_data.Lens)
+            {
+                DrawLens();
+                if (_data.PausedMode) DrawCursorInfo();
+            }
+        }
 
         private void DrawLens()
         {
-            _presenter.DrawLensOnFrame(_data.LensX, _data.LensY, _data.LensWidth, _data.LensHeight, Color.Black);  // рмсование лупы
+            _PRESENTER.DrawLensOnFrame(_data.LensX, _data.LensY, _data.LensWidth, _data.LensHeight, Color.Black);  // рмсование лупы
 
-            _presenter.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
+            _PRESENTER.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
             Color? color;
             // Выберем из _data.World[nX, nY] все что попадет в лупу
             for (var y = _data.LensY; y < _data.LensY + _data.LensHeight; y++)
@@ -172,35 +166,59 @@ namespace WindowsFormsApp1
                         _ => cont >= 1 && cont <= _data.CurrentNumberOfBots ? ((Bot1)_data.Bots[cont]).Genom.Color : throw new Exception("var color = cont switch")
                     };
 
-                    _presenter.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color);
+                    _PRESENTER.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color);
                 }
             }
-            _presenter.DrawCursorOnLens(_data.CursorX, _data.CursorY, Color.Black);  // рмсование курсора.
-            _presenter.SendLensFrameToScreen();
+            _PRESENTER.DrawCursorOnLens(_data.CursorX, _data.CursorY, Color.Black);  // рмсование курсора.
+            _PRESENTER.SendLensFrameToScreen();
         }
-
 
         // информация по курсору
-        private void DrawBotCursorInfo(Genom genom, int cur)
+        private void DrawCursorInfo()
         {
-            _presenter.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
-            Color? color;
+            var cursorCont = _data.World[_data.LensX + _data.CursorX, _data.LensY + _data.CursorY];
 
-            for (var i = 0; i < _data.GenomLength; i++)
+            if (cursorCont >= 1 && cursorCont <= _data.CurrentNumberOfBots)
             {
-                var code = genom.Code[i];
-                var x = i % 8;
-                var y = i / 8;
-                color = i == cur ? Color.Aqua : Color.DarkCyan;
+                var bot = (Bot1)_data.Bots[cursorCont];
 
-                _presenter.DrawCodeOnCursorFrame(x , y , code.ToString(), color);
+                _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
+                Color? color;
+
+                for (var i = 0; i < _data.GenomLength; i++)
+                {
+                    var x = i % 8;
+                    var y = i / 8;
+                    color = i == bot.Pointer ? Color.Aqua : Color.DarkCyan;
+
+                    _PRESENTER.DrawCodeOnCursorFrame(x, y, color);
+                }
+
+                _PRESENTER.SendCursorFrameToScreenWithoutRefresh();
+
+                for (var i = 0; i < _data.GenomLength; i++)
+                {
+                    var code = bot.Genom.Code[i];
+                    var x = i % 8;
+                    var y = i / 8;
+                    color = i == bot.Pointer ? Color.Aqua : Color.DarkCyan;
+
+                    _PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), color);
+                }
+
+                _PRESENTER.CursorFrameRefreshScreen();
+
+                _PRESENTER.PrintObjectInfo(bot);
+
             }
-            _presenter.SendCursorFrameToScreen();
+            else
+            {
+                _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
+                _PRESENTER.SendCursorFrameToScreen();
+                _PRESENTER.PrintObjectInfo(null);
+            }
         }
 
-        private void DrawEmptyCursorInfo()
-        {
-        }
 
         #region for Form
             public void MutationToggle()
