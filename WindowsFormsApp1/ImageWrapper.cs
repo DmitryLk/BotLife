@@ -281,7 +281,7 @@ namespace WindowsFormsApp1
         /// </summary>
         public unsafe void Line(int x1, int y1, int x2, int y2, Color color)
         {
-            if (x1 < 0 || x1 >= _width || y1 < 0 || y1 >= _height || x2 < 0 || x2 >= _width || y2 < 0 || y2 >= _height) return;
+            if (x1 < 0 || x1 > _width || y1 < 0 || y1 > _height || x2 < 0 || x2 > _width || y2 < 0 || y2 > _height) return;
 
             int dx = x2 - x1;
             int dy = y2 - y1;

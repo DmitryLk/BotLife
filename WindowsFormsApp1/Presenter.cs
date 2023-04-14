@@ -223,7 +223,7 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.ClearBitmap();
         }
 
-        public void DrawCodeOnCursorFrame(int x, int y, Color? color = null)
+        public void DrawCodeCellOnCursorFrame(int x, int y, Color? color = null)
         {
             _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
         }

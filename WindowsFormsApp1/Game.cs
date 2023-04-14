@@ -233,10 +233,11 @@ namespace WindowsFormsApp1
                     var y = i / 8;
                     color = i == bot.Pointer ? Color.Red : Color.DarkCyan;
 
-                    _PRESENTER.DrawCodeOnCursorFrame(x, y, color);
+                    _PRESENTER.DrawCodeCellOnCursorFrame(x, y, color);
                 }
                 _PRESENTER.SendCursorFrameToScreen();
 
+                var hist = bot.Hist
 
                 _PRESENTER.PrintObjectInfo(bot);
             }
