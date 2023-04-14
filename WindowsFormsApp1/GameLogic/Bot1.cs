@@ -42,6 +42,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			historyPointerY++;
 			if (historyPointerY == maxy) historyPointerY = 0;
+			historyPointerX =0;
 		}
 
 		public (byte[], int) GetLastStepPtrs()
@@ -625,7 +626,7 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Bots: {Genom.Bots}");
 
 			sb.AppendLine("");
-			sb.AppendLine($"Color: R{Genom.Color.R} G{Genom.Color.G} B{Genom.Color.B} A{Genom.Color.A}");
+			sb.AppendLine($"Color: R{Genom.Color.R} G{Genom.Color.G} B{Genom.Color.B}");
 			sb.AppendLine($"Hash: {Genom.GenomHash.ToString().Substring(0, 8)}");
 			sb.AppendLine($"Parent: {Genom.ParentGenomHash.ToString().Substring(0, 8)}");
 			sb.AppendLine($"Grand: {Genom.GrandParentGenomHash.ToString().Substring(0, 8)}");

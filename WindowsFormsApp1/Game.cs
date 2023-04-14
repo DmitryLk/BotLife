@@ -237,7 +237,7 @@ namespace WindowsFormsApp1
                 }
                 _PRESENTER.SendCursorFrameToScreen();
 
-                var hist = bot.Hist
+                //var hist = bot.Hist
 
                 _PRESENTER.PrintObjectInfo(bot);
             }
