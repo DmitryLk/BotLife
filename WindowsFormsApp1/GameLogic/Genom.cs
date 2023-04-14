@@ -20,8 +20,9 @@ namespace WindowsFormsApp1.GameLogic
 
 		public byte[] Code;
 		public Guid GenomHash;
-		public Guid ParentGenomHash;
-		public Guid GrandParentGenomHash;
+		public Guid ParentHash;
+        public Guid GrandHash;
+        public Guid PraHash;
 		public Color Color;
         public int Bots;
         public int Level;
@@ -50,9 +51,9 @@ namespace WindowsFormsApp1.GameLogic
 
 		public bool IsRelative(Genom genom2)
 		{
-			if (GenomHash == genom2.GenomHash || GenomHash == genom2.ParentGenomHash || GenomHash == genom2.GrandParentGenomHash) return true;
-			if (ParentGenomHash == genom2.GenomHash || ParentGenomHash == genom2.ParentGenomHash || ParentGenomHash == genom2.GrandParentGenomHash) return true;
-			if (GrandParentGenomHash == genom2.GenomHash || GrandParentGenomHash == genom2.ParentGenomHash || GrandParentGenomHash == genom2.GrandParentGenomHash) return true;
+			if (GenomHash == genom2.GenomHash || GenomHash == genom2.ParentHash || GenomHash == genom2.GrandHash) return true;
+			if (ParentHash == genom2.GenomHash || ParentHash == genom2.ParentHash || ParentHash == genom2.GrandHash) return true;
+			if (GrandHash == genom2.GenomHash || GrandHash == genom2.ParentHash || GrandHash == genom2.GrandHash) return true;
 			return false;
 		}
 
@@ -70,8 +71,9 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					Code[i] = _func.GetRandomBotCode();
 				}
-				ParentGenomHash = Guid.Empty;
-				GrandParentGenomHash = Guid.Empty;
+				ParentHash = Guid.Empty;
+				GrandHash = Guid.Empty;
+                PraHash = GenomHash;
                 Level = 1;
             }
 			else
@@ -84,8 +86,9 @@ namespace WindowsFormsApp1.GameLogic
 				// один байт в геноме подменяем
 				Code[_func.GetRandomBotCodeIndex()] = _func.GetRandomBotCode();
 
-				ParentGenomHash = parent.GenomHash;
-				GrandParentGenomHash = parent.ParentGenomHash;
+				ParentHash = parent.GenomHash;
+				GrandHash = parent.ParentHash;
+				PraHash = parent.PraHash;
 				_data.MutationCnt++;
                 Level = parent.Level + 1;
             }

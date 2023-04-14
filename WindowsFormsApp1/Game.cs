@@ -102,9 +102,9 @@ namespace WindowsFormsApp1
                 _test.EndBeginInterval(2, 3);
                 _test.EndBeginInterval(3, 4);
             }
-            
+
             _PRESENTER.PrintInfo();
-            
+
             _test.EndBeginInterval(4, 0);
             //await Task.Delay(5000);
         }
@@ -112,7 +112,7 @@ namespace WindowsFormsApp1
         private void RedrawWorld(bool additionalGraphics)
         {
             _PRESENTER.StartNewFrame(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-            
+
             _test.EndBeginInterval(1, 2);
 
             // Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
@@ -193,7 +193,6 @@ namespace WindowsFormsApp1
         private void DrawCursorInfo()
         {
             var cursorCont = _data.World[_data.LensX + _data.CursorX, _data.LensY + _data.CursorY];
-
             if (cursorCont >= 1 && cursorCont <= _data.CurrentNumberOfBots)
             {
                 var bot = (Bot1)_data.Bots[cursorCont];
@@ -221,24 +220,44 @@ namespace WindowsFormsApp1
                     };
 
                     _PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
+                    _PRESENTER.DrawSmallTextOnCursorFrame(x, y, i.ToString(), textColor);
                 }
 
                 //IMAGES
                 _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-                Color? color;
-
+                Color color;
+                int x1, y1, x2, y2;
                 for (var i = 0; i < _data.GenomLength; i++)
                 {
-                    var x = i % 8;
-                    var y = i / 8;
+                    x1 = i % 8;
+                    y1 = i / 8;
                     color = i == bot.Pointer ? Color.Red : Color.DarkCyan;
 
-                    _PRESENTER.DrawCodeCellOnCursorFrame(x, y, color);
+                    _PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
                 }
+
+                var (hist, histPtrCnt) = bot.Hist.GetLastStepPtrs();
+                byte ptr1 = hist[0];
+                byte ptr2;
+                for (var i = 1; i < histPtrCnt; i++)
+                {
+                    ptr2 = hist[i];
+
+                    x1 = ptr1 % 8;
+                    y1 = ptr1 / 8;
+                    x2 = ptr2 % 8;
+                    y2 = ptr2 / 8;
+                    color = i == 1
+                        ? Color.Blue
+                        : i == histPtrCnt - 1
+                            ? Color.Red
+                            : Color.DarkOrchid;
+                    ptr1 = ptr2;
+
+                    _PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
+                }
+
                 _PRESENTER.SendCursorFrameToScreen();
-
-                //var hist = bot.Hist
-
                 _PRESENTER.PrintObjectInfo(bot);
             }
             else
@@ -251,7 +270,7 @@ namespace WindowsFormsApp1
 
 
         #region for Form
-            public void MutationToggle()
+        public void MutationToggle()
         {
             _data.Mutation = !_data.Mutation;
         }

@@ -20,8 +20,8 @@ namespace WindowsFormsApp1.GameLogic
 		private const int maxx = 15;
 		private const int maxy = 10;
 
-		public byte[][] codeHistory = new byte[maxy][];
-		public int historyPointerX = 0;
+        public byte[][] codeHistory = new byte[maxy][];
+        public byte[] ptrs = new byte[maxy];
 		public int historyPointerY = -1;
 
 		public CodeHistory()
@@ -32,22 +32,22 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		public void SavePtr(byte ptr)
+		public void SavePtr(int ptr)
 		{
-			if (historyPointerX == maxx) throw new Exception("PutPtr(byte ptr) ");
-			codeHistory[historyPointerY][historyPointerX] = ptr;
-			historyPointerX++;
+			if (ptrs[historyPointerY] == maxx) throw new Exception("PutPtr(byte ptr) ");
+			codeHistory[historyPointerY][ptrs[historyPointerY]] = (byte)ptr;
+            ptrs[historyPointerY]++;
 		}
 		public void BeginNewStep()
 		{
 			historyPointerY++;
 			if (historyPointerY == maxy) historyPointerY = 0;
-			historyPointerX =0;
+			ptrs[historyPointerY] =0;
 		}
 
 		public (byte[], int) GetLastStepPtrs()
 		{
-			return (codeHistory[historyPointerY], historyPointerX);
+			return (codeHistory[historyPointerY], ptrs[historyPointerY]);
 		}
 	}
 
@@ -55,7 +55,8 @@ namespace WindowsFormsApp1.GameLogic
 	public class Bot1 : Bot
 	{
 		public Genom Genom;
-		public int Pointer;
+        public int Pointer;
+        public int OldPointer;
 
 		public CodeHistory Hist;
 
@@ -66,7 +67,8 @@ namespace WindowsFormsApp1.GameLogic
 		public Bot1(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, Genom genom, int pointer, int vx, int vy)
 			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
 		{
-			Pointer = pointer;
+            Pointer = pointer;
+            OldPointer = pointer;
 			Genom = genom;
 			Hist = new CodeHistory();
 		}
@@ -79,7 +81,7 @@ namespace WindowsFormsApp1.GameLogic
 			// Также может размножиться
 
 			//Direction dir;
-			int shift;
+			int shift = 0;
 			bool stepComplete = false;
 			int cntJump = 0;
 
@@ -88,7 +90,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				// 1. Определяем команду которую будет делать бот
 				var cmdCode = Genom.GetCurrentCommand(Pointer);
-				Hist.SavePtr(cmdCode);
+				Hist.SavePtr(Pointer);
 
 				// 2. Выполняем команду
 				switch (cmdCode)
@@ -112,15 +114,14 @@ namespace WindowsFormsApp1.GameLogic
 
 				cntJump++;
 				// Прибавляем к указателю текущей команды значение команды
-				ShiftCodePointer(shift);
+                ShiftCodePointer(shift);
 			}
 			while (!stepComplete && cntJump < _data.MaxUncompleteJump);
 
 			_age++;
 			Energy += _data.DeltaEnergyOnStep;
 
-			// todo обработка деления и смерти
-			//Die
+			//Death
 			if (Energy <= 0)
 			{
 				Death();
@@ -221,7 +222,6 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			Genom.Bots--;
-			//todo если геном больше не используется (Bots=0) то удалять геном чтоб память не забивал
 
 			//for (var j = 0; j < _data.WorldHeight; j++)
 			//{
@@ -280,7 +280,6 @@ namespace WindowsFormsApp1.GameLogic
 			{
 			}
 
-			// todo если релатив возвращать что просто бот как у foo52 ?
 			return ((int)refContent, true);
 		}
 
@@ -469,7 +468,6 @@ namespace WindowsFormsApp1.GameLogic
 			Old.Y = P.Y;
 			P.X = nX;
 			P.Y = nY;
-			// todo добавить обработку если наступил на яд
 
 
 			_data.World[Old.X, Old.Y] = (uint)CellContent.Free;
@@ -592,7 +590,8 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		private void ShiftCodePointer(int shift)
-		{
+        {
+            OldPointer = Pointer;
 			Pointer = (Pointer + shift) % _data.GenomLength;
 		}
 
@@ -617,9 +616,12 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Num: {_num}");
 			sb.AppendLine($"Index: {Index}");
 
-			sb.AppendLine($"Pointer: {Pointer}");
+            sb.AppendLine($"OldPointer: {OldPointer}");
+            sb.AppendLine($"Pointer: {Pointer}");
 			sb.AppendLine($"Energy: {Energy}");
-			sb.AppendLine($"_dir: {Dir}");
+            sb.AppendLine($"_dir: {Dir}");
+            sb.AppendLine($"jumps cnt: {Hist.ptrs[Hist.historyPointerY] - 1}");
+            sb.AppendLine($"jumps: {string.Join(", ", Hist.codeHistory[Hist.historyPointerY].ToList().Take(Hist.ptrs[Hist.historyPointerY]))}");
 
 			sb.AppendLine("");
 			sb.AppendLine($"Genom {Genom.Level}");
@@ -627,9 +629,10 @@ namespace WindowsFormsApp1.GameLogic
 
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Genom.Color.R} G{Genom.Color.G} B{Genom.Color.B}");
-			sb.AppendLine($"Hash: {Genom.GenomHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Parent: {Genom.ParentGenomHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Grand: {Genom.GrandParentGenomHash.ToString().Substring(0, 8)}");
+            sb.AppendLine($"Pra: {Genom.PraHash.ToString().Substring(0, 8)}");
+            sb.AppendLine($"Hash: {Genom.GenomHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Parent: {Genom.ParentHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Grand: {Genom.GrandHash.ToString().Substring(0, 8)}");
 
 			return sb.ToString();
 		}

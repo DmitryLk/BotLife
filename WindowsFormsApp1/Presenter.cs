@@ -43,8 +43,10 @@ namespace WindowsFormsApp1
         private int _codeCellHeight;
         private int _xStartCodeCell;
         private Brush _textBrush;
+        private Brush _smallTextBrush;
         private Font _font1;
         private Font _font2;
+        private Font _font3;
         private StringFormat _stringFormat;
 
         private Graphics _cursorGraphics;
@@ -131,7 +133,8 @@ namespace WindowsFormsApp1
 
             //For text
             _cursorGraphics = Graphics.FromImage(_cursorBitmap);
-            _textBrush = new SolidBrush(Color.Black);
+            //_textBrush = new SolidBrush(Color.Black);
+            _smallTextBrush = new SolidBrush(Color.Black);
             _cursorGraphics.SmoothingMode = SmoothingMode.AntiAlias;
             //_cursorGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
             //_cursorGraphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
@@ -143,6 +146,7 @@ namespace WindowsFormsApp1
             //_font = new Font("Calibri", 10);
             _font1 = new Font(FontFamily.GenericSansSerif, 14, FontStyle.Bold);
             _font2 = new Font("Calibri", 10, FontStyle.Regular);
+            _font3 = new Font("Arial", 6, FontStyle.Regular);
             _stringFormat = new StringFormat();
             _stringFormat.LineAlignment = StringAlignment.Center;
             _stringFormat.Alignment = StringAlignment.Center;
@@ -191,7 +195,8 @@ namespace WindowsFormsApp1
             {
                 var (dX, dY) = _func.GetDeltaDirection(dir.Value);
 
-                _lensImageWrapper.Line(_lensCellWidth * x + _lensCellWidth / 2,
+                _lensImageWrapper.Line(
+                    _lensCellWidth * x + _lensCellWidth / 2,
                     _lensCellHeight * y + _lensCellHeight / 2,
                     _lensCellWidth * x + _lensCellWidth * (1 + dX) / 2,
                     _lensCellHeight * y + _lensCellHeight * (1 + dY) / 2,
@@ -228,10 +233,26 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
         }
 
+        public void DrawCodeArrowOnCursorFrame(int x1, int y1, int x2, int y2, Color color)
+        {
+            _cursorImageWrapper.Line(
+                _xStartCodeCell+ _codeCellWidth * x1 + 3,
+                _codeCellHeight * y1 + 3,
+                _xStartCodeCell+ _codeCellWidth * x2 + 3,
+                _codeCellHeight * y2 + 3,
+                color);
+        }
+
         public void DrawTextOnCursorFrame(int x, int y, string code, Color color)
         {
             var textBrush = new SolidBrush(color);
             _cursorGraphics.DrawString(code, color == Color.Black ? _font2 : _font1, textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, _stringFormat);
+            //_cursorGraphics.Flush();
+        }
+
+        public void DrawSmallTextOnCursorFrame(int x, int y, string code, Color color)
+        {
+            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + 7, y * _codeCellHeight + 7, _stringFormat);
             //_cursorGraphics.Flush();
         }
 
