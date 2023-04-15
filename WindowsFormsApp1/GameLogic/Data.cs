@@ -12,87 +12,84 @@ using static System.Windows.Forms.Design.AxImporter;
 
 namespace WindowsFormsApp1.GameLogic
 {
-	public class GameData
+	public static class Data
 	{
 		//INITIAL SETTINGS
-		public int CellWidth;
-		public int CellHeight;
-		public int ReportFrequencyDrawed;
-		public int ReportFrequencyNoDrawed;
+		public static int CellWidth;
+		public static int CellHeight;
+		public static int ReportFrequencyDrawed;
+		public static int ReportFrequencyNoDrawed;
 
-		public uint StartNumberOfBots;
-		public uint MaxBotsNumber;
-		public int WorldWidth;
-		public int WorldHeight;
-		public bool UpDownEdge;
-		public bool LeftRightEdge;
+		public static uint StartNumberOfBots;
+		public static uint MaxBotsNumber;
+		public static int WorldWidth;
+		public static int WorldHeight;
+		public static bool UpDownEdge;
+		public static bool LeftRightEdge;
 
-		public bool SeedFood;
-		public bool SeedOrganic;
-		public bool SeedMinerals;
-		public bool SeedWalls;
-		public bool SeedPoison;
-		public int SeedFoodNumber;
-		public int SeedOrganicNumber;
-		public int SeedMineralsNumber;
-		public int SeedWallsNumber;
-		public int SeedPoisonNumber;
+		public static bool SeedFood;
+		public static bool SeedOrganic;
+		public static bool SeedMinerals;
+		public static bool SeedWalls;
+		public static bool SeedPoison;
+		public static int SeedFoodNumber;
+		public static int SeedOrganicNumber;
+		public static int SeedMineralsNumber;
+		public static int SeedWallsNumber;
+		public static int SeedPoisonNumber;
 
-		public int GenomLength;
-		public int MaxCode;
-		public int MaxUncompleteJump;
-		public int MutationProbabilityPercent;
+		public static int GenomLength;
+		public static int MaxCode;
+		public static int MaxUncompleteJump;
+		public static int MutationProbabilityPercent;
 
-		public int FoodEnergy;
-		public int InitialBotEnergy;
-		public int ReproductionBotEnergy;
-		public int BiteEnergy;
-		public int DeltaEnergyOnStep;
+		public static int FoodEnergy;
+		public static int InitialBotEnergy;
+		public static int ReproductionBotEnergy;
+		public static int BiteEnergy;
+		public static int DeltaEnergyOnStep;
 
-		public int LensWidth;
-		public int LensHeight;
-		public int LensCellWidth;
-		public int LensCellHeight;
+		public static int LensWidth;
+		public static int LensHeight;
+		public static int LensCellWidth;
+		public static int LensCellHeight;
 
 
 		//VARIABLE CURRENT PARAMETERS
-		public uint[,] World; // чтобы можно было узнать по координатам что там находится
-		public Bot[] Bots;
+		public static uint[,] World; // чтобы можно было узнать по координатам что там находится
+		public static Bot[] Bots;
 
 		// Настройки игры
-		public bool Started;
-		public bool PausedMode;
-		public bool Drawed;
-		public bool Worked;
-		public bool Lens;
-		public bool Mutation;
+		public static bool Started;
+		public static bool PausedMode;
+		public static bool Drawed;
+		public static bool Worked;
+		public static bool Lens;
+		public static bool Mutation;
 
 
 		//Для поддержки эффективной перерисовки
-		public uint[,] ChWorld;
-		public ChangedCell[] ChangedCells;
-		public uint NumberOfChangedCells;
-		public uint NumberOfChangedCellsForInfo;
+		public static uint[,] ChWorld;
+		public static ChangedCell[] ChangedCells;
+		public static uint NumberOfChangedCells;
+		public static uint NumberOfChangedCellsForInfo;
 
-		public uint CurrentNumberOfBots;
-		public uint CurrentStep;
-		public uint MaxBotNumber;
-		public uint DeathCnt;
-		public uint ReproductionCnt;
-		public uint MutationCnt;
-		public int ReportFrequencyCurrent;
+		public static uint CurrentNumberOfBots;
+		public static uint CurrentStep;
+		public static uint MaxBotNumber;
+		public static uint DeathCnt;
+		public static uint ReproductionCnt;
+		public static uint MutationCnt;
+		public static int ReportFrequencyCurrent;
 
-		public int LensX;
-		public int LensY;
-		public int CursorX;
-		public int CursorY;
+		public static int LensX;
+		public static int LensY;
+		public static int CursorX;
+		public static int CursorY;
 
 
-		public GameData()
-		{
-		}
 
-		public void Initialize()
+		public static void Initialize()
 		{
 			var options = LoadConfig();
 			MapOptions(options);
@@ -126,7 +123,7 @@ namespace WindowsFormsApp1.GameLogic
 			CursorY = 10;
 		}
 
-		public string GetText(double fps)
+		public static string GetText(double fps)
 		{
 			var sb = new StringBuilder();
 
@@ -141,7 +138,7 @@ namespace WindowsFormsApp1.GameLogic
 			return sb.ToString();
 		}
 
-		private GameOptions LoadConfig()
+		private static GameOptions LoadConfig()
 		{
 			using (StreamReader r = new StreamReader("config.json"))
 			{
@@ -152,7 +149,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		public void MapOptions(GameOptions options)
+		public static void MapOptions(GameOptions options)
 		{
 			CellWidth = options.CellWidth;
 			CellHeight = options.CellHeight;

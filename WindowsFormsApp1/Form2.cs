@@ -19,9 +19,9 @@ namespace WindowsFormsApp1
 			InitializeComponent();
 		}
 
-		public (PictureBox lens, PictureBox cursorInfo, TextBox objInfo) GetControlsLensForm()
+		public (PictureBox lens, PictureBox cursorInfo, TextBox objInfo1, TextBox objInfo2) GetControlsLensForm()
 		{
-			return (pictureBox1, pictureBox2, textBox1);
+			return (pictureBox1, pictureBox2, textBox1, textBox2);
 		}
 
 		private void Form2_Load(object sender, EventArgs e)
@@ -71,6 +71,11 @@ namespace WindowsFormsApp1
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
         }

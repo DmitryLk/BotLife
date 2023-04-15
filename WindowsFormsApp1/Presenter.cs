@@ -24,19 +24,16 @@ namespace WindowsFormsApp1
 {
     public class Presenter : IDisposable
     {
-        private PictureBox _mainPictureBox;
         private Bitmap _mainBitmap;
         private ImageWrapper _mainImageWrapper;
         private int _cellWidth;
         private int _cellHeight;
 
-        private PictureBox _lensPictureBox;
         private Bitmap _lensBitmap;
         private ImageWrapper _lensImageWrapper;
         private int _lensCellHeight;
         private int _lensCellWidth;
 
-        private PictureBox _cursorPictureBox;
         private Bitmap _cursorBitmap;
         private ImageWrapper _cursorImageWrapper;
         private int _codeCellWidth;
@@ -48,44 +45,27 @@ namespace WindowsFormsApp1
         private Font _font2;
         private Font _font3;
         private StringFormat _stringFormat;
+        private const float CursorPart = 0.9f;
 
         private Graphics _cursorGraphics;
-        private GameData _data;
-        private Func _func;
 
         private Color _fon;
-        private Label[] _labels;
         private TextBox[] _textBoxes;
+        private PictureBox[] _pictureBoxes;
 
         private int _cnt;
         private DateTime _dt;
 
-        public Tester _test;
 
-        public Presenter(
-            GameData data,
-            Func func,
-            Tester test,
-            PictureBox mainPictureBox,
-            PictureBox lensPictureBox,
-            PictureBox cursorPictureBox,
-            Label[] labels,
-            TextBox[] textBoxes)
+        public Presenter(PictureBox[] pictureBoxes, TextBox[] textBoxes)
         {
-            _mainPictureBox = mainPictureBox;
-            _lensPictureBox = lensPictureBox;
-            _cursorPictureBox = cursorPictureBox;
-
-            _labels = labels;
+            _pictureBoxes = pictureBoxes;
             _textBoxes = textBoxes;
 
             _fon = Color.FromKnownColor(KnownColor.ActiveCaption);
             _cnt = 0;
             _dt = DateTime.Now;
 
-            _test = test;
-            _data = data;
-            _func = func;
 
             ConfigureMainBitmap();
             ConfigureLensBitmap();
@@ -94,41 +74,41 @@ namespace WindowsFormsApp1
 
         public void ConfigureMainBitmap()
         {
-            _cellHeight = _data.CellHeight;
-            _cellWidth = _data.CellWidth;
-            var mainBitmapWidth = _data.WorldWidth * _data.CellWidth;
-            var mainBitmapHeight = _data.WorldHeight * _data.CellHeight;
-            _mainPictureBox.Size = new System.Drawing.Size(mainBitmapWidth, mainBitmapHeight);
+            _cellHeight = Data.CellHeight;
+            _cellWidth = Data.CellWidth;
+            var mainBitmapWidth = Data.WorldWidth * Data.CellWidth;
+            var mainBitmapHeight = Data.WorldHeight * Data.CellHeight;
+            _pictureBoxes[0].Size = new System.Drawing.Size(mainBitmapWidth, mainBitmapHeight);
             _mainBitmap = new Bitmap(mainBitmapWidth, mainBitmapHeight);
-            _mainPictureBox.Image = _mainBitmap;
+            _pictureBoxes[0].Image = _mainBitmap;
             _mainImageWrapper = new ImageWrapper(_mainBitmap, false);
         }
 
         public void ConfigureLensBitmap()
         {
-            _lensCellHeight = _data.LensCellWidth;
-            _lensCellWidth = _data.LensCellHeight;
-            var lensBitmapWidth = _data.LensWidth * _data.LensCellWidth;
-            var lensBitmapHeight = _data.LensHeight * _data.LensCellHeight;
-            _lensPictureBox.Size = new System.Drawing.Size(lensBitmapWidth, lensBitmapHeight);
+            _lensCellHeight = Data.LensCellWidth;
+            _lensCellWidth = Data.LensCellHeight;
+            var lensBitmapWidth = Data.LensWidth * Data.LensCellWidth;
+            var lensBitmapHeight = Data.LensHeight * Data.LensCellHeight;
+            _pictureBoxes[1].Size = new System.Drawing.Size(lensBitmapWidth, lensBitmapHeight);
             _lensBitmap = new Bitmap(lensBitmapWidth, lensBitmapHeight);
-            _lensPictureBox.Image = _lensBitmap;
+            _pictureBoxes[1].Image = _lensBitmap;
             _lensImageWrapper = new ImageWrapper(_lensBitmap, false);
         }
 
 
         public void ConfigureCursorBitmap()
         {
-            var cursorBitmapWidth = 300;
-            var cursorBitmapHeight = 200;
+            var cursorBitmapWidth = 350;
+            var cursorBitmapHeight = 300;
 
-            _codeCellWidth = (int)((cursorBitmapWidth * 0.8) / 8);
+            _codeCellWidth = (int)((cursorBitmapWidth * CursorPart) / 8);
             _codeCellHeight = (int)(cursorBitmapHeight / 8);
-            _xStartCodeCell = (int)(cursorBitmapWidth * 0.2);
+            _xStartCodeCell = (int)(cursorBitmapWidth * (1 - CursorPart));
 
-            _cursorPictureBox.Size = new System.Drawing.Size(cursorBitmapWidth, cursorBitmapHeight);
+            _pictureBoxes[2].Size = new System.Drawing.Size(cursorBitmapWidth, cursorBitmapHeight);
             _cursorBitmap = new Bitmap(cursorBitmapWidth, cursorBitmapHeight);
-            _cursorPictureBox.Image = _cursorBitmap;
+            _pictureBoxes[2].Image = _cursorBitmap;
             _cursorImageWrapper = new ImageWrapper(_cursorBitmap, true);
 
             //For text
@@ -165,7 +145,7 @@ namespace WindowsFormsApp1
 
         public void DrawLensOnFrame(int x, int y, int sizeX, int sizeY, Color color)
         {
-            _mainImageWrapper.EmptySquare(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
+            _mainImageWrapper.EmptySquare1(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
         }
 
         public void IntermediateFrameSave()
@@ -176,7 +156,7 @@ namespace WindowsFormsApp1
         public void SendFrameToScreen()
         {
             _mainImageWrapper.EndEditing();
-            _mainPictureBox.Refresh();
+            _pictureBoxes[0].Refresh();
         }
 
         //LENS////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +173,7 @@ namespace WindowsFormsApp1
 
             if (dir.HasValue)
             {
-                var (dX, dY) = _func.GetDeltaDirection(dir.Value);
+                var (dX, dY) = Func.GetDeltaDirection(dir.Value);
 
                 _lensImageWrapper.Line(
                     _lensCellWidth * x + _lensCellWidth / 2,
@@ -206,13 +186,13 @@ namespace WindowsFormsApp1
 
         public void DrawCursorOnLens(int x, int y, Color? color = null)
         {
-            _lensImageWrapper.EmptySquare(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
+            _lensImageWrapper.EmptySquare1(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
         }
 
         public void SendLensFrameToScreen()
         {
             _lensImageWrapper.EndEditing();
-            _lensPictureBox.Refresh();
+            _pictureBoxes[1].Refresh();
         }
 
         //CURSOR////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +210,7 @@ namespace WindowsFormsApp1
 
         public void DrawCodeCellOnCursorFrame(int x, int y, Color? color = null)
         {
-            _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
+            _cursorImageWrapper.EmptySquare2(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
         }
 
         public void DrawCodeArrowOnCursorFrame(int x1, int y1, int x2, int y2, Color color)
@@ -250,56 +230,70 @@ namespace WindowsFormsApp1
             //_cursorGraphics.Flush();
         }
 
-        public void DrawSmallTextOnCursorFrame(int x, int y, string code, Color color)
+        public void DrawSmallTextOnCursorFrame1(int x, int y, string code, Color color)
         {
-            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + 7, y * _codeCellHeight + 7, _stringFormat);
+            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + 30, y * _codeCellHeight + 7, _stringFormat);
+            //_cursorGraphics.Flush();
+        }
+
+        public void DrawSmallTextOnCursorFrame2(int x, int y, string code, Color color)
+        {
+            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + 19, y * _codeCellHeight + 28, _stringFormat);
+            //_cursorGraphics.Flush();
+        }
+
+        public void DrawOtherTextOnCursorFrame(int x, int y, string code)
+        {
+            _cursorGraphics.DrawString(code, _font2, _smallTextBrush, x , y);
             //_cursorGraphics.Flush();
         }
 
         public void SendCursorFrameToScreen()
         {
             _cursorImageWrapper.EndEditing();
-            _cursorPictureBox.Refresh();
+            _pictureBoxes[2].Refresh();
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public void PrintInfo()
         {
             _cnt++;
-            if (_cnt % _data.ReportFrequencyCurrent == 0)
+            if (_cnt % Data.ReportFrequencyCurrent == 0)
             {
                 var tms = (DateTime.Now - _dt).TotalSeconds;
                 if (tms == 0) throw new Exception("tms == 0");
-                var fps = _data.ReportFrequencyCurrent / tms;
+                var fps = Data.ReportFrequencyCurrent / tms;
                 _dt = DateTime.Now;
 
-                _textBoxes[0].Text = _test.GetText();
+                _textBoxes[0].Text = Test.GetText();
                 _textBoxes[0].Update();
 
-                _textBoxes[1].Text = _data.GetText(fps);
+                _textBoxes[1].Text = Data.GetText(fps);
                 _textBoxes[1].Update();
+
+                _textBoxes[2].Text = Genom.GetText();
+                _textBoxes[2].Update();
             }
         }
 
-        public void PrintObjectInfo(Bot1 bot)
+        public void PrintObjectInfo1(Bot1 bot)
         {
             if (bot != null)
             {
-                _textBoxes[2].Text = bot.GetText();
-                _textBoxes[2].Update();
+                _textBoxes[3].Text = bot.GetText1();
             }
             else
             {
-                _textBoxes[2].Text = "";
-                _textBoxes[2].Update();
+                _textBoxes[3].Text = "";
             }
+            _textBoxes[3].Update();
 
             //_cnt++;
-            //if (_cnt % _data.ReportFrequencyCurrent == 0)
+            //if (_cnt % Data.ReportFrequencyCurrent == 0)
             //{
             //    var tms = (DateTime.Now - _dt).TotalSeconds;
             //    if (tms == 0) throw new Exception("tms == 0");
-            //    var fps = _data.ReportFrequencyCurrent / tms;
+            //    var fps = Data.ReportFrequencyCurrent / tms;
             //    _dt = DateTime.Now;
 
             //    _textBoxes[2].Text = _test.GetText();
@@ -307,6 +301,18 @@ namespace WindowsFormsApp1
             //}
         }
 
+        public void PrintObjectInfo2(Bot1 bot, int delta)
+        {
+            if (bot != null)
+            {
+                _textBoxes[4].Text = bot.GetText2(delta);
+            }
+            else
+            {
+                _textBoxes[4].Text = "";
+            }
+            _textBoxes[4].Update();
+        }
         public void Dispose()
         {
             _mainBitmap.Dispose();

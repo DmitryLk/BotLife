@@ -19,17 +19,13 @@ namespace WindowsFormsApp1.GameLogic
 		public uint Index;         // Индекс бота (может меняться)
         public Direction Dir;         // Направление бота
 
-		protected GameData _data;
-		protected Func _func;
 		protected uint _num;         // Номер бота (остается постоянным)
 		protected int _age;
 		private int _vx;
 		private int _vy;
 
-		public Bot(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
+		public Bot(Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
 		{
-			_data = data;
-			_func = func;
 			Dir = dir;
 			_num = botNumber;
 			Index = botIndex;
@@ -51,9 +47,9 @@ namespace WindowsFormsApp1.GameLogic
 		public void Move()
 		{
 			var newX = P.X + _vx;
-			if (newX >= _data.WorldWidth)
+			if (newX >= Data.WorldWidth)
 			{
-				newX = _data.WorldWidth - 1;
+				newX = Data.WorldWidth - 1;
 				_vx = -_vx;
 			}
 			if (newX < 0)
@@ -64,9 +60,9 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			var newY = P.Y + _vy;
-			if (newY >= _data.WorldHeight)
+			if (newY >= Data.WorldHeight)
 			{
-				newY = _data.WorldHeight - 1;
+				newY = Data.WorldHeight - 1;
 				_vy = -_vy;
 			}
 			if (newY < 0)

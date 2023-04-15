@@ -12,20 +12,15 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
-	public class Tester
+	public static class Test
 	{
 		private const int numberOfIntervals = 10;
 
-		private Interval[] _intervals;
-		private long _frequency;
+		private static Interval[] _intervals = new Interval[numberOfIntervals];
+		private static long _frequency = Stopwatch.Frequency;
 
-		public Tester()
-		{
-			_intervals = new Interval[numberOfIntervals];
-			_frequency = Stopwatch.Frequency;
-		}
 
-		public void InitInterval(int i, string name)
+		public static void InitInterval(int i, string name)
 		{
 			if (i > numberOfIntervals)
 			{
@@ -44,19 +39,19 @@ namespace WindowsFormsApp1
 			_intervals[i].NumberOfMeasurement = 0;
 		}
 
-		public void BeginInterval(int i)
+		public static void BeginInterval(int i)
 		{
 			_intervals[i].LastMeasurementTimestamp = Stopwatch.GetTimestamp();
 		}
 
-		public void EndInterval(int i)
+		public static void EndInterval(int i)
 		{
 			_intervals[i].LastMeasurement = Stopwatch.GetTimestamp() - _intervals[i].LastMeasurementTimestamp;
 			_intervals[i].TotalMeasurement += _intervals[i].LastMeasurement;
 			_intervals[i].NumberOfMeasurement++;
 		}
 
-		public void EndBeginInterval(int end, int begin)
+		public static void EndBeginInterval(int end, int begin)
 		{
 			_intervals[begin].LastMeasurementTimestamp = Stopwatch.GetTimestamp();
 			_intervals[end].LastMeasurement = _intervals[begin].LastMeasurementTimestamp - _intervals[end].LastMeasurementTimestamp;
@@ -64,7 +59,7 @@ namespace WindowsFormsApp1
 			_intervals[end].NumberOfMeasurement++;
 		}
 
-		public string GetText()
+		public static string GetText()
 		{
 			var sb = new StringBuilder();
 			var sumElapsedMs = 0;

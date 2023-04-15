@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Drawing;
@@ -6,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using System.Xml;
@@ -16,9 +18,11 @@ using WindowsFormsApp1.Enums;
 namespace WindowsFormsApp1.GameLogic
 {
 	public class Genom
-	{
+    {
+        private static long COUNTER = 0;
+        public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
 
-		public byte[] Code;
+        public byte[] Code;
 		public Guid GenomHash;
 		public Guid ParentHash;
         public Guid GrandHash;
@@ -26,18 +30,15 @@ namespace WindowsFormsApp1.GameLogic
 		public Color Color;
         public int Bots;
         public int Level;
+        public long PraNum;
+        public long Num;
 
-		private GameData _data;
-		private Func _func;
-		private Genom _parent;
+        //private Genom _parent;
 
-		public Genom(GameData data, Func func, Genom parent = null)
+        private Genom()
 		{
-			_data = data;
-			_func = func;
-			_parent = parent;
+			//_parent = parent;
 			Bots = 0;
-			CreateGenom(parent);
 		}
 
 		public byte GetCurrentCommand(int pointer)
@@ -46,7 +47,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 		public byte GetNextCommand(int pointer)
 		{
-			return Code[pointer + 1 >= _data.GenomLength ? 0 : pointer + 1];
+			return Code[pointer + 1 >= Data.GenomLength ? 0 : pointer + 1];
 		}
 
 		public bool IsRelative(Genom genom2)
@@ -58,41 +59,76 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		// Создание нового генома, абсолютно нового или мутированную копию предка
-		private void CreateGenom(Genom parent)
-		{
-			Code = new byte[_data.GenomLength];
-			GenomHash = Guid.NewGuid();
-			Color = _func.GetRandomColor();
+		// Создание нового генома
+        public static Genom CreateNewGenom()
+        {
+            var g = new Genom();
 
-			if (parent == null)
-			{
-				for (var i = 0; i < _data.GenomLength; i++)
-				{
-					Code[i] = _func.GetRandomBotCode();
-				}
-				ParentHash = Guid.Empty;
-				GrandHash = Guid.Empty;
-                PraHash = GenomHash;
-                Level = 1;
+            g.Code = new byte[Data.GenomLength];
+            g.GenomHash = Guid.NewGuid();
+            g.Color = Func.GetRandomColor();
+
+            for (var i = 0; i < Data.GenomLength; i++)
+            {
+                g.Code[i] = Func.GetRandomBotCode();
             }
-			else
-			{
-				for (var i = 0; i < _data.GenomLength; i++)
-				{
-					Code[i] = parent.Code[i];
-				}
+            g.ParentHash = Guid.Empty;
+            g.GrandHash = Guid.Empty;
+            g.PraHash = g.GenomHash;
+            g.Level = 1;
 
-				// один байт в геноме подменяем
-				Code[_func.GetRandomBotCodeIndex()] = _func.GetRandomBotCode();
+            g.Num = Interlocked.Increment(ref COUNTER);
+            g.PraNum = g.Num;
+            GENOMS.TryAdd(g, 1);
+            return g;
+        }
 
-				ParentHash = parent.GenomHash;
-				GrandHash = parent.ParentHash;
-				PraHash = parent.PraHash;
-				_data.MutationCnt++;
-                Level = parent.Level + 1;
+        // Создание мутировавшего генома
+
+        public static Genom CreateMutatedGenom(Genom parent)
+        {
+            var g = new Genom();
+
+            g.Code = new byte[Data.GenomLength];
+            g.GenomHash = Guid.NewGuid();
+            g.Color = Func.GetRandomColor();
+
+            for (var i = 0; i < Data.GenomLength; i++)
+            {
+                g.Code[i] = parent.Code[i];
             }
-		}
-	}
+
+            // один байт в геноме подменяем
+            g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomBotCode();
+
+            g.ParentHash = parent.GenomHash;
+            g.GrandHash = parent.ParentHash;
+            g.PraHash = parent.PraHash;
+            Data.MutationCnt++;
+            g.Level = parent.Level + 1;
+
+            g.Num = Interlocked.Increment(ref COUNTER);
+            g.PraNum = parent.PraNum;
+            GENOMS.TryAdd(g, 1);
+            return g;
+        }
+
+        public static string GetText()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"Count: {COUNTER}");
+            sb.AppendLine("");
+
+            var gemons = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(20);
+
+            foreach (var g in gemons)
+            {
+                sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}");
+
+            }
+
+            return sb.ToString();
+        }
+    }
 }
 

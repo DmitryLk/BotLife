@@ -11,191 +11,150 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using Accessibility;
 using WindowsFormsApp1.GameLogic;
 
 namespace WindowsFormsApp1
 {
-	public partial class Form1 : Form
-	{
-		public Game Game;
-		public Form2 Form2;
+    public partial class Form1 : Form
+    {
+        public Game Game;
+        public Form2 Form2;
 
-		public Form1()
-		{
-			InitializeComponent();
-
-
-			Form2 = new Form2(this);
-			var (lensPictureBox, cursorPictureBox, objTextBox) = Form2.GetControlsLensForm();
-			var test = new Tester();
-            var data = new GameData();
-            var func = new Func(data);
-
-			data.Initialize();
-
-			var presenter = new Presenter(
-                data,
-				func,
-                test,
-				pictureBox1, 
-                lensPictureBox, 
-                cursorPictureBox,   
-                new Label[] { }, 
-                new[] { textBox1, textBox2, objTextBox});
-
-			Game = new Game(data, func, test, presenter);
+        public Form1()
+        {
+            InitializeComponent();
 
 
-			label2.Text = $@"	S - start
+            Form2 = new Form2(this);
+            var (lensPictureBox, cursorPictureBox, objTextBox1, objTextBox2) = Form2.GetControlsLensForm();
+
+            Data.Initialize();
+
+            var pictureBoxes = new[] { pictureBox1, lensPictureBox, cursorPictureBox };
+            var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2 };
+
+            var presenter = new Presenter(
+                pictureBoxes,
+                textBoxes);
+
+            Game = new Game(presenter);
+
+
+            label2.Text = $@"	S - start
 								P - pause mode
 								space - step
 								M - mutation on/off
 								D - draw on/off";
-		}
+        }
 
-		public async void Form1_KeyDown(object sender, KeyEventArgs e)
-		{
-			bool needToRunLife = false;
-			if (!Game.Started)
-			{
-				if (e.KeyCode == Keys.S)
-				{
-					await Game.Start();
-					needToRunLife = true;
-				}
-			}
-
-
-			if (Game.Started)
-			{
-
-				if (e.KeyCode == Keys.P)
-				{
-					Game.PausedToggle();
-					if (!Game.Paused)
-					{
-						needToRunLife = true;
-					}
-				}
-
-				if (e.KeyCode == Keys.Space)
-				{
-					if (Game.Paused)
-					{
-						needToRunLife = true;
-					}
-				}
-
-				if (e.KeyCode == Keys.L)
-				{
-					if (!Form2.Visible)
-					{
-						Game.Lens(true);
-						Form2.Visible = true;
-					}
-					else
-					{
-						Game.Lens(false);
-						Form2.Visible = false;
-					}
-				}
-
-				if (e.KeyCode == Keys.M)
-				{
-					Game.MutationToggle();
-				}
-
-				if (e.KeyCode == Keys.D)
-				{
-					Game.DrawedToggle();
-				}
+        public async void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!Game.Started)
+            {
+                if (e.KeyCode == Keys.S)
+                {
+                    await Game.Start();
+                    Game.Work();
+                    return;
+                }
+            }
 
 
+            if (Game.Started)
+            {
 
-				if (e.KeyCode == Keys.Up)
-				{
-					Game.LensUp();
+                switch (e.KeyCode)
+                {
+                    case Keys.P: PauseToggle(); break;
+                    case Keys.Space: StepPause(); break;
+                    case Keys.L: LensToggle(); break;
+                    case Keys.M: Game.MutationToggle(); break;
+                    case Keys.D: Game.DrawedToggle(); break;
+                    case Keys.Up: Game.LensUp(); break;
+                    case Keys.Down: Game.LensDown(); break;
+                    case Keys.Left: Game.LensLeft(); break;
+                    case Keys.Right: Game.LensRight(); break;
+                    case Keys.Home: Game.CursorUp(); break;
+                    case Keys.End: Game.CursorDown(); break;
+                    case Keys.Delete: Game.CursorRight(); break;
+                    case Keys.PageDown: Game.CursorLeft(); break;
+                    case Keys.Z: Game.HistoryDown(); break;
+                    case Keys.X: Game.HistoryUp(); break;
+                    default: break;
+                }
+            }
+        }
 
-				}
-				if (e.KeyCode == Keys.Down)
-				{
-					Game.LensDown();
+        private void PauseToggle()
+        {
+            Game.PausedToggle();
+            if (!Game.Paused)
+            {
+                Game.Work();
+            }
+        }
 
-				}
-				if (e.KeyCode == Keys.Left)
-				{
-					Game.LensLeft();
+        private void StepPause()
+        {
+            if (Game.Paused)
+            {
+                Game.Work();
+            }
+        }
 
-				}
-				if (e.KeyCode == Keys.Right)
-				{
-					Game.LensRight();
-				}
+        private void LensToggle()
+        {
+            if (!Form2.Visible)
+            {
+                Game.Lens(true);
+                Form2.Visible = true;
+            }
+            else
+            {
+                Game.Lens(false);
+                Form2.Visible = false;
+            }
+        }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
+        }
 
-				if (e.KeyCode == Keys.Home)
-				{
-					Game.CursorUp();
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
 
-				}
-				if (e.KeyCode == Keys.End)
-				{
-					Game.CursorDown();
+        }
 
-				}
-				if (e.KeyCode == Keys.Delete)
-				{
-					Game.CursorLeft();
+        private void label1_Click(object sender, EventArgs e)
+        {
 
-				}
-				if (e.KeyCode == Keys.PageDown)
-				{
-					Game.CursorRight();
-				}
-			}
+        }
 
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
 
-			if (needToRunLife)
-			{
-				Game.Work();
-			}
-		}
+        }
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Form2 != null)
+            {
 
-		private void Form1_Load(object sender, EventArgs e)
-		{
+                Form2.Close();
+            }
 
-		}
+        }
 
-		private void pictureBox1_Click(object sender, EventArgs e)
-		{
+        private void label2_Click(object sender, EventArgs e)
+        {
 
-		}
+        }
 
-		private void label1_Click(object sender, EventArgs e)
-		{
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
 
-		}
-
-		private void textBox1_TextChanged(object sender, EventArgs e)
-		{
-
-		}
-
-		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			if (Form2 != null)
-			{
-
-				Form2.Close();
-			}
-
-		}
-
-		private void label2_Click(object sender, EventArgs e)
-		{
-
-		}
-	}
+        }
+    }
 }

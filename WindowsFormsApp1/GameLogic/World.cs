@@ -10,15 +10,11 @@ namespace WindowsFormsApp1.GameLogic
 {
 	public class World
 	{
-		private Func _func;
 		private Seeder _seeder;
-		private static GameData _data;
 
-		public World(GameData data, Func func)
+		public World()
 		{
-			_data = data;
-			_func = func;
-			_seeder = new Seeder(_data, _func);
+			_seeder = new Seeder();
 		}
 
 		public void Initialize()
@@ -34,14 +30,14 @@ namespace WindowsFormsApp1.GameLogic
 		public void Step()
 		{
 			//Parallel.For(0, currentBotsNumber, i => Bots[i].Move());
-			for (uint botNumber = 1; botNumber < _data.CurrentNumberOfBots; botNumber++)
+			for (uint botNumber = 1; botNumber < Data.CurrentNumberOfBots; botNumber++)
 			{
 				
-				_data.Bots[botNumber].Step();
+				Data.Bots[botNumber].Step();
 				//Bots[botNumber].Live();
 				//Bots[botNumber].Move();
 			}
-			_data.CurrentStep++;
+			Data.CurrentStep++;
 		}
 	}
 }

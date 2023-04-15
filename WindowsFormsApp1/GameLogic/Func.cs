@@ -20,63 +20,57 @@ using TextBox = System.Windows.Forms.TextBox;
 
 namespace WindowsFormsApp1.GameLogic
 {
-	public class Func
+	public static class Func
 	{
-		private Random _rnd = new Random(Guid.NewGuid().GetHashCode());
-		private GameData _data;
+		private static Random _rnd = new Random(Guid.NewGuid().GetHashCode());
 
-		public Func(GameData data)
-		{
-			_rnd = new Random(Guid.NewGuid().GetHashCode());
-			_data = data;
-		}
 
 
 		// Создать нового бота можно только через этот метод им пользуется Seeder и Reproduction
-		public void CreateNewBot(Point p, uint botIndex, Genom genom)
+		public static void CreateNewBot(Point p, uint botIndex, Genom genom)
 		{
 			var dir = GetRandomDirection();
-			var en = _data.InitialBotEnergy;
+			var en = Data.InitialBotEnergy;
 			var (vx, vy) = GetRandomSpeed();
 			var pointer = 0;
-			var botNumber = ++_data.MaxBotNumber;
+			var botNumber = ++Data.MaxBotNumber;
 
 			genom.Bots++;
-			var bot = new Bot1(_data, this, p, dir, botNumber, botIndex, en, genom, pointer, vx, vy);
+			var bot = new Bot1(p, dir, botNumber, botIndex, en, genom, pointer, vx, vy);
 
 
 
 
-			_data.Bots[botIndex] = bot;
+			Data.Bots[botIndex] = bot;
 
-			_data.World[p.X, p.Y] = botIndex;
+			Data.World[p.X, p.Y] = botIndex;
 			ChangeCell(p.X, p.Y, genom.Color);
 		}
 
 
 		// Список измененных ячеек для последующей отрисовки
-		public void ChangeCell(int x, int y, Color? color)
+		public static void ChangeCell(int x, int y, Color? color)
 		{
 			//public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
 			//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
 			//public uint NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
 
-			if (_data.ChWorld[x, y] == 0)
+			if (Data.ChWorld[x, y] == 0)
 			{
 				// В этой клетке еще не было изменений после последнего рисования
-				_data.ChangedCells[_data.NumberOfChangedCells] = new ChangedCell
+				Data.ChangedCells[Data.NumberOfChangedCells] = new ChangedCell
 				{
 					X = x,
 					Y = y,
 					Color = color
 				};
-				_data.NumberOfChangedCells++;
-				_data.ChWorld[x, y] = _data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
+				Data.NumberOfChangedCells++;
+				Data.ChWorld[x, y] = Data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
 			}
 			else
 			{
 				// В этой клетке уже были изменения после последнего рисования
-				_data.ChangedCells[_data.ChWorld[x, y] - 1].Color = color;
+				Data.ChangedCells[Data.ChWorld[x, y] - 1].Color = color;
 				//_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
 				//{
 				//	X = x,
@@ -86,7 +80,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-        public (int, int) GetDeltaDirection(Direction dir)
+        public static (int, int) GetDeltaDirection(Direction dir)
         {
             return dir switch
             {
@@ -106,32 +100,32 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		#region Random
-		public Direction GetRandomDirection()
+		public static Direction GetRandomDirection()
 		{
 			return (Direction)_rnd.Next(0, 8);
 		}
 
-		public byte GetRandomBotCode()
+		public static byte GetRandomBotCode()
 		{
-			return (byte)_rnd.Next(_data.MaxCode + 1);
+			return (byte)_rnd.Next(Data.MaxCode + 1);
 		}
 
-		public Color GetRandomColor()
+		public static Color GetRandomColor()
 		{
 			return  Color.FromArgb(_rnd.Next(256), _rnd.Next(256), _rnd.Next(256));
 		}
 
-		public int GetRandomBotCodeIndex()
+		public static int GetRandomBotCodeIndex()
 		{
-			return _rnd.Next(_data.GenomLength);
+			return _rnd.Next(Data.GenomLength);
 		}
 
-		public bool Mutation()
+		public static bool Mutation()
 		{
-			return _data.Mutation && _rnd.Next(100) < _data.MutationProbabilityPercent;
+			return Data.Mutation && _rnd.Next(100) < Data.MutationProbabilityPercent;
 		}
 
-		public Point GetRandomFreeCell()
+		public static Point GetRandomFreeCell()
 		{
 			int x;
 			int y;
@@ -139,15 +133,15 @@ namespace WindowsFormsApp1.GameLogic
 
 			do
 			{
-				x = _rnd.Next(0, _data.WorldWidth);
-				y = _rnd.Next(0, _data.WorldHeight);
+				x = _rnd.Next(0, Data.WorldWidth);
+				y = _rnd.Next(0, Data.WorldHeight);
 			}
 			while (CellIsBusy(x, y) && ++i < 100);
 
 			return new Point(x, y);
 		}
 
-		public (int, int) GetRandomSpeed()
+		public static (int, int) GetRandomSpeed()
 		{
 			//do
 			//{
@@ -163,13 +157,13 @@ namespace WindowsFormsApp1.GameLogic
 			return (0, 0);
 		}
 
-		private bool CellIsBusy(int x, int y)
+		private static bool CellIsBusy(int x, int y)
 		{
-			return _data.World[x, y] != 0;
+			return Data.World[x, y] != 0;
 		}
 
 
-		private unsafe Guid GuidRandomCachedInstance()
+		private static unsafe Guid GuidRandomCachedInstance()
 		{
 			var bytes = stackalloc byte[16];
 			var dst = bytes;

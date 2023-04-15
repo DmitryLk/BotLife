@@ -17,8 +17,8 @@ namespace WindowsFormsApp1.GameLogic
 		private byte[] _code;
 		private int _pointer;
 
-		public Bot2(GameData data, Func func, Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
-			: base(data, func, p, dir, botNumber, botIndex, en, vx, vy)
+		public Bot2(Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
+			: base(p, dir, botNumber, botIndex, en, vx, vy)
 
 		{
 		}
@@ -142,15 +142,15 @@ namespace WindowsFormsApp1.GameLogic
 			var nY = P.Y + dY;
 
 			// Проверка перехода сквозь экран
-			if (!_data.LeftRightEdge)
+			if (!Data.LeftRightEdge)
 			{
-				if (nX < 0) nX += _data.WorldWidth;
-				if (nX >= _data.WorldWidth) nX -= _data.WorldWidth;
+				if (nX < 0) nX += Data.WorldWidth;
+				if (nX >= Data.WorldWidth) nX -= Data.WorldWidth;
 			}
-			if (!_data.UpDownEdge)
+			if (!Data.UpDownEdge)
 			{
-				if (nY < 0) nY += _data.WorldHeight;
-				if (nY >= _data.WorldHeight) nY -= _data.WorldHeight;
+				if (nY < 0) nY += Data.WorldHeight;
+				if (nY >= Data.WorldHeight) nY -= Data.WorldHeight;
 			}
 
 			return (nX, nY);

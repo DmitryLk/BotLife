@@ -24,19 +24,14 @@ namespace WindowsFormsApp1
 	{
 		public Presenter _PRESENTER;
 		public World _world;
-		public GameData _data;
-		public Func _func;
-		public Tester _test;
 		public System.Windows.Forms.Timer timer;
-
+        private int deltaHistory = 0;
 
 		private readonly object _sync = new object();
 		private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
-		public Game(GameData data, Func func, Tester test, Presenter presenter)
+		public Game(Presenter presenter)
 		{
-			_data = data;
-			_func = func;
 			_PRESENTER = presenter;
 
 			//timer = new System.Windows.Forms.Timer();
@@ -44,38 +39,37 @@ namespace WindowsFormsApp1
 			//timer.Interval = 1;
 			//timer.Enabled = false;
 
-			_world = new World(_data, _func);
+			_world = new World();
 
-			_test = test;
-			_test.InitInterval(0, "BotsAction();");
-			_test.InitInterval(1, "RedrawWorld();");
-			_test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
-			_test.InitInterval(3, "PaintFrame();");
-			_test.InitInterval(4, "PrintInfo();");
+			Test.InitInterval(0, "BotsAction();");
+			Test.InitInterval(1, "RedrawWorld();");
+			Test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
+			Test.InitInterval(3, "PaintFrame();");
+			Test.InitInterval(4, "PrintInfo();");
 
 		}
 
 		public async Task Start()
 		{
-			_data.Started = true;
+			Data.Started = true;
 			//timer.Enabled = true;
 			_world.Initialize();
 		}
 
 		public async Task Work()
 		{
-			if (_data.Worked) return;
+			if (Data.Worked) return;
 			await _semaphoreSlim.WaitAsync();
 			try
 			{
-				if (_data.Worked) return;
-				_data.Worked = true;
+				if (Data.Worked) return;
+				Data.Worked = true;
 				do
 				{
 					await Step();
 				}
-				while (!_data.PausedMode);
-				_data.Worked = false;
+				while (!Data.PausedMode);
+				Data.Worked = false;
 			}
 			finally
 			{
@@ -85,27 +79,27 @@ namespace WindowsFormsApp1
 
 		private async Task Step()
 		{
-			_test.BeginInterval(0);
+			Test.BeginInterval(0);
 			await Task.Run(() => _world.Step());
-			_test.EndBeginInterval(0, 1);
+			Test.EndBeginInterval(0, 1);
 
 			//await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);
 			//_world.Step();
 
-			if (_data.Drawed)
+			if (Data.Drawed)
 			{
-				RedrawWorld(_data.Lens);
+				RedrawWorld(Data.Lens);
 			}
 			else
 			{
-				_test.EndBeginInterval(1, 2);
-				_test.EndBeginInterval(2, 3);
-				_test.EndBeginInterval(3, 4);
+				Test.EndBeginInterval(1, 2);
+				Test.EndBeginInterval(2, 3);
+				Test.EndBeginInterval(3, 4);
 			}
 
 			_PRESENTER.PrintInfo();
 
-			_test.EndBeginInterval(4, 0);
+			Test.EndBeginInterval(4, 0);
 			//await Task.Delay(5000);
 		}
 
@@ -113,54 +107,58 @@ namespace WindowsFormsApp1
 		{
 			_PRESENTER.StartNewFrame(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 
-			_test.EndBeginInterval(1, 2);
+			Test.EndBeginInterval(1, 2);
 
 			// Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
 			//======================================
-			_data.NumberOfChangedCellsForInfo = _data.NumberOfChangedCells;
-			for (var i = 0; i < _data.NumberOfChangedCells; i++)
+			Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
+			for (var i = 0; i < Data.NumberOfChangedCells; i++)
 			{
-				var obj = _data.ChangedCells[i];
+				var obj = Data.ChangedCells[i];
 
 				_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
-				_data.ChWorld[obj.X, obj.Y] = 0;
+				Data.ChWorld[obj.X, obj.Y] = 0;
 			}
-			_data.NumberOfChangedCells = 0;
+			Data.NumberOfChangedCells = 0;
 			//======================================
 
-			_test.EndBeginInterval(2, 3);
+			Test.EndBeginInterval(2, 3);
 
 			if (additionalGraphics) AdditionalGraphics();
 
 			_PRESENTER.SendFrameToScreen();
 			//await Task.Delay(1);
-			_test.EndBeginInterval(3, 4);
+			Test.EndBeginInterval(3, 4);
 		}
 
 		private void AdditionalGraphics()
 		{
 			_PRESENTER.IntermediateFrameSave();  // сохранить в промежуточный массив экран без дополнительной графики
-			if (_data.Lens)
+			if (Data.Lens)
 			{
 				DrawLens();
-				if (_data.PausedMode) DrawCursorInfo();
+                if (Data.PausedMode)
+                {
+                    deltaHistory = 0;
+                    DrawCursorInfo();
+				}
 			}
 		}
 
 		private void DrawLens()
 		{
-			_PRESENTER.DrawLensOnFrame(_data.LensX, _data.LensY, _data.LensWidth, _data.LensHeight, Color.Black);  // рмсование лупы
+			_PRESENTER.DrawLensOnFrame(Data.LensX, Data.LensY, Data.LensWidth, Data.LensHeight, Color.Black);  // рмсование лупы
 
 			_PRESENTER.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
 			Color? color;
 			Direction? dir;
-			// Выберем из _data.World[nX, nY] все что попадет в лупу
-			for (var y = _data.LensY; y < _data.LensY + _data.LensHeight; y++)
+			// Выберем из Data.World[nX, nY] все что попадет в лупу
+			for (var y = Data.LensY; y < Data.LensY + Data.LensHeight; y++)
 			{
-				for (var x = _data.LensX; x < _data.LensX + _data.LensWidth; x++)
+				for (var x = Data.LensX; x < Data.LensX + Data.LensWidth; x++)
 				{
 
-					var cont = _data.World[x, y];
+					var cont = Data.World[x, y];
 					color = null;
 					dir = null;
 
@@ -171,10 +169,10 @@ namespace WindowsFormsApp1
 					{
 						color = Color.Green;
 					}
-					else if (cont >= 1 && cont <= _data.CurrentNumberOfBots)
+					else if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 					{
-						color = ((Bot1)_data.Bots[cont]).Genom.Color;
-						dir = ((Bot1)_data.Bots[cont]).Dir;
+						color = ((Bot1)Data.Bots[cont]).genom.Color;
+						dir = ((Bot1)Data.Bots[cont]).Dir;
 					}
 					else
 					{
@@ -182,26 +180,26 @@ namespace WindowsFormsApp1
 					}
 
 
-					_PRESENTER.DrawObjectOnLensFrame(x - _data.LensX, y - _data.LensY, color, dir);
+					_PRESENTER.DrawObjectOnLensFrame(x - Data.LensX, y - Data.LensY, color, dir);
 				}
 			}
-			_PRESENTER.DrawCursorOnLens(_data.CursorX, _data.CursorY, Color.Black);  // рмсование курсора.
+			_PRESENTER.DrawCursorOnLens(Data.CursorX, Data.CursorY, Color.Black);  // рмсование курсора.
 			_PRESENTER.SendLensFrameToScreen();
 		}
 
 		// информация по курсору
-		private void DrawCursorInfo()
+		public void DrawCursorInfo()
 		{
-			var cursorCont = _data.World[_data.LensX + _data.CursorX, _data.LensY + _data.CursorY];
-			if (cursorCont >= 1 && cursorCont <= _data.CurrentNumberOfBots)
+			var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
+			if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
 			{
-				var bot = (Bot1)_data.Bots[cursorCont];
+				var bot = (Bot1)Data.Bots[cursorCont];
 
 				//TEXT
 				_PRESENTER.ClearGraphicsOnCursorFrame();
-				for (var i = 0; i < _data.GenomLength; i++)
+				for (var i = 0; i < Data.GenomLength; i++)
 				{
-					var code = bot.Genom.Code[i];
+					var code = bot.genom.Code[i];
 					var x = i % 8;
 					var y = i / 8;
 
@@ -220,27 +218,31 @@ namespace WindowsFormsApp1
 					};
 
 					_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
-					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, i.ToString(), textColor);
+                    _PRESENTER.DrawSmallTextOnCursorFrame1(x, y, i.ToString(), textColor);
+					var absDirStr = ((Direction)(((int)code) % 8)).ToString();
+					_PRESENTER.DrawSmallTextOnCursorFrame2(x, y, absDirStr, textColor);
 				}
 
-				//IMAGES
+				_PRESENTER.DrawOtherTextOnCursorFrame(6, 2, deltaHistory.ToString());
+				
+                //IMAGES
 				_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 				Color color;
 				int x1, y1, x2, y2;
-				for (var i = 0; i < _data.GenomLength; i++)
+				for (var i = 0; i < Data.GenomLength; i++)
 				{
 					x1 = i % 8;
 					y1 = i / 8;
 					color = i == bot.Pointer
-						? Color.Red
+						? Color.Aqua
 						: i == bot.OldPointer
-							? Color.BurlyWood
-							: Color.DarkCyan;
+							? Color.Red
+							: Color.Gray;
 
 					_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
 				}
 
-				var (hist, histPtrCnt) = bot.Hist.GetLastStepPtrs();
+				var (hist, histPtrCnt) = bot.Hist.GetLastStepPtrs(deltaHistory);
 				if (histPtrCnt > 0)
 				{
 					byte ptr1 = hist[0];
@@ -265,13 +267,20 @@ namespace WindowsFormsApp1
 				}
 
 				_PRESENTER.SendCursorFrameToScreen();
-				_PRESENTER.PrintObjectInfo(bot);
+                
+                //INFO
+                _PRESENTER.PrintObjectInfo1(bot);
+                _PRESENTER.PrintObjectInfo2(bot, deltaHistory);
 			}
 			else
 			{
 				_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
+
 				_PRESENTER.SendCursorFrameToScreen();
-				_PRESENTER.PrintObjectInfo(null);
+                
+                //INFO
+                _PRESENTER.PrintObjectInfo1(null);
+                _PRESENTER.PrintObjectInfo2(null, deltaHistory);
 			}
 		}
 
@@ -279,98 +288,110 @@ namespace WindowsFormsApp1
 		#region for Form
 		public void MutationToggle()
 		{
-			_data.Mutation = !_data.Mutation;
+			Data.Mutation = !Data.Mutation;
 		}
 
 		public void DrawedToggle()
 		{
-			_data.Drawed = !_data.Drawed;
-			_data.ReportFrequencyCurrent = _data.Drawed ? _data.ReportFrequencyDrawed : _data.ReportFrequencyNoDrawed;
+			Data.Drawed = !Data.Drawed;
+			Data.ReportFrequencyCurrent = Data.Drawed ? Data.ReportFrequencyDrawed : Data.ReportFrequencyNoDrawed;
 		}
 
 		public void PausedToggle()
 		{
-			_data.PausedMode = !_data.PausedMode;
+			Data.PausedMode = !Data.PausedMode;
 		}
 
 		public bool Paused
 		{
-			get { return _data.PausedMode; }
+			get { return Data.PausedMode; }
 		}
 
 		public bool Started
 		{
-			get { return _data.Started; }
+			get { return Data.Started; }
 		}
 
 		public void Lens(bool mode)
 		{
-			_data.Lens = mode;
+			Data.Lens = mode;
 		}
 		public void LensLeft()
 		{
-			if (_data.Drawed && _data.Lens && _data.LensX > 0)
+			if (Data.Drawed && Data.Lens && Data.LensX > 0)
 			{
-				_data.LensX--;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.LensX--;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 		public void LensRight()
 		{
-			if (_data.Drawed && _data.Lens && _data.LensX < _data.WorldWidth - _data.LensWidth)
+			if (Data.Drawed && Data.Lens && Data.LensX < Data.WorldWidth - Data.LensWidth)
 			{
-				_data.LensX++;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.LensX++;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 		public void LensUp()
 		{
-			if (_data.Drawed && _data.Lens && _data.LensY > 0)
+			if (Data.Drawed && Data.Lens && Data.LensY > 0)
 			{
-				_data.LensY--;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.LensY--;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 		public void LensDown()
 		{
-			if (_data.Lens && _data.LensY < _data.WorldHeight - _data.LensHeight)
+			if (Data.Lens && Data.LensY < Data.WorldHeight - Data.LensHeight)
 			{
-				_data.LensY++;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.LensY++;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 
 		public void CursorLeft()
 		{
-			if (_data.Drawed && _data.Lens && _data.CursorX > 0)
+			if (Data.Drawed && Data.Lens && Data.CursorX > 0)
 			{
-				_data.CursorX--;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.CursorX--;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 		public void CursorRight()
 		{
-			if (_data.Drawed && _data.Lens && _data.CursorX < _data.LensWidth - 1)
+			if (Data.Drawed && Data.Lens && Data.CursorX < Data.LensWidth - 1)
 			{
-				_data.CursorX++;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.CursorX++;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 		public void CursorUp()
 		{
-			if (_data.Drawed && _data.Lens && _data.CursorY > 0)
+			if (Data.Drawed && Data.Lens && Data.CursorY > 0)
 			{
-				_data.CursorY--;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.CursorY--;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
 		}
 		public void CursorDown()
 		{
-			if (_data.Drawed && _data.Lens && _data.CursorY < _data.LensCellHeight - 1)
+			if (Data.Drawed && Data.Lens && Data.CursorY < Data.LensCellHeight - 1)
 			{
-				_data.CursorY++;
-				if (_data.PausedMode) RedrawWorld(_data.Lens);
+				Data.CursorY++;
+				if (Data.PausedMode) RedrawWorld(Data.Lens);
 			}
+		}
+
+
+        public void HistoryUp()
+        {
+            deltaHistory++;
+			if (Data.PausedMode) DrawCursorInfo();
+		}
+		public void HistoryDown()
+        {
+            deltaHistory--;
+            if (Data.PausedMode) DrawCursorInfo();
 		}
 
 

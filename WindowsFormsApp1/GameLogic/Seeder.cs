@@ -11,91 +11,86 @@ namespace WindowsFormsApp1.GameLogic
 {
 	public class Seeder
 	{
-		private Func _func;
-		private GameData _data;
-
-		public Seeder(GameData data, Func func)
+		public Seeder()
 		{
-			_func = func;
-			_data = data;
 		}
 
 		public void SeedBots()
 		{
-			for (uint botIndex = 1; botIndex <= _data.StartNumberOfBots; botIndex++)
+			for (uint botIndex = 1; botIndex <= Data.StartNumberOfBots; botIndex++)
 			{
 
 				// Координаты бота
-				var p = _func.GetRandomFreeCell();
+				var p = Func.GetRandomFreeCell();
 
 				// Создание кода бота
-				var genom = new Genom(_data, _func);
+				var genom = Genom.CreateNewGenom();
 
-				_func.CreateNewBot(p, botIndex, genom);
+				Func.CreateNewBot(p, botIndex, genom);
 			}
-			_data.CurrentNumberOfBots = _data.StartNumberOfBots;
+			Data.CurrentNumberOfBots = Data.StartNumberOfBots;
 			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
 		}
 
 		public void SeedItems()
 		{
 			// Заполнение Grass
-			if (_data.SeedFood)
+			if (Data.SeedFood)
 			{
-				for (var i = 0; i < _data.SeedFoodNumber; i++)
+				for (var i = 0; i < Data.SeedFoodNumber; i++)
 				{
-					var p = _func.GetRandomFreeCell();
+					var p = Func.GetRandomFreeCell();
 
-					_data.World[p.X, p.Y] = (uint)CellContent.Grass;
-					_func.ChangeCell(p.X, p.Y, Color.Green);
+					Data.World[p.X, p.Y] = (uint)CellContent.Grass;
+					Func.ChangeCell(p.X, p.Y, Color.Green);
 				}
 			}
 
 			// Заполнение Organic
-			if (_data.SeedOrganic)
+			if (Data.SeedOrganic)
 			{
-				for (var i = 0; i < _data.SeedOrganicNumber; i++)
+				for (var i = 0; i < Data.SeedOrganicNumber; i++)
 				{
-					var p = _func.GetRandomFreeCell();
+					var p = Func.GetRandomFreeCell();
 
-					_data.World[p.X, p.Y] = (uint)CellContent.Organic;
-					_func.ChangeCell(p.X, p.Y, Color.Black);
+					Data.World[p.X, p.Y] = (uint)CellContent.Organic;
+					Func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 
 			// Заполнение Minerals
-			if (_data.SeedMinerals)
+			if (Data.SeedMinerals)
 			{
-				for (var i = 0; i < _data.SeedMineralsNumber; i++)
+				for (var i = 0; i < Data.SeedMineralsNumber; i++)
 				{
-					var p = _func.GetRandomFreeCell();
+					var p = Func.GetRandomFreeCell();
 
-					_data.World[p.X, p.Y] = (uint)CellContent.Mineral;
-					_func.ChangeCell(p.X, p.Y, Color.Black);
+					Data.World[p.X, p.Y] = (uint)CellContent.Mineral;
+					Func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 
 			// Заполнение Walls
-			if (_data.SeedWalls)
+			if (Data.SeedWalls)
 			{
-				for (var i = 0; i < _data.SeedWallsNumber; i++)
+				for (var i = 0; i < Data.SeedWallsNumber; i++)
 				{
-					var p = _func.GetRandomFreeCell();
+					var p = Func.GetRandomFreeCell();
 
-					_data.World[p.X, p.Y] = (uint)CellContent.Wall;
-					_func.ChangeCell(p.X, p.Y, Color.Black);
+					Data.World[p.X, p.Y] = (uint)CellContent.Wall;
+					Func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 
 			// Заполнение Poison
-			if (_data.SeedPoison)
+			if (Data.SeedPoison)
 			{
-				for (var i = 0; i < _data.SeedPoisonNumber; i++)
+				for (var i = 0; i < Data.SeedPoisonNumber; i++)
 				{
-					var p = _func.GetRandomFreeCell();
+					var p = Func.GetRandomFreeCell();
 
-					_data.World[p.X, p.Y] = (uint)CellContent.Poison;
-					_func.ChangeCell(p.X, p.Y, Color.Black);
+					Data.World[p.X, p.Y] = (uint)CellContent.Poison;
+					Func.ChangeCell(p.X, p.Y, Color.Black);
 				}
 			}
 		}
