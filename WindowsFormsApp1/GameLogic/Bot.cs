@@ -43,39 +43,6 @@ namespace WindowsFormsApp1.GameLogic
 		public abstract void Death();
 
 		protected abstract void Reproduction();
-
-		public void Move()
-		{
-			var newX = P.X + _vx;
-			if (newX >= Data.WorldWidth)
-			{
-				newX = Data.WorldWidth - 1;
-				_vx = -_vx;
-			}
-			if (newX < 0)
-			{
-				newX = 0;
-				_vx = -_vx;
-			}
-
-
-			var newY = P.Y + _vy;
-			if (newY >= Data.WorldHeight)
-			{
-				newY = Data.WorldHeight - 1;
-				_vy = -_vy;
-			}
-			if (newY < 0)
-			{
-				newY = 0;
-				_vy = -_vy;
-			}
-
-			Old.X = P.X;
-			Old.Y = P.Y;
-			P.X = newX;
-			P.Y = newY;
-		}
 	}
 }
 

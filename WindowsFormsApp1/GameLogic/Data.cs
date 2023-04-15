@@ -58,6 +58,7 @@ namespace WindowsFormsApp1.GameLogic
 		//VARIABLE CURRENT PARAMETERS
 		public static uint[,] World; // чтобы можно было узнать по координатам что там находится
 		public static Bot[] Bots;
+        public static int TotalEnergy;
 
 		// Настройки игры
 		public static bool Started;
@@ -80,7 +81,7 @@ namespace WindowsFormsApp1.GameLogic
 		public static uint DeathCnt;
 		public static uint ReproductionCnt;
 		public static uint MutationCnt;
-		public static int ReportFrequencyCurrent;
+        public static int ReportFrequencyCurrent;
 
 		public static int LensX;
 		public static int LensY;
