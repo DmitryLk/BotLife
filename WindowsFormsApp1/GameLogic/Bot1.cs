@@ -47,7 +47,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public (byte[], int) GetLastStepPtrs()
 		{
-			return (codeHistory[historyPointerY], ptrs[historyPointerY]);
+			return historyPointerY >=0 ? (codeHistory[historyPointerY], ptrs[historyPointerY]) : (Array.Empty<byte>(), 0);
 		}
 	}
 
@@ -620,8 +620,13 @@ namespace WindowsFormsApp1.GameLogic
             sb.AppendLine($"Pointer: {Pointer}");
 			sb.AppendLine($"Energy: {Energy}");
             sb.AppendLine($"_dir: {Dir}");
-            sb.AppendLine($"jumps cnt: {Hist.ptrs[Hist.historyPointerY] - 1}");
-            sb.AppendLine($"jumps: {string.Join(", ", Hist.codeHistory[Hist.historyPointerY].ToList().Take(Hist.ptrs[Hist.historyPointerY]))}");
+
+			if (Hist.historyPointerY >= 0)
+			{
+				sb.AppendLine($"jumps cnt: {Hist.ptrs[Hist.historyPointerY] - 1}");
+				sb.AppendLine($"jumps: {string.Join(", ", Hist.codeHistory[Hist.historyPointerY].ToList().Take(Hist.ptrs[Hist.historyPointerY]))}");
+			}
+
 
 			sb.AppendLine("");
 			sb.AppendLine($"Genom {Genom.Level}");

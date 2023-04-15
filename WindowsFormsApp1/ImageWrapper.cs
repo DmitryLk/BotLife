@@ -279,28 +279,28 @@ namespace WindowsFormsApp1
         /// <summary>
         /// Рисует отрезок
         /// </summary>
-        public unsafe void Line(int x1, int y1, int x2, int y2, Color color)
+        public void Line(int x1, int y1, int x2, int y2, Color color)
         {
-            if (x1 < 0 || x1 > _width || y1 < 0 || y1 > _height || x2 < 0 || x2 > _width || y2 < 0 || y2 > _height) return;
-
             int dx = x2 - x1;
             int dy = y2 - y1;
 
             if (dx == 0 && dy == 0) return;
 
-            byte* curpos;
-            int ind;
-            int sx = 0;
-            int sy = 0;
-            bool cycX = Math.Abs(dx) > Math.Abs(dy);
+			int sx = 0;
+			int sy = 0;
+			int bx = 0;
+			int by = 0;
+			bool cycX = Math.Abs(dx) > Math.Abs(dy);
 
             if (cycX)
             {
                 sx = x2 > x1 ? 1 : -1;
+                by = 1;
             }
             else
             {
                 sy = y2 > y1 ? 1 : -1;
+                bx = 1;
             }
 
 
@@ -310,26 +310,11 @@ namespace WindowsFormsApp1
             do
             {
 
-                ind = x * 4 + y * _stride;
+				SetPixel(x, y, color);
+				SetPixel(x + bx, y + by, color);
+				SetPixel(x - bx, y - by, color);
 
-                if (_useEditArray)
-                {
-                    _editArray[ind++] = color.B;
-                    _editArray[ind++] = color.G;
-                    _editArray[ind++] = color.R;
-                    _editArray[ind++] = 255;
-                }
-                else
-                {
-                    curpos = (byte*)_bmpData.Scan0 + ind;
-                    *(curpos++) = color.B;
-                    *(curpos++) = color.G;
-                    *(curpos++) = color.R;
-                    *(curpos++) = 255;
-                }
-
-
-                if (cycX)
+				if (cycX)
                 {
                     x += sx;
                     y = y1 + (x - x1) * dy / dx;   // меньшее по модулю/большее по модулю
@@ -343,14 +328,38 @@ namespace WindowsFormsApp1
             }
             while (cycX ? x != x2 : y != y2);
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        /// <summary>
-        /// Заносит в bitmap выходной буфер и снимает лок.
-        /// Этот метод обязателен к исполнению (либо явно, лмбо через using)
-        /// </summary>
-        public void Dispose()
+        private unsafe void SetPixel(int x, int y, Color color)
+        {
+			if (x < 0 || x >= _width || y < 0 || y >= _height) return;
+			var ind = x * 4 + y * _stride;
+
+			if (_useEditArray)
+			{
+				_editArray[ind++] = color.B;
+				_editArray[ind++] = color.G;
+				_editArray[ind++] = color.R;
+				_editArray[ind++] = 255;
+			}
+			else
+			{
+				var curpos = (byte*)_bmpData.Scan0 + ind;
+				*(curpos++) = color.B;
+				*(curpos++) = color.G;
+				*(curpos++) = color.R;
+				*(curpos++) = 255;
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+		/// <summary>
+		/// Заносит в bitmap выходной буфер и снимает лок.
+		/// Этот метод обязателен к исполнению (либо явно, лмбо через using)
+		/// </summary>
+		public void Dispose()
         {
             _bmp.UnlockBits(_bmpData);
         }
