@@ -11,14 +11,14 @@ namespace WindowsFormsApp1
         EditDirectlyScreenBitmap_Fastest = 1,
         EditCopyScreenBitmap = 2,
         EditEmptyArray = 3,
-        EditCopyScreenBitmapWithAdditionalArray = 4
-    }
+		EditCopyScreenBitmapWithAdditionalArray = 4
+	}
 
-    /// <summary>
-    /// Обертка над Bitmap для быстрого чтения и изменения пикселов.
-    /// Также, класс контролирует выход за пределы изображения: при чтении за границей изображения - возвращает DefaultColor, при записи за границей изображения - игнорирует присвоение.
-    /// </summary>
-    public class ImageWrapper : IDisposable, IEnumerable<System.Drawing.Point>
+	/// <summary>
+	/// Обертка над Bitmap для быстрого чтения и изменения пикселов.
+	/// Также, класс контролирует выход за пределы изображения: при чтении за границей изображения - возвращает DefaultColor, при записи за границей изображения - игнорирует присвоение.
+	/// </summary>
+	public class ImageWrapper : IDisposable, IEnumerable<System.Drawing.Point>
     {
         public int _width;
         public int _height;
@@ -91,7 +91,7 @@ namespace WindowsFormsApp1
 
             if (type == BitmapCopyType.EditEmptyArray)
             {
-                Switching_From_EditCopyScreenBitmapWithAdditionalArray();
+                //Switching_From_EditCopyScreenBitmapWithAdditionalArray();
 
                 // заново абсолютно всё рисуем на пустом массиве для редактирования
                 _editArray = new byte[_length];
@@ -112,37 +112,39 @@ namespace WindowsFormsApp1
                             _type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray;
         }
 
-        public void ClearBitmap()
-        {
-            _bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            System.Runtime.InteropServices.Marshal.Copy(_clear, 0, _bmpData.Scan0, _length);
-            _bmp.UnlockBits(_bmpData);
-        }
 
-        private void Switching_To_EditCopyScreenBitmapWithAdditionalArray()
+		//скопировать доп массив _mainScreenBufferWithoutLens в экранный битмап
+		private void Switching_From_EditCopyScreenBitmapWithAdditionalArray()
+		{
+			if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
+			{
+				_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+				System.Runtime.InteropServices.Marshal.Copy(_mainScreenBufferWithoutLens, 0, _bmpData.Scan0, _editArray.Length);
+				_bmp.UnlockBits(_bmpData);
+			}
+		}
+
+		//скопировать экранный битмап без доп графики в массив _mainScreenBufferWithoutLens
+		private void Switching_To_EditCopyScreenBitmapWithAdditionalArray()
         {
             if (_type != BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
             {
-                //при переходе на этот режим вначале надо скопировать в массив _mainScreenBufferWithoutLens текущий экран без дополнительной графики 
                 _bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
                 System.Runtime.InteropServices.Marshal.Copy(_bmpData.Scan0, _mainScreenBufferWithoutLens, 0, _length);
                 _bmp.UnlockBits(_bmpData);
             }
         }
 
-        private void Switching_From_EditCopyScreenBitmapWithAdditionalArray()
-        {
-            if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
-            {
-                _bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-                System.Runtime.InteropServices.Marshal.Copy(_mainScreenBufferWithoutLens, 0, _bmpData.Scan0, _editArray.Length);
-                _bmp.UnlockBits(_bmpData);
-            }
-        }
 
-
+		public void ClearBitmap()
+		{
+			_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+			System.Runtime.InteropServices.Marshal.Copy(_clear, 0, _bmpData.Scan0, _length);
+			_bmp.UnlockBits(_bmpData);
+		}
+		
         // После отрисовки всех ботов сохранить образец и продолжить рисовать на буфере редиктирования дополнительную графику
-        public void IntervalEditing()
+		public void IntervalEditing()
         {
             if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
             {

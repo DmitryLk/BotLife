@@ -31,6 +31,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = GetRandomDirection();
 			var en = Data.InitialBotEnergy;
+			Data.TotalEnergy += Data.InitialBotEnergy;
 			var (vx, vy) = GetRandomSpeed();
 			var pointer = 0;
 			var botNumber = ++Data.MaxBotNumber;
@@ -122,7 +123,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public static bool Mutation()
 		{
-			return Data.Mutation && _rnd.Next(100) < Data.MutationProbabilityPercent;
+			return Data.Mutation && _rnd.NextDouble()*100 < Data.MutationProbabilityPercent;
 		}
 
 		public static Point GetRandomFreeCell()

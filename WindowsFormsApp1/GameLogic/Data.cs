@@ -41,13 +41,16 @@ namespace WindowsFormsApp1.GameLogic
 		public static int GenomLength;
 		public static int MaxCode;
 		public static int MaxUncompleteJump;
-		public static int MutationProbabilityPercent;
+		public static float MutationProbabilityPercent;
+		public static int MutationLenght;
 
 		public static int FoodEnergy;
 		public static int InitialBotEnergy;
 		public static int ReproductionBotEnergy;
 		public static int BiteEnergy;
 		public static int DeltaEnergyOnStep;
+		public static int PhotosynthesisEnergy;
+
 
 		public static int LensWidth;
 		public static int LensHeight;
@@ -58,7 +61,7 @@ namespace WindowsFormsApp1.GameLogic
 		//VARIABLE CURRENT PARAMETERS
 		public static uint[,] World; // чтобы можно было узнать по координатам что там находится
 		public static Bot[] Bots;
-        public static int TotalEnergy;
+		public static int TotalEnergy;
 
 		// Настройки игры
 		public static bool Started;
@@ -81,7 +84,7 @@ namespace WindowsFormsApp1.GameLogic
 		public static uint DeathCnt;
 		public static uint ReproductionCnt;
 		public static uint MutationCnt;
-        public static int ReportFrequencyCurrent;
+		public static int ReportFrequencyCurrent;
 
 		public static int LensX;
 		public static int LensY;
@@ -136,6 +139,7 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"deathCnt: {DeathCnt}");
 			sb.AppendLine($"reproductionCnt: {ReproductionCnt}");
 			sb.AppendLine($"mutationCnt: {MutationCnt}");
+			sb.AppendLine($"TotalEnergy: {TotalEnergy}");
 			return sb.ToString();
 		}
 
@@ -179,13 +183,14 @@ namespace WindowsFormsApp1.GameLogic
 			MaxCode = options.MaxCode;
 			MaxUncompleteJump = options.MaxUncompleteJump;
 			MutationProbabilityPercent = options.MutationProbabilityPercent;
+			MutationLenght = options.MutationLenght;
 
 			InitialBotEnergy = options.InitialBotEnergy;
 			FoodEnergy = options.FoodEnergy;
 			ReproductionBotEnergy = options.ReproductionBotEnergy;
 			BiteEnergy = options.BiteEnergy;
 			DeltaEnergyOnStep = options.DeltaEnergyOnStep;
-
+			PhotosynthesisEnergy = options.PhotosynthesisEnergy;
 			LensWidth = options.LensWidth;
 			LensHeight = options.LensHeight;
 			LensCellWidth = options.LensCellWidth;

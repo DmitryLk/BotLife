@@ -32,15 +32,17 @@ namespace WindowsFormsApp1
 		public int GenomLength;
 		public int MaxCode;
 		public int MaxUncompleteJump;
-		public int MutationProbabilityPercent;
+		public float MutationProbabilityPercent;
+		public int MutationLenght;
 
 		public int FoodEnergy;
 		public int InitialBotEnergy;
 		public int ReproductionBotEnergy;
 		public int BiteEnergy;
 		public int DeltaEnergyOnStep;
+		public int PhotosynthesisEnergy;
 
-        public int LensWidth;
+		public int LensWidth;
         public int LensHeight;
         public int LensCellWidth;
         public int LensCellHeight;

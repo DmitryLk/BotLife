@@ -32,15 +32,17 @@
   "GenomLength": 64,
   "MaxCode": 63,
   "MaxUncompleteJump": 10,
-  "MutationProbabilityPercent": 10,
+  "MutationProbabilityPercent": 0.1,
+  "MutationLenght": 5,
 
 
   //Energy
-  "FoodEnergy": 2000,
-  "InitialBotEnergy": 100,
-  "ReproductionBotEnergy": 300,
-  "BiteEnergy": 100,
+  "FoodEnergy": 20000,
+  "InitialBotEnergy": 1000,
+  "ReproductionBotEnergy": 3000,
+  "BiteEnergy": 1000,
   "DeltaEnergyOnStep": -1,
+  "PhotosynthesisEnergy": 3,
 
 
   //Lens

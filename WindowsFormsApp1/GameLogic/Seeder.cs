@@ -40,6 +40,7 @@ namespace WindowsFormsApp1.GameLogic
 				for (var i = 0; i < Data.SeedFoodNumber; i++)
 				{
 					var p = Func.GetRandomFreeCell();
+					Data.TotalEnergy += Data.FoodEnergy;
 
 					Data.World[p.X, p.Y] = (uint)CellContent.Grass;
 					Func.ChangeCell(p.X, p.Y, Color.Green);

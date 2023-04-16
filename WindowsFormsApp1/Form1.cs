@@ -40,8 +40,9 @@ namespace WindowsFormsApp1
 
             Game = new Game(presenter);
 
+            trackBar1.Value = Data.PhotosynthesisEnergy;
 
-            label2.Text = $@"	S - start
+			label2.Text = $@"	S - start
 								P - pause mode
 								space - step
 								M - mutation on/off
@@ -52,12 +53,17 @@ namespace WindowsFormsApp1
         {
             if (!Game.Started)
             {
-                if (e.KeyCode == Keys.S)
-                {
-                    await Game.Start();
-                    Game.Work();
-                    return;
-                }
+				switch (e.KeyCode)
+				{
+					case Keys.P: PauseToggle(); break;
+					case Keys.S:
+						{
+							await Game.Start();
+							Game.Work();
+							return;
+						}
+					default: break;
+				}
             }
 
 
@@ -155,6 +161,16 @@ namespace WindowsFormsApp1
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            Data.PhotosynthesisEnergy = trackBar1.Value;
         }
     }
 }

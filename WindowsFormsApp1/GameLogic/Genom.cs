@@ -70,9 +70,10 @@ namespace WindowsFormsApp1.GameLogic
 
             for (var i = 0; i < Data.GenomLength; i++)
             {
-                g.Code[i] = Func.GetRandomBotCode();
-            }
-            g.ParentHash = Guid.Empty;
+				g.Code[i] = Func.GetRandomBotCode();
+				g.Code[i] = 25;
+			}
+			g.ParentHash = Guid.Empty;
             g.GrandHash = Guid.Empty;
             g.PraHash = g.GenomHash;
             g.Level = 1;
@@ -98,10 +99,14 @@ namespace WindowsFormsApp1.GameLogic
                 g.Code[i] = parent.Code[i];
             }
 
-            // один байт в геноме подменяем
-            g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomBotCode();
+			// Data.MutationLenght байт в геноме подменяем
+			for (var i = 0; i < Data.MutationLenght; i++)
+            {
+				g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomBotCode();
+			}
 
-            g.ParentHash = parent.GenomHash;
+
+			g.ParentHash = parent.GenomHash;
             g.GrandHash = parent.ParentHash;
             g.PraHash = parent.PraHash;
             Data.MutationCnt++;

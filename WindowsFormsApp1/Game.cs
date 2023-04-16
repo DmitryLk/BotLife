@@ -108,19 +108,8 @@ namespace WindowsFormsApp1
 			_PRESENTER.StartNewFrame(additionalGraphics ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 
 			Test.EndBeginInterval(1, 2);
-
-			// Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
-			//======================================
-			Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
-			for (var i = 0; i < Data.NumberOfChangedCells; i++)
-			{
-				var obj = Data.ChangedCells[i];
-
-				_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
-				Data.ChWorld[obj.X, obj.Y] = 0;
-			}
-			Data.NumberOfChangedCells = 0;
-			//======================================
+			
+			MainGraphics();
 
 			Test.EndBeginInterval(2, 3);
 
@@ -130,6 +119,24 @@ namespace WindowsFormsApp1
 			//await Task.Delay(1);
 			Test.EndBeginInterval(3, 4);
 		}
+
+
+
+		// Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
+		private void MainGraphics()
+		{
+			Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
+			for (var i = 0; i < Data.NumberOfChangedCells; i++)
+			{
+				var obj = Data.ChangedCells[i];
+
+				_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
+				Data.ChWorld[obj.X, obj.Y] = 0;
+			}
+			Data.NumberOfChangedCells = 0;
+		}
+
+
 
 		private void AdditionalGraphics()
 		{
@@ -206,14 +213,15 @@ namespace WindowsFormsApp1
 
 					var textColor = code switch
 					{
-						23 => Color.Green,  //поворот
-						24 => Color.Green,
+						23 => Color.Blue,  //поворот
+						24 => Color.Blue,
+						25 => Color.Green,
 						26 => Color.Brown,  //шаг
 						27 => Color.Brown,
 						28 => Color.Red,    //съесть
 						29 => Color.Red,
-						30 => Color.BlueViolet,  //посмотреть
-						31 => Color.BlueViolet,
+						30 => Color.Gray,  //посмотреть
+						31 => Color.Gray,
 						_ => Color.Black
 					};
 
@@ -294,12 +302,19 @@ namespace WindowsFormsApp1
 		public void DrawedToggle()
 		{
 			Data.Drawed = !Data.Drawed;
-			Data.ReportFrequencyCurrent = Data.Drawed ? Data.ReportFrequencyDrawed : Data.ReportFrequencyNoDrawed;
+			Data.ReportFrequencyCurrent = GetCurrentReportFrequency();
 		}
 
+		private static int GetCurrentReportFrequency()
+		{
+			if (!Data.Drawed) return Data.ReportFrequencyNoDrawed;
+			if (Data.PausedMode) return 1;
+			return Data.ReportFrequencyDrawed;
+		}
 		public void PausedToggle()
 		{
 			Data.PausedMode = !Data.PausedMode;
+			Data.ReportFrequencyCurrent = GetCurrentReportFrequency();
 		}
 
 		public bool Paused
