@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Accessibility;
-using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1
 {

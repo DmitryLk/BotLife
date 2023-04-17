@@ -4,11 +4,12 @@ using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
+using WindowsFormsApp1.Static;
 using static System.Windows.Forms.Design.AxImporter;
 
 namespace WindowsFormsApp1.GameLogic
 {
-	public class World
+    public class World
 	{
 		private readonly Seeder _seeder;
 

@@ -14,13 +14,14 @@ using WindowsFormsApp1;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Static;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.Design.AxImporter;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WindowsFormsApp1
 {
-	public class Game
+    public class Game
 	{
 		public Presenter _PRESENTER;
 		public World _world;
@@ -158,7 +159,7 @@ namespace WindowsFormsApp1
 
 			_PRESENTER.StartNewLensFrame(BitmapCopyType.EditEmptyArray);
 			Color? color;
-			Direction? dir;
+			int? dir;
 			// Выберем из Data.World[nX, nY] все что попадет в лупу
 			for (var y = Data.LensY; y < Data.LensY + Data.LensHeight; y++)
 			{
@@ -178,8 +179,8 @@ namespace WindowsFormsApp1
 					}
 					else if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 					{
-						color = ((Bot1)Data.Bots[cont]).genom.Color;
-						dir = ((Bot1)Data.Bots[cont]).Dir;
+						color = Data.Bots[cont].genom.Color;
+						dir = Data.Bots[cont].Direction;
 					}
 					else
 					{
@@ -200,7 +201,7 @@ namespace WindowsFormsApp1
 			var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
 			if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
 			{
-				var bot = (Bot1)Data.Bots[cursorCont];
+				var bot = Data.Bots[cursorCont];
 
 				//TEXT
 				_PRESENTER.ClearGraphicsOnCursorFrame();
@@ -227,7 +228,7 @@ namespace WindowsFormsApp1
 
 					_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
                     _PRESENTER.DrawSmallTextOnCursorFrame1(x, y, i.ToString(), textColor);
-					var absDirStr = ((Direction)(((int)code) % 8)).ToString();
+                    var absDirStr = Dir.GetDirectionString(code);
 					_PRESENTER.DrawSmallTextOnCursorFrame2(x, y, absDirStr, textColor);
 				}
 

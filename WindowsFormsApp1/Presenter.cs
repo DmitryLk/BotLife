@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Static;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = System.Windows.Forms.Label;
@@ -165,7 +166,7 @@ namespace WindowsFormsApp1
             _lensImageWrapper.StartEditing(type);
         }
 
-        public void DrawObjectOnLensFrame(int x, int y, Color? color, Direction? dir)
+        public void DrawObjectOnLensFrame(int x, int y, Color? color, int? dir)
         {
 
 
@@ -173,13 +174,13 @@ namespace WindowsFormsApp1
 
             if (dir.HasValue)
             {
-                var (dX, dY) = Func.GetDeltaDirection(dir.Value);
+                var (dX, dY) = Dir.GetDeltaDirection(dir.Value);
 
                 _lensImageWrapper.Line(
                     _lensCellWidth * x + _lensCellWidth / 2,
                     _lensCellHeight * y + _lensCellHeight / 2,
-                    _lensCellWidth * x + _lensCellWidth * (1 + dX) / 2,
-                    _lensCellHeight * y + _lensCellHeight * (1 + dY) / 2,
+                    (int)(_lensCellWidth * x + _lensCellWidth * (1 + dX) / 2),
+                    (int)(_lensCellHeight * y + _lensCellHeight * (1 + dY) / 2),
                     Color.Red);
             }
         }

@@ -14,10 +14,11 @@ using System.Xml;
 using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
+using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1.GameLogic
 {
-	public class Genom
+    public class Genom
     {
         private static long COUNTER = 0;
         public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
@@ -71,7 +72,7 @@ namespace WindowsFormsApp1.GameLogic
             for (var i = 0; i < Data.GenomLength; i++)
             {
 				g.Code[i] = Func.GetRandomBotCode();
-				g.Code[i] = 25;
+				//g.Code[i] = 25;
 			}
 			g.ParentHash = Guid.Empty;
             g.GrandHash = Guid.Empty;
