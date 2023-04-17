@@ -22,8 +22,7 @@ namespace WindowsFormsApp1.Static
 {
     public static class Func
     {
-        private static Random _rnd = new Random(Guid.NewGuid().GetHashCode());
-
+        public static Random Rnd = new Random(Guid.NewGuid().GetHashCode());
 
 
         // Создать нового бота можно только через этот метод им пользуется Seeder и Reproduction
@@ -81,22 +80,22 @@ namespace WindowsFormsApp1.Static
 
         public static byte GetRandomBotCode()
         {
-            return (byte)_rnd.Next(Data.MaxCode + 1);
+            return (byte)Rnd.Next(Data.MaxCode + 1);
         }
 
         public static Color GetRandomColor()
         {
-            return Color.FromArgb(_rnd.Next(256), _rnd.Next(256), _rnd.Next(256));
+            return Color.FromArgb(Rnd.Next(256), Rnd.Next(256), Rnd.Next(256));
         }
 
         public static int GetRandomBotCodeIndex()
         {
-            return _rnd.Next(Data.GenomLength);
+            return Rnd.Next(Data.GenomLength);
         }
 
         public static bool Mutation()
         {
-            return Data.Mutation && _rnd.NextDouble() * 100 < Data.MutationProbabilityPercent;
+            return Data.Mutation && Rnd.NextDouble() * 100 < Data.MutationProbabilityPercent;
         }
 
         public static (int x, int y) GetRandomFreeCell()
@@ -107,13 +106,14 @@ namespace WindowsFormsApp1.Static
 
             do
             {
-                x = _rnd.Next(0, Data.WorldWidth);
-                y = _rnd.Next(0, Data.WorldHeight);
+                x = Rnd.Next(0, Data.WorldWidth);
+                y = Rnd.Next(0, Data.WorldHeight);
             }
             while (CellIsBusy(x, y) && ++i < 1000);
 
             return (x, y);
         }
+
 
         public static (int, int) GetRandomSpeed()
         {
@@ -124,9 +124,9 @@ namespace WindowsFormsApp1.Static
             //}
             //while (_vx == 0 && _vy == 0);
 
-            if (_rnd.Next(100) > 97)
+            if (Rnd.Next(100) > 97)
             {
-                return (_rnd.Next(-1, 2), _rnd.Next(-1, 2));
+                return (Rnd.Next(-1, 2), Rnd.Next(-1, 2));
             }
             return (0, 0);
         }

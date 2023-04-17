@@ -23,13 +23,18 @@ namespace WindowsFormsApp1.Static
     {
         public const int NumberOfDirections = 8;
         public static (double, double)[] Directions = new (double, double)[64];
-        private static Random _rnd = new Random(Guid.NewGuid().GetHashCode());
+
+        public static (int, int)[] NearbyCells = new (int, int)[8]
+            { (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0) };
+
 
 
         static Dir()
         {
             for (var i = 0; i < NumberOfDirections; i++)
             {
+                //var x = Math.Round(Math.Sin(i * 2 * Math.PI / NumberOfDirections));
+                //var y = Math.Round(-Math.Cos(i * 2 * Math.PI / NumberOfDirections));
                 var x = Math.Sin(i * 2 * Math.PI / NumberOfDirections);
                 var y = -Math.Cos(i * 2 * Math.PI / NumberOfDirections);
                 Directions[i] = (x, y);
@@ -50,12 +55,7 @@ namespace WindowsFormsApp1.Static
 
         public static int GetRandomDirection()
         {
-            return _rnd.Next(0, NumberOfDirections);
-        }
-
-        public static int GetRandomCardinalDirection()
-        {
-            return _rnd.Next(0, 8) * NumberOfDirections / 8;
+            return Func.Rnd.Next(NumberOfDirections);
         }
 
         public static int GetDirectionFromCode(byte code)

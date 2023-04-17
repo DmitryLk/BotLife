@@ -461,19 +461,17 @@ namespace WindowsFormsApp1.GameLogic
 
         private bool TryGetRandomFreeCellNearby(out int nXi, out int nYi)
         {
-            nXi = 0;
-            nYi = 0;
-
+            var n = Func.Rnd.Next(8);
             RefContent refContent;
             var i = 0;
 
-            var dir = Dir.GetRandomCardinalDirection();
             do
             {
-                dir = Dir.DirectionPlus(dir, Dir.NumberOfDirections / 8);
-                (_, _, nXi, nYi) = GetNewBotCoordinatesByDirection(dir);
+                (nXi, nYi) = GetCoordinatesByDelta(n);
                 refContent = GetRefContentWithoutRelative(nXi, nYi);
                 i++;
+                
+                if (++n >= 8) n -= 8;
             }
             while (refContent != RefContent.Free && i <= 8);
 
@@ -488,8 +486,8 @@ namespace WindowsFormsApp1.GameLogic
         }
 
 
-        // Метод вернет всегда координаты отличные от текущих
-        private (double nXd, double nYd, int nXi, int nYi) GetNewBotCoordinatesByDirection(int dir)
+        // Метод вернет всегда координаты отличные от текущих - нет
+        private (double nXd, double nYd, int nXi, int nYi) GetCoordinatesByDirection(int dir)
         {
             var (nXdd, nYdd) = Dir.GetDeltaDirection(dir);
 
@@ -535,6 +533,44 @@ namespace WindowsFormsApp1.GameLogic
             }
 
             return (nXd, nYd, nXi, nYi);
+        }
+
+        private (int nXi, int nYi) GetCoordinatesByDelta(int nDelta)
+        {
+            var (nXid, nYid) = Dir.NearbyCells[nDelta];
+
+
+            var nXi = _Xi + nXid;
+            var nYi = _Yi + nYid;
+
+            // Проверка перехода сквозь экран
+            if (!Data.LeftRightEdge)
+            {
+                if (nXi < 0)
+                {
+                    nXi += Data.WorldWidth;
+                }
+
+                if (nXi >= Data.WorldWidth)
+                {
+                    nXi -= Data.WorldWidth;
+                }
+            }
+
+            if (!Data.UpDownEdge)
+            {
+                if (nYi < 0)
+                {
+                    nYi += Data.WorldHeight;
+                }
+
+                if (nYi >= Data.WorldHeight)
+                {
+                    nYi -= Data.WorldHeight;
+                }
+            }
+
+            return (nXi, nYi);
         }
 
         #region GetRefContent
@@ -612,7 +648,7 @@ namespace WindowsFormsApp1.GameLogic
         private RefContent GetCellInfo1(int dir)
         {
             // 1. Узнаем координаты клетки на которую надо посмотреть
-            var (_, _, nXi, nYi) = GetNewBotCoordinatesByDirection(dir);
+            var (_, _, nXi, nYi) = GetCoordinatesByDirection(dir);
 
             // 2. Узнаем что находится на этой клетке
             var refContent = GetRefContent(nXi, nYi);
@@ -624,7 +660,7 @@ namespace WindowsFormsApp1.GameLogic
         private (RefContent refContent, double nXd, double nYd, int nXi, int nYi) GetCellInfo2(int dir)
         {
             // 1. Узнаем координаты предполагаемого перемещения
-            var (nXd, nYd, nXi, nYi) = GetNewBotCoordinatesByDirection(dir);
+            var (nXd, nYd, nXi, nYi) = GetCoordinatesByDirection(dir);
 
             // 2. Узнаем что находится на этой клетке
             var refContent = GetRefContent(nXi, nYi);
@@ -636,7 +672,7 @@ namespace WindowsFormsApp1.GameLogic
         private (RefContent refContent, int nX, int nY, uint cont) GetCellInfo3(int dir)
         {
             // 1. Узнаем координаты клетки на которую надо посмотреть
-            var (_, _, nXi, nYi) = GetNewBotCoordinatesByDirection(dir);
+            var (_, _, nXi, nYi) = GetCoordinatesByDirection(dir);
 
             // 2. Узнаем что находится на этой клетке
             var (refContent, cont) = GetRefContentAndCont(nXi, nYi);
