@@ -24,10 +24,10 @@ namespace WindowsFormsApp1.GameLogic
 
         public CodeHistory Hist;
 
-        public double Xd;
-        public double Yd;
-        public int Xi;
-        public int Yi;
+        public double _Xd;
+        public double _Yd;
+        public int _Xi;
+        public int _Yi;
         public int Energy;
         public uint Index;         // Индекс бота (может меняться)
 
@@ -52,10 +52,10 @@ namespace WindowsFormsApp1.GameLogic
             Energy = en;
             _age = 0;
 
-            Xd = x;
-            Yd = y;
-            Xi = x;
-            Yi = y;
+            _Xd = x;
+            _Yd = y;
+            _Xi = x;
+            _Yi = y;
         }
 
         public void Step()
@@ -185,8 +185,8 @@ namespace WindowsFormsApp1.GameLogic
             //	throw new Exception("var idx = Data.World[P.X, P.Y];");
             //}
 
-            Data.World[Xi, Yi] = (uint)CellContent.Free;
-            Func.ChangeCell(Xi, Yi, null); // при следующей отрисовке бот стерется с экрана
+            Data.World[_Xi, _Yi] = (uint)CellContent.Free;
+            Func.ChangeCell(_Xi, _Yi, null); // при следующей отрисовке бот стерется с экрана
 
             //idx = Data.World[P.X, P.Y];
             //if (idx != 0)
@@ -217,7 +217,7 @@ namespace WindowsFormsApp1.GameLogic
                 var lastBot = Data.Bots[Data.CurrentNumberOfBots];
                 Data.Bots[Index] = lastBot;
                 lastBot.Index = Index;
-                Data.World[lastBot.Xi, lastBot.Yi] = Index;
+                Data.World[lastBot._Xi, lastBot._Yi] = Index;
                 //Func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
                 //после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
             }
@@ -443,16 +443,16 @@ namespace WindowsFormsApp1.GameLogic
         // Перемещение бота
         private void Move(double nXd, double nYd, int nXi, int nYi)
         {
-            Data.World[nXi, nYi] = (uint)CellContent.Free;
-            Func.ChangeCell(nXi, nYi, null);
+            Data.World[_Xi, _Yi] = (uint)CellContent.Free;
+            Func.ChangeCell(_Xi, _Yi, null);
 
-            Xd = nXd;
-            Yd = nYd;
-            Xi = nXi;
-            Yi = nYi;
+            _Xd = nXd;
+            _Yd = nYd;
+            _Xi = nXi;
+            _Yi = nYi;
 
-            Data.World[nXi, nYi] = Index;
-            Func.ChangeCell(nXi, nYi, genom.Color);
+            Data.World[_Xi, _Yi] = Index;
+            Func.ChangeCell(_Xi, _Yi, genom.Color);
         }
 
 
@@ -498,8 +498,8 @@ namespace WindowsFormsApp1.GameLogic
             //public int Xi;
             //public int Yi;
 
-            var nXd = Xd + nXdd;
-            var nYd = Yd + nYdd;
+            var nXd = _Xd + nXdd;
+            var nYd = _Yd + nYdd;
             var nXi = (int)Math.Round(nXd);
             var nYi = (int)Math.Round(nYd);
 
