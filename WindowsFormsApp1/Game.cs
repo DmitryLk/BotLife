@@ -228,7 +228,7 @@ namespace WindowsFormsApp1
 
 					_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
                     _PRESENTER.DrawSmallTextOnCursorFrame1(x, y, i.ToString(), textColor);
-                    var absDirStr = Dir.GetDirectionString(code);
+                    var absDirStr = Dir.GetDirectionStringFromCode(code);
 					_PRESENTER.DrawSmallTextOnCursorFrame2(x, y, absDirStr, textColor);
 				}
 

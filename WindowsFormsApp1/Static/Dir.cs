@@ -63,9 +63,9 @@ namespace WindowsFormsApp1.Static
             return code % NumberOfDirections;
         }
 
-        public static string GetDirectionString(int dir)
+        public static string GetDirectionStringFromCode(int dir)
         {
-            return (360 * dir / NumberOfDirections).ToString();
+            return ((int)(360 * (dir % NumberOfDirections) / NumberOfDirections)).ToString();
         }
     }
 }

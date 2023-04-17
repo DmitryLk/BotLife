@@ -718,7 +718,7 @@ namespace WindowsFormsApp1.GameLogic
                         _ => ""
                     };
 
-                    var dirStr = Dir.GetDirectionString(genom.GetNextCommand(hist[i]));
+                    var dirStr = Dir.GetDirectionStringFromCode(genom.GetNextCommand(hist[i]));
                     if (cmdTxt != "")
                     {
                         sb.AppendLine($"{cmdTxt} {dirStr}");
