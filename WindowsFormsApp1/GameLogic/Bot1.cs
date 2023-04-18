@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -401,12 +402,21 @@ namespace WindowsFormsApp1.GameLogic
             // 1. Узнаем направление предполагаемого движения
             var dir = GetDirRelative();
             // 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-            var (refContent, nXd, nYd, nXi, nYi) = GetCellInfo2(dir);
+            var (iEqual, refContent, nXd, nYd, nXi, nYi) = GetCellInfo2(dir);
+
             // 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-            if (refContent == RefContent.Free || refContent == RefContent.Poison)
+            if (iEqual)
             {
-                Move(nXd, nYd, nXi, nYi);
+                MoveOnlyDouble(nXd, nYd);
             }
+            else
+            {
+                if (refContent == RefContent.Free || refContent == RefContent.Poison)
+                {
+                    Move(nXd, nYd, nXi, nYi);
+                }
+            }
+
             return ((int)refContent, true);
         }
 
@@ -417,11 +427,19 @@ namespace WindowsFormsApp1.GameLogic
             // 1. Узнаем направление предполагаемого движения
             var dir = GetDirAbsolute();
             // 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-            var (refContent, nXd, nYd, nXi, nYi) = GetCellInfo2(dir);
+            var (iEqual, refContent, nXd, nYd, nXi, nYi) = GetCellInfo2(dir);
+
             // 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-            if (refContent == RefContent.Free || refContent == RefContent.Poison)
+            if (iEqual)
             {
-                Move(nXd, nYd, nXi, nYi);
+                MoveOnlyDouble(nXd, nYd);
+            }
+            else
+            {
+                if (refContent == RefContent.Free || refContent == RefContent.Poison)
+                {
+                    Move(nXd, nYd, nXi, nYi);
+                }
             }
             return ((int)refContent, true);
         }
@@ -455,6 +473,11 @@ namespace WindowsFormsApp1.GameLogic
             Func.ChangeCell(_Xi, _Yi, genom.Color);
         }
 
+        private void MoveOnlyDouble(double nXd, double nYd)
+        {
+            _Xd = nXd;
+            _Yd = nYd;
+        }
 
         //////////////////////////////////////////////////////////////////
 
@@ -470,7 +493,7 @@ namespace WindowsFormsApp1.GameLogic
                 (nXi, nYi) = GetCoordinatesByDelta(n);
                 refContent = GetRefContentWithoutRelative(nXi, nYi);
                 i++;
-                
+
                 if (++n >= 8) n -= 8;
             }
             while (refContent != RefContent.Free && i <= 8);
@@ -486,54 +509,79 @@ namespace WindowsFormsApp1.GameLogic
         }
 
 
-        // Метод вернет всегда координаты отличные от текущих - нет
-        private (double nXd, double nYd, int nXi, int nYi) GetCoordinatesByDirection(int dir)
+        // Метод может вернуть координаты равные текущим (используется для движения)
+        // и отличные от текущих (используется для посмотреть, есть, схватить, ...)
+        private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirection(int dir, bool onlyDifferent)
         {
-            var (nXdd, nYdd) = Dir.GetDeltaDirection(dir);
+            var (deltaXdouble, deltaYdouble) = Dir.GetDeltaDirection(dir);
 
-            //public double Xd;
-            //public double Yd;
-            //public int Xi;
-            //public int Yi;
+            var newXdouble = _Xd + deltaXdouble;
+            var newYdouble = _Yd + deltaYdouble;
 
-            var nXd = _Xd + nXdd;
-            var nYd = _Yd + nYdd;
-            var nXi = (int)Math.Round(nXd);
-            var nYi = (int)Math.Round(nYd);
+            var newXint = Dir.Round(newXdouble);
+            var newYint = Dir.Round(newYdouble);
+
+            var iEqual = newXint == _Xi && newYint == _Yi;
+
+            if (onlyDifferent && iEqual)
+            {
+                // координаты не изменились. надо шагнуть дальше
+                var (deltaXdouble2, deltaYdouble2) = Dir.GetDeltaDirection2(dir);
+
+                newXdouble = _Xd + deltaXdouble2;
+                newYdouble = _Yd + deltaYdouble2;
+
+                newXint = Dir.Round(newXdouble);
+                newYint = Dir.Round(newYdouble);
+
+                // проверка на изменение координат еще раз. такого не может быть
+                if (newXint == _Xi && newYint == _Yi)
+                {
+                    throw new Exception("if (newXint == _Xi && newYint == _Yi)");
+                }
+
+                if (newXint - _Xi > 1 || newXint - _Xi < -1 || newYint - _Yi > 1 || newYint - _Yi < -1)
+                {
+                    throw new Exception("if (newXint - _Xi > 1 || newXint - _Xi < -1 || newYint - _Yi > 1 || newYint - _Yi < -1)");
+                }
+
+                iEqual = false;
+            }
 
             // Проверка перехода сквозь экран
             if (!Data.LeftRightEdge)
             {
-                if (nXi < 0)
+                if (newXint < 0)
                 {
-                    nXi += Data.WorldWidth;
-                    nXd += Data.WorldWidth;
+                    newXint += Data.WorldWidth;
+                    newXdouble += Data.WorldWidth;
                 }
 
-                if (nXi >= Data.WorldWidth)
+                if (newXint >= Data.WorldWidth)
                 {
-                    nXi -= Data.WorldWidth;
-                    nXd -= Data.WorldWidth;
+                    newXint -= Data.WorldWidth;
+                    newXdouble -= Data.WorldWidth;
                 }
             }
 
             if (!Data.UpDownEdge)
             {
-                if (nYi < 0)
+                if (newYint < 0)
                 {
-                    nYi += Data.WorldHeight;
-                    nYd += Data.WorldHeight;
+                    newYint += Data.WorldHeight;
+                    newYdouble += Data.WorldHeight;
                 }
 
-                if (nYi >= Data.WorldHeight)
+                if (newYint >= Data.WorldHeight)
                 {
-                    nYi -= Data.WorldHeight;
-                    nYd -= Data.WorldHeight;
+                    newYint -= Data.WorldHeight;
+                    newYdouble -= Data.WorldHeight;
                 }
             }
 
-            return (nXd, nYd, nXi, nYi);
+            return (newXdouble, newYdouble, newXint, newYint, iEqual);
         }
+
 
         private (int nXi, int nYi) GetCoordinatesByDelta(int nDelta)
         {
@@ -645,10 +693,11 @@ namespace WindowsFormsApp1.GameLogic
         #endregion
 
         #region GetCellInfo
+        // For Look
         private RefContent GetCellInfo1(int dir)
         {
             // 1. Узнаем координаты клетки на которую надо посмотреть
-            var (_, _, nXi, nYi) = GetCoordinatesByDirection(dir);
+            var (_, _, nXi, nYi, _) = GetCoordinatesByDirection(dir, true);
 
             // 2. Узнаем что находится на этой клетке
             var refContent = GetRefContent(nXi, nYi);
@@ -657,22 +706,30 @@ namespace WindowsFormsApp1.GameLogic
             return refContent;
         }
 
-        private (RefContent refContent, double nXd, double nYd, int nXi, int nYi) GetCellInfo2(int dir)
+        // For move
+        private (bool Equal, RefContent refContent, double nXd, double nYd, int nXi, int nYi) GetCellInfo2(int dir)
         {
             // 1. Узнаем координаты предполагаемого перемещения
-            var (nXd, nYd, nXi, nYi) = GetCoordinatesByDirection(dir);
+            var (nXd, nYd, nXi, nYi, iEqual) = GetCoordinatesByDirection(dir, false);
+            //private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirection(int dir, bool onlyDifferent)
+
+            if (iEqual)
+            {
+                return (true, RefContent.Free, nXd, nYd, nXi, nYi);
+            }
 
             // 2. Узнаем что находится на этой клетке
             var refContent = GetRefContent(nXi, nYi);
 
             // 3. Возвращаем полученную информацию
-            return (refContent, nXd, nYd, nXi, nYi);
+            return (false, refContent, nXd, nYd, nXi, nYi);
         }
 
+        // For eat
         private (RefContent refContent, int nX, int nY, uint cont) GetCellInfo3(int dir)
         {
             // 1. Узнаем координаты клетки на которую надо посмотреть
-            var (_, _, nXi, nYi) = GetCoordinatesByDirection(dir);
+            var (_, _, nXi, nYi, _) = GetCoordinatesByDirection(dir, true);
 
             // 2. Узнаем что находится на этой клетке
             var (refContent, cont) = GetRefContentAndCont(nXi, nYi);

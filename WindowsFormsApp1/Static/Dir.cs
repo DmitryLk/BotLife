@@ -21,8 +21,9 @@ namespace WindowsFormsApp1.Static
 {
     public static class Dir
     {
-        public const int NumberOfDirections = 8;
+        public const int NumberOfDirections = 64;
         public static (double, double)[] Directions = new (double, double)[64];
+        public static (double, double)[] Directions2 = new (double, double)[64];
 
         public static (int, int)[] NearbyCells = new (int, int)[8]
             { (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0) };
@@ -38,6 +39,7 @@ namespace WindowsFormsApp1.Static
                 var x = Math.Sin(i * 2 * Math.PI / NumberOfDirections);
                 var y = -Math.Cos(i * 2 * Math.PI / NumberOfDirections);
                 Directions[i] = (x, y);
+                Directions2[i] = (1.42 * x, 1.42 * y);
             }
         }
 
@@ -46,6 +48,11 @@ namespace WindowsFormsApp1.Static
         public static (double, double) GetDeltaDirection(int dir)
         {
             return Directions[dir];
+        }
+        
+        public static (double, double) GetDeltaDirection2(int dir)
+        {
+            return Directions2[dir];
         }
 
         public static int DirectionPlus(int dir1, int dir2)
@@ -57,6 +64,12 @@ namespace WindowsFormsApp1.Static
         {
             return Func.Rnd.Next(NumberOfDirections);
         }
+
+        public static int Round(double val)
+        {
+            return val >= 0 ? (int)(val + 0.5f) : -(int)(0.5f - val);
+        }
+
 
         public static int GetDirectionFromCode(byte code)
         {
