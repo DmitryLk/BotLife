@@ -133,8 +133,8 @@ namespace WindowsFormsApp1.Static
 
             sb.AppendLine($"Fps: {fps.ToString("#")}");
             sb.AppendLine($"Step: {CurrentStep}");
-            sb.AppendLine($"CurrentNumberOfBots: {CurrentNumberOfBots}");
-            sb.AppendLine($"NumberOfChangedCells: {NumberOfChangedCellsForInfo}");
+            sb.AppendLine($"Bots: {CurrentNumberOfBots}");
+            sb.AppendLine($"ChangedCells: {NumberOfChangedCellsForInfo}");
 
             sb.AppendLine($"deathCnt: {DeathCnt}");
             sb.AppendLine($"reproductionCnt: {ReproductionCnt}");
