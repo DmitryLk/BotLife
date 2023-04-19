@@ -44,6 +44,12 @@
   "DeltaEnergyOnStep": -1,
   "PhotosynthesisEnergy": 3,
 
+  //Size
+  "MinSize": 300,
+  "MaxSize": 10000,
+  "InitialBotEnergyOnSize": 1,
+  "ReproductionBotEnergyOnSize": 3,
+  "BiteEnergyOnSize": 1,
 
   //Lens
   "LensWidth": 20,

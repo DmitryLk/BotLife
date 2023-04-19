@@ -71,8 +71,8 @@ namespace WindowsFormsApp1.GameLogic
 
             for (var i = 0; i < Data.GenomLength; i++)
             {
-				g.Code[i] = Func.GetRandomBotCode();
-				//g.Code[i] = 25;
+				//g.Code[i] = Func.GetRandomBotCode();
+				g.Code[i] = 25;
 			}
 			g.ParentHash = Guid.Empty;
             g.GrandHash = Guid.Empty;

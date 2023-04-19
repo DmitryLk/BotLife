@@ -35,12 +35,13 @@ namespace WindowsFormsApp1.GameLogic
         public int Direction;         // Направление бота
 
         private uint _num;         // Номер бота (остается постоянным)
-        private int _age;
+		private int _age;
+		private int _size;
 
 
 
-        // Может вызываться только из func.CreateNewBot()
-        public Bot1(int x, int y, int dir, uint botNumber, uint botIndex, int en, Genom genom, int pointer)
+		// Может вызываться только из func.CreateNewBot()
+		public Bot1(int x, int y, int dir, uint botNumber, uint botIndex, int en, Genom genom, int pointer)
         {
             Pointer = pointer;
             OldPointer = pointer;
