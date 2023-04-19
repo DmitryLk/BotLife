@@ -140,6 +140,15 @@ namespace WindowsFormsApp1.Static
             sb.AppendLine($"reproductionCnt: {ReproductionCnt}");
             sb.AppendLine($"mutationCnt: {MutationCnt}");
             sb.AppendLine($"TotalEnergy: {TotalEnergy}");
+
+            var te = 0;
+            for (uint botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            {
+                te += Data.Bots[botNumber].Energy;
+            }
+
+            sb.AppendLine($"Actual total energy:{te}");
+
             return sb.ToString();
         }
 

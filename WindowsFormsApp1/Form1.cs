@@ -172,5 +172,10 @@ namespace WindowsFormsApp1
         {
             Data.PhotosynthesisEnergy = trackBar1.Value;
         }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

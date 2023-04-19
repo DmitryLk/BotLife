@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using WindowsFormsApp1;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
@@ -98,7 +97,7 @@ namespace WindowsFormsApp1
 				Test.EndBeginInterval(3, 4);
 			}
 
-			_PRESENTER.PrintInfo();
+			_PRESENTER.Print012();
 
 			Test.EndBeginInterval(4, 0);
 			//await Task.Delay(5000);
@@ -278,8 +277,8 @@ namespace WindowsFormsApp1
 				_PRESENTER.SendCursorFrameToScreen();
                 
                 //INFO
-                _PRESENTER.PrintObjectInfo1(bot);
-                _PRESENTER.PrintObjectInfo2(bot, deltaHistory);
+                _PRESENTER.Print3(bot);
+                _PRESENTER.Print4(bot, deltaHistory);
 			}
 			else
 			{
@@ -288,8 +287,8 @@ namespace WindowsFormsApp1
 				_PRESENTER.SendCursorFrameToScreen();
                 
                 //INFO
-                _PRESENTER.PrintObjectInfo1(null);
-                _PRESENTER.PrintObjectInfo2(null, deltaHistory);
+                _PRESENTER.Print3(null);
+                _PRESENTER.Print4(null, deltaHistory);
 			}
 		}
 

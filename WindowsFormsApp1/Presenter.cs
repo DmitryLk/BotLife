@@ -254,9 +254,13 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.EndEditing();
             _pictureBoxes[2].Refresh();
         }
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public void PrintInfo()
+        ///////ВСЕ РАСПЕЧАТКИ///////////////////////////////////////////////////////////////////////////////////////////////
+        // 0 - на главной форме посередине
+        // 1 - на главной форме сверху
+        // 2 - на главной форме снизу
+        // 3 - на второй форме сверху
+        // 4 - на второй форме снизу
+        public void Print012()
         {
             _cnt++;
             if (_cnt % Data.ReportFrequencyCurrent == 0)
@@ -277,7 +281,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        public void PrintObjectInfo1(Bot1 bot)
+        public void Print3(Bot1 bot)
         {
             if (bot != null)
             {
@@ -302,7 +306,7 @@ namespace WindowsFormsApp1
             //}
         }
 
-        public void PrintObjectInfo2(Bot1 bot, int delta)
+        public void Print4(Bot1 bot, int delta)
         {
             if (bot != null)
             {
@@ -314,6 +318,10 @@ namespace WindowsFormsApp1
             }
             _textBoxes[4].Update();
         }
+        ///////ВСЕ РАСПЕЧАТКИ///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
         public void Dispose()
         {
             _mainBitmap.Dispose();
