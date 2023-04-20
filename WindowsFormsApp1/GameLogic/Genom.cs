@@ -18,34 +18,87 @@ using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class Genom
-    {
-        private static long COUNTER = 0;
-        public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
+	public class Genom
+	{
+		private static long COUNTER = 0;
+		public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
 
-        public byte[] Code;
+		public byte[] Code;
 		public Guid GenomHash;
 		public Guid ParentHash;
-        public Guid GrandHash;
-        public Guid PraHash;
+		public Guid GrandHash;
+		public Guid PraHash;
 		public Color Color;
-        public int Bots;
-        public int Level;
-        public long PraNum;
-        public long Num;
+		public int Level;
+		public long PraNum;
+		public long Num;
+		public int Bots { get; set; }
+		public uint BirthStep;
+		public uint DeathStep;
 
-        //private Genom _parent;
+		//private Genom _parent;
 
-        private Genom()
+		private Genom()
 		{
 			//_parent = parent;
 			Bots = 0;
+		}
+
+		// Создание генома
+		public static Genom CreateGenom(Genom parent = null)
+		{
+			var g = new Genom();
+
+			g.Code = new byte[Data.GenomLength];
+			g.GenomHash = Guid.NewGuid();
+			g.Color = Func.GetRandomColor();
+
+
+			if (parent == null)
+			{
+				for (var i = 0; i < Data.GenomLength; i++)
+				{
+					g.Code[i] = Func.GetRandomBotCode();
+					//g.Code[i] = 25;
+				}
+				g.ParentHash = Guid.Empty;
+				g.GrandHash = Guid.Empty;
+				g.PraHash = g.GenomHash;
+				g.PraNum = g.Num;
+				g.Level = 1;
+			}
+			else
+			{
+				for (var i = 0; i < Data.GenomLength; i++)
+				{
+					g.Code[i] = parent.Code[i];
+				}
+				// Data.MutationLenght байт в геноме подменяем
+				for (var i = 0; i < Data.MutationLenght; i++)
+				{
+					g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomBotCode();
+				}
+				g.ParentHash = parent.GenomHash;
+				g.GrandHash = parent.ParentHash;
+				g.PraHash = parent.PraHash;
+				g.PraNum = parent.PraNum;
+				g.Level = parent.Level + 1;
+				Data.MutationCnt++;
+			}
+
+			g.Num = Interlocked.Increment(ref COUNTER);
+			GENOMS.TryAdd(g, 1);
+
+			g.BirthStep = Data.CurrentStep;
+
+			return g;
 		}
 
 		public byte GetCurrentCommand(int pointer)
 		{
 			return Code[pointer];
 		}
+
 		public byte GetNextCommand(int pointer)
 		{
 			return Code[pointer + 1 >= Data.GenomLength ? 0 : pointer + 1];
@@ -60,81 +113,26 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		// Создание нового генома
-        public static Genom CreateNewGenom()
-        {
-            var g = new Genom();
 
-            g.Code = new byte[Data.GenomLength];
-            g.GenomHash = Guid.NewGuid();
-            g.Color = Func.GetRandomColor();
+		public static string GetText()
+		{
+			var sb = new StringBuilder();
+			sb.AppendLine($"Count: {COUNTER}");
 
-            for (var i = 0; i < Data.GenomLength; i++)
-            {
-				//g.Code[i] = Func.GetRandomBotCode();
-				g.Code[i] = 25;
-			}
-			g.ParentHash = Guid.Empty;
-            g.GrandHash = Guid.Empty;
-            g.PraHash = g.GenomHash;
-            g.Level = 1;
+			var activeGemons = GENOMS.Keys.Where(g => g.Bots > 0).Count();
+			sb.AppendLine($"Active: {activeGemons}");
 
-            g.Num = Interlocked.Increment(ref COUNTER);
-            g.PraNum = g.Num;
-            GENOMS.TryAdd(g, 1);
-            return g;
-        }
+			sb.AppendLine("");
+			var gemons = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(20);
 
-        // Создание мутировавшего генома
+			foreach (var g in gemons)
+			{
+				sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}");
 
-        public static Genom CreateMutatedGenom(Genom parent)
-        {
-            var g = new Genom();
-
-            g.Code = new byte[Data.GenomLength];
-            g.GenomHash = Guid.NewGuid();
-            g.Color = Func.GetRandomColor();
-
-            for (var i = 0; i < Data.GenomLength; i++)
-            {
-                g.Code[i] = parent.Code[i];
-            }
-
-			// Data.MutationLenght байт в геноме подменяем
-			for (var i = 0; i < Data.MutationLenght; i++)
-            {
-				g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomBotCode();
 			}
 
-
-			g.ParentHash = parent.GenomHash;
-            g.GrandHash = parent.ParentHash;
-            g.PraHash = parent.PraHash;
-            Data.MutationCnt++;
-            g.Level = parent.Level + 1;
-
-            g.Num = Interlocked.Increment(ref COUNTER);
-            g.PraNum = parent.PraNum;
-            GENOMS.TryAdd(g, 1);
-            return g;
-        }
-
-        public static string GetText()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"Count: {COUNTER}");
-            sb.AppendLine("");
-
-            var gemons = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(20);
-
-            foreach (var g in gemons)
-            {
-                sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}");
-
-            }
-
-            return sb.ToString();
-        }
-    }
+			return sb.ToString();
+		}
+	}
 }
 

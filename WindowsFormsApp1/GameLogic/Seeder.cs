@@ -25,9 +25,9 @@ namespace WindowsFormsApp1.GameLogic
                 var (x, y) = Func.GetRandomFreeCell();
 
                 // Создание кода бота
-                var genom = Genom.CreateNewGenom();
+                var genom = Genom.CreateGenom();
 
-                Func.CreateNewBot(x, y, botIndex, genom);
+                Func.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
             }
             Data.CurrentNumberOfBots = Data.StartNumberOfBots;
             //Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2

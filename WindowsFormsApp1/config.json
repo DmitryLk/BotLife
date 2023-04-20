@@ -17,7 +17,7 @@
 
 
   // Настройки Seeder
-  "SeedFood": true,
+  "SeedFood": false,
   "SeedOrganic": false,
   "SeedMinerals": false,
   "SeedWalls": false,
@@ -32,12 +32,13 @@
   "GenomLength": 64,
   "MaxCode": 63,
   "MaxUncompleteJump": 10,
-  "MutationProbabilityPercent": 0.1,
-  "MutationLenght": 5,
+  "MutationProbabilityPercent": 10,
+  "MutationLenght": 1,
 
 
   //Energy
   "FoodEnergy": 20000,
+  "SeedBotEnergy": 50000,
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": 1000,
@@ -47,7 +48,6 @@
   //Size
   "MinSize": 300,
   "MaxSize": 10000,
-  "InitialBotEnergyOnSize": 1,
   "ReproductionBotEnergyOnSize": 3,
   "BiteEnergyOnSize": 1,
 

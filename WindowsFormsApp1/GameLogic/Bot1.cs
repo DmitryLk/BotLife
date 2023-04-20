@@ -253,9 +253,9 @@ namespace WindowsFormsApp1.GameLogic
             {
                 Data.CurrentNumberOfBots++;
                 var botIndex = Data.CurrentNumberOfBots;
-                var genom = Func.Mutation() ? Genom.CreateMutatedGenom(this.genom) : this.genom;
+                var genom = Func.Mutation() ? Genom.CreateGenom(this.genom) : this.genom;
 
-                Func.CreateNewBot(x, y, botIndex, genom);
+                Func.CreateNewBot(x, y, botIndex, Data.InitialBotEnergy, genom);
                 Energy -= Data.InitialBotEnergy;
                 Data.TotalEnergy -= Data.InitialBotEnergy;
                 Data.ReproductionCnt++;
@@ -744,11 +744,11 @@ namespace WindowsFormsApp1.GameLogic
         #region Direction
         private int GetDirAbsolute()
         {
-            return Dir.GetDirectionFromCode(genom.GetNextCommand(Pointer));
+            return Dir.GetDirectionFromCodeAbsolute(genom.GetNextCommand(Pointer));
         }
         private int GetDirRelative()
         {
-            return Dir.DirectionPlus(Direction, genom.GetNextCommand(Pointer));
+            return Dir.GetDirectionFromCodeRelative(Direction, genom.GetNextCommand(Pointer));
         }
         #endregion
 

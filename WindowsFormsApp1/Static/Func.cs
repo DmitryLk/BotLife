@@ -26,11 +26,10 @@ namespace WindowsFormsApp1.Static
 
 
         // Создать нового бота можно только через этот метод им пользуется Seeder и Reproduction
-        public static void CreateNewBot(int x, int y, uint botIndex, Genom genom)
+        public static void CreateNewBot(int x, int y, uint botIndex, int en, Genom genom)
         {
             var dir = Dir.GetRandomDirection();
-            var en = Data.InitialBotEnergy;
-            Data.TotalEnergy += Data.InitialBotEnergy;
+            Data.TotalEnergy += en;
             var pointer = 0;
             var botNumber = ++Data.MaxBotNumber;
 

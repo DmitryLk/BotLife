@@ -36,6 +36,7 @@ namespace WindowsFormsApp1
 		public int MutationLenght;
 
 		public int FoodEnergy;
+		public int SeedBotEnergy;
 		public int InitialBotEnergy;
 		public int ReproductionBotEnergy;
 		public int BiteEnergy;
