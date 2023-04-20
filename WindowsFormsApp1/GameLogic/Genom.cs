@@ -15,12 +15,14 @@ using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.Static;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WindowsFormsApp1.GameLogic
 {
 	public class Genom
 	{
-		private static long COUNTER = 0;
+		private static long BEGINCOUNTER = 0;
+		private static long ENDCOUNTER = 0;
 		public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
 
 		public byte[] Code;
@@ -32,11 +34,31 @@ namespace WindowsFormsApp1.GameLogic
 		public int Level;
 		public long PraNum;
 		public long Num;
-		public int Bots { get; set; }
-		public uint BirthStep;
-		public uint DeathStep;
-
+		public uint BeginStep;
+		public uint EndStep;
 		//private Genom _parent;
+
+
+		private int _bots;
+		public int Bots
+		{
+			get { return _bots; }
+			set
+			{
+				if (_bots == 1 && value == 0)
+				{
+					EndStep = Data.CurrentStep;
+					Interlocked.Increment(ref ENDCOUNTER);
+				}
+
+				if (_bots - value > 1 && _bots - value < -1 || value < 0)
+				{
+					throw new Exception("if (()_bots - value != 1 && _bots - value != -1) || value<0)");
+				}
+
+				_bots = value;
+			}
+		}
 
 		private Genom()
 		{
@@ -86,10 +108,10 @@ namespace WindowsFormsApp1.GameLogic
 				Data.MutationCnt++;
 			}
 
-			g.Num = Interlocked.Increment(ref COUNTER);
+			g.Num = Interlocked.Increment(ref BEGINCOUNTER);
 			GENOMS.TryAdd(g, 1);
 
-			g.BirthStep = Data.CurrentStep;
+			g.BeginStep = Data.CurrentStep;
 
 			return g;
 		}
@@ -117,18 +139,24 @@ namespace WindowsFormsApp1.GameLogic
 		public static string GetText()
 		{
 			var sb = new StringBuilder();
-			sb.AppendLine($"Count: {COUNTER}");
+			sb.AppendLine($"Count: {BEGINCOUNTER}");
 
 			var activeGemons = GENOMS.Keys.Where(g => g.Bots > 0).Count();
-			sb.AppendLine($"Active: {activeGemons}");
+			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}");
 
 			sb.AppendLine("");
-			var gemons = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(20);
 
-			foreach (var g in gemons)
+			var genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderBy(g => g.BeginStep).Take(10);
+			foreach (var g in genoms)
+			{
+				sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
+			}
+			sb.AppendLine("");
+
+			genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(10);
+			foreach (var g in genoms)
 			{
 				sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}");
-
 			}
 
 			return sb.ToString();
