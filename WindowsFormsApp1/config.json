@@ -6,6 +6,7 @@
   "CellHeight": 2,
   "ReportFrequencyDrawed": 100,
   "ReportFrequencyNoDrawed": 100,
+  "FrequencyOfPeriodicalDraw": 25,
 
   // Настройки мира
   "StartBotsNumber": 1000,
@@ -17,7 +18,7 @@
 
 
   // Настройки Seeder
-  "SeedFood": false,
+  "SeedFood": true,
   "SeedOrganic": false,
   "SeedMinerals": false,
   "SeedWalls": false,
@@ -33,17 +34,18 @@
   "MaxCode": 63,
   "MaxUncompleteJump": 10,
   "MutationProbabilityPercent": 10,
-  "MutationLenght": 1,
+  "MutationLenght": 5,
 
 
   //Energy
   "FoodEnergy": 20000,
-  "SeedBotEnergy": 50000,
+  "SeedBotEnergy": 1000,
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": 1000,
   "DeltaEnergyOnStep": -1,
-  "PhotosynthesisEnergy": 3,
+  "PhotosynthesisEnergy": 30,
+  "PhotosynthesisLayerHeight": 0,
 
   //Size
   "MinSize": 300,

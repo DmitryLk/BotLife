@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices;
@@ -31,39 +32,46 @@ namespace WindowsFormsApp1.GameLogic
 		public Guid GrandHash;
 		public Guid PraHash;
 		public Color Color;
+		public Color PraColor;
 		public int Level;
 		public long PraNum;
 		public long Num;
 		public uint BeginStep;
 		public uint EndStep;
 		//private Genom _parent;
+		private int _curBots = 0;
+		private int _allBots = 0;
+		public bool Plant = false;
 
+		public int Bots { get => _curBots; }
+		public int AllBots { get => _allBots; }
 
-		private int _bots;
-		public int Bots
-		{
-			get { return _bots; }
-			set
-			{
-				if (_bots == 1 && value == 0)
-				{
-					EndStep = Data.CurrentStep;
-					Interlocked.Increment(ref ENDCOUNTER);
-				}
-
-				if (_bots - value > 1 && _bots - value < -1 || value < 0)
-				{
-					throw new Exception("if (()_bots - value != 1 && _bots - value != -1) || value<0)");
-				}
-
-				_bots = value;
-			}
-		}
 
 		private Genom()
 		{
 			//_parent = parent;
-			Bots = 0;
+		}
+
+		public void AddBot()
+		{
+			_curBots++;
+			_allBots++;
+		}
+		public void RemoveBot()
+		{
+			if (_curBots < 1)
+			{
+				throw new Exception("if (_curBots < 1)");
+			}
+			
+			// Исчезновение генома
+			if (_curBots == 1)
+			{
+				EndStep = Data.CurrentStep;
+				Interlocked.Increment(ref ENDCOUNTER);
+			}
+
+			_curBots--;
 		}
 
 		// Создание генома
@@ -73,8 +81,11 @@ namespace WindowsFormsApp1.GameLogic
 
 			g.Code = new byte[Data.GenomLength];
 			g.GenomHash = Guid.NewGuid();
+			//g.Color = Color.Red;
 			g.Color = Func.GetRandomColor();
-
+			g.PraColor = g.Color;
+			g.Num = Interlocked.Increment(ref BEGINCOUNTER);
+			g.BeginStep = Data.CurrentStep;
 
 			if (parent == null)
 			{
@@ -104,15 +115,12 @@ namespace WindowsFormsApp1.GameLogic
 				g.GrandHash = parent.ParentHash;
 				g.PraHash = parent.PraHash;
 				g.PraNum = parent.PraNum;
+				g.PraColor = parent.PraColor;
 				g.Level = parent.Level + 1;
 				Data.MutationCnt++;
 			}
 
-			g.Num = Interlocked.Increment(ref BEGINCOUNTER);
 			GENOMS.TryAdd(g, 1);
-
-			g.BeginStep = Data.CurrentStep;
-
 			return g;
 		}
 
@@ -145,18 +153,27 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}");
 
 			sb.AppendLine("");
-
-			var genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderBy(g => g.BeginStep).Take(10);
+			sb.AppendLine("По кол-ву живых ботов");
+			var genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(10);
 			foreach (var g in genoms)
 			{
 				sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
 			}
-			sb.AppendLine("");
 
-			genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(10);
+			sb.AppendLine("");
+			sb.AppendLine("По времени жизни генома");
+			genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderBy(g => g.BeginStep).Take(10);
 			foreach (var g in genoms)
 			{
-				sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}");
+				sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
+			}
+
+			sb.AppendLine("");
+			sb.AppendLine("По общему кол-ву ботов");
+			genoms = GENOMS.Keys.OrderByDescending(g => g.AllBots).Take(10);
+			foreach (var g in genoms)
+			{
+				sb.AppendLine($"{g.AllBots}/{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  {(g._curBots==0 ? $"{g.EndStep - g.BeginStep}" : "L")}");
 			}
 
 			return sb.ToString();

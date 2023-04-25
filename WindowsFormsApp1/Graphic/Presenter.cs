@@ -21,7 +21,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = System.Windows.Forms.Label;
 using TextBox = System.Windows.Forms.TextBox;
 
-namespace WindowsFormsApp1
+namespace WindowsFormsApp1.Graphic
 {
     public class Presenter : IDisposable
     {
@@ -46,26 +46,20 @@ namespace WindowsFormsApp1
         private Font _font2;
         private Font _font3;
         private StringFormat _stringFormat;
-        private const float CursorPart = 0.9f;
+        private const float CursorPart = 0.95f;
 
         private Graphics _cursorGraphics;
 
         private Color _fon;
-        private TextBox[] _textBoxes;
         private PictureBox[] _pictureBoxes;
 
-        private int _cnt;
-        private DateTime _dt;
 
 
-        public Presenter(PictureBox[] pictureBoxes, TextBox[] textBoxes)
+        public Presenter(PictureBox[] pictureBoxes)
         {
             _pictureBoxes = pictureBoxes;
-            _textBoxes = textBoxes;
 
             _fon = Color.FromKnownColor(KnownColor.ActiveCaption);
-            _cnt = 0;
-            _dt = DateTime.Now;
 
 
             ConfigureMainBitmap();
@@ -79,7 +73,7 @@ namespace WindowsFormsApp1
             _cellWidth = Data.CellWidth;
             var mainBitmapWidth = Data.WorldWidth * Data.CellWidth;
             var mainBitmapHeight = Data.WorldHeight * Data.CellHeight;
-            _pictureBoxes[0].Size = new System.Drawing.Size(mainBitmapWidth, mainBitmapHeight);
+            _pictureBoxes[0].Size = new Size(mainBitmapWidth, mainBitmapHeight);
             _mainBitmap = new Bitmap(mainBitmapWidth, mainBitmapHeight);
             _pictureBoxes[0].Image = _mainBitmap;
             _mainImageWrapper = new ImageWrapper(_mainBitmap, false);
@@ -91,7 +85,7 @@ namespace WindowsFormsApp1
             _lensCellWidth = Data.LensCellHeight;
             var lensBitmapWidth = Data.LensWidth * Data.LensCellWidth;
             var lensBitmapHeight = Data.LensHeight * Data.LensCellHeight;
-            _pictureBoxes[1].Size = new System.Drawing.Size(lensBitmapWidth, lensBitmapHeight);
+            _pictureBoxes[1].Size = new Size(lensBitmapWidth, lensBitmapHeight);
             _lensBitmap = new Bitmap(lensBitmapWidth, lensBitmapHeight);
             _pictureBoxes[1].Image = _lensBitmap;
             _lensImageWrapper = new ImageWrapper(_lensBitmap, false);
@@ -103,11 +97,11 @@ namespace WindowsFormsApp1
             var cursorBitmapWidth = 350;
             var cursorBitmapHeight = 300;
 
-            _codeCellWidth = (int)((cursorBitmapWidth * CursorPart) / 8);
-            _codeCellHeight = (int)(cursorBitmapHeight / 8);
+            _codeCellWidth = (int)(cursorBitmapWidth * CursorPart / 8);
+            _codeCellHeight = cursorBitmapHeight / 8;
             _xStartCodeCell = (int)(cursorBitmapWidth * (1 - CursorPart));
 
-            _pictureBoxes[2].Size = new System.Drawing.Size(cursorBitmapWidth, cursorBitmapHeight);
+            _pictureBoxes[2].Size = new Size(cursorBitmapWidth, cursorBitmapHeight);
             _cursorBitmap = new Bitmap(cursorBitmapWidth, cursorBitmapHeight);
             _pictureBoxes[2].Image = _cursorBitmap;
             _cursorImageWrapper = new ImageWrapper(_cursorBitmap, true);
@@ -217,9 +211,9 @@ namespace WindowsFormsApp1
         public void DrawCodeArrowOnCursorFrame(int x1, int y1, int x2, int y2, Color color)
         {
             _cursorImageWrapper.Line(
-                _xStartCodeCell+ _codeCellWidth * x1 + 3,
+                _xStartCodeCell + _codeCellWidth * x1 + 3,
                 _codeCellHeight * y1 + 3,
-                _xStartCodeCell+ _codeCellWidth * x2 + 3,
+                _xStartCodeCell + _codeCellWidth * x2 + 3,
                 _codeCellHeight * y2 + 3,
                 color);
         }
@@ -245,7 +239,7 @@ namespace WindowsFormsApp1
 
         public void DrawOtherTextOnCursorFrame(int x, int y, string code)
         {
-            _cursorGraphics.DrawString(code, _font2, _smallTextBrush, x , y);
+            _cursorGraphics.DrawString(code, _font2, _smallTextBrush, x, y);
             //_cursorGraphics.Flush();
         }
 
@@ -254,71 +248,6 @@ namespace WindowsFormsApp1
             _cursorImageWrapper.EndEditing();
             _pictureBoxes[2].Refresh();
         }
-        ///////ВСЕ РАСПЕЧАТКИ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 0 - на главной форме посередине
-        // 1 - на главной форме сверху
-        // 2 - на главной форме снизу
-        // 3 - на второй форме сверху
-        // 4 - на второй форме снизу
-        public void Print012()
-        {
-            _cnt++;
-            if (_cnt % Data.ReportFrequencyCurrent == 0)
-            {
-                var tms = (DateTime.Now - _dt).TotalSeconds;
-                if (tms == 0) throw new Exception("tms == 0");
-                var fps = Data.ReportFrequencyCurrent / tms;
-                _dt = DateTime.Now;
-
-                _textBoxes[0].Text = Test.GetText();
-                _textBoxes[0].Update();
-
-                _textBoxes[1].Text = Data.GetText(fps);
-                _textBoxes[1].Update();
-
-                _textBoxes[2].Text = Genom.GetText();
-                _textBoxes[2].Update();
-            }
-        }
-
-        public void Print3(Bot1 bot)
-        {
-            if (bot != null)
-            {
-                _textBoxes[3].Text = bot.GetText1();
-            }
-            else
-            {
-                _textBoxes[3].Text = "";
-            }
-            _textBoxes[3].Update();
-
-            //_cnt++;
-            //if (_cnt % Data.ReportFrequencyCurrent == 0)
-            //{
-            //    var tms = (DateTime.Now - _dt).TotalSeconds;
-            //    if (tms == 0) throw new Exception("tms == 0");
-            //    var fps = Data.ReportFrequencyCurrent / tms;
-            //    _dt = DateTime.Now;
-
-            //    _textBoxes[2].Text = _test.GetText();
-            //    _textBoxes[2].Update();
-            //}
-        }
-
-        public void Print4(Bot1 bot, int delta)
-        {
-            if (bot != null)
-            {
-                _textBoxes[4].Text = bot.GetText2(delta);
-            }
-            else
-            {
-                _textBoxes[4].Text = "";
-            }
-            _textBoxes[4].Update();
-        }
-        ///////ВСЕ РАСПЕЧАТКИ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 

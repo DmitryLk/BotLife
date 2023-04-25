@@ -20,17 +20,16 @@ namespace WindowsFormsApp1.GameLogic
         {
             for (uint botIndex = 1; botIndex <= Data.StartNumberOfBots; botIndex++)
             {
+				// Координаты бота
+				if (Func.TryGetRandomFreeCell(out var x, out var y))
+				{
+					// Создание кода бота
+					var genom = Genom.CreateGenom();
 
-                // Координаты бота
-                var (x, y) = Func.GetRandomFreeCell();
-
-                // Создание кода бота
-                var genom = Genom.CreateGenom();
-
-                Func.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
+					Func.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
+                    Data.CurrentNumberOfBots++;
+				}
             }
-            Data.CurrentNumberOfBots = Data.StartNumberOfBots;
-            //Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
         }
 
         public void SeedItems()
@@ -40,11 +39,14 @@ namespace WindowsFormsApp1.GameLogic
             {
                 for (var i = 0; i < Data.SeedFoodNumber; i++)
                 {
-                    var (x, y) = Func.GetRandomFreeCell();
-                    Data.TotalEnergy += Data.FoodEnergy;
+                    if (Func.TryGetRandomFreeCell(out var x, out var y))
+                    {
+						Data.TotalEnergy += Data.FoodEnergy;
 
-                    Data.World[x, y] = (uint)CellContent.Grass;
-                    Func.ChangeCell(x, y, Color.Green);
+						Data.World[x, y] = (uint)CellContent.Grass;
+						Func.FixChangeCell(x, y, Color.Green);
+
+					}
                 }
             }
 
@@ -53,10 +55,11 @@ namespace WindowsFormsApp1.GameLogic
             {
                 for (var i = 0; i < Data.SeedOrganicNumber; i++)
                 {
-                    var (x, y) = Func.GetRandomFreeCell();
-
-                    Data.World[x, y] = (uint)CellContent.Organic;
-                    Func.ChangeCell(x, y, Color.Black);
+                    if (Func.TryGetRandomFreeCell(out var x, out var y))
+                    {
+						Data.World[x, y] = (uint)CellContent.Organic;
+						Func.FixChangeCell(x, y, Color.Black);
+					}
                 }
             }
 
@@ -65,10 +68,11 @@ namespace WindowsFormsApp1.GameLogic
             {
                 for (var i = 0; i < Data.SeedMineralsNumber; i++)
                 {
-                    var (x, y) = Func.GetRandomFreeCell();
-
-                    Data.World[x, y] = (uint)CellContent.Mineral;
-                    Func.ChangeCell(x, y, Color.Black);
+					if (Func.TryGetRandomFreeCell(out var x, out var y))
+					{
+						Data.World[x, y] = (uint)CellContent.Mineral;
+						Func.FixChangeCell(x, y, Color.Black);
+					}
                 }
             }
 
@@ -77,10 +81,11 @@ namespace WindowsFormsApp1.GameLogic
             {
                 for (var i = 0; i < Data.SeedWallsNumber; i++)
                 {
-                    var (x, y) = Func.GetRandomFreeCell();
-
-                    Data.World[x, y] = (uint)CellContent.Wall;
-                    Func.ChangeCell(x, y, Color.Black);
+					if (Func.TryGetRandomFreeCell(out var x, out var y))
+					{
+						Data.World[x, y] = (uint)CellContent.Wall;
+						Func.FixChangeCell(x, y, Color.Black);
+					}
                 }
             }
 
@@ -89,10 +94,11 @@ namespace WindowsFormsApp1.GameLogic
             {
                 for (var i = 0; i < Data.SeedPoisonNumber; i++)
                 {
-                    var (x, y) = Func.GetRandomFreeCell();
-
-                    Data.World[x, y] = (uint)CellContent.Poison;
-                    Func.ChangeCell(x, y, Color.Black);
+					if (Func.TryGetRandomFreeCell(out var x, out var y))
+					{
+						Data.World[x, y] = (uint)CellContent.Poison;
+						Func.FixChangeCell(x, y, Color.Black);
+					}
                 }
             }
         }

@@ -15,6 +15,7 @@ using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using DrawMode = WindowsFormsApp1.Enums.DrawMode;
 using Label = System.Windows.Forms.Label;
 using TextBox = System.Windows.Forms.TextBox;
 
@@ -33,18 +34,18 @@ namespace WindowsFormsApp1.Static
             var pointer = 0;
             var botNumber = ++Data.MaxBotNumber;
 
-            genom.Bots++;
+            genom.AddBot();
             var bot = new Bot1(x,y, dir, botNumber, botIndex, en, genom, pointer);
-
+            bot.RefreshColor();
             Data.Bots[botIndex] = bot;
 
             Data.World[x, y] = botIndex;
-            ChangeCell(x, y, genom.Color);
+			if (Data.DrawType == DrawType.OnlyChangedCells) FixChangeCell(x, y, bot.Color);
         }
 
 
         // Список измененных ячеек для последующей отрисовки
-        public static void ChangeCell(int x, int y, Color? color)
+        public static void FixChangeCell(int x, int y, Color? color)
         {
             //public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
             //public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
@@ -97,10 +98,10 @@ namespace WindowsFormsApp1.Static
             return Data.Mutation && Rnd.NextDouble() * 100 < Data.MutationProbabilityPercent;
         }
 
-        public static (int x, int y) GetRandomFreeCell()
+        public static bool TryGetRandomFreeCell(out int x, out int y)
         {
-            int x;
-            int y;
+            x = 0;
+            y = 0;
             var i = 0;
 
             do
@@ -110,7 +111,12 @@ namespace WindowsFormsApp1.Static
             }
             while (CellIsBusy(x, y) && ++i < 1000);
 
-            return (x, y);
+            if (i >= 1000)
+            {
+                return false;
+            }
+
+            return true;
         }
 
 

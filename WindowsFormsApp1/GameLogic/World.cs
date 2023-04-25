@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
@@ -25,6 +26,9 @@ namespace WindowsFormsApp1.GameLogic
 
 			// Засевание ботов
 			_seeder.SeedBots();
+
+
+			Data.SeedTotalEnergy = Data.TotalEnergy;
 		}
 
 
@@ -39,13 +43,30 @@ namespace WindowsFormsApp1.GameLogic
 				//Bots[botNumber].Move();
 			}
 			Data.CurrentStep++;
+
+			while (Data.TotalEnergy < Data.SeedTotalEnergy)
+			{
+				if (Func.TryGetRandomFreeCell(out var x, out var y))
+				{
+					Data.World[x, y] = (uint)CellContent.Grass;
+					Func.FixChangeCell(x, y, Color.Green);
+
+					Data.TotalEnergy += Data.FoodEnergy;
+
+				}
+				else 
+				{
+					break;
+				}
+			}
+
 		}
 	}
 }
 
 
 /*
-мутации 5>1 байт; мутации .1>10 процентов; food tru>false;  SeedBotEnergy 1000>50000; случайное направление
+мутации 5>1 байт; мутации .1>10 процентов; food tru>false;  SeedBotEnergy 1000>50000; случайное направление; добавлен PhotosynthesisLayerHeight
 
 
 
@@ -77,7 +98,10 @@ default: shift = cmdCode; stepComplete = false; break; если cmdCode =0 то 
 фотосинтез должен давать мало энергии тогда потребуется много команд фотосинтеза в коде и тем
 самым меньше будут появляться хищники с фотосинтезом
 радиация, которая действует на ботов в самом верхнем слое мира ====
-
+боты притягиваютс к большой массе
+по запаху двигается
+наступает только на ту клетку где вокруг нет хищников
+удачно мутировавшие гены чтоб больше не мутировали или с меньшей вероятностью?
 
 ЕСЛИ РЯДОМ НЕТ СВОБОДНОЙ ЯЧЕЙКИ
 // - просто накапливать энергию дальше
@@ -120,9 +144,11 @@ default: shift = cmdCode; stepComplete = false; break; если cmdCode =0 то 
 бот может взорваться при определенных условиях
 притворится мертвым или стеной
 случайное направление , допустим цифра 8 (0-7 это обычные направления)
-поделиться энергией
 делиться - если у бота больше энергии или минералов, чем у соседа, то они распределяются поровну          
 команда перехода на случайное количество шагов в программе
+притянуть бота
+притянуться к боту
+дальнее зрение
 
 УСЛОВНЫЕ КОМАНДЫ
 сколько энергии?

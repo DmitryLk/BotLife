@@ -47,9 +47,9 @@
 			// 
 			// pictureBox2
 			// 
-			this.pictureBox2.Location = new System.Drawing.Point(162, 408);
+			this.pictureBox2.Location = new System.Drawing.Point(167, 407);
 			this.pictureBox2.Name = "pictureBox2";
-			this.pictureBox2.Size = new System.Drawing.Size(395, 314);
+			this.pictureBox2.Size = new System.Drawing.Size(381, 314);
 			this.pictureBox2.TabIndex = 1;
 			this.pictureBox2.TabStop = false;
 			this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
@@ -72,7 +72,7 @@
 			this.textBox2.Multiline = true;
 			this.textBox2.Name = "textBox2";
 			this.textBox2.ReadOnly = true;
-			this.textBox2.Size = new System.Drawing.Size(186, 131);
+			this.textBox2.Size = new System.Drawing.Size(154, 131);
 			this.textBox2.TabIndex = 3;
 			this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
 			// 
@@ -80,7 +80,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(569, 754);
+			this.ClientSize = new System.Drawing.Size(523, 754);
 			this.Controls.Add(this.textBox2);
 			this.Controls.Add(this.textBox1);
 			this.Controls.Add(this.pictureBox2);

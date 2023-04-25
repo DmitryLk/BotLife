@@ -4,21 +4,21 @@ using System.Drawing;
 using System;
 
 
-namespace WindowsFormsApp1
+namespace WindowsFormsApp1.Graphic
 {
     public enum BitmapCopyType
     {
         EditDirectlyScreenBitmap_Fastest = 1,
         EditCopyScreenBitmap = 2,
         EditEmptyArray = 3,
-		EditCopyScreenBitmapWithAdditionalArray = 4
-	}
+        EditCopyScreenBitmapWithAdditionalArray = 4
+    }
 
-	/// <summary>
-	/// Обертка над Bitmap для быстрого чтения и изменения пикселов.
-	/// Также, класс контролирует выход за пределы изображения: при чтении за границей изображения - возвращает DefaultColor, при записи за границей изображения - игнорирует присвоение.
-	/// </summary>
-	public class ImageWrapper : IDisposable, IEnumerable<System.Drawing.Point>
+    /// <summary>
+    /// Обертка над Bitmap для быстрого чтения и изменения пикселов.
+    /// Также, класс контролирует выход за пределы изображения: при чтении за границей изображения - возвращает DefaultColor, при записи за границей изображения - игнорирует присвоение.
+    /// </summary>
+    public class ImageWrapper : IDisposable, IEnumerable<Point>
     {
         public int _width;
         public int _height;
@@ -113,19 +113,19 @@ namespace WindowsFormsApp1
         }
 
 
-		//скопировать доп массив _mainScreenBufferWithoutLens в экранный битмап
-		private void Switching_From_EditCopyScreenBitmapWithAdditionalArray()
-		{
-			if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
-			{
-				_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-				System.Runtime.InteropServices.Marshal.Copy(_mainScreenBufferWithoutLens, 0, _bmpData.Scan0, _editArray.Length);
-				_bmp.UnlockBits(_bmpData);
-			}
-		}
+        //скопировать доп массив _mainScreenBufferWithoutLens в экранный битмап
+        private void Switching_From_EditCopyScreenBitmapWithAdditionalArray()
+        {
+            if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
+            {
+                _bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                System.Runtime.InteropServices.Marshal.Copy(_mainScreenBufferWithoutLens, 0, _bmpData.Scan0, _editArray.Length);
+                _bmp.UnlockBits(_bmpData);
+            }
+        }
 
-		//скопировать экранный битмап без доп графики в массив _mainScreenBufferWithoutLens
-		private void Switching_To_EditCopyScreenBitmapWithAdditionalArray()
+        //скопировать экранный битмап без доп графики в массив _mainScreenBufferWithoutLens
+        private void Switching_To_EditCopyScreenBitmapWithAdditionalArray()
         {
             if (_type != BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
             {
@@ -136,15 +136,15 @@ namespace WindowsFormsApp1
         }
 
 
-		public void ClearBitmap()
-		{
-			_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-			System.Runtime.InteropServices.Marshal.Copy(_clear, 0, _bmpData.Scan0, _length);
-			_bmp.UnlockBits(_bmpData);
-		}
-		
+        public void ClearBitmap()
+        {
+            _bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            System.Runtime.InteropServices.Marshal.Copy(_clear, 0, _bmpData.Scan0, _length);
+            _bmp.UnlockBits(_bmpData);
+        }
+
         // После отрисовки всех ботов сохранить образец и продолжить рисовать на буфере редиктирования дополнительную графику
-		public void IntervalEditing()
+        public void IntervalEditing()
         {
             if (_type == BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray)
             {
@@ -212,10 +212,10 @@ namespace WindowsFormsApp1
                     {
                         for (var i = 0; i < size; i++)
                         {
-                            *(curpos++) = color.B;
-                            *(curpos++) = color.G;
-                            *(curpos++) = color.R;
-                            *(curpos++) = 255;
+                            *curpos++ = color.B;
+                            *curpos++ = color.G;
+                            *curpos++ = color.R;
+                            *curpos++ = 255;
                         }
                         curpos += _stride - size * 4;
                     }
@@ -255,7 +255,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    curpos = ((byte*)_bmpData.Scan0) + ind;
+                    curpos = (byte*)_bmpData.Scan0 + ind;
 
                     for (var j = 0; j < sizeY; j++)
                     {
@@ -266,10 +266,10 @@ namespace WindowsFormsApp1
                                 curpos += (sizeX - 2) * 4;
                                 i = sizeX - 1;
                             }
-                            *(curpos++) = color.B;
-                            *(curpos++) = color.G;
-                            *(curpos++) = color.R;
-                            *(curpos++) = 255;
+                            *curpos++ = color.B;
+                            *curpos++ = color.G;
+                            *curpos++ = color.R;
+                            *curpos++ = 255;
                         }
                         curpos += _stride - sizeX * 4;
                     }
@@ -309,7 +309,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    curpos = ((byte*)_bmpData.Scan0) + ind;
+                    curpos = (byte*)_bmpData.Scan0 + ind;
 
                     for (var j = 0; j < sizeY; j++)
                     {
@@ -320,10 +320,10 @@ namespace WindowsFormsApp1
                                 curpos += (sizeX - 4) * 4;
                                 i = sizeX - 2;
                             }
-                            *(curpos++) = color.B;
-                            *(curpos++) = color.G;
-                            *(curpos++) = color.R;
-                            *(curpos++) = 255;
+                            *curpos++ = color.B;
+                            *curpos++ = color.G;
+                            *curpos++ = color.R;
+                            *curpos++ = 255;
                         }
                         curpos += _stride - sizeX * 4;
                     }
@@ -342,11 +342,11 @@ namespace WindowsFormsApp1
 
             if (dx == 0 && dy == 0) return;
 
-			int sx = 0;
-			int sy = 0;
-			int bx = 0;
-			int by = 0;
-			bool cycX = Math.Abs(dx) > Math.Abs(dy);
+            int sx = 0;
+            int sy = 0;
+            int bx = 0;
+            int by = 0;
+            bool cycX = Math.Abs(dx) > Math.Abs(dy);
 
             if (cycX)
             {
@@ -366,11 +366,11 @@ namespace WindowsFormsApp1
             do
             {
 
-				SetPixel(x, y, color);
-				SetPixel(x + bx, y + by, color);
-				SetPixel(x - bx, y - by, color);
+                SetPixel(x, y, color);
+                SetPixel(x + bx, y + by, color);
+                SetPixel(x - bx, y - by, color);
 
-				if (cycX)
+                if (cycX)
                 {
                     x += sx;
                     y = y1 + (x - x1) * dy / dx;   // меньшее по модулю/большее по модулю
@@ -388,34 +388,34 @@ namespace WindowsFormsApp1
 
         private unsafe void SetPixel(int x, int y, Color color)
         {
-			if (x < 0 || x >= _width || y < 0 || y >= _height) return;
-			var ind = x * 4 + y * _stride;
+            if (x < 0 || x >= _width || y < 0 || y >= _height) return;
+            var ind = x * 4 + y * _stride;
 
-			if (_useEditArray)
-			{
-				_editArray[ind++] = color.B;
-				_editArray[ind++] = color.G;
-				_editArray[ind++] = color.R;
-				_editArray[ind++] = 255;
-			}
-			else
-			{
-				var curpos = (byte*)_bmpData.Scan0 + ind;
-				*(curpos++) = color.B;
-				*(curpos++) = color.G;
-				*(curpos++) = color.R;
-				*(curpos++) = 255;
-			}
-		}
+            if (_useEditArray)
+            {
+                _editArray[ind++] = color.B;
+                _editArray[ind++] = color.G;
+                _editArray[ind++] = color.R;
+                _editArray[ind++] = 255;
+            }
+            else
+            {
+                var curpos = (byte*)_bmpData.Scan0 + ind;
+                *curpos++ = color.B;
+                *curpos++ = color.G;
+                *curpos++ = color.R;
+                *curpos++ = 255;
+            }
+        }
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-		/// <summary>
-		/// Заносит в bitmap выходной буфер и снимает лок.
-		/// Этот метод обязателен к исполнению (либо явно, лмбо через using)
-		/// </summary>
-		public void Dispose()
+        /// <summary>
+        /// Заносит в bitmap выходной буфер и снимает лок.
+        /// Этот метод обязателен к исполнению (либо явно, лмбо через using)
+        /// </summary>
+        public void Dispose()
         {
             _bmp.UnlockBits(_bmpData);
         }
@@ -483,11 +483,11 @@ namespace WindowsFormsApp1
         /// <summary>
         /// Перечисление всех точек изображения
         /// </summary>
-        public IEnumerator<System.Drawing.Point> GetEnumerator()
+        public IEnumerator<Point> GetEnumerator()
         {
             for (int y = 0; y < _height; y++)
                 for (int x = 0; x < _width; x++)
-                    yield return new System.Drawing.Point(x, y);
+                    yield return new Point(x, y);
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
