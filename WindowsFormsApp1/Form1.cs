@@ -44,9 +44,8 @@ namespace WindowsFormsApp1
 
 			trackBar1.Value = Data.PhotosynthesisEnergy;
 
-			label2.Text = $@"	S - start
-								P - pause mode
-								space - step
+			label2.Text = $@"	P - pause mode
+								space - start/step
 								M - mutation on/off
 
 								D - NoDraw
@@ -72,7 +71,7 @@ namespace WindowsFormsApp1
 				switch (e.KeyCode)
 				{
 					case Keys.P: PauseToggle(); break;
-					case Keys.S:
+					case Keys.Space:
 						{
 							await Game.Init();
 							Game.Work();
