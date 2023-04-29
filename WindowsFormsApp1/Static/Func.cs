@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.PerformanceData;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -24,10 +25,11 @@ namespace WindowsFormsApp1.Static
     public static class Func
     {
         public static Random Rnd = new Random(Guid.NewGuid().GetHashCode());
+		private static readonly object _busy = new object();
 
 
-        // Создать нового бота можно только через этот метод им пользуется Seeder и Reproduction
-        public static void CreateNewBot(int x, int y, uint botIndex, int en, Genom genom)
+		// Создать нового бота можно только через этот метод им пользуется Seeder и Reproduction
+		public static void CreateNewBot(int x, int y, uint botIndex, int en, Genom genom)
         {
             var dir = Dir.GetRandomDirection();
             Data.TotalEnergy += en;
@@ -40,45 +42,63 @@ namespace WindowsFormsApp1.Static
             Data.Bots[botIndex] = bot;
 
             Data.World[x, y] = botIndex;
-			if (Data.DrawType == DrawType.OnlyChangedCells) FixChangeCell(x, y, bot.Color);
+			if (Data.DrawType == DrawType.OnlyChangedCells) FixChangeCell(x, y, bot.Color,"createNewBot");
         }
 
 
-        // Список измененных ячеек для последующей отрисовки
-        public static void FixChangeCell(int x, int y, Color? color)
+		private static long COUNTER1 = 0;
+		private static long COUNTER2 = 0;
+		private static Stack<string> st = new Stack<string>();
+		// Список измененных ячеек для последующей отрисовки
+		public static void FixChangeCell(int x, int y, Color? color, string stack)
         {
-            //public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
-            //public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
-            //public uint NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
+			if (COUNTER1 != COUNTER2)
+			{
+			}
+			st.Push(stack);
+			
+			Interlocked.Increment(ref COUNTER1);
 
-            if (Data.ChWorld[x, y] == 0)
-            {
-                // В этой клетке еще не было изменений после последнего рисования
-                Data.ChangedCells[Data.NumberOfChangedCells] = new ChangedCell
-                {
-                    X = x,
-                    Y = y,
-                    Color = color
-                };
-                Data.NumberOfChangedCells++;
-                Data.ChWorld[x, y] = Data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
-            }
-            else
-            {
-                // В этой клетке уже были изменения после последнего рисования
-                Data.ChangedCells[Data.ChWorld[x, y] - 1].Color = color;
-                //_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
-                //{
-                //	X = x,
-                //	Y = y,
-                //	Color = color
-                //};
-            }
-        }
+			//public uint[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
+			//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
+			//public uint NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
 
-        #region Random
+			if (Data.ChWorld[x, y] == 0)
+			{
+				// В этой клетке еще не было изменений после последнего рисования
+				Data.ChangedCells[Data.NumberOfChangedCells] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					Color = color
+				};
+				if (Data.NumberOfChangedCells > 900 && Data.ChangedCells[Data.NumberOfChangedCells - 1] == null)
+				{
+				}
+				Data.NumberOfChangedCells++;
+				Data.ChWorld[x, y] = Data.NumberOfChangedCells; // сюда записываем +1 чтобы 0 не записывать
+			}
+			else
+			{
+				// В этой клетке уже были изменения после последнего рисования
+				Data.ChangedCells[Data.ChWorld[x, y] - 1].Color = color;
+				//_data.ChangedCells[_data.ChWorld[x, y] - 1] = new ChangedCell
+				//{
+				//	X = x,
+				//	Y = y,
+				//	Color = color
+				//};
+			}
+			Interlocked.Increment(ref COUNTER2);
+			//lock (_busy)
+   //         {
+			//}
+            if (st.Any()) st.Pop();
+		}
 
-        public static byte GetRandomBotCode()
+		#region Random
+
+		public static byte GetRandomBotCode()
         {
             return (byte)Rnd.Next(Data.MaxCode + 1);
         }

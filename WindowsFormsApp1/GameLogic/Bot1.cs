@@ -4,8 +4,10 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Globalization;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using System.Xml;
@@ -37,12 +39,12 @@ namespace WindowsFormsApp1.GameLogic
 			set
 			{
 				_en = value;
-				if (Data.BotColorMode == BotColorMode.Energy) 
-				{ 
+				if (Data.BotColorMode == BotColorMode.Energy)
+				{
 					Color = GetGraduatedColor(Energy, 0, 6000);
 					if (Data.DrawType == DrawType.OnlyChangedCells)
 					{
-						Func.FixChangeCell(_Xi, _Yi, Color);
+						Func.FixChangeCell(_Xi, _Yi, Color, "Energy");
 					}
 				}
 			}
@@ -50,11 +52,13 @@ namespace WindowsFormsApp1.GameLogic
 
 		public uint Index;         // Индекс бота (может меняться)
 		public int Direction;         // Направление бота
+		public int Age;
 
 		private int _en;
 		private uint _num;         // Номер бота (остается постоянным)
-		private int _age;
 		private int _size;
+		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+		private static readonly object _busy = new object();
 
 
 
@@ -70,7 +74,7 @@ namespace WindowsFormsApp1.GameLogic
 			_num = botNumber;
 			Index = botIndex;
 			Energy = en;
-			_age = 0;
+			Age = 0;
 
 			_Xd = x;
 			_Yd = y;
@@ -86,7 +90,7 @@ namespace WindowsFormsApp1.GameLogic
 				BotColorMode.PraGenomColor => genom.PraColor,
 				BotColorMode.PlantPredator => genom.Plant ? Color.Green : Color.Red,
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
-				BotColorMode.Age => GetGraduatedColor(_age, 0, 500),
+				BotColorMode.Age => GetGraduatedColor(Age, 0, 500),
 				BotColorMode.GenomAge => GetGraduatedColor((int)(Data.CurrentStep - genom.BeginStep), 0, 10000),
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
@@ -121,6 +125,14 @@ namespace WindowsFormsApp1.GameLogic
 			int shift = 0;
 			bool stepComplete = false;
 			int cntJump = 0;
+
+			//Death
+			if (Energy <= 0)
+			{
+				Death();
+				return;
+			}
+
 
 			Hist.BeginNewStep();
 			do
@@ -177,14 +189,25 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			while (!stepComplete && cntJump < Data.MaxUncompleteJump);
 
-			_age++;
-			Energy += Data.DeltaEnergyOnStep;
-			Data.TotalEnergy += Data.DeltaEnergyOnStep;
+			Age++;
+
+			lock (_busy)
+			{
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
+				{
+				}
+				Energy += Data.DeltaEnergyOnStep;
+				Data.TotalEnergy += Data.DeltaEnergyOnStep;
+				Interlocked.Increment(ref COUNTER2);
+			}
+
 
 			//Death
 			if (Energy <= 0)
 			{
 				Death();
+				return;
 			}
 
 			//Reproduction
@@ -231,95 +254,91 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Death()
 		{
-			//var idx = Data.World[P.X, P.Y];
-			//if (idx != _ind)
-			//{
-			//	throw new Exception("var idx = Data.World[P.X, P.Y];");
-			//}
-
-			Data.World[_Xi, _Yi] = (uint)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, null); // при следующей отрисовке бот стерется с экрана
-
-			//idx = Data.World[P.X, P.Y];
-			//if (idx != 0)
-			//{
-			//	throw new Exception("var idx = Data.World[P.X, P.Y];");
-			//}
-
-
-
-			// надо его убрать из массива ботов, переставив последнего бота на его место
-			//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
-
-			//1
-			if (Index > Data.CurrentNumberOfBots)
+			lock (_busy)
 			{
-				throw new Exception("if (_ind > Data.CurrentBotsNumber)");
-			}
-
-			//2
-			if (Index < Data.CurrentNumberOfBots)
-			{
-				// Перенос последнего бота в освободившееся отверстие
-				if (Data.Bots[Data.CurrentNumberOfBots] == null)
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
 				{
-					throw new Exception("if (Data.Bots[Data.CurrentNumberOfBots] == null)");
+				}
+				Data.World[_Xi, _Yi] = (uint)CellContent.Free;
+				if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, null, "death"); // при следующей отрисовке бот стерется с экрана
+
+				// надо его убрать из массива ботов, переставив последнего бота на его место
+				//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
+
+				if (Index > Data.CurrentNumberOfBots)
+				{
+					throw new Exception("if (_ind > Data.CurrentBotsNumber)");
 				}
 
-				var lastBot = Data.Bots[Data.CurrentNumberOfBots];
-				Data.Bots[Index] = lastBot;
-				lastBot.Index = Index;
-				Data.World[lastBot._Xi, lastBot._Yi] = Index;
-				//Func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
-				//после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
+				// Перенос последнего бота в освободившееся отверстие
+				if (Index < Data.CurrentNumberOfBots)
+				{
+					if (Data.Bots[Data.CurrentNumberOfBots] == null)
+					{
+						throw new Exception("if (Data.Bots[Data.CurrentNumberOfBots] == null)");
+					}
+
+					var lastBot = Data.Bots[Data.CurrentNumberOfBots];
+					Data.Bots[Index] = lastBot;
+					lastBot.Index = Index;
+					Data.World[lastBot._Xi, lastBot._Yi] = Index;
+					//Func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
+					//после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
+				}
+
+				// Укарачиваем массив
+				Data.Bots[Data.CurrentNumberOfBots] = null;
+				Data.CurrentNumberOfBots--;
+
+				Data.DeathCnt++;
+
+				genom.RemoveBot(Age);
+				Interlocked.Increment(ref COUNTER2);
 			}
-
-			// Укарачиваем массив
-			Data.Bots[Data.CurrentNumberOfBots] = null;
-			Data.CurrentNumberOfBots--;
-
-			Data.DeathCnt++;
-
-
-			genom.RemoveBot();
-
-			//for (var j = 0; j < Data.WorldHeight; j++)
-			//{
-			//	for (var i = 0; i < Data.WorldWidth; i++)
-			//	{
-			//		if (Data.World[j, i] > Data.CurrentNumberOfBots && Data.World[j, i] < 65000)
-			//		{
-			//			throw new Exception("if (Data.World[j, i] > Data.CurrentNumberOfBots)");
-			//		}
-			//	}
-			//}
 		}
 
 		protected void Reproduction()
 		{
 			// Создание нового бота
 			// Узнать есть ли рядом ячейка свободная
-			if (TryGetRandomFreeCellNearby(out var x, out var y))
+			lock (_busy)
 			{
-				Data.CurrentNumberOfBots++;
-				var botIndex = Data.CurrentNumberOfBots;
-				var genom = Func.Mutation() ? Genom.CreateGenom(this.genom) : this.genom;
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
+				{
+				}
 
-				Func.CreateNewBot(x, y, botIndex, Data.InitialBotEnergy, genom);
-				Energy -= Data.InitialBotEnergy;
-				Data.TotalEnergy -= Data.InitialBotEnergy;
-				Data.ReproductionCnt++;
+				if (TryGetRandomFreeCellNearby(out var x, out var y))
+				{
+					Data.CurrentNumberOfBots++;
+					var botIndex = Data.CurrentNumberOfBots;
+					var genom = Func.Mutation() ? Genom.CreateGenom(this.genom) : this.genom;
+
+					Func.CreateNewBot(x, y, botIndex, Data.InitialBotEnergy, genom);
+					Data.TotalEnergy -= Data.InitialBotEnergy;
+					Data.ReproductionCnt++;
+					Energy -= Data.InitialBotEnergy;
+				}
+				Interlocked.Increment(ref COUNTER2);
 			}
-
 		}
 
 		private (int shift, bool stepComplete) Photosynthesis()
 		{
 			if (_Yi < Data.PhotosynthesisLayerHeight)
 			{
-				Energy += Data.PhotosynthesisEnergy;
-				Data.TotalEnergy += Data.PhotosynthesisEnergy;
-				genom.Plant = true;
+				lock (_busy)
+				{
+					Interlocked.Increment(ref COUNTER1);
+					if (COUNTER1 - COUNTER2 > 1)
+					{
+					}
+					Energy += Data.PhotosynthesisEnergy;
+					Data.TotalEnergy += Data.PhotosynthesisEnergy;
+					genom.Plant = true;
+					Interlocked.Increment(ref COUNTER2);
+				}
 				//genom.Color = Color.Green;
 				return (1, true);
 			}
@@ -334,19 +353,30 @@ namespace WindowsFormsApp1.GameLogic
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемой еды
 			var dir = GetDirRelative();
-			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-			var (refContent, nXi, nYi, cont) = GetCellInfo3(dir);
 
-			// 3. Узнаем съедобно ли это
-			if (refContent == RefContent.Grass)
+			RefContent refContent;
+			lock (_busy)
 			{
-				EatGrass(nXi, nYi);
-			}
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
+				{
+				}
 
-			if (refContent == RefContent.Bot ||
-				refContent == RefContent.Relative)
-			{
-				EatBot(nXi, nYi, cont);
+				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
+				(refContent, var nXi, var nYi, var cont) = GetCellInfo3(dir);
+
+				// 3. Узнаем съедобно ли это
+				if (refContent == RefContent.Grass)
+				{
+					EatGrass(nXi, nYi);
+				}
+
+				if (refContent == RefContent.Bot ||
+					refContent == RefContent.Relative)
+				{
+					EatBot(nXi, nYi, cont);
+				}
+				Interlocked.Increment(ref COUNTER2);
 			}
 
 			if (refContent == RefContent.Organic ||
@@ -363,20 +393,34 @@ namespace WindowsFormsApp1.GameLogic
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемой еды
 			var dir = GetDirAbsolute();
-			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-			var (refContent, nXi, nYi, cont) = GetCellInfo3(dir);
 
-			// 3. Узнаем съедобно ли это
-			if (refContent == RefContent.Grass)
+			RefContent refContent;
+			lock (_busy)
 			{
-				EatGrass(nXi, nYi);
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
+				{
+				}
+
+				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
+				(refContent, var nXi, var nYi, var cont) = GetCellInfo3(dir);
+
+				// 3. Узнаем съедобно ли это
+				if (refContent == RefContent.Grass)
+				{
+					EatGrass(nXi, nYi);
+				}
+
+				if (refContent == RefContent.Bot ||
+					refContent == RefContent.Relative)
+				{
+					EatBot(nXi, nYi, cont);
+				}
+
+				Interlocked.Increment(ref COUNTER2);
 			}
 
-			if (refContent == RefContent.Bot ||
-				refContent == RefContent.Relative)
-			{
-				EatBot(nXi, nYi, cont);
-			}
+
 
 			if (refContent == RefContent.Organic ||
 				refContent == RefContent.Mineral ||
@@ -392,7 +436,7 @@ namespace WindowsFormsApp1.GameLogic
 			Energy += Data.FoodEnergy;
 
 			Data.World[nXi, nYi] = (uint)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null, "eatgrass");
 		}
 
 
@@ -420,10 +464,10 @@ namespace WindowsFormsApp1.GameLogic
 			Energy += energyCanEat;
 			eatedBot.Energy -= energyCanEat;
 
-			if (eatedBot.Energy <= 0)
-			{
-				eatedBot.Death();
-			}
+			//if (eatedBot.Energy <= 0)
+			//{
+			//	eatedBot.Death();
+			//}
 		}
 
 		private (int shift, bool stepComplete) LookAtRelativeDirection()
@@ -470,51 +514,77 @@ namespace WindowsFormsApp1.GameLogic
 			return (2, false);
 		}
 
+		private static long COUNTER1 = 0;
+		private static long COUNTER2 = 0;
+
+		private static readonly object _busy1 = new object();
 		private (int shift, bool stepComplete) StepInRelativeDirection()
 		{
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемого движения
 			var dir = GetDirRelative();
-			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-			var (iEqual, refContent, nXd, nYd, nXi, nYi) = GetCellInfo2(dir);
 
-			// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-			if (iEqual)
+			RefContent refContent;
+			lock (_busy)
 			{
-				MoveOnlyDouble(nXd, nYd);
-			}
-			else
-			{
-				if (refContent == RefContent.Free || refContent == RefContent.Poison)
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
 				{
-					Move(nXd, nYd, nXi, nYi);
 				}
+				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
+				(var iEqual, refContent, var nXd, var nYd, var nXi, var nYi) = GetCellInfo2(dir);
+
+				// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
+				if (iEqual)
+				{
+					MoveOnlyDouble(nXd, nYd);
+				}
+				else
+				{
+					if (refContent == RefContent.Free || refContent == RefContent.Poison)
+					{
+						Move(nXd, nYd, nXi, nYi);
+					}
+				}
+				Interlocked.Increment(ref COUNTER2);
 			}
 
 			return ((int)refContent, true);
 		}
 
 
+		private static readonly object _busy2 = new object();
 		private (int shift, bool stepComplete) StepInAbsoluteDirection()
 		{
 			// Алгоритм:
 			// 1. Узнаем направление предполагаемого движения
 			var dir = GetDirAbsolute();
-			// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-			var (iEqual, refContent, nXd, nYd, nXi, nYi) = GetCellInfo2(dir);
 
-			// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-			if (iEqual)
+			RefContent refContent;
+			lock (_busy)
 			{
-				MoveOnlyDouble(nXd, nYd);
-			}
-			else
-			{
-				if (refContent == RefContent.Free || refContent == RefContent.Poison)
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
 				{
-					Move(nXd, nYd, nXi, nYi);
 				}
+				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
+				(var iEqual, refContent, var nXd, var nYd, var nXi, var nYi) = GetCellInfo2(dir);
+
+				// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
+				if (iEqual)
+				{
+					MoveOnlyDouble(nXd, nYd);
+				}
+				else
+				{
+					if (refContent == RefContent.Free || refContent == RefContent.Poison)
+					{
+						Move(nXd, nYd, nXi, nYi);
+					}
+				}
+				Interlocked.Increment(ref COUNTER2);
 			}
+
 			return ((int)refContent, true);
 		}
 
@@ -536,7 +606,7 @@ namespace WindowsFormsApp1.GameLogic
 		private void Move(double nXd, double nYd, int nXi, int nYi)
 		{
 			Data.World[_Xi, _Yi] = (uint)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, null);
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, null,"move1");
 
 			_Xd = nXd;
 			_Yd = nYd;
@@ -544,7 +614,7 @@ namespace WindowsFormsApp1.GameLogic
 			_Yi = nYi;
 
 			Data.World[_Xi, _Yi] = Index;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, Color);
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, Color, "move2");
 		}
 
 		private void MoveOnlyDouble(double nXd, double nYd)
@@ -704,7 +774,20 @@ namespace WindowsFormsApp1.GameLogic
 			// Если координаты попадают за экран то вернуть RefContent.Edge
 			if (y < 0 || y >= Data.WorldHeight || x < 0 || x >= Data.WorldWidth) return RefContent.Edge;
 
-			var cont = Data.World[x, y];
+			uint cont;
+			lock (_busy)
+			{
+				Interlocked.Increment(ref COUNTER1);
+				if (COUNTER1 - COUNTER2 > 1)
+				{
+				}
+
+				cont = Data.World[x, y];
+				if (cont >= 1 && cont <= Data.CurrentNumberOfBots) return RefContentByBotRelativity(cont);
+				Interlocked.Increment(ref COUNTER2);
+			}
+
+			if (cont < 0 || (cont > 0 && !(cont >= 65500 && cont <= 65504))) throw new Exception("cont = Data.World[x, y];");
 
 			return cont switch
 			{
@@ -714,7 +797,7 @@ namespace WindowsFormsApp1.GameLogic
 				65502 => RefContent.Mineral,
 				65503 => RefContent.Wall,
 				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
+				_ => throw new Exception("return cont switch")
 			};
 		}
 
@@ -830,7 +913,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var sb = new StringBuilder();
 
-			sb.AppendLine($"Age: {_age}");
+			sb.AppendLine($"Age: {Age}");
 			sb.AppendLine($"Num: {_num}");
 			sb.AppendLine($"Index: {Index}");
 
@@ -840,7 +923,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			sb.AppendLine("");
 			sb.AppendLine($"Genom {genom.PraNum} {(genom.Num != 0 ? $"({genom.Num})" : "")}Lev{genom.Level}");
-			sb.AppendLine($"Bots: {genom.Bots}");
+			sb.AppendLine($"Bots: {genom.CurBots}");
 
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Color.R} G{Color.G} B{Color.B}");
@@ -899,61 +982,63 @@ namespace WindowsFormsApp1.GameLogic
 		}
 		#endregion
 
+		private async Task<bool> SetBusy()
+		{
+			try
+			{
+				await _semaphore.WaitAsync();
+			}
+			catch
+			{
+				ReleaseBusy();
+				return false;
+			}
+			return true;
+		}
+
+		private void ReleaseBusy()
+		{
+			try
+			{
+				_semaphore.Release();
+			}
+			catch { }
+		}
+
+		//private bool TrySetBusyMode()
+		//{
+		//	lock (_syncBusyMode)
+		//	{
+		//		if (_busyState) return false;
+		//		_busyState = true;
+		//		return true;
+		//	}
+		//}
+		//private void ReleaseBusyMode()
+		//{
+		//	lock (_syncBusyMode)
+		//	{
+		//		_busyState = false;
+		//	}
+		//}
+
+		//	private async Task<(SocketAcceptionResult, ISocket)> GetSocket(ISocketManager socketManager, string tokenId)
+		//	{
+		//		try
+		//		{
+		//			var suссessBusy = await SetBusy();
+		//			if (!suссessBusy)
+		//			{
+		//				return (SocketAcceptionResult.UnknownError, null);
+		//			}
+		//		}
+		//		// ReleaseBusy() в finally, чтобы перед каждым return его не писать
+		//		finally
+		//		{
+		//			// Метод не возвращает исключений.
+		//			ReleaseBusy();
+		//		}
+		//	}
+		//}
 	}
-	public class CodeHistory
-	{
-		private const int maxx = 15;
-		private const int maxy = 10;
-
-		public byte[][] codeHistory = new byte[maxy][];
-		public byte[] ptrs = new byte[maxy];
-		public int historyPointerY = -1;
-
-		public CodeHistory()
-		{
-			for (var y = 0; y < maxy; y++)
-			{
-				codeHistory[y] = new byte[maxx];
-			}
-		}
-
-		public void SavePtr(int ptr)
-		{
-			if (ptrs[historyPointerY] == maxx) throw new Exception("PutPtr(byte ptr) ");
-			codeHistory[historyPointerY][ptrs[historyPointerY]] = (byte)ptr;
-			ptrs[historyPointerY]++;
-		}
-		public void BeginNewStep()
-		{
-			historyPointerY++;
-			if (historyPointerY == maxy) historyPointerY = 0;
-			ptrs[historyPointerY] = 0;
-		}
-
-		public (byte[], int) GetLastStepPtrs(int delta)
-		{
-			if (historyPointerY < 0)
-			{
-				return (Array.Empty<byte>(), 0);
-			}
-
-			var ptr = historyPointerY + delta;
-
-			while (ptr < 0)
-			{
-				ptr += maxy;
-			}
-
-			while (ptr >= maxy)
-			{
-				ptr -= maxy;
-			}
-
-
-			return (codeHistory[ptr], ptrs[ptr]);
-		}
-	}
-
-
 }
-

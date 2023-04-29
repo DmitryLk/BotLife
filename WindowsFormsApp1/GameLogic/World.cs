@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.Static;
@@ -10,7 +11,7 @@ using static System.Windows.Forms.Design.AxImporter;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class World
+	public class World
 	{
 		private readonly Seeder _seeder;
 
@@ -31,35 +32,38 @@ namespace WindowsFormsApp1.GameLogic
 			Data.SeedTotalEnergy = Data.TotalEnergy;
 		}
 
-
 		public void Step()
 		{
-			//Parallel.For(0, currentBotsNumber, i => Bots[i].Move());
-			for (uint botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			Parallel.For(1, Data.MaxBotsNumber, (i, state) =>
 			{
-				
-				Data.Bots[botNumber].Step();
-				//Bots[botNumber].Live();
-				//Bots[botNumber].Move();
-			}
+				if (Data.Bots[i] == null) return;
+				Data.Bots[i].Step();
+			});
+
+			//for (uint botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			//{
+
+			//	Data.Bots[botNumber].Step();
+			//	//Bots[botNumber].Live();
+			//	//Bots[botNumber].Move();
+			//}
 			Data.CurrentStep++;
 
-			while (Data.TotalEnergy < Data.SeedTotalEnergy)
+			while (Data.TotalEnergy < 10000000) //Data.SeedTotalEnergy)
 			{
 				if (Func.TryGetRandomFreeCell(out var x, out var y))
 				{
 					Data.World[x, y] = (uint)CellContent.Grass;
-					Func.FixChangeCell(x, y, Color.Green);
+					Func.FixChangeCell(x, y, Color.Green, "grass");
 
 					Data.TotalEnergy += Data.FoodEnergy;
 
 				}
-				else 
+				else
 				{
 					break;
 				}
 			}
-
 		}
 	}
 }
@@ -67,7 +71,7 @@ namespace WindowsFormsApp1.GameLogic
 
 /*
 мутации 5>1 байт; мутации .1>10 процентов; food tru>false;  SeedBotEnergy 1000>50000; случайное направление; добавлен PhotosynthesisLayerHeight
-
+не уменьшать энергию
 
 
  ИДЕИ

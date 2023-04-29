@@ -44,7 +44,7 @@ namespace WindowsFormsApp1.GameLogic
 						Data.TotalEnergy += Data.FoodEnergy;
 
 						Data.World[x, y] = (uint)CellContent.Grass;
-						Func.FixChangeCell(x, y, Color.Green);
+						Func.FixChangeCell(x, y, Color.Green, "s");
 
 					}
                 }
@@ -58,7 +58,7 @@ namespace WindowsFormsApp1.GameLogic
                     if (Func.TryGetRandomFreeCell(out var x, out var y))
                     {
 						Data.World[x, y] = (uint)CellContent.Organic;
-						Func.FixChangeCell(x, y, Color.Black);
+						Func.FixChangeCell(x, y, Color.Black, "s");
 					}
                 }
             }
@@ -71,7 +71,7 @@ namespace WindowsFormsApp1.GameLogic
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
 						Data.World[x, y] = (uint)CellContent.Mineral;
-						Func.FixChangeCell(x, y, Color.Black);
+						Func.FixChangeCell(x, y, Color.Black, "s");
 					}
                 }
             }
@@ -84,7 +84,7 @@ namespace WindowsFormsApp1.GameLogic
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
 						Data.World[x, y] = (uint)CellContent.Wall;
-						Func.FixChangeCell(x, y, Color.Black);
+						Func.FixChangeCell(x, y, Color.Black, "s");
 					}
                 }
             }
@@ -97,7 +97,7 @@ namespace WindowsFormsApp1.GameLogic
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
 						Data.World[x, y] = (uint)CellContent.Poison;
-						Func.FixChangeCell(x, y, Color.Black);
+						Func.FixChangeCell(x, y, Color.Black, "s");
 					}
                 }
             }
