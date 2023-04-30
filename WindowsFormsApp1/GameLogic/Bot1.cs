@@ -53,7 +53,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int _en;
 		private uint _num;         // Номер бота (остается постоянным)
-		private int _age;
+		public int Age;
 		private int _size;
 
 
@@ -70,7 +70,7 @@ namespace WindowsFormsApp1.GameLogic
 			_num = botNumber;
 			Index = botIndex;
 			Energy = en;
-			_age = 0;
+			Age = 0;
 
 			_Xd = x;
 			_Yd = y;
@@ -86,7 +86,7 @@ namespace WindowsFormsApp1.GameLogic
 				BotColorMode.PraGenomColor => genom.PraColor,
 				BotColorMode.PlantPredator => genom.Plant ? Color.Green : Color.Red,
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
-				BotColorMode.Age => GetGraduatedColor(_age, 0, 500),
+				BotColorMode.Age => GetGraduatedColor(Age, 0, 500),
 				BotColorMode.GenomAge => GetGraduatedColor((int)(Data.CurrentStep - genom.BeginStep), 0, 10000),
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
@@ -121,6 +121,13 @@ namespace WindowsFormsApp1.GameLogic
 			int shift = 0;
 			bool stepComplete = false;
 			int cntJump = 0;
+
+			//Death
+			if (Energy <= 0)
+			{
+				Death();
+				return;
+			}
 
 			Hist.BeginNewStep();
 			do
@@ -177,7 +184,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			while (!stepComplete && cntJump < Data.MaxUncompleteJump);
 
-			_age++;
+			Age++;
 			Energy += Data.DeltaEnergyOnStep;
 			Data.TotalEnergy += Data.DeltaEnergyOnStep;
 
@@ -185,6 +192,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (Energy <= 0)
 			{
 				Death();
+				return;
 			}
 
 			//Reproduction
@@ -281,7 +289,7 @@ namespace WindowsFormsApp1.GameLogic
 			Data.DeathCnt++;
 
 
-			genom.RemoveBot();
+			genom.RemoveBot(Age);
 
 			//for (var j = 0; j < Data.WorldHeight; j++)
 			//{
@@ -420,10 +428,10 @@ namespace WindowsFormsApp1.GameLogic
 			Energy += energyCanEat;
 			eatedBot.Energy -= energyCanEat;
 
-			if (eatedBot.Energy <= 0)
-			{
-				eatedBot.Death();
-			}
+			//if (eatedBot.Energy <= 0)
+			//{
+			//	eatedBot.Death();
+			//}
 		}
 
 		private (int shift, bool stepComplete) LookAtRelativeDirection()
@@ -830,7 +838,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var sb = new StringBuilder();
 
-			sb.AppendLine($"Age: {_age}");
+			sb.AppendLine($"Age: {Age}");
 			sb.AppendLine($"Num: {_num}");
 			sb.AppendLine($"Index: {Index}");
 
@@ -840,7 +848,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			sb.AppendLine("");
 			sb.AppendLine($"Genom {genom.PraNum} {(genom.Num != 0 ? $"({genom.Num})" : "")}Lev{genom.Level}");
-			sb.AppendLine($"Bots: {genom.Bots}");
+			sb.AppendLine($"Bots: {genom.CurBots}");
 
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Color.R} G{Color.G} B{Color.B}");
@@ -900,60 +908,5 @@ namespace WindowsFormsApp1.GameLogic
 		#endregion
 
 	}
-	public class CodeHistory
-	{
-		private const int maxx = 15;
-		private const int maxy = 10;
-
-		public byte[][] codeHistory = new byte[maxy][];
-		public byte[] ptrs = new byte[maxy];
-		public int historyPointerY = -1;
-
-		public CodeHistory()
-		{
-			for (var y = 0; y < maxy; y++)
-			{
-				codeHistory[y] = new byte[maxx];
-			}
-		}
-
-		public void SavePtr(int ptr)
-		{
-			if (ptrs[historyPointerY] == maxx) throw new Exception("PutPtr(byte ptr) ");
-			codeHistory[historyPointerY][ptrs[historyPointerY]] = (byte)ptr;
-			ptrs[historyPointerY]++;
-		}
-		public void BeginNewStep()
-		{
-			historyPointerY++;
-			if (historyPointerY == maxy) historyPointerY = 0;
-			ptrs[historyPointerY] = 0;
-		}
-
-		public (byte[], int) GetLastStepPtrs(int delta)
-		{
-			if (historyPointerY < 0)
-			{
-				return (Array.Empty<byte>(), 0);
-			}
-
-			var ptr = historyPointerY + delta;
-
-			while (ptr < 0)
-			{
-				ptr += maxy;
-			}
-
-			while (ptr >= maxy)
-			{
-				ptr -= maxy;
-			}
-
-
-			return (codeHistory[ptr], ptrs[ptr]);
-		}
-	}
-
-
 }
 

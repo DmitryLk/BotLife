@@ -67,7 +67,7 @@ namespace WindowsFormsApp1.GameLogic
 
 /*
 мутации 5>1 байт; мутации .1>10 процентов; food tru>false;  SeedBotEnergy 1000>50000; случайное направление; добавлен PhotosynthesisLayerHeight
-
+не уменьшать энергию
 
 
  ИДЕИ
