@@ -17,7 +17,7 @@
 //	{
 
 
-//		public Bot3(Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
+//		public Bot3(Point p, Direction dir, long botNumber, long botIndex, int en, int vx, int vy)
 //			: base( p, dir, botNumber, botIndex, en, vx, vy)
 //		{
 //		}

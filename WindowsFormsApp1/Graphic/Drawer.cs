@@ -85,7 +85,7 @@ namespace WindowsFormsApp1.Graphic
 					{
 						var obj = Data.Bots[i];
 
-						_PRESENTER.DrawObjectOnFrame(obj._Xi, obj._Yi, obj.Color);
+						_PRESENTER.DrawObjectOnFrame(obj.Xi, obj.Yi, obj.Color);
 					}
 					break;
 
@@ -155,7 +155,7 @@ namespace WindowsFormsApp1.Graphic
 				_PRESENTER.ClearGraphicsOnCursorFrame();
 				for (var i = 0; i < Data.GenomLength; i++)
 				{
-					var code = bot.genom.Code[i];
+					var code = bot.Genom.Code[i];
 					var x = i % 8;
 					var y = i / 8;
 

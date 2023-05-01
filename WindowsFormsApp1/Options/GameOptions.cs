@@ -12,8 +12,8 @@ namespace WindowsFormsApp1.Options
 		public int ReportFrequencyNoDrawed;
 		public int FrequencyOfPeriodicalDraw;
 
-		public uint StartBotsNumber;
-        public uint MaxBotsNumber;
+		public long StartBotsNumber;
+        public long MaxBotsNumber;
         public int WorldWidth;
         public int WorldHeight;
         public bool UpDownEdge;

@@ -17,7 +17,7 @@
 //		private byte[] _code;
 //		private int _pointer;
 
-//		public Bot2(Point p, Direction dir, uint botNumber, uint botIndex, int en, int vx, int vy)
+//		public Bot2(Point p, Direction dir, long botNumber, long botIndex, int en, int vx, int vy)
 //			: base(p, dir, botNumber, botIndex, en, vx, vy)
 
 //		{

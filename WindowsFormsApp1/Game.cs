@@ -130,7 +130,7 @@ namespace WindowsFormsApp1
 
 				Data.BotColorMode = Data.NextBotColorMode;
 
-				for (uint botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+				for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
 				{
 					Data.Bots[botNumber].RefreshColor();
 				}

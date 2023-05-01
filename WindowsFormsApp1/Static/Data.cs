@@ -26,8 +26,8 @@ namespace WindowsFormsApp1.Static
 		public static int FrequencyOfPeriodicalDraw;
 
 
-		public static uint StartNumberOfBots;
-		public static uint MaxBotsNumber;
+		public static long StartNumberOfBots;
+		public static long MaxBotsNumber;
 		public static int WorldWidth;
 		public static int WorldHeight;
 		public static bool UpDownEdge;
@@ -66,10 +66,18 @@ namespace WindowsFormsApp1.Static
 
 
 		//=================VARIABLE CURRENT PARAMETERS==============================
-		public static uint[,] World; // чтобы можно было узнать по координатам что там находится
+		public static long[,] World; // чтобы можно было узнать по координатам что там находится
 		public static Bot1[] Bots;
-		public static int TotalEnergy;
-		public static int SeedTotalEnergy;
+		public static long TotalEnergy;
+		public static long SeedTotalEnergy;
+
+		// Death Reproduction		
+		public static Bot1[] BotDeath;
+		public static Bot1[] BotReproduction;
+		public static long NumberOfBotDeath;
+		public static long NumberOfBotReproduction;
+		public static long DeathCnt;
+		public static long ReproductionCnt;
 
 		// Настройки игры
 		public static bool Started;
@@ -86,18 +94,16 @@ namespace WindowsFormsApp1.Static
 
 
 		//Для поддержки эффективной перерисовки
-		public static uint[,] ChWorld;
+		public static long[,] ChWorld;
 		public static ChangedCell[] ChangedCells;
-		public static uint NumberOfChangedCells;
-		public static uint NumberOfChangedCellsForInfo;
+		public static long NumberOfChangedCells;
+		public static long NumberOfChangedCellsForInfo;
 		public static Color[] GrColors;
 
-		public static uint CurrentNumberOfBots;
+		public static long CurrentNumberOfBots;
 		public static uint CurrentStep;
-		public static uint MaxBotNumber;
-		public static uint DeathCnt;
-		public static uint ReproductionCnt;
-		public static uint MutationCnt;
+		public static long MaxBotNumber;
+		public static long MutationCnt;
 		public static int ReportFrequencyCurrent;
 
 		public static int LensX;
@@ -113,11 +119,18 @@ namespace WindowsFormsApp1.Static
 			MapOptions(options);
 
 			// Создать все игровые массивы
-			World = new uint[WorldWidth, WorldHeight];
+			World = new long[WorldWidth, WorldHeight];
 			Bots = new Bot1[MaxBotsNumber];
-			ChWorld = new uint[WorldWidth, WorldHeight];
+			ChWorld = new long[WorldWidth, WorldHeight];
 			ChangedCells = new ChangedCell[MaxBotsNumber];
 			GrColors = new Color[361];
+
+			BotDeath = new Bot1[3000];
+			BotReproduction = new Bot1[3000];
+			NumberOfBotDeath = -1;
+			NumberOfBotReproduction = -1;
+			DeathCnt = 0;
+			ReproductionCnt = 0;
 
 			Mutation = true;
 			Started = false;
@@ -133,10 +146,6 @@ namespace WindowsFormsApp1.Static
 			NumberOfChangedCells = 0;
 			MaxBotNumber = 0;
 			CurrentStep = 0;
-
-
-			DeathCnt = 0;
-			ReproductionCnt = 0;
 			MutationCnt = 0;
 
 			ReportFrequencyCurrent = ReportFrequencyDrawed;
@@ -146,7 +155,7 @@ namespace WindowsFormsApp1.Static
 			CursorX = 10;
 			CursorY = 10;
 
-			for (var hue= 0; hue <= 360; hue++)
+			for (var hue = 0; hue <= 360; hue++)
 			{
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
 			}
@@ -191,7 +200,7 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"TotalEnergy: {TotalEnergy}");
 
 			var te = 0;
-			for (uint botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
 			{
 				te += Data.Bots[botNumber].Energy;
 			}

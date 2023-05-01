@@ -34,13 +34,16 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Step()
 		{
-			Parallel.For(1, Data.MaxBotsNumber, (i, state) =>
+			Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
 			{
-				if (Data.Bots[i] == null) return;
+				if (Data.Bots[i] == null) throw new Exception("Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>");
 				Data.Bots[i].Step();
 			});
 
-			//for (uint botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			Func.Death();
+			Func.Reproduction();
+
+			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
 			//{
 
 			//	Data.Bots[botNumber].Step();
@@ -49,12 +52,12 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 			Data.CurrentStep++;
 
-			while (Data.TotalEnergy < 10000000) //Data.SeedTotalEnergy)
+			while (Data.TotalEnergy < Data.SeedTotalEnergy)
 			{
 				if (Func.TryGetRandomFreeCell(out var x, out var y))
 				{
-					Data.World[x, y] = (uint)CellContent.Grass;
-					Func.FixChangeCell(x, y, Color.Green, "grass");
+					Data.World[x, y] = (long)CellContent.Grass;
+					Func.FixChangeCell(x, y, Color.Green);
 
 					Data.TotalEnergy += Data.FoodEnergy;
 
@@ -90,7 +93,9 @@ namespace WindowsFormsApp1.GameLogic
 todo если геном больше не используется (Bots=0) то удалять геном чтоб память не забивал
 todo при поедании если релатив возвращать что просто бот как у foo52 ?
 todo добавить обработку если наступил на яд
-todo в ChangeCell не перерисовывать если на первоначальном экране ячейка такого же цвета
+todo в FixChangeCell не перерисовывать если на первоначальном экране ячейка такого же цвета
+todo в FixChangeCell перевести на ConcurrentDictionary AddOrUpdate
+todo при удалении и создании ботов не пересоздавать объект а переиспользовать его
 фотосинтез только в верхгних слоях
 мина
 default: shift = cmdCode; stepComplete = false; break; если cmdCode =0 то что будет? зависнет?

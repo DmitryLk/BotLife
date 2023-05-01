@@ -18,7 +18,7 @@ namespace WindowsFormsApp1.GameLogic
 
         public void SeedBots()
         {
-            for (uint botIndex = 1; botIndex <= Data.StartNumberOfBots; botIndex++)
+            for (long botIndex = 1; botIndex <= Data.StartNumberOfBots; botIndex++)
             {
 				// Координаты бота
 				if (Func.TryGetRandomFreeCell(out var x, out var y))
@@ -26,7 +26,8 @@ namespace WindowsFormsApp1.GameLogic
 					// Создание кода бота
 					var genom = Genom.CreateGenom();
 
-					Func.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
+					Data.TotalEnergy += Data.SeedBotEnergy;
+					Bot1.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
                     Data.CurrentNumberOfBots++;
 				}
             }
@@ -43,8 +44,8 @@ namespace WindowsFormsApp1.GameLogic
                     {
 						Data.TotalEnergy += Data.FoodEnergy;
 
-						Data.World[x, y] = (uint)CellContent.Grass;
-						Func.FixChangeCell(x, y, Color.Green, "s");
+						Data.World[x, y] = (long)CellContent.Grass;
+						Func.FixChangeCell(x, y, Color.Green);
 
 					}
                 }
@@ -57,8 +58,8 @@ namespace WindowsFormsApp1.GameLogic
                 {
                     if (Func.TryGetRandomFreeCell(out var x, out var y))
                     {
-						Data.World[x, y] = (uint)CellContent.Organic;
-						Func.FixChangeCell(x, y, Color.Black, "s");
+						Data.World[x, y] = (long)CellContent.Organic;
+						Func.FixChangeCell(x, y, Color.Black);
 					}
                 }
             }
@@ -70,8 +71,8 @@ namespace WindowsFormsApp1.GameLogic
                 {
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
-						Data.World[x, y] = (uint)CellContent.Mineral;
-						Func.FixChangeCell(x, y, Color.Black, "s");
+						Data.World[x, y] = (long)CellContent.Mineral;
+						Func.FixChangeCell(x, y, Color.Black);
 					}
                 }
             }
@@ -83,8 +84,8 @@ namespace WindowsFormsApp1.GameLogic
                 {
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
-						Data.World[x, y] = (uint)CellContent.Wall;
-						Func.FixChangeCell(x, y, Color.Black, "s");
+						Data.World[x, y] = (long)CellContent.Wall;
+						Func.FixChangeCell(x, y, Color.Black);
 					}
                 }
             }
@@ -96,8 +97,8 @@ namespace WindowsFormsApp1.GameLogic
                 {
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
-						Data.World[x, y] = (uint)CellContent.Poison;
-						Func.FixChangeCell(x, y, Color.Black, "s");
+						Data.World[x, y] = (long)CellContent.Poison;
+						Func.FixChangeCell(x, y, Color.Black);
 					}
                 }
             }

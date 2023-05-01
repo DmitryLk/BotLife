@@ -39,15 +39,17 @@ namespace WindowsFormsApp1.GameLogic
 		public uint BeginStep;
 		public uint EndStep;
 		//private Genom _parent;
-		private int _curBots = 0;
-		private int _allBots = 0;
-		private int _removedBots = 0;
+
+		private long _curBots = 0;
+		private long _allBots = 0;
+
+		private long _removedBots = 0;
 		private int _ageBots = 0;
 		public bool Plant = false;
 
-		public int CurBots { get => _curBots; }
-		public int AllBots { get => _allBots; }
-		public int RemovedBots { get => _removedBots; }
+		public long CurBots { get => _curBots; }
+		public long AllBots { get => _allBots; }
+		public long RemovedBots { get => _removedBots; }
 		public int AgeBots { get => _ageBots; }
 
 		private Genom()
@@ -57,8 +59,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void AddBot()
 		{
-			_curBots++;
-			_allBots++;
+			Interlocked.Increment(ref _curBots);
+			Interlocked.Increment(ref _allBots);
 		}
 		public void RemoveBot(int age)
 		{
@@ -74,9 +76,9 @@ namespace WindowsFormsApp1.GameLogic
 				Interlocked.Increment(ref ENDCOUNTER);
 			}
 
-			_curBots--;
+			Interlocked.Decrement(ref _curBots);
+			Interlocked.Increment(ref _removedBots);
 
-			_removedBots++;
 			_ageBots += age;
 		}
 

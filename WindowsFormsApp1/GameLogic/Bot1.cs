@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Xml;
 using System.Xml.Linq;
@@ -21,7 +22,13 @@ namespace WindowsFormsApp1.GameLogic
 	// Бот с океана foo52
 	public class Bot1
 	{
-		public Genom genom;
+		//private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+		//private static readonly object _busy = new object();
+
+		//private static long COUNTER1 = 0;
+		//private static long COUNTER2 = 0;
+
+		public Genom Genom;
 		public Color Color;
 		public int Pointer;
 		public int OldPointer;
@@ -30,8 +37,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public double _Xd;
 		public double _Yd;
-		public int _Xi;
-		public int _Yi;
+		public int Xi;
+		public int Yi;
 
 		public int Energy
 		{
@@ -44,30 +51,27 @@ namespace WindowsFormsApp1.GameLogic
 					Color = GetGraduatedColor(Energy, 0, 6000);
 					if (Data.DrawType == DrawType.OnlyChangedCells)
 					{
-						Func.FixChangeCell(_Xi, _Yi, Color, "Energy");
+						Func.FixChangeCell(Xi, Yi, Color);
 					}
 				}
 			}
 		}
 
-		public uint Index;         // Индекс бота (может меняться)
+		public long Index;         // Индекс бота (может меняться)
 		public int Direction;         // Направление бота
 		public int Age;
 
 		private int _en;
-		private uint _num;         // Номер бота (остается постоянным)
+		private long _num;         // Номер бота (остается постоянным)
 		private int _size;
-		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-		private static readonly object _busy = new object();
 
 
 
-		// Может вызываться только из func.CreateNewBot()
-		public Bot1(int x, int y, int dir, uint botNumber, uint botIndex, int en, Genom genom, int pointer)
+		private Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
 		{
 			Pointer = pointer;
 			OldPointer = pointer;
-			this.genom = genom;
+			this.Genom = genom;
 			Hist = new CodeHistory();
 
 			Direction = dir;
@@ -78,20 +82,20 @@ namespace WindowsFormsApp1.GameLogic
 
 			_Xd = x;
 			_Yd = y;
-			_Xi = x;
-			_Yi = y;
+			Xi = x;
+			Yi = y;
 		}
 
 		public void RefreshColor()
 		{
 			Color = Data.BotColorMode switch
 			{
-				BotColorMode.GenomColor => genom.Color,
-				BotColorMode.PraGenomColor => genom.PraColor,
-				BotColorMode.PlantPredator => genom.Plant ? Color.Green : Color.Red,
+				BotColorMode.GenomColor => Genom.Color,
+				BotColorMode.PraGenomColor => Genom.PraColor,
+				BotColorMode.PlantPredator => Genom.Plant ? Color.Green : Color.Red,
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
 				BotColorMode.Age => GetGraduatedColor(Age, 0, 500),
-				BotColorMode.GenomAge => GetGraduatedColor((int)(Data.CurrentStep - genom.BeginStep), 0, 10000),
+				BotColorMode.GenomAge => GetGraduatedColor((int)(Data.CurrentStep - Genom.BeginStep), 0, 10000),
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
 		}
@@ -129,7 +133,7 @@ namespace WindowsFormsApp1.GameLogic
 			//Death
 			if (Energy <= 0)
 			{
-				Death();
+				ToDeathList();
 				return;
 			}
 
@@ -138,7 +142,7 @@ namespace WindowsFormsApp1.GameLogic
 			do
 			{
 				// 1. Определяем команду которую будет делать бот
-				var cmdCode = genom.GetCurrentCommand(Pointer);
+				var cmdCode = Genom.GetCurrentCommand(Pointer);
 				Hist.SavePtr(Pointer);
 
 				// 2. Выполняем команду
@@ -206,14 +210,14 @@ namespace WindowsFormsApp1.GameLogic
 			//Death
 			if (Energy <= 0)
 			{
-				Death();
+				ToDeathList();
 				return;
 			}
 
 			//Reproduction
-			if (Energy >= Data.ReproductionBotEnergy)
+			if (CanReproduct())
 			{
-				Reproduction();
+				ToReproductionList();
 			}
 
 			// 0-7		движение
@@ -252,81 +256,27 @@ namespace WindowsFormsApp1.GameLogic
 			//................   генная атака  ...................................			if ($command == 49)
 		}
 
-		public void Death()
+
+		public bool CanReproduct()
 		{
-			lock (_busy)
-			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
-				{
-				}
-				Data.World[_Xi, _Yi] = (uint)CellContent.Free;
-				if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, null, "death"); // при следующей отрисовке бот стерется с экрана
-
-				// надо его убрать из массива ботов, переставив последнего бота на его место
-				//Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
-
-				if (Index > Data.CurrentNumberOfBots)
-				{
-					throw new Exception("if (_ind > Data.CurrentBotsNumber)");
-				}
-
-				// Перенос последнего бота в освободившееся отверстие
-				if (Index < Data.CurrentNumberOfBots)
-				{
-					if (Data.Bots[Data.CurrentNumberOfBots] == null)
-					{
-						throw new Exception("if (Data.Bots[Data.CurrentNumberOfBots] == null)");
-					}
-
-					var lastBot = Data.Bots[Data.CurrentNumberOfBots];
-					Data.Bots[Index] = lastBot;
-					lastBot.Index = Index;
-					Data.World[lastBot._Xi, lastBot._Yi] = Index;
-					//Func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
-					//после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
-				}
-
-				// Укарачиваем массив
-				Data.Bots[Data.CurrentNumberOfBots] = null;
-				Data.CurrentNumberOfBots--;
-
-				Data.DeathCnt++;
-
-				genom.RemoveBot(Age);
-				Interlocked.Increment(ref COUNTER2);
-			}
+			return Energy >= Data.ReproductionBotEnergy;
 		}
 
-		protected void Reproduction()
+		public void ToDeathList()
 		{
-			// Создание нового бота
-			// Узнать есть ли рядом ячейка свободная
-			lock (_busy)
-			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
-				{
-				}
+			var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
+			Data.BotDeath[num] = this;
+		}
 
-				if (TryGetRandomFreeCellNearby(out var x, out var y))
-				{
-					Data.CurrentNumberOfBots++;
-					var botIndex = Data.CurrentNumberOfBots;
-					var genom = Func.Mutation() ? Genom.CreateGenom(this.genom) : this.genom;
-
-					Func.CreateNewBot(x, y, botIndex, Data.InitialBotEnergy, genom);
-					Data.TotalEnergy -= Data.InitialBotEnergy;
-					Data.ReproductionCnt++;
-					Energy -= Data.InitialBotEnergy;
-				}
-				Interlocked.Increment(ref COUNTER2);
-			}
+		private void ToReproductionList()
+		{
+			var num = Interlocked.Increment(ref Data.NumberOfBotReproduction);
+			Data.BotReproduction[num] = this;
 		}
 
 		private (int shift, bool stepComplete) Photosynthesis()
 		{
-			if (_Yi < Data.PhotosynthesisLayerHeight)
+			if (Yi < Data.PhotosynthesisLayerHeight)
 			{
 				lock (_busy)
 				{
@@ -336,7 +286,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					Energy += Data.PhotosynthesisEnergy;
 					Data.TotalEnergy += Data.PhotosynthesisEnergy;
-					genom.Plant = true;
+					Genom.Plant = true;
 					Interlocked.Increment(ref COUNTER2);
 				}
 				//genom.Color = Color.Green;
@@ -435,17 +385,17 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			Energy += Data.FoodEnergy;
 
-			Data.World[nXi, nYi] = (uint)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null, "eatgrass");
+			Data.World[nXi, nYi] = (long)CellContent.Free;
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
 		}
 
 
-		private void EatBot(int nXi, int nYi, uint cont)
+		private void EatBot(int nXi, int nYi, long cont)
 		{
 			var eatedBot = Data.Bots[cont];
 
 			// Растение не может есть животное
-			if (genom.Plant && !eatedBot.genom.Plant)
+			if (Genom.Plant && !eatedBot.Genom.Plant)
 			{
 				return;
 			}
@@ -464,10 +414,10 @@ namespace WindowsFormsApp1.GameLogic
 			Energy += energyCanEat;
 			eatedBot.Energy -= energyCanEat;
 
-			//if (eatedBot.Energy <= 0)
-			//{
-			//	eatedBot.Death();
-			//}
+			if (eatedBot.Energy <= 0)
+			{
+				eatedBot.ToDeathList();
+			}
 		}
 
 		private (int shift, bool stepComplete) LookAtRelativeDirection()
@@ -514,8 +464,6 @@ namespace WindowsFormsApp1.GameLogic
 			return (2, false);
 		}
 
-		private static long COUNTER1 = 0;
-		private static long COUNTER2 = 0;
 
 		private static readonly object _busy1 = new object();
 		private (int shift, bool stepComplete) StepInRelativeDirection()
@@ -605,16 +553,16 @@ namespace WindowsFormsApp1.GameLogic
 		// Перемещение бота
 		private void Move(double nXd, double nYd, int nXi, int nYi)
 		{
-			Data.World[_Xi, _Yi] = (uint)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, null,"move1");
+			Data.World[Xi, Yi] = (long)CellContent.Free;
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(Xi, Yi, null);
 
 			_Xd = nXd;
 			_Yd = nYd;
-			_Xi = nXi;
-			_Yi = nYi;
+			Xi = nXi;
+			Yi = nYi;
 
-			Data.World[_Xi, _Yi] = Index;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(_Xi, _Yi, Color, "move2");
+			Data.World[Xi, Yi] = Index;
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(Xi, Yi, Color);
 		}
 
 		private void MoveOnlyDouble(double nXd, double nYd)
@@ -626,24 +574,6 @@ namespace WindowsFormsApp1.GameLogic
 		//////////////////////////////////////////////////////////////////
 
 
-		private bool TryGetRandomFreeCellNearby(out int nXi, out int nYi)
-		{
-			var n = Func.Rnd.Next(8);
-			RefContent refContent;
-			var i = 0;
-
-			do
-			{
-				(nXi, nYi) = GetCoordinatesByDelta(n);
-				refContent = GetRefContentWithoutRelative(nXi, nYi);
-				i++;
-
-				if (++n >= 8) n -= 8;
-			}
-			while (refContent != RefContent.Free && i <= 8);
-
-			return refContent == RefContent.Free;
-		}
 
 
 		private void ShiftCodePointer(int shift)
@@ -665,7 +595,7 @@ namespace WindowsFormsApp1.GameLogic
 			var newXint = Dir.Round(newXdouble);
 			var newYint = Dir.Round(newYdouble);
 
-			var iEqual = newXint == _Xi && newYint == _Yi;
+			var iEqual = newXint == Xi && newYint == Yi;
 
 			if (onlyDifferent && iEqual)
 			{
@@ -679,12 +609,12 @@ namespace WindowsFormsApp1.GameLogic
 				newYint = Dir.Round(newYdouble);
 
 				// проверка на изменение координат еще раз. такого не может быть
-				if (newXint == _Xi && newYint == _Yi)
+				if (newXint == Xi && newYint == Yi)
 				{
 					throw new Exception("if (newXint == _Xi && newYint == _Yi)");
 				}
 
-				if (newXint - _Xi > 1 || newXint - _Xi < -1 || newYint - _Yi > 1 || newYint - _Yi < -1)
+				if (newXint - Xi > 1 || newXint - Xi < -1 || newYint - Yi > 1 || newYint - Yi < -1)
 				{
 					throw new Exception("if (newXint - _Xi > 1 || newXint - _Xi < -1 || newYint - _Yi > 1 || newYint - _Yi < -1)");
 				}
@@ -727,43 +657,6 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		private (int nXi, int nYi) GetCoordinatesByDelta(int nDelta)
-		{
-			var (nXid, nYid) = Dir.NearbyCells[nDelta];
-
-
-			var nXi = _Xi + nXid;
-			var nYi = _Yi + nYid;
-
-			// Проверка перехода сквозь экран
-			if (!Data.LeftRightEdge)
-			{
-				if (nXi < 0)
-				{
-					nXi += Data.WorldWidth;
-				}
-
-				if (nXi >= Data.WorldWidth)
-				{
-					nXi -= Data.WorldWidth;
-				}
-			}
-
-			if (!Data.UpDownEdge)
-			{
-				if (nYi < 0)
-				{
-					nYi += Data.WorldHeight;
-				}
-
-				if (nYi >= Data.WorldHeight)
-				{
-					nYi -= Data.WorldHeight;
-				}
-			}
-
-			return (nXi, nYi);
-		}
 
 		#region GetRefContent
 
@@ -774,7 +667,7 @@ namespace WindowsFormsApp1.GameLogic
 			// Если координаты попадают за экран то вернуть RefContent.Edge
 			if (y < 0 || y >= Data.WorldHeight || x < 0 || x >= Data.WorldWidth) return RefContent.Edge;
 
-			uint cont;
+			long cont;
 			lock (_busy)
 			{
 				Interlocked.Increment(ref COUNTER1);
@@ -801,7 +694,7 @@ namespace WindowsFormsApp1.GameLogic
 			};
 		}
 
-		private (RefContent refContent, uint cont) GetRefContentAndCont(int x, int y)
+		private (RefContent refContent, long cont) GetRefContentAndCont(int x, int y)
 		{
 			if (y < 0 || y >= Data.WorldHeight || x < 0 || x >= Data.WorldWidth) return (RefContent.Edge, 0);
 
@@ -819,29 +712,12 @@ namespace WindowsFormsApp1.GameLogic
 			}, cont);
 		}
 
-		private RefContent GetRefContentWithoutRelative(int x, int y)
-		{
-			if (y < 0 || y >= Data.WorldHeight || x < 0 || x >= Data.WorldWidth) return RefContent.Edge;
 
-			var cont = Data.World[x, y];
-
-			return cont switch
-			{
-				0 => RefContent.Free,
-				65500 => RefContent.Grass,
-				65501 => RefContent.Organic,
-				65502 => RefContent.Mineral,
-				65503 => RefContent.Wall,
-				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots ? RefContent.Bot : throw new Exception("return cont switch")
-			};
-		}
-
-		private RefContent RefContentByBotRelativity(uint cont)
+		private RefContent RefContentByBotRelativity(long cont)
 		{
 			// надо определить родственник ли бот
 
-			return genom.IsRelative(Data.Bots[cont].genom)
+			return Genom.IsRelative(Data.Bots[cont].Genom)
 				? RefContent.Relative
 				: RefContent.Bot;
 		}
@@ -883,7 +759,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		// For eat
-		private (RefContent refContent, int nX, int nY, uint cont) GetCellInfo3(int dir)
+		private (RefContent refContent, int nX, int nY, long cont) GetCellInfo3(int dir)
 		{
 			// 1. Узнаем координаты клетки на которую надо посмотреть
 			var (_, _, nXi, nYi, _) = GetCoordinatesByDirection(dir, true);
@@ -900,11 +776,11 @@ namespace WindowsFormsApp1.GameLogic
 		#region Direction
 		private int GetDirAbsolute()
 		{
-			return Dir.GetDirectionFromCodeAbsolute(genom.GetNextCommand(Pointer));
+			return Dir.GetDirectionFromCodeAbsolute(Genom.GetNextCommand(Pointer));
 		}
 		private int GetDirRelative()
 		{
-			return Dir.GetDirectionFromCodeRelative(Direction, genom.GetNextCommand(Pointer));
+			return Dir.GetDirectionFromCodeRelative(Direction, Genom.GetNextCommand(Pointer));
 		}
 		#endregion
 
@@ -922,15 +798,15 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			sb.AppendLine("");
-			sb.AppendLine($"Genom {genom.PraNum} {(genom.Num != 0 ? $"({genom.Num})" : "")}Lev{genom.Level}");
-			sb.AppendLine($"Bots: {genom.CurBots}");
+			sb.AppendLine($"Genom {Genom.PraNum} {(Genom.Num != 0 ? $"({Genom.Num})" : "")}Lev{Genom.Level}");
+			sb.AppendLine($"Bots: {Genom.CurBots}");
 
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Color.R} G{Color.G} B{Color.B}");
-			sb.AppendLine($"Pra: {genom.PraHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Hash: {genom.GenomHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Parent: {genom.ParentHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Grand: {genom.GrandHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Pra: {Genom.PraHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Hash: {Genom.GenomHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Parent: {Genom.ParentHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Grand: {Genom.GrandHash.ToString().Substring(0, 8)}");
 
 			return sb.ToString();
 		}
@@ -954,7 +830,7 @@ namespace WindowsFormsApp1.GameLogic
 
 				for (var i = 0; i < histPtrCnt; i++)
 				{
-					var cmdTxt = genom.Code[hist[i]] switch
+					var cmdTxt = Genom.Code[hist[i]] switch
 					{
 						23 => "Поворот относительно",
 						24 => "Поворот абсолютно",
@@ -968,7 +844,7 @@ namespace WindowsFormsApp1.GameLogic
 						_ => ""
 					};
 
-					var dirStr = Dir.GetDirectionStringFromCode(genom.GetNextCommand(hist[i]));
+					var dirStr = Dir.GetDirectionStringFromCode(Genom.GetNextCommand(hist[i]));
 					if (cmdTxt != "")
 					{
 						sb.AppendLine($"{cmdTxt} {dirStr}");
@@ -981,6 +857,22 @@ namespace WindowsFormsApp1.GameLogic
 			return sb.ToString();
 		}
 		#endregion
+
+		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
+		{
+			var dir = Dir.GetRandomDirection();
+			var pointer = 0;
+			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
+
+			genom.AddBot();
+			var bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom, pointer);
+			bot.RefreshColor();
+			Data.Bots[botIndex] = bot;
+
+			Data.World[x, y] = botIndex;
+			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(x, y, bot.Color);
+		}
+
 
 		private async Task<bool> SetBusy()
 		{
