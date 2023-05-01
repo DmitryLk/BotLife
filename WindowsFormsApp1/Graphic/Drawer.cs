@@ -66,7 +66,7 @@ namespace WindowsFormsApp1.Graphic
 					// Рисуем только изменившщиеся ячейки. Одновременно постепенно обнуляем массивы измененных ячеек
 					_PRESENTER.StartNewFrame(Data.LensOn ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 					Test.EndBeginInterval(1, 2);
-					for (var i = 0; i < Data.NumberOfChangedCells; i++)
+					for (var i = 1; i < Data.NumberOfChangedCells; i++)
 					{
 						var obj = Data.ChangedCells[i];
 

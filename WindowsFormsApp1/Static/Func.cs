@@ -37,27 +37,20 @@ namespace WindowsFormsApp1.Static
 			// возможно ли в паралелли одновременное изменение одной клетки? а то приходится локи городить из-за этой возможности
 			bool first = false;
 			long num;
+
 			if (Data.ChWorld[x, y] == 0)
 			{
 				lock (_busyChWorld)
 				{
 					if (Data.ChWorld[x, y] == 0)
 					{
-						num = Data.ChWorld[x, y] = Interlocked.Increment(ref Data.NumberOfChangedCells); // сюда записываем +1 чтобы 0 не записывать
+						Data.ChWorld[x, y] = Interlocked.Increment(ref Data.NumberOfChangedCells); // сюда записываем +1 чтобы 0 не записывать
 						first = true;
-					}
-					else
-					{
-						num = Data.ChWorld[x, y];
 					}
 				}
 			}
-			else
-			{
-				num = Data.ChWorld[x, y];
-			}
 
-
+			num = Data.ChWorld[x, y];
 
 			if (Data.ChangedCells[num] == null)
 			{
@@ -126,7 +119,7 @@ namespace WindowsFormsApp1.Static
 
 			lock (_busyWorld)
 			{
-				Data.World[bot.Xi, bot.Yi] = (long)CellContent.Free;
+				Data.World[bot.Xi, bot.Yi] = 0;
 			}
 
 

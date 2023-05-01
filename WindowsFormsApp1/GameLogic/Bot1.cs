@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Globalization;
@@ -25,6 +26,14 @@ namespace WindowsFormsApp1.GameLogic
 		//private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 		//private static readonly object _busy = new object();
 
+		private static readonly object _busyWorld1 = new object();
+		private static readonly object _busyWorld2 = new object();
+		private static readonly object _busyTotalEnergy = new object();
+		private static readonly object _busyBotEnergy = new object();
+		private static readonly object _busyDeathList = new object();
+
+
+
 		//private static long COUNTER1 = 0;
 		//private static long COUNTER2 = 0;
 
@@ -35,8 +44,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public CodeHistory Hist;
 
-		public double _Xd;
-		public double _Yd;
+		public double Xd;
+		public double Yd;
 		public int Xi;
 		public int Yi;
 
@@ -64,6 +73,7 @@ namespace WindowsFormsApp1.GameLogic
 		private int _en;
 		private long _num;         // Номер бота (остается постоянным)
 		private int _size;
+		private bool _insertedToDeathList;
 
 
 
@@ -80,10 +90,12 @@ namespace WindowsFormsApp1.GameLogic
 			Energy = en;
 			Age = 0;
 
-			_Xd = x;
-			_Yd = y;
+			Xd = x;
+			Yd = y;
 			Xi = x;
 			Yi = y;
+
+			_insertedToDeathList = false;
 		}
 
 		public void RefreshColor()
@@ -149,41 +161,41 @@ namespace WindowsFormsApp1.GameLogic
 				switch (cmdCode)
 				{
 
-					case 23: (shift, stepComplete) = RotateInRelativeDirection(); break;    // ПОВОРОТ относительно								2,               false
-					case 24: (shift, stepComplete) = RotateInAbsoluteDirection(); break;    // ПОВОРОТ абсолютно								2,               false
+					case 23: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно								2,               false
+					case 24: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
 					case 25: (shift, stepComplete) = Photosynthesis(); break;               // ФОТОСИНТЕЗ                                       1,               true
-					case 26: (shift, stepComplete) = StepInRelativeDirection(); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
-					case 27: (shift, stepComplete) = StepInAbsoluteDirection(); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
-					case 28: (shift, stepComplete) = EatInRelativeDirection(); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
-					case 29: (shift, stepComplete) = EatInAbsoluteDirection(); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
-					case 30: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-					case 31: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 32: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 33: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 34: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 35: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 36: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 37: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 38: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 39: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 40: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 41: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 42: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 43: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 44: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 45: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 46: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 47: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 48: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 49: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 50: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 51: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 52: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 53: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 54: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 55: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																							//case 56: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																							//case 57: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+					case 26: (shift, stepComplete) = Step(GetDirRelative()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
+					case 27: (shift, stepComplete) = Step(GetDirAbsolute()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
+					case 28: (shift, stepComplete) = Eat(GetDirRelative()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
+					case 29: (shift, stepComplete) = Eat(GetDirAbsolute()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
+					case 30: (shift, stepComplete) = Look(GetDirRelative()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+					case 31: (shift, stepComplete) = Look(GetDirAbsolute()); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 32: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 33: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 34: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 35: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 36: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 37: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 38: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 39: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 40: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 41: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 42: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 43: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 44: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 45: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 46: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 47: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 48: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 49: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 50: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 51: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 52: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 53: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 54: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 55: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+																						 //case 56: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+																						 //case 57: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
 					default: shift = cmdCode; stepComplete = false; break;
 				};
 
@@ -195,15 +207,10 @@ namespace WindowsFormsApp1.GameLogic
 
 			Age++;
 
-			lock (_busy)
+			Energy += Data.DeltaEnergyOnStep;
+			lock (_busyTotalEnergy)
 			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
-				{
-				}
-				Energy += Data.DeltaEnergyOnStep;
 				Data.TotalEnergy += Data.DeltaEnergyOnStep;
-				Interlocked.Increment(ref COUNTER2);
 			}
 
 
@@ -264,8 +271,18 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void ToDeathList()
 		{
-			var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
-			Data.BotDeath[num] = this;
+			if (!_insertedToDeathList)
+			{
+				lock (_busyDeathList)
+				{
+					if (!_insertedToDeathList)
+					{
+						_insertedToDeathList = true;
+						var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
+						Data.BotDeath[num] = this;
+					}
+				}
+			}
 		}
 
 		private void ToReproductionList()
@@ -278,17 +295,12 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			if (Yi < Data.PhotosynthesisLayerHeight)
 			{
-				lock (_busy)
+				Energy += Data.PhotosynthesisEnergy;
+				lock (_busyTotalEnergy)
 				{
-					Interlocked.Increment(ref COUNTER1);
-					if (COUNTER1 - COUNTER2 > 1)
-					{
-					}
-					Energy += Data.PhotosynthesisEnergy;
 					Data.TotalEnergy += Data.PhotosynthesisEnergy;
-					Genom.Plant = true;
-					Interlocked.Increment(ref COUNTER2);
 				}
+				Genom.Plant = true;
 				//genom.Color = Color.Green;
 				return (1, true);
 			}
@@ -298,99 +310,63 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		private (int shift, bool stepComplete) EatInRelativeDirection()
+		private (int shift, bool stepComplete) Eat(int dir)
 		{
 			// Алгоритм:
-			// 1. Узнаем направление предполагаемой еды
-			var dir = GetDirRelative();
+			// 1. Узнаем координаты клетки на которую надо посмотреть
+			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
 
-			RefContent refContent;
-			lock (_busy)
+			// 2. Узнаем что находится на этой клетке
+			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth) return ((int)RefContent.Edge, true);
+
+			long cont = -1;
+
+			if (Data.World[nXi, nYi] == 65500)
 			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
+				lock (_busyWorld1)
 				{
+					if (Data.World[nXi, nYi] == 65500)
+					{
+						Data.World[nXi, nYi] = 0;
+						cont = 65500;
+					}
 				}
-
-				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-				(refContent, var nXi, var nYi, var cont) = GetCellInfo3(dir);
-
-				// 3. Узнаем съедобно ли это
-				if (refContent == RefContent.Grass)
-				{
-					EatGrass(nXi, nYi);
-				}
-
-				if (refContent == RefContent.Bot ||
-					refContent == RefContent.Relative)
-				{
-					EatBot(nXi, nYi, cont);
-				}
-				Interlocked.Increment(ref COUNTER2);
 			}
 
-			if (refContent == RefContent.Organic ||
-				refContent == RefContent.Mineral ||
-				refContent == RefContent.Poison)
+			if (cont == 65500)  //Grass
 			{
+				Energy += Data.FoodEnergy;
+				if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
+				return ((int)RefContent.Grass, true);
+			}
+
+			cont = Data.World[nXi, nYi];
+			var refContent = cont switch
+			{
+				0 => RefContent.Free,
+				65500 => RefContent.Grass,
+				65501 => RefContent.Organic,
+				65502 => RefContent.Mineral,
+				65503 => RefContent.Wall,
+				65504 => RefContent.Poison,
+				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+					? Genom.IsRelative(Data.Bots[cont].Genom)
+						? RefContent.Relative
+						: RefContent.Bot
+					: throw new Exception("return cont switch")
+			};
+
+
+			if (refContent == RefContent.Bot || refContent == RefContent.Relative)  //Bot || Relative
+			{
+				EatBot(cont);
 			}
 
 			return ((int)refContent, true);
 		}
 
-		private (int shift, bool stepComplete) EatInAbsoluteDirection()
-		{
-			// Алгоритм:
-			// 1. Узнаем направление предполагаемой еды
-			var dir = GetDirAbsolute();
 
-			RefContent refContent;
-			lock (_busy)
-			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
-				{
-				}
-
-				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-				(refContent, var nXi, var nYi, var cont) = GetCellInfo3(dir);
-
-				// 3. Узнаем съедобно ли это
-				if (refContent == RefContent.Grass)
-				{
-					EatGrass(nXi, nYi);
-				}
-
-				if (refContent == RefContent.Bot ||
-					refContent == RefContent.Relative)
-				{
-					EatBot(nXi, nYi, cont);
-				}
-
-				Interlocked.Increment(ref COUNTER2);
-			}
-
-
-
-			if (refContent == RefContent.Organic ||
-				refContent == RefContent.Mineral ||
-				refContent == RefContent.Poison)
-			{
-			}
-
-			return ((int)refContent, true);
-		}
-
-		private void EatGrass(int nXi, int nYi)
-		{
-			Energy += Data.FoodEnergy;
-
-			Data.World[nXi, nYi] = (long)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
-		}
-
-
-		private void EatBot(int nXi, int nYi, long cont)
+		private void EatBot(long cont)
 		{
 			var eatedBot = Data.Bots[cont];
 
@@ -408,11 +384,14 @@ namespace WindowsFormsApp1.GameLogic
 			//		return;
 			//	}
 			//}
-
-			var energyCanEat = eatedBot.Energy > Data.BiteEnergy ? Data.BiteEnergy : eatedBot.Energy;
+			int energyCanEat;
+			lock (_busyBotEnergy)
+			{
+				energyCanEat = eatedBot.Energy > Data.BiteEnergy ? Data.BiteEnergy : eatedBot.Energy;
+				eatedBot.Energy -= energyCanEat;
+			}
 
 			Energy += energyCanEat;
-			eatedBot.Energy -= energyCanEat;
 
 			if (eatedBot.Energy <= 0)
 			{
@@ -420,123 +399,44 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		private (int shift, bool stepComplete) LookAtRelativeDirection()
+		private (int shift, bool stepComplete) Look(int dir)
 		{
 			// Алгоритм:
-			// 1. Узнаем новое направление
-			var dir = GetDirRelative();
+			// 1. Узнаем координаты клетки на которую надо посмотреть
+			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
 
-			// 2. Узнаем по направлению новые координаты, что там находится и последующее смещение кода
-			var refContent = GetCellInfo1(dir);
+			// 2. Узнаем что находится на этой клетке
+
+			//смещение условного перехода 2-пусто  3-стена  4-органика 5-бот 6-родня
+
+			// Если координаты попадают за экран то вернуть RefContent.Edge
+			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth) return ((int)RefContent.Edge, true);
+
+			var cont = Data.World[nXi, nYi];
+			var refContent = cont switch
+			{
+				0 => RefContent.Free,
+				65500 => RefContent.Grass,
+				65501 => RefContent.Organic,
+				65502 => RefContent.Mineral,
+				65503 => RefContent.Wall,
+				65504 => RefContent.Poison,
+				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+					? Genom.IsRelative(Data.Bots[cont].Genom)
+						? RefContent.Relative
+						: RefContent.Bot
+					: throw new Exception("return cont switch")
+			};
 
 			return ((int)refContent, false);
 		}
 
-		private (int shift, bool stepComplete) LookAtAbsoluteDirection()
+
+		private (int shift, bool stepComplete) Rotate(int dir)
 		{
-			// Алгоритм:
-			// 1. Узнаем новое направление
-			var dir = GetDirAbsolute();
-
-			// 2. Узнаем по направлению новые координаты, что там находится и последующее смещение кода
-			var refContent = GetCellInfo1(dir);
-
-			return ((int)refContent, false);
-		}
-
-		private (int shift, bool stepComplete) RotateInRelativeDirection()
-		{
-			// Алгоритм:
-			// 1. Узнаем новое направление
-			var dir = GetDirRelative();
-			// 2. Меняем направление бота
 			Direction = dir;
 			return (2, false);
 		}
-
-		private (int shift, bool stepComplete) RotateInAbsoluteDirection()
-		{
-			// Алгоритм:
-			// 1. Узнаем новое направление
-			var dir = GetDirAbsolute();
-			// 2. Меняем направление бота
-			Direction = dir;
-			return (2, false);
-		}
-
-
-		private static readonly object _busy1 = new object();
-		private (int shift, bool stepComplete) StepInRelativeDirection()
-		{
-			// Алгоритм:
-			// 1. Узнаем направление предполагаемого движения
-			var dir = GetDirRelative();
-
-			RefContent refContent;
-			lock (_busy)
-			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
-				{
-				}
-				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-				(var iEqual, refContent, var nXd, var nYd, var nXi, var nYi) = GetCellInfo2(dir);
-
-				// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-				if (iEqual)
-				{
-					MoveOnlyDouble(nXd, nYd);
-				}
-				else
-				{
-					if (refContent == RefContent.Free || refContent == RefContent.Poison)
-					{
-						Move(nXd, nYd, nXi, nYi);
-					}
-				}
-				Interlocked.Increment(ref COUNTER2);
-			}
-
-			return ((int)refContent, true);
-		}
-
-
-		private static readonly object _busy2 = new object();
-		private (int shift, bool stepComplete) StepInAbsoluteDirection()
-		{
-			// Алгоритм:
-			// 1. Узнаем направление предполагаемого движения
-			var dir = GetDirAbsolute();
-
-			RefContent refContent;
-			lock (_busy)
-			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
-				{
-				}
-				// 2. Узнаем по направлению новые координаты, что там находится, можно ли туда передвинуться, последующее смещение кода
-				(var iEqual, refContent, var nXd, var nYd, var nXi, var nYi) = GetCellInfo2(dir);
-
-				// 3. Если есть возможность туда передвинуться , то перемещаем туда бота
-				if (iEqual)
-				{
-					MoveOnlyDouble(nXd, nYd);
-				}
-				else
-				{
-					if (refContent == RefContent.Free || refContent == RefContent.Poison)
-					{
-						Move(nXd, nYd, nXi, nYi);
-					}
-				}
-				Interlocked.Increment(ref COUNTER2);
-			}
-
-			return ((int)refContent, true);
-		}
-
-		//////////////////////////////////////////////////////////////////
 
 
 		//////////////////////////////////////////////////////////////////
@@ -549,78 +449,92 @@ namespace WindowsFormsApp1.GameLogic
 		//			##     ##  #######     ###    ######## 
 		//////////////////////////////////////////////////////////////////
 
+		#region Move
 
-		// Перемещение бота
-		private void Move(double nXd, double nYd, int nXi, int nYi)
+		private (int shift, bool stepComplete) Step(int dir)
 		{
-			Data.World[Xi, Yi] = (long)CellContent.Free;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(Xi, Yi, null);
+			// Алгоритм:
+			// 1. Узнаем координаты предполагаемого перемещения
+			var (nXd, nYd, nXi, nYi, iEqual) = GetCoordinatesByDirectionForMove(dir);
 
-			_Xd = nXd;
-			_Yd = nYd;
-			Xi = nXi;
-			Yi = nYi;
+			if (iEqual)
+			{
+				// ПЕРЕМЕЩЕНИЕ
+				Xd = nXd;
+				Yd = nYd;
+				return (0, true);
+			}
 
-			Data.World[Xi, Yi] = Index;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(Xi, Yi, Color);
+
+			// Если координаты попадают за экран то вернуть RefContent.Edge
+			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth) return ((int)RefContent.Edge, true);
+
+
+
+			long cont = -1;
+
+			if (Data.World[nXi, nYi] == 0) //Free
+			{
+				lock (_busyWorld2)
+				{
+					if (Data.World[nXi, nYi] == 0)
+					{
+						// ПЕРЕМЕЩЕНИЕ A
+						Data.World[nXi, nYi] = Index;
+						cont = 0;
+					}
+				}
+			}
+
+			if (cont == 0)  
+			{
+				// ПЕРЕМЕЩЕНИЕ B
+				if (Data.DrawType == DrawType.OnlyChangedCells) 
+				{
+					Func.FixChangeCell(Xi, Yi, null);
+					Func.FixChangeCell(nXi, nYi, Color);
+				}
+				
+				Xd = nXd;
+				Yd = nYd;
+				Xi = nXi;
+				Yi = nYi;
+
+				Data.World[Xi, Yi] = 0;
+				return ((int)RefContent.Free, true);
+			}
+
+			cont = Data.World[nXi, nYi];
+			var refContent = cont switch
+			{
+				0 => RefContent.Free,
+				65500 => RefContent.Grass,
+				65501 => RefContent.Organic,
+				65502 => RefContent.Mineral,
+				65503 => RefContent.Wall,
+				65504 => RefContent.Poison,
+				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+					? Genom.IsRelative(Data.Bots[cont].Genom)
+						? RefContent.Relative
+						: RefContent.Bot
+					: throw new Exception("return cont switch")
+			};
+
+			return ((int)refContent, true);
 		}
 
-		private void MoveOnlyDouble(double nXd, double nYd)
+		private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirectionForMove(int dir)
 		{
-			_Xd = nXd;
-			_Yd = nYd;
-		}
+			var (deltaXdouble, deltaYdouble) = Dir.Directions1[dir];
 
-		//////////////////////////////////////////////////////////////////
-
-
-
-
-		private void ShiftCodePointer(int shift)
-		{
-			OldPointer = Pointer;
-			Pointer = (Pointer + shift) % Data.GenomLength;
-		}
-
-
-		// Метод может вернуть координаты равные текущим (используется для движения)
-		// и отличные от текущих (используется для посмотреть, есть, схватить, ...)
-		private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirection(int dir, bool onlyDifferent)
-		{
-			var (deltaXdouble, deltaYdouble) = Dir.GetDeltaDirection(dir);
-
-			var newXdouble = _Xd + deltaXdouble;
-			var newYdouble = _Yd + deltaYdouble;
+			var newXdouble = Xd + deltaXdouble;
+			var newYdouble = Yd + deltaYdouble;
 
 			var newXint = Dir.Round(newXdouble);
 			var newYint = Dir.Round(newYdouble);
 
 			var iEqual = newXint == Xi && newYint == Yi;
 
-			if (onlyDifferent && iEqual)
-			{
-				// координаты не изменились. надо шагнуть дальше
-				var (deltaXdouble2, deltaYdouble2) = Dir.GetDeltaDirection2(dir);
-
-				newXdouble = _Xd + deltaXdouble2;
-				newYdouble = _Yd + deltaYdouble2;
-
-				newXint = Dir.Round(newXdouble);
-				newYint = Dir.Round(newYdouble);
-
-				// проверка на изменение координат еще раз. такого не может быть
-				if (newXint == Xi && newYint == Yi)
-				{
-					throw new Exception("if (newXint == _Xi && newYint == _Yi)");
-				}
-
-				if (newXint - Xi > 1 || newXint - Xi < -1 || newYint - Yi > 1 || newYint - Yi < -1)
-				{
-					throw new Exception("if (newXint - _Xi > 1 || newXint - _Xi < -1 || newYint - _Yi > 1 || newYint - _Yi < -1)");
-				}
-
-				iEqual = false;
-			}
 
 			// Проверка перехода сквозь экран
 			if (!Data.LeftRightEdge)
@@ -655,123 +569,78 @@ namespace WindowsFormsApp1.GameLogic
 
 			return (newXdouble, newYdouble, newXint, newYint, iEqual);
 		}
+		#endregion
 
+		//////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////
 
-
-		#region GetRefContent
-
-		private RefContent GetRefContent(int x, int y)
+		private void ShiftCodePointer(int shift)
 		{
-			//смещение условного перехода 2-пусто  3-стена  4-органика 5-бот 6-родня
+			OldPointer = Pointer;
+			Pointer = (Pointer + shift) % Data.GenomLength;
+		}
 
-			// Если координаты попадают за экран то вернуть RefContent.Edge
-			if (y < 0 || y >= Data.WorldHeight || x < 0 || x >= Data.WorldWidth) return RefContent.Edge;
+		private (int newXint, int newYint) GetCoordinatesByDirectionOnlyDifferent(int dir)
+		{
+			var (deltaXdouble, deltaYdouble) = Dir.Directions1[dir];
 
-			long cont;
-			lock (_busy)
+			var newXint = Dir.Round(Xd + deltaXdouble);
+			var newYint = Dir.Round(Yd + deltaYdouble);
+
+			if (newXint == Xi && newYint == Yi)
 			{
-				Interlocked.Increment(ref COUNTER1);
-				if (COUNTER1 - COUNTER2 > 1)
+				// координаты не изменились. надо шагнуть дальше
+				(deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
+
+				newXint = Dir.Round(Xd + deltaXdouble);
+				newYint = Dir.Round(Yd + deltaYdouble);
+
+				// проверка на изменение координат еще раз. такого не может быть
+				if (newXint == Xi && newYint == Yi)
 				{
+					throw new Exception("if (newXint == _Xi && newYint == _Yi)");
 				}
 
-				cont = Data.World[x, y];
-				if (cont >= 1 && cont <= Data.CurrentNumberOfBots) return RefContentByBotRelativity(cont);
-				Interlocked.Increment(ref COUNTER2);
+				if (newXint - Xi > 1 || newXint - Xi < -1 || newYint - Yi > 1 || newYint - Yi < -1)
+				{
+					throw new Exception("if (newXint - _Xi > 1 || newXint - _Xi < -1 || newYint - _Yi > 1 || newYint - _Yi < -1)");
+				}
 			}
 
-			if (cont < 0 || (cont > 0 && !(cont >= 65500 && cont <= 65504))) throw new Exception("cont = Data.World[x, y];");
-
-			return cont switch
+			// Проверка перехода сквозь экран
+			if (!Data.LeftRightEdge)
 			{
-				0 => RefContent.Free,
-				65500 => RefContent.Grass,
-				65501 => RefContent.Organic,
-				65502 => RefContent.Mineral,
-				65503 => RefContent.Wall,
-				65504 => RefContent.Poison,
-				_ => throw new Exception("return cont switch")
-			};
-		}
+				if (newXint < 0)
+				{
+					newXint += Data.WorldWidth;
+				}
 
-		private (RefContent refContent, long cont) GetRefContentAndCont(int x, int y)
-		{
-			if (y < 0 || y >= Data.WorldHeight || x < 0 || x >= Data.WorldWidth) return (RefContent.Edge, 0);
-
-			var cont = Data.World[x, y];
-
-			return (cont switch
-			{
-				0 => RefContent.Free,
-				65500 => RefContent.Grass,
-				65501 => RefContent.Organic,
-				65502 => RefContent.Mineral,
-				65503 => RefContent.Wall,
-				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots ? RefContentByBotRelativity(cont) : throw new Exception("return cont switch")
-			}, cont);
-		}
-
-
-		private RefContent RefContentByBotRelativity(long cont)
-		{
-			// надо определить родственник ли бот
-
-			return Genom.IsRelative(Data.Bots[cont].Genom)
-				? RefContent.Relative
-				: RefContent.Bot;
-		}
-
-
-		#endregion
-
-		#region GetCellInfo
-		// For Look
-		private RefContent GetCellInfo1(int dir)
-		{
-			// 1. Узнаем координаты клетки на которую надо посмотреть
-			var (_, _, nXi, nYi, _) = GetCoordinatesByDirection(dir, true);
-
-			// 2. Узнаем что находится на этой клетке
-			var refContent = GetRefContent(nXi, nYi);
-
-			// 3. Возвращаем полученную информацию
-			return refContent;
-		}
-
-		// For move
-		private (bool Equal, RefContent refContent, double nXd, double nYd, int nXi, int nYi) GetCellInfo2(int dir)
-		{
-			// 1. Узнаем координаты предполагаемого перемещения
-			var (nXd, nYd, nXi, nYi, iEqual) = GetCoordinatesByDirection(dir, false);
-			//private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirection(int dir, bool onlyDifferent)
-
-			if (iEqual)
-			{
-				return (true, RefContent.Free, nXd, nYd, nXi, nYi);
+				if (newXint >= Data.WorldWidth)
+				{
+					newXint -= Data.WorldWidth;
+				}
 			}
 
-			// 2. Узнаем что находится на этой клетке
-			var refContent = GetRefContent(nXi, nYi);
+			if (!Data.UpDownEdge)
+			{
+				if (newYint < 0)
+				{
+					newYint += Data.WorldHeight;
+				}
 
-			// 3. Возвращаем полученную информацию
-			return (false, refContent, nXd, nYd, nXi, nYi);
+				if (newYint >= Data.WorldHeight)
+				{
+					newYint -= Data.WorldHeight;
+				}
+			}
+
+			return (newXint, newYint);
 		}
 
-		// For eat
-		private (RefContent refContent, int nX, int nY, long cont) GetCellInfo3(int dir)
-		{
-			// 1. Узнаем координаты клетки на которую надо посмотреть
-			var (_, _, nXi, nYi, _) = GetCoordinatesByDirection(dir, true);
-
-			// 2. Узнаем что находится на этой клетке
-			var (refContent, cont) = GetRefContentAndCont(nXi, nYi);
-
-			// 3. Возвращаем полученную информацию
-			return (refContent, nXi, nYi, cont);
-		}
-		#endregion
-
+		//private bool IdentifyRelativity(long cont)
+		//{
+		//	return Genom.IsRelative(Data.Bots[cont].Genom);
+		//}
 
 		#region Direction
 		private int GetDirAbsolute()
@@ -874,28 +743,28 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		private async Task<bool> SetBusy()
-		{
-			try
-			{
-				await _semaphore.WaitAsync();
-			}
-			catch
-			{
-				ReleaseBusy();
-				return false;
-			}
-			return true;
-		}
+		//private async Task<bool> SetBusy()
+		//{
+		//	try
+		//	{
+		//		await _semaphore.WaitAsync();
+		//	}
+		//	catch
+		//	{
+		//		ReleaseBusy();
+		//		return false;
+		//	}
+		//	return true;
+		//}
 
-		private void ReleaseBusy()
-		{
-			try
-			{
-				_semaphore.Release();
-			}
-			catch { }
-		}
+		//private void ReleaseBusy()
+		//{
+		//	try
+		//	{
+		//		_semaphore.Release();
+		//	}
+		//	catch { }
+		//}
 
 		//private bool TrySetBusyMode()
 		//{
