@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -78,9 +79,11 @@ namespace WindowsFormsApp1.Static
 
 		public static void Death()
 		{
-			Parallel.For(0, (int)Data.NumberOfBotDeath, DeathBot);
+			Parallel.For(0, (int)Data.NumberOfBotDeath + 1, DeathBot);
 
-			for (var i = 0; i < (int)Data.NumberOfBotDeath; i++)
+			//Func.CheckWorld2();
+
+			for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
 			{
 				var index = Data.BotDeath[i].Index;
 
@@ -98,6 +101,8 @@ namespace WindowsFormsApp1.Static
 					Data.Bots[index] = lastBot;
 					lastBot.Index = index;
 					Data.World[lastBot.Xi, lastBot.Yi] = index;
+
+					//Func.CheckWorld2();
 					//Func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
 					//после этого ссылки на текущего бота нигде не останется и он должен будет уничтожен GC
 
@@ -108,20 +113,229 @@ namespace WindowsFormsApp1.Static
 				Interlocked.Decrement(ref Data.CurrentNumberOfBots);
 			}
 
+			//Func.CheckWorld2();
+
 			Data.DeathCnt += Data.NumberOfBotDeath + 1;
 
 			Data.NumberOfBotDeath = -1;
+		}
+
+		//public static bool CheckWorld()
+		//{
+		//	var res = true;
+
+		//	for (var x = 0; x < Data.WorldWidth; x++)
+		//	{
+		//		for (var y = 0; y < Data.WorldHeight; y++)
+		//		{
+		//			var cont = Data.World[x, y];
+		//			var step = Data.CurrentStep;
+		//			if (cont > Data.CurrentNumberOfBots && Data.World[x, y] != 65500)
+		//			{
+		//				res = false;
+		//			}
+		//		}
+		//	}
+
+		//	return res;
+		//}
+
+		//public static (int Cnt, List<(int, int)> Lst) CheckWorld(long cont)
+		//{
+		//	var cnt = 0;
+		//	var lst = new List<(int, int)>();
+
+		//	for (var x = 0; x < Data.WorldWidth; x++)
+		//	{
+		//		for (var y = 0; y < Data.WorldHeight; y++)
+		//		{
+		//			var step = Data.CurrentStep;
+		//			if (cont == Data.World[x, y])
+		//			{
+		//				cnt++;
+		//				lst.Add((x, y));
+		//			}
+		//		}
+		//	}
+
+		//	return (cnt, lst);
+		//}
+
+
+		public class Asd
+		{
+			public int Cnt;
+			public List<long> Nums;
+			public List<(int X, int Y)> Lst;
+		}
+
+		public static bool CheckWorld2(long botindex, long botnum, int botx, int boty)
+		{
+			var dct = new Dictionary<long, Asd>();
+
+			for (var x = 0; x < Data.WorldWidth; x++)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+					var cont = Data.World[x, y];
+
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (dct.ContainsKey(cont))
+						{
+							// а осталась ли первая точка? проверить. может просто произошло перемещение
+							if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+							{
+								dct[cont].Lst[0] = (x, y);
+								dct[cont].Nums[0] = Data.Bots[cont].Num;
+							}
+							else
+							{
+								dct[cont].Cnt++;
+								dct[cont].Lst.Add((x, y));
+								dct[cont].Nums.Add(Data.Bots[cont].Num);
+							}
+						}
+						else
+						{
+							dct.Add(cont, new Asd
+							{
+								Cnt = 1,
+								Lst = new List<(int, int)> { (x, y) },
+								Nums = new List<long> { Data.Bots[cont].Num }
+							});
+						}
+					}
+				}
+			}
+
+			if (dct.Count(d => d.Value.Cnt > 1) > 0)
+			{
+				var conts = dct.Where(d => d.Value.Cnt > 1);
+				var contscnt = dct.Count(d => d.Value.Cnt > 1);
+				var cont1 = conts.First();
+				var cont1idx = cont1.Key;
+				var cont1cnt = cont1.Value.Cnt;
+				var cont1lst = cont1.Value.Lst;
+				var cont1nums = cont1.Value.Nums;
+				var st = Data.CurrentStep;
+				var numb = Data.CurrentNumberOfBots;
+				 return false;
+			}
+
+			return true;
+		}
+
+		public static bool CheckWorld2()
+		{
+			var dct = new Dictionary<long, Asd>();
+
+			for (var x = 0; x < Data.WorldWidth; x++)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+					var cont = Data.World[x, y];
+
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (dct.ContainsKey(cont))
+						{
+							// а осталась ли первая точка? проверить. может просто произошло перемещение
+							if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+							{
+								dct[cont].Lst[0] = (x, y);
+								dct[cont].Nums[0] = Data.Bots[cont].Num;
+							}
+							else
+							{
+								dct[cont].Cnt++;
+								dct[cont].Lst.Add((x, y));
+								dct[cont].Nums.Add(Data.Bots[cont].Num);
+							}
+						}
+						else
+						{
+							dct.Add(cont, new Asd
+							{
+								Cnt = 1,
+								Lst = new List<(int, int)> { (x, y) },
+								Nums = new List<long> { Data.Bots[cont].Num }
+							});
+						}
+
+					}
+				}
+			}
+
+			if (dct.Count(d => d.Value.Cnt > 1) > 0)
+			{
+				var conts = dct.Where(d => d.Value.Cnt > 1);
+				var contscnt = dct.Count(d => d.Value.Cnt > 1);
+				var cont1 = conts.First();
+				var cont1idx = cont1.Key;
+				var cont1cnt = cont1.Value.Cnt;
+				var cont1lst = cont1.Value.Lst;
+				var cont1nums = cont1.Value.Nums;
+				var st = Data.CurrentStep;
+				var numb = Data.CurrentNumberOfBots;
+				return false;
+			}
+
+			return true;
+		}
+
+		public static bool CheckWorld3()
+		{
+			var cnt = 0;
+			long sum = 0;
+			for (var x = 0; x < Data.WorldWidth; x++)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+					var cont = Data.World[x, y];
+
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						sum += cont;
+						cnt++;
+					}
+				}
+			}
+
+			if (cnt != Data.CurrentNumberOfBots)
+			{
+				var st = Data.CurrentStep;
+				var fcd = Data.BotDeath;
+				if (Data.CurrentNumberOfBots - cnt == 1) 
+				{
+					var ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
+					var bttt = Data.Bots[ttt];
+					var log = bttt.Log.GetLog();
+					var contttt = Data.World[bttt.Xi, bttt.Yi];
+				}
+				var numberOfBotDeath = Data.NumberOfBotDeath;
+				return false;
+			}
+
+			return true;
 		}
 
 		private static void DeathBot(int index)
 		{
 			var bot = Data.BotDeath[index];
 
+			//Func.CheckWorld2();
+
 			lock (_busyWorld)
 			{
+				if (Data.World[bot.Xi, bot.Yi] != bot.Index)
+				{
+					Data.World[bot.Xi, bot.Yi] = 2;
+				}
 				Data.World[bot.Xi, bot.Yi] = 0;
 			}
 
+			//Func.CheckWorld2();
 
 			if (Data.DrawType == DrawType.OnlyChangedCells)
 			{
@@ -134,7 +348,7 @@ namespace WindowsFormsApp1.Static
 
 		public static void Reproduction()
 		{
-			Parallel.For(0, (int)Data.NumberOfBotReproduction, ReproductionBot);
+			Parallel.For(0, (int)Data.NumberOfBotReproduction + 1, ReproductionBot);
 
 			Data.NumberOfBotReproduction = -1;
 		}

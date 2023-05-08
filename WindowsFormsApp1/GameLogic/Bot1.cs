@@ -43,6 +43,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int OldPointer;
 
 		public CodeHistory Hist;
+		public BotLog Log;
 
 		public double Xd;
 		public double Yd;
@@ -69,11 +70,12 @@ namespace WindowsFormsApp1.GameLogic
 		public long Index;         // Индекс бота (может меняться)
 		public int Direction;         // Направление бота
 		public int Age;
+		public long Num;         // Номер бота (остается постоянным)
 
 		private int _en;
-		private long _num;         // Номер бота (остается постоянным)
 		private int _size;
 		private bool _insertedToDeathList;
+		//private bool _insertedToReproductionList;
 
 
 
@@ -83,9 +85,10 @@ namespace WindowsFormsApp1.GameLogic
 			OldPointer = pointer;
 			this.Genom = genom;
 			Hist = new CodeHistory();
+			Log = new BotLog();
 
 			Direction = dir;
-			_num = botNumber;
+			Num = botNumber;
 			Index = botIndex;
 			Energy = en;
 			Age = 0;
@@ -96,6 +99,7 @@ namespace WindowsFormsApp1.GameLogic
 			Yi = y;
 
 			_insertedToDeathList = false;
+			Log.AddLog("bot was born");
 		}
 
 		public void RefreshColor()
@@ -141,13 +145,17 @@ namespace WindowsFormsApp1.GameLogic
 			int shift = 0;
 			bool stepComplete = false;
 			int cntJump = 0;
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			//Death
 			if (Energy <= 0)
 			{
 				ToDeathList();
+				Log.AddLog("bot inserted to DeathList 1");
 				return;
 			}
+
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 
 			Hist.BeginNewStep();
@@ -214,18 +222,26 @@ namespace WindowsFormsApp1.GameLogic
 			}
 
 
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
+
+
 			//Death
 			if (Energy <= 0)
 			{
 				ToDeathList();
+				Log.AddLog("bot inserted to DeathList 2");
 				return;
 			}
+
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			//Reproduction
 			if (CanReproduct())
 			{
 				ToReproductionList();
 			}
+
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			// 0-7		движение
 			// 8-15		схватить еду или нейтрализовать яд
@@ -332,6 +348,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 				}
 			}
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			if (cont == 65500)  //Grass
 			{
@@ -355,12 +372,14 @@ namespace WindowsFormsApp1.GameLogic
 						: RefContent.Bot
 					: throw new Exception("return cont switch")
 			};
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 
 			if (refContent == RefContent.Bot || refContent == RefContent.Relative)  //Bot || Relative
 			{
 				EatBot(cont);
 			}
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			return ((int)refContent, true);
 		}
@@ -389,6 +408,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				energyCanEat = eatedBot.Energy > Data.BiteEnergy ? Data.BiteEnergy : eatedBot.Energy;
 				eatedBot.Energy -= energyCanEat;
+				eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
 			}
 
 			Energy += energyCanEat;
@@ -396,6 +416,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (eatedBot.Energy <= 0)
 			{
 				eatedBot.ToDeathList();
+				eatedBot.Log.AddLog("bot was bited anв inserted to DeathList");
 			}
 		}
 
@@ -453,6 +474,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private (int shift, bool stepComplete) Step(int dir)
 		{
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
+
 			// Алгоритм:
 			// 1. Узнаем координаты предполагаемого перемещения
 			var (nXd, nYd, nXi, nYi, iEqual) = GetCoordinatesByDirectionForMove(dir);
@@ -480,6 +503,8 @@ namespace WindowsFormsApp1.GameLogic
 					if (Data.World[nXi, nYi] == 0)
 					{
 						// ПЕРЕМЕЩЕНИЕ A
+						Data.World[Xi, Yi] = 0;
+						//Thread.MemoryBarrier();
 						Data.World[nXi, nYi] = Index;
 						cont = 0;
 					}
@@ -489,20 +514,28 @@ namespace WindowsFormsApp1.GameLogic
 			if (cont == 0)  
 			{
 				// ПЕРЕМЕЩЕНИЕ B
+
 				if (Data.DrawType == DrawType.OnlyChangedCells) 
 				{
 					Func.FixChangeCell(Xi, Yi, null);
 					Func.FixChangeCell(nXi, nYi, Color);
 				}
-				
+
+				Log.AddLog($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
+
 				Xd = nXd;
 				Yd = nYd;
 				Xi = nXi;
 				Yi = nYi;
 
-				Data.World[Xi, Yi] = 0;
+				//Func.CheckWorld2(Index, Num, Xi, Yi);
+
+
 				return ((int)RefContent.Free, true);
 			}
+
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
+
 
 			cont = Data.World[nXi, nYi];
 			var refContent = cont switch
@@ -520,6 +553,7 @@ namespace WindowsFormsApp1.GameLogic
 					: throw new Exception("return cont switch")
 			};
 
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			return ((int)refContent, true);
 		}
 
@@ -659,7 +693,7 @@ namespace WindowsFormsApp1.GameLogic
 			var sb = new StringBuilder();
 
 			sb.AppendLine($"Age: {Age}");
-			sb.AppendLine($"Num: {_num}");
+			sb.AppendLine($"Num: {Num}");
 			sb.AppendLine($"Index: {Index}");
 
 			sb.AppendLine($"Energy: {Energy}");
