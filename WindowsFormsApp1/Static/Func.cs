@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.PerformanceData;
 using System.Drawing;
@@ -79,28 +80,72 @@ namespace WindowsFormsApp1.Static
 
 		public static void Death()
 		{
+			SearchDouble();
+			CheckIndex();
+
 			Parallel.For(0, (int)Data.NumberOfBotDeath + 1, DeathBot);
 
 			//Func.CheckWorld2();
+			SearchDouble();
+			CheckIndex();
 
-			for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
+			int maxdeathindex;
+			long maxworldindex;
+			while (true)
 			{
-				var index = Data.BotDeath[i].Index;
+				maxdeathindex = -1;
+				maxworldindex = -1;
+				// Выбрать из масива Data.BotDeath[] бота с максимальным world индексом
+				for (var i = 0; i <= Data.NumberOfBotDeath; i++)
+				{
+					var worldindex = Data.BotDeath[i] == null ? -1 : Data.BotDeath[i].Index;
 
-				if (index > Data.CurrentNumberOfBots)
+					if (worldindex > maxworldindex)
+					{
+						maxdeathindex = i;
+						maxworldindex = worldindex;
+					}
+				}
+
+
+				// все обработаны
+				if (maxdeathindex == -1) break;
+
+				Data.BotDeath[maxdeathindex] = null;
+
+				if (maxworldindex > Data.CurrentNumberOfBots)
 				{
 					throw new Exception("if (_ind > Data.CurrentBotsNumber)");
 				}
 
-				if (index < Data.CurrentNumberOfBots)
+				if (maxworldindex < Data.CurrentNumberOfBots)
 				{
 					// Перенос последнего бота в освободившееся отверстие
 					// надо его убрать из массива ботов, переставив последнего бота на его место
 					// Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
+					for (var x = 0; x < Data.WorldWidth; x++)
+					{
+						for (var y = 0; y < Data.WorldHeight; y++)
+						{
+							var cont = Data.World[x, y];
+							if (cont == maxworldindex)
+							{
+								var ls = new List<int>();
+								for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
+								{
+									var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
+									ls.Add(ind);
+								}
+							}
+						}
+					}
+
 					var lastBot = Data.Bots[Data.CurrentNumberOfBots];
-					Data.Bots[index] = lastBot;
-					lastBot.Index = index;
-					Data.World[lastBot.Xi, lastBot.Yi] = index;
+					var lastIndex = Data.Bots[Data.CurrentNumberOfBots].Index;
+					Data.Bots[maxworldindex] = lastBot;
+					lastBot.Index = maxworldindex;
+					lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworldindex}");
+					Data.World[lastBot.Xi, lastBot.Yi] = maxworldindex;
 
 					//Func.CheckWorld2();
 					//Func.ChangeCell(P.X, P.Y,  - делать не надо так как по этим координатам ничего не произошло, бот по этим координатам каким был таким и остался, только изменился индекс в двух массивах Bots и World
@@ -113,12 +158,46 @@ namespace WindowsFormsApp1.Static
 				Interlocked.Decrement(ref Data.CurrentNumberOfBots);
 			}
 
+
+			CheckIndex();
+			SearchDouble();
 			//Func.CheckWorld2();
 
 			Data.DeathCnt += Data.NumberOfBotDeath + 1;
 
 			Data.NumberOfBotDeath = -1;
 		}
+
+		private static void DeathBot(int index)
+		{
+			var bot = Data.BotDeath[index];
+
+			//Func.CheckWorld2();
+
+			lock (_busyWorld)
+			{
+				if (Data.World[bot.Xi, bot.Yi] != bot.Index)
+				{
+					Data.World[bot.Xi, bot.Yi] = 2;
+				}
+				Data.World[bot.Xi, bot.Yi] = 0;
+
+				if (Data.World[bot.Xi, bot.Yi] != 0)
+				{
+					Data.World[bot.Xi, bot.Yi] = 2;
+				}
+			}
+
+			//Func.CheckWorld2();
+
+			if (Data.DrawType == DrawType.OnlyChangedCells)
+			{
+				FixChangeCell(bot.Xi, bot.Yi, null); // при следующей отрисовке бот стерется с экрана
+			}
+
+			bot.Genom.RemoveBot(bot.Age);
+		}
+
 
 		//public static bool CheckWorld()
 		//{
@@ -220,7 +299,7 @@ namespace WindowsFormsApp1.Static
 				var cont1nums = cont1.Value.Nums;
 				var st = Data.CurrentStep;
 				var numb = Data.CurrentNumberOfBots;
-				 return false;
+				return false;
 			}
 
 			return true;
@@ -302,53 +381,112 @@ namespace WindowsFormsApp1.Static
 				}
 			}
 
+			long ttt;
+			Bot1 bttt;
+			List<LogRecord> log;
+			long contttt;
+
 			if (cnt != Data.CurrentNumberOfBots)
 			{
 				var st = Data.CurrentStep;
 				var fcd = Data.BotDeath;
-				if (Data.CurrentNumberOfBots - cnt == 1) 
+
+				if (Data.CurrentNumberOfBots - cnt == 1)
 				{
-					var ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
-					var bttt = Data.Bots[ttt];
-					var log = bttt.Log.GetLog();
-					var contttt = Data.World[bttt.Xi, bttt.Yi];
+					ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
+					bttt = Data.Bots[ttt];
+					log = bttt.Log.GetLog();
+					contttt = Data.World[bttt.Xi, bttt.Yi];
 				}
+
+				if (Data.CurrentNumberOfBots - cnt == -1)
+				{
+					ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
+					bttt = Data.Bots[ttt];
+					log = bttt.Log.GetLog();
+					contttt = Data.World[bttt.Xi, bttt.Yi];
+					SearchDouble();
+
+				}
+
 				var numberOfBotDeath = Data.NumberOfBotDeath;
 				return false;
 			}
 
 			return true;
 		}
-
-		private static void DeathBot(int index)
+		private static void SearchDouble()
 		{
-			var bot = Data.BotDeath[index];
+			var dct = new Dictionary<long, Asd>();
 
-			//Func.CheckWorld2();
-
-			lock (_busyWorld)
+			for (var x = 0; x < Data.WorldWidth; x++)
 			{
-				if (Data.World[bot.Xi, bot.Yi] != bot.Index)
+				for (var y = 0; y < Data.WorldHeight; y++)
 				{
-					Data.World[bot.Xi, bot.Yi] = 2;
+					var cont = Data.World[x, y];
+
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (dct.ContainsKey(cont))
+						{
+							// а осталась ли первая точка? проверить. может просто произошло перемещение
+							if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+							{
+								dct[cont].Lst[0] = (x, y);
+								dct[cont].Nums[0] = Data.Bots[cont].Num;
+							}
+							else
+							{
+								dct[cont].Cnt++;
+								dct[cont].Lst.Add((x, y));
+								dct[cont].Nums.Add(Data.Bots[cont].Num);
+							}
+						}
+						else
+						{
+							dct.Add(cont, new Asd
+							{
+								Cnt = 1,
+								Lst = new List<(int, int)> { (x, y) },
+								Nums = new List<long> { Data.Bots[cont].Num }
+							});
+						}
+
+					}
 				}
-				Data.World[bot.Xi, bot.Yi] = 0;
 			}
 
-			//Func.CheckWorld2();
-
-			if (Data.DrawType == DrawType.OnlyChangedCells)
+			if (dct.Count(d => d.Value.Cnt > 1) > 0)
 			{
-				FixChangeCell(bot.Xi, bot.Yi, null); // при следующей отрисовке бот стерется с экрана
+				var conts = dct.Where(d => d.Value.Cnt > 1);
+				var contscnt = dct.Count(d => d.Value.Cnt > 1);
+				var cont1 = conts.First();
+				var cont1idx = cont1.Key;
+				var cont1cnt = cont1.Value.Cnt;
+				var cont1lst = cont1.Value.Lst;
+				var cont1nums = cont1.Value.Nums;
+				var stp = Data.CurrentStep;
+				var numb = Data.CurrentNumberOfBots;
 			}
-
-			bot.Genom.RemoveBot(bot.Age);
 		}
 
+		private static void CheckIndex()
+		{
+			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			{
+				if (Data.Bots[i].Index != i)
+				{ 
+				}
+			}
+		}
 
 		public static void Reproduction()
 		{
+			SearchDouble();
+
 			Parallel.For(0, (int)Data.NumberOfBotReproduction + 1, ReproductionBot);
+
+			SearchDouble();
 
 			Data.NumberOfBotReproduction = -1;
 		}

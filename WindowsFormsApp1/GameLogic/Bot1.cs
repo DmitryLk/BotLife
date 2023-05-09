@@ -99,7 +99,7 @@ namespace WindowsFormsApp1.GameLogic
 			Yi = y;
 
 			_insertedToDeathList = false;
-			Log.AddLog("bot was born");
+			Log.AddLog($"bot was born. index:{Index}");
 		}
 
 		public void RefreshColor()
@@ -293,9 +293,27 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (!_insertedToDeathList)
 					{
+
 						_insertedToDeathList = true;
 						var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
 						Data.BotDeath[num] = this;
+
+						if (Data.NumberOfBotDeath > 0)
+						{
+							var st = Data.CurrentStep;
+							for (var i = 0; i <= Data.NumberOfBotDeath; i++)
+							{
+								for (var j = 0; j <= Data.NumberOfBotDeath; j++)
+								{
+									if (i != j)
+									{
+										if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
+										{
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -511,11 +529,11 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-			if (cont == 0)  
+			if (cont == 0)
 			{
 				// ПЕРЕМЕЩЕНИЕ B
 
-				if (Data.DrawType == DrawType.OnlyChangedCells) 
+				if (Data.DrawType == DrawType.OnlyChangedCells)
 				{
 					Func.FixChangeCell(Xi, Yi, null);
 					Func.FixChangeCell(nXi, nYi, Color);
