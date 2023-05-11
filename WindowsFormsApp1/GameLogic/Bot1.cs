@@ -43,7 +43,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int OldPointer;
 
 		public CodeHistory Hist;
-		public BotLog Log;
+		//public BotLog Log;
 
 		public double Xd;
 		public double Yd;
@@ -85,7 +85,7 @@ namespace WindowsFormsApp1.GameLogic
 			OldPointer = pointer;
 			this.Genom = genom;
 			Hist = new CodeHistory();
-			Log = new BotLog();
+			//Log = new BotLog();
 
 			Direction = dir;
 			Num = botNumber;
@@ -99,7 +99,7 @@ namespace WindowsFormsApp1.GameLogic
 			Yi = y;
 
 			_insertedToDeathList = false;
-			Log.AddLog($"bot was born. index:{Index}");
+			//Log.AddLog($"bot was born. index:{Index}");
 		}
 
 		public void RefreshColor()
@@ -151,7 +151,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (Energy <= 0)
 			{
 				ToDeathList();
-				Log.AddLog("bot inserted to DeathList 1");
+				//Log.AddLog("bot inserted to DeathList 1");
 				return;
 			}
 
@@ -229,7 +229,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (Energy <= 0)
 			{
 				ToDeathList();
-				Log.AddLog("bot inserted to DeathList 2");
+				//Log.AddLog("bot inserted to DeathList 2");
 				return;
 			}
 
@@ -298,22 +298,22 @@ namespace WindowsFormsApp1.GameLogic
 						var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
 						Data.BotDeath[num] = this;
 
-						if (Data.NumberOfBotDeath > 0)
-						{
-							var st = Data.CurrentStep;
-							for (var i = 0; i <= Data.NumberOfBotDeath; i++)
-							{
-								for (var j = 0; j <= Data.NumberOfBotDeath; j++)
-								{
-									if (i != j)
-									{
-										if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
-										{
-										}
-									}
-								}
-							}
-						}
+						//if (Data.NumberOfBotDeath > 0)
+						//{
+						//	var st = Data.CurrentStep;
+						//	for (var i = 0; i <= Data.NumberOfBotDeath; i++)
+						//	{
+						//		for (var j = 0; j <= Data.NumberOfBotDeath; j++)
+						//		{
+						//			if (i != j)
+						//			{
+						//				if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
+						//				{
+						//				}
+						//			}
+						//		}
+						//	}
+						//}
 					}
 				}
 			}
@@ -426,7 +426,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				energyCanEat = eatedBot.Energy > Data.BiteEnergy ? Data.BiteEnergy : eatedBot.Energy;
 				eatedBot.Energy -= energyCanEat;
-				eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
+				//eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
 			}
 
 			Energy += energyCanEat;
@@ -434,7 +434,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (eatedBot.Energy <= 0)
 			{
 				eatedBot.ToDeathList();
-				eatedBot.Log.AddLog("bot was bited anв inserted to DeathList");
+				//eatedBot.Log.AddLog("bot was bited anв inserted to DeathList");
 			}
 		}
 
@@ -539,7 +539,7 @@ namespace WindowsFormsApp1.GameLogic
 					Func.FixChangeCell(nXi, nYi, Color);
 				}
 
-				Log.AddLog($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
+				//Log.AddLog($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
 
 				Xd = nXd;
 				Yd = nYd;

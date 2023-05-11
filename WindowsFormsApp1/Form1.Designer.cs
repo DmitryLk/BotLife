@@ -60,7 +60,7 @@
 			this.textBox1.Multiline = true;
 			this.textBox1.Name = "textBox1";
 			this.textBox1.ReadOnly = true;
-			this.textBox1.Size = new System.Drawing.Size(190, 111);
+			this.textBox1.Size = new System.Drawing.Size(190, 220);
 			this.textBox1.TabIndex = 4;
 			this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
@@ -97,11 +97,11 @@
 			// textBox3
 			// 
 			this.textBox3.Enabled = false;
-			this.textBox3.Location = new System.Drawing.Point(1022, 279);
+			this.textBox3.Location = new System.Drawing.Point(1022, 388);
 			this.textBox3.Multiline = true;
 			this.textBox3.Name = "textBox3";
 			this.textBox3.ReadOnly = true;
-			this.textBox3.Size = new System.Drawing.Size(190, 707);
+			this.textBox3.Size = new System.Drawing.Size(190, 598);
 			this.textBox3.TabIndex = 12;
 			this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
 			// 

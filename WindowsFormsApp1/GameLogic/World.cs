@@ -35,8 +35,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Step()
 		{
-			Func.CheckWorld3();
-			Func.CheckWorld2();
+			//Func.CheckWorld3();
+			//Func.CheckWorld2();
 
 			Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
 			{
@@ -44,8 +44,8 @@ namespace WindowsFormsApp1.GameLogic
 				Data.Bots[i].Step();
 			});
 
-			Func.CheckWorld3();
-			Func.CheckWorld2();
+			//Func.CheckWorld3();
+			//Func.CheckWorld2();
 
 			if (Data.NumberOfBotDeath > -1)
 			{
@@ -53,15 +53,15 @@ namespace WindowsFormsApp1.GameLogic
 				Func.Death();
 			}
 
-			Func.CheckWorld3();
+			//Func.CheckWorld3();
 
 			if (Data.NumberOfBotReproduction > -1)
 			{
 				Func.Reproduction();
 			}
 
-			Func.CheckWorld3();
-			Func.CheckWorld2();
+			//Func.CheckWorld3();
+			//Func.CheckWorld2();
 
 			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
 			//{
@@ -87,7 +87,7 @@ namespace WindowsFormsApp1.GameLogic
 					break;
 				}
 			}
-			Func.CheckWorld3();
+			//Func.CheckWorld3();
 		}
 	}
 }

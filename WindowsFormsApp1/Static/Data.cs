@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Net.Mail;
 using System.Reflection;
@@ -188,6 +189,7 @@ namespace WindowsFormsApp1.Static
 		public static string GetText(double fps)
 		{
 			var sb = new StringBuilder();
+			var f = new NumberFormatInfo { NumberGroupSeparator = "_" };
 
 			sb.AppendLine($"Fps: {fps.ToString("#")}");
 			sb.AppendLine($"Step: {CurrentStep}");
@@ -197,7 +199,7 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"deathCnt: {DeathCnt}");
 			sb.AppendLine($"reproductionCnt: {ReproductionCnt}");
 			sb.AppendLine($"mutationCnt: {MutationCnt}");
-			sb.AppendLine($"TotalEnergy: {TotalEnergy}");
+			sb.AppendLine($"TotalEnergy: {TotalEnergy.ToString("n", f)}");
 
 			var te = 0;
 			for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
@@ -205,7 +207,7 @@ namespace WindowsFormsApp1.Static
 				te += Data.Bots[botNumber].Energy;
 			}
 
-			sb.AppendLine($"Actual total energy:{te}");
+			sb.AppendLine($"ActualEnergy:{te.ToString("n", f)}");
 
 			return sb.ToString();
 		}

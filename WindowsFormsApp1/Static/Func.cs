@@ -80,14 +80,14 @@ namespace WindowsFormsApp1.Static
 
 		public static void Death()
 		{
-			SearchDouble();
-			CheckIndex();
+			//SearchDouble();
+			//CheckIndex();
 
 			Parallel.For(0, (int)Data.NumberOfBotDeath + 1, DeathBot);
 
 			//Func.CheckWorld2();
-			SearchDouble();
-			CheckIndex();
+			//SearchDouble();
+			//CheckIndex();
 
 			int maxdeathindex;
 			long maxworldindex;
@@ -144,7 +144,7 @@ namespace WindowsFormsApp1.Static
 					var lastIndex = Data.Bots[Data.CurrentNumberOfBots].Index;
 					Data.Bots[maxworldindex] = lastBot;
 					lastBot.Index = maxworldindex;
-					lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworldindex}");
+					//lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworldindex}");
 					Data.World[lastBot.Xi, lastBot.Yi] = maxworldindex;
 
 					//Func.CheckWorld2();
@@ -159,8 +159,8 @@ namespace WindowsFormsApp1.Static
 			}
 
 
-			CheckIndex();
-			SearchDouble();
+			//CheckIndex();
+			//SearchDouble();
 			//Func.CheckWorld2();
 
 			Data.DeathCnt += Data.NumberOfBotDeath + 1;
@@ -241,252 +241,252 @@ namespace WindowsFormsApp1.Static
 		//}
 
 
-		public class Asd
-		{
-			public int Cnt;
-			public List<long> Nums;
-			public List<(int X, int Y)> Lst;
-		}
+		//public class Asd
+		//{
+		//	public int Cnt;
+		//	public List<long> Nums;
+		//	public List<(int X, int Y)> Lst;
+		//}
 
-		public static bool CheckWorld2(long botindex, long botnum, int botx, int boty)
-		{
-			var dct = new Dictionary<long, Asd>();
+		//public static bool CheckWorld2(long botindex, long botnum, int botx, int boty)
+		//{
+		//	var dct = new Dictionary<long, Asd>();
 
-			for (var x = 0; x < Data.WorldWidth; x++)
-			{
-				for (var y = 0; y < Data.WorldHeight; y++)
-				{
-					var cont = Data.World[x, y];
+		//	for (var x = 0; x < Data.WorldWidth; x++)
+		//	{
+		//		for (var y = 0; y < Data.WorldHeight; y++)
+		//		{
+		//			var cont = Data.World[x, y];
 
-					if (cont > 0 && (cont < 65000 || cont > 65504))
-					{
-						if (dct.ContainsKey(cont))
-						{
-							// а осталась ли первая точка? проверить. может просто произошло перемещение
-							if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
-							{
-								dct[cont].Lst[0] = (x, y);
-								dct[cont].Nums[0] = Data.Bots[cont].Num;
-							}
-							else
-							{
-								dct[cont].Cnt++;
-								dct[cont].Lst.Add((x, y));
-								dct[cont].Nums.Add(Data.Bots[cont].Num);
-							}
-						}
-						else
-						{
-							dct.Add(cont, new Asd
-							{
-								Cnt = 1,
-								Lst = new List<(int, int)> { (x, y) },
-								Nums = new List<long> { Data.Bots[cont].Num }
-							});
-						}
-					}
-				}
-			}
+		//			if (cont > 0 && (cont < 65000 || cont > 65504))
+		//			{
+		//				if (dct.ContainsKey(cont))
+		//				{
+		//					// а осталась ли первая точка? проверить. может просто произошло перемещение
+		//					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+		//					{
+		//						dct[cont].Lst[0] = (x, y);
+		//						dct[cont].Nums[0] = Data.Bots[cont].Num;
+		//					}
+		//					else
+		//					{
+		//						dct[cont].Cnt++;
+		//						dct[cont].Lst.Add((x, y));
+		//						dct[cont].Nums.Add(Data.Bots[cont].Num);
+		//					}
+		//				}
+		//				else
+		//				{
+		//					dct.Add(cont, new Asd
+		//					{
+		//						Cnt = 1,
+		//						Lst = new List<(int, int)> { (x, y) },
+		//						Nums = new List<long> { Data.Bots[cont].Num }
+		//					});
+		//				}
+		//			}
+		//		}
+		//	}
 
-			if (dct.Count(d => d.Value.Cnt > 1) > 0)
-			{
-				var conts = dct.Where(d => d.Value.Cnt > 1);
-				var contscnt = dct.Count(d => d.Value.Cnt > 1);
-				var cont1 = conts.First();
-				var cont1idx = cont1.Key;
-				var cont1cnt = cont1.Value.Cnt;
-				var cont1lst = cont1.Value.Lst;
-				var cont1nums = cont1.Value.Nums;
-				var st = Data.CurrentStep;
-				var numb = Data.CurrentNumberOfBots;
-				return false;
-			}
+		//	if (dct.Count(d => d.Value.Cnt > 1) > 0)
+		//	{
+		//		var conts = dct.Where(d => d.Value.Cnt > 1);
+		//		var contscnt = dct.Count(d => d.Value.Cnt > 1);
+		//		var cont1 = conts.First();
+		//		var cont1idx = cont1.Key;
+		//		var cont1cnt = cont1.Value.Cnt;
+		//		var cont1lst = cont1.Value.Lst;
+		//		var cont1nums = cont1.Value.Nums;
+		//		var st = Data.CurrentStep;
+		//		var numb = Data.CurrentNumberOfBots;
+		//		return false;
+		//	}
 
-			return true;
-		}
+		//	return true;
+		//}
 
-		public static bool CheckWorld2()
-		{
-			var dct = new Dictionary<long, Asd>();
+		//public static bool CheckWorld2()
+		//{
+		//	var dct = new Dictionary<long, Asd>();
 
-			for (var x = 0; x < Data.WorldWidth; x++)
-			{
-				for (var y = 0; y < Data.WorldHeight; y++)
-				{
-					var cont = Data.World[x, y];
+		//	for (var x = 0; x < Data.WorldWidth; x++)
+		//	{
+		//		for (var y = 0; y < Data.WorldHeight; y++)
+		//		{
+		//			var cont = Data.World[x, y];
 
-					if (cont > 0 && (cont < 65000 || cont > 65504))
-					{
-						if (dct.ContainsKey(cont))
-						{
-							// а осталась ли первая точка? проверить. может просто произошло перемещение
-							if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
-							{
-								dct[cont].Lst[0] = (x, y);
-								dct[cont].Nums[0] = Data.Bots[cont].Num;
-							}
-							else
-							{
-								dct[cont].Cnt++;
-								dct[cont].Lst.Add((x, y));
-								dct[cont].Nums.Add(Data.Bots[cont].Num);
-							}
-						}
-						else
-						{
-							dct.Add(cont, new Asd
-							{
-								Cnt = 1,
-								Lst = new List<(int, int)> { (x, y) },
-								Nums = new List<long> { Data.Bots[cont].Num }
-							});
-						}
+		//			if (cont > 0 && (cont < 65000 || cont > 65504))
+		//			{
+		//				if (dct.ContainsKey(cont))
+		//				{
+		//					// а осталась ли первая точка? проверить. может просто произошло перемещение
+		//					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+		//					{
+		//						dct[cont].Lst[0] = (x, y);
+		//						dct[cont].Nums[0] = Data.Bots[cont].Num;
+		//					}
+		//					else
+		//					{
+		//						dct[cont].Cnt++;
+		//						dct[cont].Lst.Add((x, y));
+		//						dct[cont].Nums.Add(Data.Bots[cont].Num);
+		//					}
+		//				}
+		//				else
+		//				{
+		//					dct.Add(cont, new Asd
+		//					{
+		//						Cnt = 1,
+		//						Lst = new List<(int, int)> { (x, y) },
+		//						Nums = new List<long> { Data.Bots[cont].Num }
+		//					});
+		//				}
 
-					}
-				}
-			}
+		//			}
+		//		}
+		//	}
 
-			if (dct.Count(d => d.Value.Cnt > 1) > 0)
-			{
-				var conts = dct.Where(d => d.Value.Cnt > 1);
-				var contscnt = dct.Count(d => d.Value.Cnt > 1);
-				var cont1 = conts.First();
-				var cont1idx = cont1.Key;
-				var cont1cnt = cont1.Value.Cnt;
-				var cont1lst = cont1.Value.Lst;
-				var cont1nums = cont1.Value.Nums;
-				var st = Data.CurrentStep;
-				var numb = Data.CurrentNumberOfBots;
-				return false;
-			}
+		//	if (dct.Count(d => d.Value.Cnt > 1) > 0)
+		//	{
+		//		var conts = dct.Where(d => d.Value.Cnt > 1);
+		//		var contscnt = dct.Count(d => d.Value.Cnt > 1);
+		//		var cont1 = conts.First();
+		//		var cont1idx = cont1.Key;
+		//		var cont1cnt = cont1.Value.Cnt;
+		//		var cont1lst = cont1.Value.Lst;
+		//		var cont1nums = cont1.Value.Nums;
+		//		var st = Data.CurrentStep;
+		//		var numb = Data.CurrentNumberOfBots;
+		//		return false;
+		//	}
 
-			return true;
-		}
+		//	return true;
+		//}
 
-		public static bool CheckWorld3()
-		{
-			var cnt = 0;
-			long sum = 0;
-			for (var x = 0; x < Data.WorldWidth; x++)
-			{
-				for (var y = 0; y < Data.WorldHeight; y++)
-				{
-					var cont = Data.World[x, y];
+		//public static bool CheckWorld3()
+		//{
+		//	var cnt = 0;
+		//	long sum = 0;
+		//	for (var x = 0; x < Data.WorldWidth; x++)
+		//	{
+		//		for (var y = 0; y < Data.WorldHeight; y++)
+		//		{
+		//			var cont = Data.World[x, y];
 
-					if (cont > 0 && (cont < 65000 || cont > 65504))
-					{
-						sum += cont;
-						cnt++;
-					}
-				}
-			}
+		//			if (cont > 0 && (cont < 65000 || cont > 65504))
+		//			{
+		//				sum += cont;
+		//				cnt++;
+		//			}
+		//		}
+		//	}
 
-			long ttt;
-			Bot1 bttt;
-			List<LogRecord> log;
-			long contttt;
+		//	long ttt;
+		//	Bot1 bttt;
+		//	List<LogRecord> log;
+		//	long contttt;
 
-			if (cnt != Data.CurrentNumberOfBots)
-			{
-				var st = Data.CurrentStep;
-				var fcd = Data.BotDeath;
+		//	if (cnt != Data.CurrentNumberOfBots)
+		//	{
+		//		var st = Data.CurrentStep;
+		//		var fcd = Data.BotDeath;
 
-				if (Data.CurrentNumberOfBots - cnt == 1)
-				{
-					ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
-					bttt = Data.Bots[ttt];
-					log = bttt.Log.GetLog();
-					contttt = Data.World[bttt.Xi, bttt.Yi];
-				}
+		//		if (Data.CurrentNumberOfBots - cnt == 1)
+		//		{
+		//			ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
+		//			bttt = Data.Bots[ttt];
+		//			log = bttt.Log.GetLog();
+		//			contttt = Data.World[bttt.Xi, bttt.Yi];
+		//		}
 
-				if (Data.CurrentNumberOfBots - cnt == -1)
-				{
-					ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
-					bttt = Data.Bots[ttt];
-					log = bttt.Log.GetLog();
-					contttt = Data.World[bttt.Xi, bttt.Yi];
-					SearchDouble();
+		//		if (Data.CurrentNumberOfBots - cnt == -1)
+		//		{
+		//			ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
+		//			bttt = Data.Bots[ttt];
+		//			log = bttt.Log.GetLog();
+		//			contttt = Data.World[bttt.Xi, bttt.Yi];
+		//			SearchDouble();
 
-				}
+		//		}
 
-				var numberOfBotDeath = Data.NumberOfBotDeath;
-				return false;
-			}
+		//		var numberOfBotDeath = Data.NumberOfBotDeath;
+		//		return false;
+		//	}
 
-			return true;
-		}
-		private static void SearchDouble()
-		{
-			var dct = new Dictionary<long, Asd>();
+		//	return true;
+		//}
+		//private static void SearchDouble()
+		//{
+		//	var dct = new Dictionary<long, Asd>();
 
-			for (var x = 0; x < Data.WorldWidth; x++)
-			{
-				for (var y = 0; y < Data.WorldHeight; y++)
-				{
-					var cont = Data.World[x, y];
+		//	for (var x = 0; x < Data.WorldWidth; x++)
+		//	{
+		//		for (var y = 0; y < Data.WorldHeight; y++)
+		//		{
+		//			var cont = Data.World[x, y];
 
-					if (cont > 0 && (cont < 65000 || cont > 65504))
-					{
-						if (dct.ContainsKey(cont))
-						{
-							// а осталась ли первая точка? проверить. может просто произошло перемещение
-							if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
-							{
-								dct[cont].Lst[0] = (x, y);
-								dct[cont].Nums[0] = Data.Bots[cont].Num;
-							}
-							else
-							{
-								dct[cont].Cnt++;
-								dct[cont].Lst.Add((x, y));
-								dct[cont].Nums.Add(Data.Bots[cont].Num);
-							}
-						}
-						else
-						{
-							dct.Add(cont, new Asd
-							{
-								Cnt = 1,
-								Lst = new List<(int, int)> { (x, y) },
-								Nums = new List<long> { Data.Bots[cont].Num }
-							});
-						}
+		//			if (cont > 0 && (cont < 65000 || cont > 65504))
+		//			{
+		//				if (dct.ContainsKey(cont))
+		//				{
+		//					// а осталась ли первая точка? проверить. может просто произошло перемещение
+		//					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+		//					{
+		//						dct[cont].Lst[0] = (x, y);
+		//						dct[cont].Nums[0] = Data.Bots[cont].Num;
+		//					}
+		//					else
+		//					{
+		//						dct[cont].Cnt++;
+		//						dct[cont].Lst.Add((x, y));
+		//						dct[cont].Nums.Add(Data.Bots[cont].Num);
+		//					}
+		//				}
+		//				else
+		//				{
+		//					dct.Add(cont, new Asd
+		//					{
+		//						Cnt = 1,
+		//						Lst = new List<(int, int)> { (x, y) },
+		//						Nums = new List<long> { Data.Bots[cont].Num }
+		//					});
+		//				}
 
-					}
-				}
-			}
+		//			}
+		//		}
+		//	}
 
-			if (dct.Count(d => d.Value.Cnt > 1) > 0)
-			{
-				var conts = dct.Where(d => d.Value.Cnt > 1);
-				var contscnt = dct.Count(d => d.Value.Cnt > 1);
-				var cont1 = conts.First();
-				var cont1idx = cont1.Key;
-				var cont1cnt = cont1.Value.Cnt;
-				var cont1lst = cont1.Value.Lst;
-				var cont1nums = cont1.Value.Nums;
-				var stp = Data.CurrentStep;
-				var numb = Data.CurrentNumberOfBots;
-			}
-		}
+		//	if (dct.Count(d => d.Value.Cnt > 1) > 0)
+		//	{
+		//		var conts = dct.Where(d => d.Value.Cnt > 1);
+		//		var contscnt = dct.Count(d => d.Value.Cnt > 1);
+		//		var cont1 = conts.First();
+		//		var cont1idx = cont1.Key;
+		//		var cont1cnt = cont1.Value.Cnt;
+		//		var cont1lst = cont1.Value.Lst;
+		//		var cont1nums = cont1.Value.Nums;
+		//		var stp = Data.CurrentStep;
+		//		var numb = Data.CurrentNumberOfBots;
+		//	}
+		//}
 
-		private static void CheckIndex()
-		{
-			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-			{
-				if (Data.Bots[i].Index != i)
-				{ 
-				}
-			}
-		}
+		//private static void CheckIndex()
+		//{
+		//	for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+		//	{
+		//		if (Data.Bots[i].Index != i)
+		//		{ 
+		//		}
+		//	}
+		//}
 
 		public static void Reproduction()
 		{
-			SearchDouble();
+			//SearchDouble();
 
 			Parallel.For(0, (int)Data.NumberOfBotReproduction + 1, ReproductionBot);
 
-			SearchDouble();
+			//SearchDouble();
 
 			Data.NumberOfBotReproduction = -1;
 		}
