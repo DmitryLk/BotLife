@@ -43,6 +43,7 @@ namespace WindowsFormsApp1.GameLogic
 				if (Data.Bots[i] == null) throw new Exception("Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>");
 				Data.Bots[i].Step();
 			});
+            Test.NextInterval(10, "PARALLEL");
 
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();
@@ -52,6 +53,7 @@ namespace WindowsFormsApp1.GameLogic
 				// МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
 				Func.Death();
 			}
+            Test.NextInterval(11, "death");
 
 			//Func.CheckWorld3();
 
@@ -59,6 +61,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				Func.Reproduction();
 			}
+            Test.NextInterval(12, "reproduction");
 
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();

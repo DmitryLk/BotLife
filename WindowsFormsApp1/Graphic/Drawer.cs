@@ -36,7 +36,8 @@ namespace WindowsFormsApp1.Graphic
 
 			DrawBotsWorld();
 
-			Test.EndBeginInterval(2, 3);
+            Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
+
 
 			if (Data.LensOn)
 			{
@@ -51,7 +52,7 @@ namespace WindowsFormsApp1.Graphic
 
 
 			//await Task.Delay(1);
-			Test.EndBeginInterval(3, 4);
+            Test.NextInterval(5, "PaintFrame();");
 		}
 
 
@@ -65,7 +66,9 @@ namespace WindowsFormsApp1.Graphic
 				case DrawType.OnlyChangedCells:
 					// Рисуем только изменившщиеся ячейки. Одновременно постепенно обнуляем массивы измененных ячеек
 					_PRESENTER.StartNewFrame(Data.LensOn ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-					Test.EndBeginInterval(1, 2);
+                    
+                    Test.NextInterval(3, "RedrawWorld();");
+
 					for (var i = 1; i < Data.NumberOfChangedCells; i++)
 					{
 						var obj = Data.ChangedCells[i];
@@ -80,7 +83,9 @@ namespace WindowsFormsApp1.Graphic
 				case DrawType.AllCells:
 					// Рисуем все ячейки.
 					_PRESENTER.StartNewFrame(BitmapCopyType.EditEmptyArray);
-					Test.EndBeginInterval(1, 2);
+
+                    Test.NextInterval(3, "RedrawWorld();");
+
 					for (var i = 1; i <= Data.CurrentNumberOfBots; i++)
 					{
 						var obj = Data.Bots[i];

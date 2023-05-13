@@ -64,24 +64,18 @@ namespace WindowsFormsApp1.Static
 			return (curdir + code) % NumberOfDirections;
 		}
 
-		public static int GetRandomDirection()
-		{
-			return Func.Rnd.Next(NumberOfDirections);
-		}
+        public static int GetDirectionFromCodeAbsolute(byte code)
+        {
+            //if (code >= 28 && code <= 30)
+            //{
+            //	return GetRandomDirection();
+            //}
+            return code % NumberOfDirections;
+        }
 
 		public static int Round(double val)
 		{
 			return val >= 0 ? (int)(val + 0.5f) : -(int)(0.5f - val);
-		}
-
-
-		public static int GetDirectionFromCodeAbsolute(byte code)
-		{
-			//if (code >= 28 && code <= 30)
-			//{
-			//	return GetRandomDirection();
-			//}
-			return code % NumberOfDirections;
 		}
 
 		public static string GetDirectionStringFromCode(int dir)

@@ -27,7 +27,7 @@ namespace WindowsFormsApp1.GameLogic
 					var genom = Genom.CreateGenom();
 
 					Data.TotalEnergy += Data.SeedBotEnergy;
-					Bot1.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
+					Func.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);
                     Data.CurrentNumberOfBots++;
 				}
             }

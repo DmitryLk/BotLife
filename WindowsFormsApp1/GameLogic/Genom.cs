@@ -57,7 +57,7 @@ namespace WindowsFormsApp1.GameLogic
 			//_parent = parent;
 		}
 
-		public void AddBot()
+		public void IncBot()
 		{
 			Interlocked.Increment(ref _curBots);
 			Interlocked.Increment(ref _allBots);
@@ -125,7 +125,7 @@ namespace WindowsFormsApp1.GameLogic
 				g.PraNum = parent.PraNum;
 				g.PraColor = parent.PraColor;
 				g.Level = parent.Level + 1;
-				Data.MutationCnt++;
+                Interlocked.Increment(ref Data.MutationCnt);
 			}
 
 			GENOMS.TryAdd(g, 1);

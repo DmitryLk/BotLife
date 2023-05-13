@@ -36,13 +36,6 @@ namespace WindowsFormsApp1
 			_WORLD = new World();
 			_DRAWER = new Drawer(presenter, printer);
 			_PRINTER = printer;
-
-			// Подготовка интервалов тестирования
-			Test.InitInterval(0, "BotsAction();");
-			Test.InitInterval(1, "RedrawWorld();");
-			Test.InitInterval(2, "DrawBotOnFrame(bots[botNumber]);");
-			Test.InitInterval(3, "PaintFrame();");
-			Test.InitInterval(4, "PrintInfo();");
 		}
 
 		public async Task Init()
@@ -81,7 +74,7 @@ namespace WindowsFormsApp1
 
 		private async Task Step(DrawMode mode)
 		{
-			Test.BeginInterval(0);
+			Test.NextInterval(1, "PrintInfo();");
 
 			IsDrawTypeChanged();
 			IsBotColorModeChanged();
@@ -89,7 +82,7 @@ namespace WindowsFormsApp1
 
 			await Task.Run(() => _WORLD.Step());
 
-			Test.EndBeginInterval(0, 1);
+			Test.NextInterval(2, "add food");
 
 
 			if (Data.DrawMode == DrawMode.EachStep ||
@@ -99,13 +92,13 @@ namespace WindowsFormsApp1
 			}
 			else
 			{
-				Test.EndBeginInterval(1, 2);
-				Test.EndBeginInterval(2, 3);
-				Test.EndBeginInterval(3, 4);
+				Test.NextInterval(3, "RedrawWorld();");
+				Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
+				Test.NextInterval(5, "PaintFrame();");
 			}
 			_PRINTER.Print0125();
 
-			Test.EndBeginInterval(4, 0);
+			Test.NextInterval(1, "PrintInfo();");
 		}
 
 

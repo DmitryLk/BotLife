@@ -79,7 +79,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 
-		private Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
+		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
 		{
 			Pointer = pointer;
 			OldPointer = pointer;
@@ -779,20 +779,6 @@ namespace WindowsFormsApp1.GameLogic
 		}
 		#endregion
 
-		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
-		{
-			var dir = Dir.GetRandomDirection();
-			var pointer = 0;
-			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
-
-			genom.AddBot();
-			var bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom, pointer);
-			bot.RefreshColor();
-			Data.Bots[botIndex] = bot;
-
-			Data.World[x, y] = botIndex;
-			if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(x, y, bot.Color);
-		}
 
 
 		//private async Task<bool> SetBusy()
