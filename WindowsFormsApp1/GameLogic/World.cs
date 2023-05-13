@@ -35,15 +35,22 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Step()
 		{
-			//Func.CheckWorld3();
-			//Func.CheckWorld2();
+            //Func.CheckWorld3();
+            //Func.CheckWorld2();
 
-			Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
-			{
-				if (Data.Bots[i] == null) throw new Exception("Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>");
-				Data.Bots[i].Step();
-			});
-            Test.NextInterval(10, "PARALLEL");
+            Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
+            {
+                Data.Bots[i].Step();
+            });
+
+            //for (var i =1; i<=Data.CurrentNumberOfBots; i++)
+            //{
+            //    Data.Bots[i].Step();
+            //}
+
+
+
+			Test.NextInterval(10, "BOTS ACTIONS CYCLE");
 
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();

@@ -18,7 +18,7 @@
 
 
   // Настройки Seeder
-  "SeedFood": true,
+  "SeedFood": false,
   "SeedOrganic": false,
   "SeedMinerals": false,
   "SeedWalls": false,
@@ -39,11 +39,11 @@
 
   //Energy
   "FoodEnergy": 20000,
-  "SeedBotEnergy": 1000,
+  "SeedBotEnergy": 20000,
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": 1000,
-  "DeltaEnergyOnStep": -1,
+  "DeltaEnergyOnStep": 0,
   "PhotosynthesisEnergy": 30,
   "PhotosynthesisLayerHeight": 0,
 

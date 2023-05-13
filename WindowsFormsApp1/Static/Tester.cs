@@ -68,7 +68,8 @@ namespace WindowsFormsApp1.Static
             foreach (var i in Ins.OrderBy(i => i.Key))
             {
                 sb.AppendLine($"{i.Key}. {i.Value.Name} " +
-                              $"{(int)(1000000L * i.Value.TotalMeasurement / i.Value.NumberOfMeasurement / _frequency)} " +
+                              //$"{(int)(1000000L * i.Value.TotalMeasurement / i.Value.NumberOfMeasurement / _frequency)} " +
+                              $"{(int)(1000000L * i.Value.LastMeasurement / _frequency)} " +
                               $"mcs ({100 * i.Value.LastMeasurement / sumElapsedMs}%)");
             }
 
