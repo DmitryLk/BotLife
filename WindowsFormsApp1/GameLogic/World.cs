@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
@@ -37,29 +38,67 @@ namespace WindowsFormsApp1.GameLogic
 		{
             //Func.CheckWorld3();
             //Func.CheckWorld2();
+            //var bc1 = Data.CurrentNumberOfBots;
+            //var (totalEnergy, dctEnergy) = Func.GetBotsEnergy();
 
-            Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
+			Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
             {
                 Data.Bots[i].Step();
             });
 
-            //for (var i =1; i<=Data.CurrentNumberOfBots; i++)
-            //{
-            //    Data.Bots[i].Step();
-            //}
+            //Func.CheckBotsEnergy(dctEnergy, totalEnergy);
 
+            //for (var i =1; i<=Data.CurrentNumberOfBots; i++)
+			//{
+			//    Data.Bots[i].Step();
+			//}
 
 
 			Test.NextInterval(10, "BOTS ACTIONS CYCLE");
 
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();
+            var cnt1 = Data.NumberOfBotDeath;
+            int cnt0 = 0;
+            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            {
+                if (Data.Bots[botNumber].InsertedToDeathList)
+                {
+                    cnt0++;
+                }
+            }
+
+
+			if (cnt0 != cnt1 + 1) throw new Exception("fdgergg");
+
 
 			if (Data.NumberOfBotDeath > -1)
 			{
 				// МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
 				Func.Death();
 			}
+
+   //         int cnt3 = 0;
+   //         for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+   //         {
+   //             if (Data.Bots[botNumber].InsertedToDeathList)
+   //             {
+			//		for (var i = 1; i < Data.MaxBotsNumber; i++)
+   //                 {
+   //                     if (Data.Bots[i] == null)
+   //                     {
+   //                         goto frg;
+   //                     }
+
+   //                     cnt3 += Data.Bots[i].InsertedToDeathList ? 1 : 0;
+   //                 }
+			//		//var cnt2 = Data.Bots.Take(100).Count(b => b.InsertedToDeathList);
+			//	}
+			//}
+			//frg:
+
+
+
             Test.NextInterval(11, "death");
 
 			//Func.CheckWorld3();
@@ -69,6 +108,18 @@ namespace WindowsFormsApp1.GameLogic
 				Func.Reproduction();
 			}
             Test.NextInterval(12, "reproduction");
+
+            int cnt5 = 0;
+            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            {
+                if (Data.Bots[botNumber].InsertedToReproductionList)
+                {
+                    cnt5++;
+                }
+            }
+
+            if (cnt5 != 0) throw new Exception("dfgdf");
+
 
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();
@@ -97,7 +148,7 @@ namespace WindowsFormsApp1.GameLogic
 					break;
 				}
 			}
-			//Func.CheckWorld3();
+    		//Func.CheckWorld3();
 		}
 	}
 }

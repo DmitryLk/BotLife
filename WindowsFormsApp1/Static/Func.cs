@@ -77,12 +77,42 @@ namespace WindowsFormsApp1.Static
             }
         }
 
+        private static int removedbots1;
+        private static int removedbots2;
         public static void Death()
         {
             //SearchDouble();
             //CheckIndex();
+            removedbots1 = 0;
+            removedbots2 = 0;
+
+            int cnt0 = 0;
+            List<long> lst0 = new List<long>();
+            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            {
+                if (Data.Bots[botNumber].InsertedToDeathList)
+                {
+                    cnt0++;
+                    lst0.Add(Data.Bots[botNumber].Index);
+                }
+            }
+
+            if (cnt0 != (int)Data.NumberOfBotDeath + 1) throw new Exception("dfgdf");
 
             Parallel.For(0, (int)Data.NumberOfBotDeath + 1, DeathBot);
+
+            int cnt1 = 0;
+            List<long> lst1 = new List<long>();
+            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            {
+                if (Data.Bots[botNumber].InsertedToDeathList)
+                {
+                    cnt1++;
+                    lst1.Add(Data.Bots[botNumber].Index);
+                }
+            }
+
+            if (cnt1 != 0) throw new Exception("dfgdf");
 
             Test.NextInterval(20, "death parallel");
 
@@ -96,10 +126,11 @@ namespace WindowsFormsApp1.Static
             {
                 maxdeathindex = -1;
                 maxworlddeathindex = -1;
-                // Выбрать из масива Data.BotDeath[] бота с максимальным world индексом
+
+                // Выбор из списка Data.BotDeath следующего бота с максимальным world индексом
                 for (var i = 0; i <= Data.NumberOfBotDeath; i++)
                 {
-                    var worldindex = Data.BotDeath[i] == null ? -1 : Data.BotDeath[i].Index;
+                    var worldindex = Data.BotDeath[i] == null || Data.BotDeath[i].Energy > 0 ? -1 : Data.BotDeath[i].Index;
 
                     if (worldindex > maxworlddeathindex)
                     {
@@ -124,25 +155,9 @@ namespace WindowsFormsApp1.Static
                     // Перенос последнего бота в освободившееся отверстие
                     // надо его убрать из массива ботов, переставив последнего бота на его место
                     // Bots: 0[пусто] 1[бот _ind=1] 2[бот _ind=2]; StartBotsNumber=2 CurrentBotsNumber=2
-                    //for (var x = 0; x < Data.WorldWidth; x++)
-                    //{
-                    //	for (var y = 0; y < Data.WorldHeight; y++)
-                    //	{
-                    //		var cont = Data.World[x, y];
-                    //		if (cont == maxworldindex)
-                    //		{
-                    //			var ls = new List<int>();
-                    //			for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
-                    //			{
-                    //				var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
-                    //				ls.Add(ind);
-                    //			}
-                    //		}
-                    //	}
-                    //}
 
                     var lastBot = Data.Bots[Data.CurrentNumberOfBots];
-                    var lastIndex = Data.Bots[Data.CurrentNumberOfBots].Index;
+                    var lastIndex = lastBot.Index;
                     Data.Bots[maxworlddeathindex] = lastBot;
                     lastBot.Index = maxworlddeathindex;
                     lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
@@ -157,6 +172,7 @@ namespace WindowsFormsApp1.Static
                 // Укарачиваем массив
                 Data.Bots[Data.CurrentNumberOfBots] = null;
                 Interlocked.Decrement(ref Data.CurrentNumberOfBots);
+                Interlocked.Increment(ref removedbots2);
             }
 
 
@@ -164,7 +180,10 @@ namespace WindowsFormsApp1.Static
             //SearchDouble();
             //Func.CheckWorld2();
 
-            Data.DeathCnt += Data.NumberOfBotDeath + 1;
+            if (removedbots1 != removedbots2) throw new Exception("dfgdfgf");
+
+
+            Data.DeathCnt += removedbots1;
 
             Data.NumberOfBotDeath = -1;
         }
@@ -172,21 +191,19 @@ namespace WindowsFormsApp1.Static
         private static void DeathBot(int index)
         {
             var bot = Data.BotDeath[index];
+            bot.InsertedToDeathList = false;
+
 
             //Func.CheckWorld2();
+            if (bot.Energy > 0) return; //бот успел поесть
+
+
+
+            if (bot.Energy < -1) throw new Exception("rtfghrthrt");
 
             lock (_busyWorld)
             {
-                if (Data.World[bot.Xi, bot.Yi] != bot.Index)
-                {
-                    Data.World[bot.Xi, bot.Yi] = 2;
-                }
                 Data.World[bot.Xi, bot.Yi] = 0;
-
-                if (Data.World[bot.Xi, bot.Yi] != 0)
-                {
-                    Data.World[bot.Xi, bot.Yi] = 2;
-                }
             }
 
             //Func.CheckWorld2();
@@ -197,289 +214,53 @@ namespace WindowsFormsApp1.Static
             }
 
             bot.Genom.RemoveBot(bot.Age);
+            Interlocked.Increment(ref removedbots1);
         }
 
 
-        //public static bool CheckWorld()
-        //{
-        //	var res = true;
+        public static (int, Dictionary<long, int>) GetBotsEnergy()
+        {
+            var te = 0;
+            var dct = new Dictionary<long, int>();
+            int en;
 
-        //	for (var x = 0; x < Data.WorldWidth; x++)
-        //	{
-        //		for (var y = 0; y < Data.WorldHeight; y++)
-        //		{
-        //			var cont = Data.World[x, y];
-        //			var step = Data.CurrentStep;
-        //			if (cont > Data.CurrentNumberOfBots && Data.World[x, y] != 65500)
-        //			{
-        //				res = false;
-        //			}
-        //		}
-        //	}
+            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+            {
+                en = Data.Bots[botIndex].Energy;
+                te += en;
+                dct.Add(botIndex, en);
+            }
 
-        //	return res;
-        //}
+            return (te, dct);
+        }
 
-        //public static (int Cnt, List<(int, int)> Lst) CheckWorld(long cont)
-        //{
-        //	var cnt = 0;
-        //	var lst = new List<(int, int)>();
+        public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
+        {
+            var te2 = 0;
+            int en;
+            var dct2 = new Dictionary<long, (int, int)>();
 
-        //	for (var x = 0; x < Data.WorldWidth; x++)
-        //	{
-        //		for (var y = 0; y < Data.WorldHeight; y++)
-        //		{
-        //			var step = Data.CurrentStep;
-        //			if (cont == Data.World[x, y])
-        //			{
-        //				cnt++;
-        //				lst.Add((x, y));
-        //			}
-        //		}
-        //	}
+            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+            {
+                en = Data.Bots[botIndex].Energy;
+                te2 += en;
+                if (dct[botIndex] != en)
+                {
+                    dct2.Add(botIndex, (dct[botIndex], en));
+                }
+            }
 
-        //	return (cnt, lst);
-        //}
+            if (te1 != te2 && dct2.Count > 0)
+            {
+                var st = Data.CurrentStep;
+                var bc2 = Data.CurrentNumberOfBots;
+                var indttt = dct2.First().Key;
+                var bttt = Data.Bots[indttt];
+                var log = bttt.Log.GetLog();
+            }
+        }
 
 
-        //public class Asd
-        //{
-        //	public int Cnt;
-        //	public List<long> Nums;
-        //	public List<(int X, int Y)> Lst;
-        //}
-
-        //public static bool CheckWorld2(long botindex, long botnum, int botx, int boty)
-        //{
-        //	var dct = new Dictionary<long, Asd>();
-
-        //	for (var x = 0; x < Data.WorldWidth; x++)
-        //	{
-        //		for (var y = 0; y < Data.WorldHeight; y++)
-        //		{
-        //			var cont = Data.World[x, y];
-
-        //			if (cont > 0 && (cont < 65000 || cont > 65504))
-        //			{
-        //				if (dct.ContainsKey(cont))
-        //				{
-        //					// а осталась ли первая точка? проверить. может просто произошло перемещение
-        //					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
-        //					{
-        //						dct[cont].Lst[0] = (x, y);
-        //						dct[cont].Nums[0] = Data.Bots[cont].Num;
-        //					}
-        //					else
-        //					{
-        //						dct[cont].Cnt++;
-        //						dct[cont].Lst.Add((x, y));
-        //						dct[cont].Nums.Add(Data.Bots[cont].Num);
-        //					}
-        //				}
-        //				else
-        //				{
-        //					dct.Add(cont, new Asd
-        //					{
-        //						Cnt = 1,
-        //						Lst = new List<(int, int)> { (x, y) },
-        //						Nums = new List<long> { Data.Bots[cont].Num }
-        //					});
-        //				}
-        //			}
-        //		}
-        //	}
-
-        //	if (dct.Count(d => d.Value.Cnt > 1) > 0)
-        //	{
-        //		var conts = dct.Where(d => d.Value.Cnt > 1);
-        //		var contscnt = dct.Count(d => d.Value.Cnt > 1);
-        //		var cont1 = conts.First();
-        //		var cont1idx = cont1.Key;
-        //		var cont1cnt = cont1.Value.Cnt;
-        //		var cont1lst = cont1.Value.Lst;
-        //		var cont1nums = cont1.Value.Nums;
-        //		var st = Data.CurrentStep;
-        //		var numb = Data.CurrentNumberOfBots;
-        //		return false;
-        //	}
-
-        //	return true;
-        //}
-
-        //public static bool CheckWorld2()
-        //{
-        //	var dct = new Dictionary<long, Asd>();
-
-        //	for (var x = 0; x < Data.WorldWidth; x++)
-        //	{
-        //		for (var y = 0; y < Data.WorldHeight; y++)
-        //		{
-        //			var cont = Data.World[x, y];
-
-        //			if (cont > 0 && (cont < 65000 || cont > 65504))
-        //			{
-        //				if (dct.ContainsKey(cont))
-        //				{
-        //					// а осталась ли первая точка? проверить. может просто произошло перемещение
-        //					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
-        //					{
-        //						dct[cont].Lst[0] = (x, y);
-        //						dct[cont].Nums[0] = Data.Bots[cont].Num;
-        //					}
-        //					else
-        //					{
-        //						dct[cont].Cnt++;
-        //						dct[cont].Lst.Add((x, y));
-        //						dct[cont].Nums.Add(Data.Bots[cont].Num);
-        //					}
-        //				}
-        //				else
-        //				{
-        //					dct.Add(cont, new Asd
-        //					{
-        //						Cnt = 1,
-        //						Lst = new List<(int, int)> { (x, y) },
-        //						Nums = new List<long> { Data.Bots[cont].Num }
-        //					});
-        //				}
-
-        //			}
-        //		}
-        //	}
-
-        //	if (dct.Count(d => d.Value.Cnt > 1) > 0)
-        //	{
-        //		var conts = dct.Where(d => d.Value.Cnt > 1);
-        //		var contscnt = dct.Count(d => d.Value.Cnt > 1);
-        //		var cont1 = conts.First();
-        //		var cont1idx = cont1.Key;
-        //		var cont1cnt = cont1.Value.Cnt;
-        //		var cont1lst = cont1.Value.Lst;
-        //		var cont1nums = cont1.Value.Nums;
-        //		var st = Data.CurrentStep;
-        //		var numb = Data.CurrentNumberOfBots;
-        //		return false;
-        //	}
-
-        //	return true;
-        //}
-
-        //public static bool CheckWorld3()
-        //{
-        //	var cnt = 0;
-        //	long sum = 0;
-        //	for (var x = 0; x < Data.WorldWidth; x++)
-        //	{
-        //		for (var y = 0; y < Data.WorldHeight; y++)
-        //		{
-        //			var cont = Data.World[x, y];
-
-        //			if (cont > 0 && (cont < 65000 || cont > 65504))
-        //			{
-        //				sum += cont;
-        //				cnt++;
-        //			}
-        //		}
-        //	}
-
-        //	long ttt;
-        //	Bot1 bttt;
-        //	List<LogRecord> log;
-        //	long contttt;
-
-        //	if (cnt != Data.CurrentNumberOfBots)
-        //	{
-        //		var st = Data.CurrentStep;
-        //		var fcd = Data.BotDeath;
-
-        //		if (Data.CurrentNumberOfBots - cnt == 1)
-        //		{
-        //			ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
-        //			bttt = Data.Bots[ttt];
-        //			log = bttt.Log.GetLog();
-        //			contttt = Data.World[bttt.Xi, bttt.Yi];
-        //		}
-
-        //		if (Data.CurrentNumberOfBots - cnt == -1)
-        //		{
-        //			ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
-        //			bttt = Data.Bots[ttt];
-        //			log = bttt.Log.GetLog();
-        //			contttt = Data.World[bttt.Xi, bttt.Yi];
-        //			SearchDouble();
-
-        //		}
-
-        //		var numberOfBotDeath = Data.NumberOfBotDeath;
-        //		return false;
-        //	}
-
-        //	return true;
-        //}
-        //private static void SearchDouble()
-        //{
-        //	var dct = new Dictionary<long, Asd>();
-
-        //	for (var x = 0; x < Data.WorldWidth; x++)
-        //	{
-        //		for (var y = 0; y < Data.WorldHeight; y++)
-        //		{
-        //			var cont = Data.World[x, y];
-
-        //			if (cont > 0 && (cont < 65000 || cont > 65504))
-        //			{
-        //				if (dct.ContainsKey(cont))
-        //				{
-        //					// а осталась ли первая точка? проверить. может просто произошло перемещение
-        //					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
-        //					{
-        //						dct[cont].Lst[0] = (x, y);
-        //						dct[cont].Nums[0] = Data.Bots[cont].Num;
-        //					}
-        //					else
-        //					{
-        //						dct[cont].Cnt++;
-        //						dct[cont].Lst.Add((x, y));
-        //						dct[cont].Nums.Add(Data.Bots[cont].Num);
-        //					}
-        //				}
-        //				else
-        //				{
-        //					dct.Add(cont, new Asd
-        //					{
-        //						Cnt = 1,
-        //						Lst = new List<(int, int)> { (x, y) },
-        //						Nums = new List<long> { Data.Bots[cont].Num }
-        //					});
-        //				}
-
-        //			}
-        //		}
-        //	}
-
-        //	if (dct.Count(d => d.Value.Cnt > 1) > 0)
-        //	{
-        //		var conts = dct.Where(d => d.Value.Cnt > 1);
-        //		var contscnt = dct.Count(d => d.Value.Cnt > 1);
-        //		var cont1 = conts.First();
-        //		var cont1idx = cont1.Key;
-        //		var cont1cnt = cont1.Value.Cnt;
-        //		var cont1lst = cont1.Value.Lst;
-        //		var cont1nums = cont1.Value.Nums;
-        //		var stp = Data.CurrentStep;
-        //		var numb = Data.CurrentNumberOfBots;
-        //	}
-        //}
-
-        //private static void CheckIndex()
-        //{
-        //	for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-        //	{
-        //		if (Data.Bots[i].Index != i)
-        //		{ 
-        //		}
-        //	}
-        //}
 
         //https://symbl.cc/ru/tools/text-to-symbols/
         //    ████─█──█─█───██─██────████─████─███─████─███─███─█──█─████────████──████─███─███
@@ -503,17 +284,18 @@ namespace WindowsFormsApp1.Static
         private static void ReproductionBot(int index)
         {
             var reproductedBot = Data.BotReproduction[index];
+            reproductedBot.InsertedToReproductionList = false;
+
             if (!reproductedBot.CanReproduct()) return;
+            if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, out var x, out var y, out var newBotIndex)) return;
+            
+            
+            var genom = Func.Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
 
-            if (TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, out var x, out var y, out var newBotIndex))
-            {
-                var genom = Func.Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
+            CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
+            reproductedBot.EnergyMinus(Data.InitialBotEnergy);
 
-                CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
-                reproductedBot.Energy -= Data.InitialBotEnergy;
-
-                Interlocked.Increment(ref Data.ReproductionCnt);
-            }
+            Interlocked.Increment(ref Data.ReproductionCnt);
         }
 
         public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
@@ -680,3 +462,340 @@ namespace WindowsFormsApp1.Static
     }
 
 }
+
+//              ███─███─████─███─█───█
+//              ─█──█───█──█──█──█───█
+//              ─█──███─█─────█──███─█
+//              ─█──█───█──█──█──█─█─█
+//              ─█──███─████──█──███─█
+
+
+// НАЙТИ В WORLD КООРДИНАТЫ УМИРАЮЩЕГО БОТА С МАКСИМАЛЬНЫМ ИНДЕКСОМ И НАЙТИ ЕГО РЕАЛЬНЫЙ ИНДЕКС В BOTS
+//for (var x = 0; x < Data.WorldWidth; x++)
+//{
+//	for (var y = 0; y < Data.WorldHeight; y++)
+//	{
+//		var cont = Data.World[x, y];
+//		if (cont == maxworlddeathindex)
+//		{
+//			var ls = new List<int>();
+//			for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
+//			{
+//				var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
+//				ls.Add(ind);
+//			}
+//		}
+//	}
+//}
+
+
+
+// НАЙТИ ЕСТЬ ЛИ В МАССИВЕ WORLD ИНДЕКС БОЛЬШИЙ ЧЕМ Data.CurrentNumberOfBots
+//public static bool CheckWorld()
+//{
+//	var res = true;
+
+//	for (var x = 0; x < Data.WorldWidth; x++)
+//	{
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var cont = Data.World[x, y];
+//			var step = Data.CurrentStep;
+//			if (cont > Data.CurrentNumberOfBots && Data.World[x, y] != 65500)
+//			{
+//				res = false;
+//			}
+//		}
+//	}
+
+//	return res;
+//}
+
+
+// НАЙТИ СКОЛЬКО РАЗ ВСТРЕЧАЕКТСЯ ИНДЕКС cont В МАССИВЕ WORLD И КООРДИНАТЫ
+//public static (int Cnt, List<(int, int)> Lst) CheckWorld(long cont)
+//{
+//	var cnt = 0;
+//	var lst = new List<(int, int)>();
+
+//	for (var x = 0; x < Data.WorldWidth; x++)
+//	{
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var step = Data.CurrentStep;
+//			if (cont == Data.World[x, y])
+//			{
+//				cnt++;
+//				lst.Add((x, y));
+//			}
+//		}
+//	}
+
+//	return (cnt, lst);
+//}
+
+
+//public class Asd
+//{
+//	public int Cnt;
+//	public List<long> Nums;
+//	public List<(int X, int Y)> Lst;
+//}
+
+
+// ПРОЙТИ ПО ВСЕМУ МАССИВУ WORLD НАЙТИ ВСЕ ДУБЛИКАТЫ С КООРДИНАТАМИ И NUMS И ВЫДАТЬ ПОДРОБНУЮ ИНФОРМАЦИЮ ПО ДУБЛИКАТАМ
+//public static bool CheckWorld2(long botindex, long botnum, int botx, int boty)
+//{
+//	var dct = new Dictionary<long, Asd>();
+
+//	for (var x = 0; x < Data.WorldWidth; x++)
+//	{
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var cont = Data.World[x, y];
+
+//			if (cont > 0 && (cont < 65000 || cont > 65504))
+//			{
+//				if (dct.ContainsKey(cont))
+//				{
+//					// а осталась ли первая точка? проверить. может просто произошло перемещение
+//					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+//					{
+//						dct[cont].Lst[0] = (x, y);
+//						dct[cont].Nums[0] = Data.Bots[cont].Num;
+//					}
+//					else
+//					{
+//						dct[cont].Cnt++;
+//						dct[cont].Lst.Add((x, y));
+//						dct[cont].Nums.Add(Data.Bots[cont].Num);
+//					}
+//				}
+//				else
+//				{
+//					dct.Add(cont, new Asd
+//					{
+//						Cnt = 1,
+//						Lst = new List<(int, int)> { (x, y) },
+//						Nums = new List<long> { Data.Bots[cont].Num }
+//					});
+//				}
+//			}
+//		}
+//	}
+
+//	if (dct.Count(d => d.Value.Cnt > 1) > 0)
+//	{
+//		var conts = dct.Where(d => d.Value.Cnt > 1);
+//		var contscnt = dct.Count(d => d.Value.Cnt > 1);
+//		var cont1 = conts.First();
+//		var cont1idx = cont1.Key;
+//		var cont1cnt = cont1.Value.Cnt;
+//		var cont1lst = cont1.Value.Lst;
+//		var cont1nums = cont1.Value.Nums;
+//		var st = Data.CurrentStep;
+//		var numb = Data.CurrentNumberOfBots;
+//		return false;
+//	}
+
+//	return true;
+//}
+
+
+
+// ПРОЙТИ ПО ВСЕМУ МАССИВУ WORLD НАЙТИ ВСЕ ДУБЛИКАТЫ С КООРДИНАТАМИ И NUMS И ВЫДАТЬ ПОДРОБНУЮ ИНФОРМАЦИЮ ПО ДУБЛИКАТАМ (ТОЖЕ САМОЕ НО ВЫЗЫВАЛОСЬ ИЗ ДРУГОГО МЕСТА)
+//public static bool CheckWorld2()
+//{
+//	var dct = new Dictionary<long, Asd>();
+
+//	for (var x = 0; x < Data.WorldWidth; x++)
+//	{
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var cont = Data.World[x, y];
+
+//			if (cont > 0 && (cont < 65000 || cont > 65504))
+//			{
+//				if (dct.ContainsKey(cont))
+//				{
+//					// а осталась ли первая точка? проверить. может просто произошло перемещение
+//					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+//					{
+//						dct[cont].Lst[0] = (x, y);
+//						dct[cont].Nums[0] = Data.Bots[cont].Num;
+//					}
+//					else
+//					{
+//						dct[cont].Cnt++;
+//						dct[cont].Lst.Add((x, y));
+//						dct[cont].Nums.Add(Data.Bots[cont].Num);
+//					}
+//				}
+//				else
+//				{
+//					dct.Add(cont, new Asd
+//					{
+//						Cnt = 1,
+//						Lst = new List<(int, int)> { (x, y) },
+//						Nums = new List<long> { Data.Bots[cont].Num }
+//					});
+//				}
+
+//			}
+//		}
+//	}
+
+//	if (dct.Count(d => d.Value.Cnt > 1) > 0)
+//	{
+//		var conts = dct.Where(d => d.Value.Cnt > 1);
+//		var contscnt = dct.Count(d => d.Value.Cnt > 1);
+//		var cont1 = conts.First();
+//		var cont1idx = cont1.Key;
+//		var cont1cnt = cont1.Value.Cnt;
+//		var cont1lst = cont1.Value.Lst;
+//		var cont1nums = cont1.Value.Nums;
+//		var st = Data.CurrentStep;
+//		var numb = Data.CurrentNumberOfBots;
+//		return false;
+//	}
+
+//	return true;
+//}
+
+
+// ПРОВЕРИТЬ ЧТО КОЛИЧЕТВО ТОЧЕК В WORLD СОВПАДАЕТ С Data.CurrentNumberOfBots, ЕСЛИ НЕТ ТО
+// ВЫДАТЬ ИНФОРМАЦИЮ О ДУБЛЕ ИЛИ ОТСУТСТВУЮЩЕМ С ЕГО ЛОГОМ
+//public static bool CheckWorld3()
+//{
+//	var cnt = 0;
+//	long sum = 0;
+//	for (var x = 0; x < Data.WorldWidth; x++)
+//	{
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var cont = Data.World[x, y];
+
+//			if (cont > 0 && (cont < 65000 || cont > 65504))
+//			{
+//				sum += cont;
+//				cnt++;
+//			}
+//		}
+//	}
+
+//	long ttt;
+//	Bot1 bttt;
+//	List<LogRecord> log;
+//	long contttt;
+
+//	if (cnt != Data.CurrentNumberOfBots)
+//	{
+//		var st = Data.CurrentStep;
+//		var fcd = Data.BotDeath;
+
+//		if (Data.CurrentNumberOfBots - cnt == 1)
+//		{
+//			ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
+//			bttt = Data.Bots[ttt];
+//			log = bttt.Log.GetLog();
+//			contttt = Data.World[bttt.Xi, bttt.Yi];
+//		}
+
+//		if (Data.CurrentNumberOfBots - cnt == -1)
+//		{
+//			ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
+//			bttt = Data.Bots[ttt];
+//			log = bttt.Log.GetLog();
+//			contttt = Data.World[bttt.Xi, bttt.Yi];
+//			SearchDouble();
+
+//		}
+
+//		var numberOfBotDeath = Data.NumberOfBotDeath;
+//		return false;
+//	}
+
+//	return true;
+//}
+
+
+// ПРОЙТИ ПО ВСЕМУ МАССИВУ WORLD НАЙТИ ВСЕ ДУБЛИКАТЫ С КООРДИНАТАМИ И NUMS И ВЫДАТЬ ПОДРОБНУЮ ИНФОРМАЦИЮ ПО ДУБЛИКАТАМ
+//private static void SearchDouble()
+//{
+//	var dct = new Dictionary<long, Asd>();
+
+//	for (var x = 0; x < Data.WorldWidth; x++)
+//	{
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var cont = Data.World[x, y];
+
+//			if (cont > 0 && (cont < 65000 || cont > 65504))
+//			{
+//				if (dct.ContainsKey(cont))
+//				{
+//					// а осталась ли первая точка? проверить. может просто произошло перемещение
+//					if (dct[cont].Cnt == 1 && Data.World[dct[cont].Lst[0].X, dct[cont].Lst[0].Y] != cont)
+//					{
+//						dct[cont].Lst[0] = (x, y);
+//						dct[cont].Nums[0] = Data.Bots[cont].Num;
+//					}
+//					else
+//					{
+//						dct[cont].Cnt++;
+//						dct[cont].Lst.Add((x, y));
+//						dct[cont].Nums.Add(Data.Bots[cont].Num);
+//					}
+//				}
+//				else
+//				{
+//					dct.Add(cont, new Asd
+//					{
+//						Cnt = 1,
+//						Lst = new List<(int, int)> { (x, y) },
+//						Nums = new List<long> { Data.Bots[cont].Num }
+//					});
+//				}
+
+//			}
+//		}
+//	}
+
+//	if (dct.Count(d => d.Value.Cnt > 1) > 0)
+//	{
+//		var conts = dct.Where(d => d.Value.Cnt > 1);
+//		var contscnt = dct.Count(d => d.Value.Cnt > 1);
+//		var cont1 = conts.First();
+//		var cont1idx = cont1.Key;
+//		var cont1cnt = cont1.Value.Cnt;
+//		var cont1lst = cont1.Value.Lst;
+//		var cont1nums = cont1.Value.Nums;
+//		var stp = Data.CurrentStep;
+//		var numb = Data.CurrentNumberOfBots;
+//	}
+//}
+
+
+// ПРОВЕРИТЬ ЧТО У ВСЕХ БОТОВ Index СООТВЕТСТВУЕТ РЕАЛЬНОМУ ИНДЕКСУ В МАССИВЕ Data.Bots
+//private static void CheckIndex()
+//{
+//	for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+//	{
+//		if (Data.Bots[i].Index != i)
+//		{ 
+//		}
+//	}
+//}
+
+
+// ПОЛУЧИТЬ ОБЩУЮ ЭНЕРГИЮ ВСЕХ БОТОВ
+//public static int GetTotalEnergy()
+//{
+//    var te = 0;
+//    for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+//    {
+//        te += Data.Bots[botNumber].Energy;
+//    }
+
+//    return te;
+//}

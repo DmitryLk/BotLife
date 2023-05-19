@@ -30,9 +30,9 @@ namespace WindowsFormsApp1.GameLogic
         private static readonly object _busyWorld2 = new object();
         private static readonly object _busyTotalEnergy = new object();
 
-        
-        private readonly object _busyDeathList = new object();
+
         private readonly object _busyBotEnergy = new object();
+        //private readonly object _busyBite = new object();
 
 
 
@@ -52,6 +52,22 @@ namespace WindowsFormsApp1.GameLogic
         public int Xi;
         public int Yi;
 
+
+        public long Index;         // Индекс бота (может меняться)
+        public int Direction;         // Направление бота
+        public int Age;
+        public long Num;         // Номер бота (остается постоянным)
+
+        private int _en;
+        private int _size;
+
+        public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
+        public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
+        private readonly object _busyInsertedToDeathList = new object();
+        private readonly object _busyInsertedToReproductionList = new object();
+
+        private int df = 0;
+
         public int Energy
         {
             get
@@ -62,34 +78,81 @@ namespace WindowsFormsApp1.GameLogic
                 //    return _en;
                 //}
             }
-            set
-            {
-                lock (_busyBotEnergy)
-                {
-                    _en = value;
-                }
+            //set
+            //{
+            //    Log.AddLog($"Change Energy from {_en} to {value}");
+            //    //if (_en == value)
+            //    //{
+            //    //}
 
-                if (Data.BotColorMode == BotColorMode.Energy)
+            //    //df++;
+            //    _en = value;
+            //    //if (df > 1) throw new Exception();
+            //    //df--;
+            //    //lock (_busyBotEnergy)
+            //    //{
+            //    //}
+
+            //    if (Data.BotColorMode == BotColorMode.Energy)
+            //    {
+            //        Color = GetGraduatedColor(Energy, 0, 6000);
+            //        if (Data.DrawType == DrawType.OnlyChangedCells)
+            //        {
+            //            Func.FixChangeCell(Xi, Yi, Color);
+            //        }
+            //    }
+            //}
+        }
+
+        public void EnergyPlus(int add)
+        {
+            lock (_busyBotEnergy)
+            {
+                _en += add;
+            }
+            
+            if (Data.BotColorMode == BotColorMode.Energy)
+            {
+                Color = GetGraduatedColor(Energy, 0, 6000);
+                if (Data.DrawType == DrawType.OnlyChangedCells)
                 {
-                    Color = GetGraduatedColor(Energy, 0, 6000);
-                    if (Data.DrawType == DrawType.OnlyChangedCells)
-                    {
-                        Func.FixChangeCell(Xi, Yi, Color);
-                    }
+                    Func.FixChangeCell(Xi, Yi, Color);
                 }
             }
         }
 
-        public long Index;         // Индекс бота (может меняться)
-        public int Direction;         // Направление бота
-        public int Age;
-        public long Num;         // Номер бота (остается постоянным)
-
-        private int _en;
-        private int _size;
-        private bool _insertedToDeathList;
-        //private bool _insertedToReproductionList;
-
+        public int EnergyMinus(int minus)
+        {
+            lock (_busyBotEnergy)
+            {
+                if (_en < minus)
+                {
+                    _en = 0;
+                    if (Data.BotColorMode == BotColorMode.Energy)
+                    {
+                        Color = GetGraduatedColor(Energy, 0, 6000);
+                        if (Data.DrawType == DrawType.OnlyChangedCells)
+                        {
+                            Func.FixChangeCell(Xi, Yi, Color);
+                        }
+                    }
+                    return _en;
+                }
+                else
+                {
+                    _en -= minus;
+                    if (Data.BotColorMode == BotColorMode.Energy)
+                    {
+                        Color = GetGraduatedColor(Energy, 0, 6000);
+                        if (Data.DrawType == DrawType.OnlyChangedCells)
+                        {
+                            Func.FixChangeCell(Xi, Yi, Color);
+                        }
+                    }
+                    return minus;
+                }
+            }
+        }
 
 
         public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
@@ -103,7 +166,7 @@ namespace WindowsFormsApp1.GameLogic
             Direction = dir;
             Num = botNumber;
             Index = botIndex;
-            Energy = en;
+            _en = en;
             Age = 0;
 
             Xd = x;
@@ -111,7 +174,8 @@ namespace WindowsFormsApp1.GameLogic
             Xi = x;
             Yi = y;
 
-            _insertedToDeathList = false;
+            InsertedToDeathList = false;
+            InsertedToReproductionList = false;
             Log.AddLog($"bot was born. index:{Index}");
         }
 
@@ -228,7 +292,8 @@ namespace WindowsFormsApp1.GameLogic
 
             Age++;
 
-            Energy += Data.DeltaEnergyOnStep;
+            EnergyPlus(Data.DeltaEnergyOnStep);
+
             lock (_busyTotalEnergy)
             {
                 Data.TotalEnergy += Data.DeltaEnergyOnStep;
@@ -300,14 +365,14 @@ namespace WindowsFormsApp1.GameLogic
 
         public void ToDeathList()
         {
-            if (!_insertedToDeathList)
+            if (!InsertedToDeathList)
             {
-                lock (_busyDeathList)
+                lock (_busyInsertedToDeathList)
                 {
-                    if (!_insertedToDeathList)
+                    if (!InsertedToDeathList)
                     {
 
-                        _insertedToDeathList = true;
+                        InsertedToDeathList = true;
                         var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
                         Data.BotDeath[num] = this;
 
@@ -334,15 +399,27 @@ namespace WindowsFormsApp1.GameLogic
 
         private void ToReproductionList()
         {
-            var num = Interlocked.Increment(ref Data.NumberOfBotReproduction);
-            Data.BotReproduction[num] = this;
+            if (!InsertedToReproductionList)
+            {
+                lock (_busyInsertedToReproductionList)
+                {
+                    if (!InsertedToReproductionList)
+                    {
+
+                        InsertedToReproductionList = true;
+                        var num = Interlocked.Increment(ref Data.NumberOfBotReproduction);
+                        Data.BotReproduction[num] = this;
+
+                    }
+                }
+            }
         }
 
         private (int shift, bool stepComplete) Photosynthesis()
         {
             if (Yi < Data.PhotosynthesisLayerHeight)
             {
-                Energy += Data.PhotosynthesisEnergy;
+                EnergyPlus(Data.PhotosynthesisEnergy);
                 lock (_busyTotalEnergy)
                 {
                     Data.TotalEnergy += Data.PhotosynthesisEnergy;
@@ -383,7 +460,7 @@ namespace WindowsFormsApp1.GameLogic
 
             if (cont == 65500)  //Grass
             {
-                Energy += Data.FoodEnergy;
+                EnergyPlus(Data.FoodEnergy);
                 if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
                 return ((int)RefContent.Grass, true);
             }
@@ -434,18 +511,34 @@ namespace WindowsFormsApp1.GameLogic
             //		return;
             //	}
             //}
-            var energyCanEat = eatedBot.Energy > Data.BiteEnergy ? Data.BiteEnergy : eatedBot.Energy;
-            eatedBot.Energy -= energyCanEat;
+            
+            
+            var gotEnergyByEating = eatedBot.Bite();
+
+            if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+
+            EnergyPlus(gotEnergyByEating);
+
+
+
+
             eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
-
-            Energy += energyCanEat;
-
+            Log.AddLog($"bot bite bot{cont} and got {gotEnergyByEating} energy.");
             if (eatedBot.Energy <= 0)
             {
                 eatedBot.ToDeathList();
                 eatedBot.Log.AddLog("bot was bited anв inserted to DeathList");
             }
         }
+
+
+        public int Bite()
+        {
+            var eatenEnergy = EnergyMinus(Data.BiteEnergy);
+
+            return eatenEnergy;
+        }
+
 
         private (int shift, bool stepComplete) Look(int dir)
         {
