@@ -38,7 +38,7 @@ namespace WindowsFormsApp1
 			var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2, textBox4 };
 
 			var presenter = new Presenter(pictureBoxes);
-			var printer = new Printer(textBoxes);
+			var printer = new Printer(textBoxes, this);
 
 			Game = new Game(presenter, printer);
 
@@ -61,6 +61,9 @@ namespace WindowsFormsApp1
 								F4 - Energy
 								F5 - Age
 								F6 - GenomAge
+
+								V  - Paralel
+								С  - Checks
 			";
 		}
 
@@ -89,23 +92,30 @@ namespace WindowsFormsApp1
 				{
 					case Keys.P: PauseToggle(); break;
 					case Keys.Space: StepPause(); break;
+
 					case Keys.L: LensToggle(); break;
 					case Keys.M: Game.MutationToggle(); break;
+
 					case Keys.D: Game.ChangeDrawMode(DrawMode.NoDraw); break;
 					case Keys.F: Game.ChangeDrawMode(DrawMode.EachStep); break;
 					case Keys.G: Game.ChangeDrawMode(DrawMode.Periodical); break;
+
 					case Keys.H: Game.ChangeDrawType(DrawType.OnlyChangedCells); break;
 					case Keys.J: Game.ChangeDrawType(DrawType.AllCells); break;
+
 					case Keys.Up: Game.LensUp(); break;
 					case Keys.Down: Game.LensDown(); break;
 					case Keys.Left: Game.LensLeft(); break;
 					case Keys.Right: Game.LensRight(); break;
+
 					case Keys.Home: Game.CursorUp(); break;
 					case Keys.End: Game.CursorDown(); break;
 					case Keys.Delete: Game.CursorRight(); break;
 					case Keys.PageDown: Game.CursorLeft(); break;
+
 					case Keys.Z: Game.HistoryDown(); break;
 					case Keys.X: Game.HistoryUp(); break;
+
 					case Keys.F1: Game.ChangeBotColorMode(BotColorMode.GenomColor); break;
 					case Keys.F2: Game.ChangeBotColorMode(BotColorMode.PraGenomColor); break;
 					case Keys.F3: Game.ChangeBotColorMode(BotColorMode.PlantPredator); break;
@@ -113,6 +123,13 @@ namespace WindowsFormsApp1
 					case Keys.F5: Game.ChangeBotColorMode(BotColorMode.Age); break;
 					case Keys.F6: Game.ChangeBotColorMode(BotColorMode.GenomAge); break;
 
+					case Keys.D1: Game.GenomInfo(GenomInfoMode.LiveBotsNumber); break;
+					case Keys.D2: Game.GenomInfo(GenomInfoMode.GenomLifetime); break;
+					case Keys.D3: Game.GenomInfo(GenomInfoMode.AllBotsNumber); break;
+					case Keys.D4: Game.GenomInfo(GenomInfoMode.AverageBotsLifetime); break;
+
+					case Keys.V: Game.ParallelToggle(); break;
+					case Keys.C: Game.ChecksToggle(); break;
 					default: break;
 				}
 			}

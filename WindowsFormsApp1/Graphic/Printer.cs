@@ -27,12 +27,14 @@ namespace WindowsFormsApp1.Graphic
     {
 		private int _cnt;
 		private TextBox[] _textBoxes;
+		private Form _form;
 		private DateTime _dt;
 
 
-		public Printer(TextBox[] textBoxes)
+		public Printer(TextBox[] textBoxes, Form form)
         {
 			_textBoxes = textBoxes;
+			_form = form;
 			_cnt = 0;
 			_dt = DateTime.Now;
 		}
@@ -43,7 +45,7 @@ namespace WindowsFormsApp1.Graphic
 		// 3 - на второй форме сверху               только на паузе
 		// 4 - на второй форме снизу                только на паузе
 		// 5 - на главной форме различные режимы
-		public void Print0125()
+		public void Print015()
         {
             if (++_cnt % Data.ReportFrequencyCurrent == 0)
             {
@@ -58,14 +60,23 @@ namespace WindowsFormsApp1.Graphic
                 _textBoxes[1].Text = Data.GetText(fps);
                 _textBoxes[1].Update();
 
-                _textBoxes[2].Text = Genom.GetText();
-                _textBoxes[2].Update();
+                //_textBoxes[2].Text = Genom.GetText();
+                //_textBoxes[2].Update();
 
-                Print5();
+                _form.Text = $"Bots: {Data.GetTextForCaption()}";
+
+
+				Print5();
 			}
         }
 
-        public void Print3(Bot1 bot)
+		public void Print2(GenomInfoMode mode)
+		{
+            _textBoxes[2].Text = Genom.GetText(mode);
+            _textBoxes[2].Update();
+        }
+
+		public void Print3(Bot1 bot)
         {
             if (bot != null)
             {

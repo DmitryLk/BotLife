@@ -58,18 +58,9 @@ namespace WindowsFormsApp1.GameLogic
 
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();
-            var cnt1 = Data.NumberOfBotDeath;
-            int cnt0 = 0;
-            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-            {
-                if (Data.Bots[botNumber].InsertedToDeathList)
-                {
-                    cnt0++;
-                }
-            }
 
+			if (Data.Checks) Func.CHECK1();
 
-			if (cnt0 != cnt1 + 1) throw new Exception("fdgergg");
 
 
 			if (Data.NumberOfBotDeath > -1)
@@ -107,18 +98,20 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				Func.Reproduction();
 			}
-            Test.NextInterval(12, "reproduction");
+			Test.NextInterval(12, "reproduction");
 
-            int cnt5 = 0;
-            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-            {
-                if (Data.Bots[botNumber].InsertedToReproductionList)
-                {
-                    cnt5++;
-                }
-            }
+			//int cnt5 = 0;
+			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			//{
+			//    if (Data.Bots[botNumber].InsertedToReproductionList)
+			//    {
+			//        cnt5++;
+			//    }
+			//}
 
-            if (cnt5 != 0) throw new Exception("dfgdf");
+			//if (cnt5 != 0) throw new Exception("dfgdf");
+
+			if (Data.Checks) Func.CHECK2();
 
 
 			//Func.CheckWorld3();
@@ -155,6 +148,12 @@ namespace WindowsFormsApp1.GameLogic
 
 
 /*
+ 
+
+// Включен лог
+
+
+
 мутации 5>1 байт; мутации .1>10 процентов; food tru>false;  SeedBotEnergy 1000>50000; случайное направление; добавлен PhotosynthesisLayerHeight
 не уменьшать энергию
 

@@ -96,7 +96,7 @@ namespace WindowsFormsApp1
 				Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
 				Test.NextInterval(5, "PaintFrame();");
 			}
-			_PRINTER.Print0125();
+			_PRINTER.Print015();
 
 			Test.NextInterval(1, "PrintInfo();");
 		}
@@ -153,6 +153,26 @@ namespace WindowsFormsApp1
 		{
 			Data.Mutation = !Data.Mutation;
 		}
+
+		public void ParallelToggle()
+		{
+			Data.Parallel = !Data.Parallel;
+		}
+
+		public void ChecksToggle()
+		{
+			Data.Checks = !Data.Checks;
+		}
+
+		//case Keys.D1: Game.GenomInfo(GenomInfoMode.LiveBotsNumber); break;
+		//case Keys.D2: Game.GenomInfo(GenomInfoMode.GenomLifetime); break;
+		//case Keys.D3: Game.GenomInfo(GenomInfoMode.AllBotsNumber); break;
+		//case Keys.D4: Game.GenomInfo(GenomInfoMode.AverageBotsLifetime); break;
+		public void GenomInfo(GenomInfoMode mode)
+		{
+			_PRINTER.Print2(mode);
+		}
+
 
 		public void ChangeDrawMode(DrawMode mode)
 		{

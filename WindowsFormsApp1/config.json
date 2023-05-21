@@ -43,7 +43,7 @@
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": 1000,
-  "DeltaEnergyOnStep": 0,
+  "DeltaEnergyOnStep": -1,
   "PhotosynthesisEnergy": 30,
   "PhotosynthesisLayerHeight": 0,
 

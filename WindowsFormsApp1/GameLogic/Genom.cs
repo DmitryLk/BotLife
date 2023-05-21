@@ -52,6 +52,7 @@ namespace WindowsFormsApp1.GameLogic
 		public long RemovedBots { get => _removedBots; }
 		public int AgeBots { get => _ageBots; }
 
+
 		private Genom()
 		{
 			//_parent = parent;
@@ -62,22 +63,23 @@ namespace WindowsFormsApp1.GameLogic
 			Interlocked.Increment(ref _curBots);
 			Interlocked.Increment(ref _allBots);
 		}
-		public void RemoveBot(int age)
+		public void DecBot(int age)
 		{
 			if (_curBots < 1)
 			{
 				throw new Exception("if (_curBots < 1)");
 			}
 
+
+			Interlocked.Decrement(ref _curBots);
+			Interlocked.Increment(ref _removedBots);
+
 			// Исчезновение генома
-			if (_curBots == 1)
+			if (_curBots == 0)
 			{
 				EndStep = Data.CurrentStep;
 				Interlocked.Increment(ref ENDCOUNTER);
 			}
-
-			Interlocked.Decrement(ref _curBots);
-			Interlocked.Increment(ref _removedBots);
 
 			_ageBots += age;
 		}
@@ -128,7 +130,7 @@ namespace WindowsFormsApp1.GameLogic
                 Interlocked.Increment(ref Data.MutationCnt);
 			}
 
-			GENOMS.TryAdd(g, 1);
+			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
 			return g;
 		}
 
@@ -152,45 +154,55 @@ namespace WindowsFormsApp1.GameLogic
 
 
 
-		public static string GetText()
+		public static string GetText(GenomInfoMode mode)
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine($"Count: {BEGINCOUNTER}");
 
 			var activeGemons = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
 			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}");
-
-			//sb.AppendLine("");
-			//sb.AppendLine("По кол-ву живых ботов");
-			//var genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderByDescending(g => g.Bots).Take(10);
-			//foreach (var g in genoms)
-			//{
-			//	sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
-			//}
-
-			//sb.AppendLine("");
-			//sb.AppendLine("По времени жизни генома");
-			//genoms = GENOMS.Keys.Where(g => g.Bots > 0).OrderBy(g => g.BeginStep).Take(10);
-			//foreach (var g in genoms)
-			//{
-			//	sb.AppendLine($"{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
-			//}
-
-			//sb.AppendLine("");
-			//sb.AppendLine("По общему кол-ву ботов");
-			//genoms = GENOMS.Keys.OrderByDescending(g => g.AllBots).Take(10);
-			//foreach (var g in genoms)
-			//{
-			//	sb.AppendLine($"{g.AllBots}/{g.Bots} - {g.PraNum}({g.Num})  L{g.Level}  {(g._curBots == 0 ? $"{g.EndStep - g.BeginStep}" : "L")}");
-			//}
-
-
 			sb.AppendLine("");
-			sb.AppendLine("По ср.пр.жизни ботов");
-			var genoms = GENOMS.Keys.Where(g => g.RemovedBots > 10).OrderByDescending(g => g.AgeBots / g.RemovedBots).Take(10);
-			foreach (var g in genoms)
+
+			switch (mode)
 			{
-				sb.AppendLine($"{g.AllBots}/{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  {g.AgeBots / g.RemovedBots}");
+				case GenomInfoMode.LiveBotsNumber:
+					sb.AppendLine("По кол-ву живых ботов");
+					var genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderByDescending(g => g.CurBots).Take(10);
+					foreach (var g in genoms)
+					{
+						sb.AppendLine($"{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
+					}
+					break;
+
+				case GenomInfoMode.GenomLifetime:
+					sb.AppendLine("По времени жизни генома");
+					genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderBy(g => g.BeginStep).Take(10);
+					foreach (var g in genoms)
+					{
+						sb.AppendLine($"{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
+					}
+					break;
+
+				case GenomInfoMode.AllBotsNumber:
+					sb.AppendLine("По общему кол-ву ботов");
+					genoms = GENOMS.Keys.OrderByDescending(g => g.AllBots).Take(10);
+					foreach (var g in genoms)
+					{
+						sb.AppendLine($"{g.AllBots}/{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  {(g._curBots == 0 ? $"{g.EndStep - g.BeginStep}" : "L")}");
+					}
+					break;
+
+				case GenomInfoMode.AverageBotsLifetime:
+					sb.AppendLine("По ср.пр.жизни ботов");
+					genoms = GENOMS.Keys.Where(g => g.RemovedBots > 10).OrderByDescending(g => g.AgeBots / g.RemovedBots).Take(10);
+					foreach (var g in genoms)
+					{
+						sb.AppendLine($"{g.AllBots}/{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  {g.AgeBots / g.RemovedBots}");
+					}
+					break;
+
+				default: throw new Exception("fgfdgfdg");
+
 			}
 
 			return sb.ToString();

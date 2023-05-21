@@ -97,11 +97,11 @@
 			// textBox3
 			// 
 			this.textBox3.Enabled = false;
-			this.textBox3.Location = new System.Drawing.Point(1022, 388);
+			this.textBox3.Location = new System.Drawing.Point(1022, 684);
 			this.textBox3.Multiline = true;
 			this.textBox3.Name = "textBox3";
 			this.textBox3.ReadOnly = true;
-			this.textBox3.Size = new System.Drawing.Size(190, 598);
+			this.textBox3.Size = new System.Drawing.Size(399, 365);
 			this.textBox3.TabIndex = 12;
 			this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
 			// 

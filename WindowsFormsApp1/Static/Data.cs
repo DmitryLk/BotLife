@@ -86,6 +86,8 @@ namespace WindowsFormsApp1.Static
 		public static bool Worked;
 		public static bool LensOn;
 		public static bool Mutation;
+		public static bool Parallel;
+		public static bool Checks;
 		public static DrawMode DrawMode;
 		public static DrawMode NextDrawMode;
 		public static DrawType DrawType;
@@ -137,6 +139,9 @@ namespace WindowsFormsApp1.Static
 			Started = false;
 			PausedMode = false;
 			LensOn = false;
+			Parallel = true;
+			Checks = false;
+
 			DrawMode = DrawMode.EachStep;
 			NextDrawMode = DrawMode.EachStep;
 			BotColorMode = BotColorMode.GenomColor;
@@ -186,6 +191,12 @@ namespace WindowsFormsApp1.Static
 			else
 				return Color.FromArgb(255, v, p, q);
 		}
+
+		public static string GetTextForCaption()
+		{
+			return CurrentNumberOfBots.ToString();
+		}
+
 		public static string GetText(double fps)
 		{
 			var sb = new StringBuilder();
@@ -218,6 +229,8 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"DrawMode: {DrawMode.ToString()}");
 			sb.AppendLine($"DrawType: {DrawType.ToString()}");
 			sb.AppendLine($"BotColorMode: {BotColorMode.ToString()}");
+			sb.AppendLine($"Parallel: {(Data.Parallel ? "true" : "false")}");
+			sb.AppendLine($"Checks: {(Data.Checks ? "true" : "false")}");
 			return sb.ToString();
 		}
 

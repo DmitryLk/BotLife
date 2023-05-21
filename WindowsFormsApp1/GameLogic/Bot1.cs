@@ -26,6 +26,8 @@ namespace WindowsFormsApp1.GameLogic
         //private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         //private static readonly object _busy = new object();
 
+        const int hueFrom = 200;
+
         private static readonly object _busyWorld1 = new object();
         private static readonly object _busyWorld2 = new object();
         private static readonly object _busyTotalEnergy = new object();
@@ -104,58 +106,66 @@ namespace WindowsFormsApp1.GameLogic
             //}
         }
 
-        public void EnergyPlus(int add)
+        public int EnergyChange(int delta)
         {
+            int olden;
+            int newen;
             lock (_busyBotEnergy)
             {
-                _en += add;
+                olden = _en;
+                _en += delta;
+                if (_en <= 0) _en = 0;
+                newen = _en;
             }
-            
-            if (Data.BotColorMode == BotColorMode.Energy)
-            {
-                Color = GetGraduatedColor(Energy, 0, 6000);
-                if (Data.DrawType == DrawType.OnlyChangedCells)
-                {
-                    Func.FixChangeCell(Xi, Yi, Color);
-                }
+
+			if (newen < 0)
+			{
+                throw new Exception("fdgdfgdfg");
             }
-        }
 
-        public int EnergyMinus(int minus)
-        {
-            lock (_busyBotEnergy)
-            {
-                if (_en < minus)
-                {
-                    _en = 0;
-                    if (Data.BotColorMode == BotColorMode.Energy)
-                    {
-                        Color = GetGraduatedColor(Energy, 0, 6000);
-                        if (Data.DrawType == DrawType.OnlyChangedCells)
-                        {
-                            Func.FixChangeCell(Xi, Yi, Color);
-                        }
-                    }
-                    return _en;
-                }
-                else
-                {
-                    _en -= minus;
-                    if (Data.BotColorMode == BotColorMode.Energy)
-                    {
-                        Color = GetGraduatedColor(Energy, 0, 6000);
-                        if (Data.DrawType == DrawType.OnlyChangedCells)
-                        {
-                            Func.FixChangeCell(Xi, Yi, Color);
-                        }
-                    }
-                    return minus;
-                }
-            }
-        }
+			if (newen == 0)
+			{
+				ToDeathList();
+			}
+
+			ChangeEnergyColor();
+
+            return olden - newen;
+
+			void ToDeathList()
+			{
+				if (!InsertedToDeathList)
+				{
+					lock (_busyInsertedToDeathList)
+					{
+						if (!InsertedToDeathList)
+						{
+							Log.AddLog("bot inserted to DeathList");
+
+							InsertedToDeathList = true;
+							var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
+							Data.BotDeath[num] = this;
+    					}
+					}
+				}
+			}
+
+			void ChangeEnergyColor()
+			{
+				if (Data.BotColorMode == BotColorMode.Energy)
+				{
+					Color = GetGraduatedColor(Energy, 0, 6000);
+					if (Data.DrawType == DrawType.OnlyChangedCells)
+					{
+						Func.FixChangeCell(Xi, Yi, Color);
+					}
+				}
+			}
+		}
 
 
-        public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
+
+		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
         {
             Pointer = pointer;
             OldPointer = pointer;
@@ -196,7 +206,6 @@ namespace WindowsFormsApp1.GameLogic
 
         private Color GetGraduatedColor(int grad, int min, int max)
         {
-            const int hueFrom = 200;
             // 0 -		FFFF00
             // 1000 -	FFFFFF
             //0 ->	H = 120 S = 100 V =100
@@ -223,15 +232,6 @@ namespace WindowsFormsApp1.GameLogic
             bool stepComplete = false;
             int cntJump = 0;
             //Func.CheckWorld2(Index, Num, Xi, Yi);
-
-            //Death
-            if (Energy <= 0)
-            {
-                ToDeathList();
-                Log.AddLog("bot inserted to DeathList 1");
-                return;
-            }
-
             //Func.CheckWorld2(Index, Num, Xi, Yi);
 
 
@@ -292,7 +292,7 @@ namespace WindowsFormsApp1.GameLogic
 
             Age++;
 
-            EnergyPlus(Data.DeltaEnergyOnStep);
+            EnergyChange(Data.DeltaEnergyOnStep);
 
             lock (_busyTotalEnergy)
             {
@@ -301,16 +301,6 @@ namespace WindowsFormsApp1.GameLogic
 
 
             //Func.CheckWorld2(Index, Num, Xi, Yi);
-
-
-            //Death
-            if (Energy <= 0)
-            {
-                ToDeathList();
-                Log.AddLog("bot inserted to DeathList 2");
-                return;
-            }
-
             //Func.CheckWorld2(Index, Num, Xi, Yi);
 
             //Reproduction
@@ -363,39 +353,6 @@ namespace WindowsFormsApp1.GameLogic
             return Energy >= Data.ReproductionBotEnergy;
         }
 
-        public void ToDeathList()
-        {
-            if (!InsertedToDeathList)
-            {
-                lock (_busyInsertedToDeathList)
-                {
-                    if (!InsertedToDeathList)
-                    {
-
-                        InsertedToDeathList = true;
-                        var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
-                        Data.BotDeath[num] = this;
-
-                        //if (Data.NumberOfBotDeath > 0)
-                        //{
-                        //	var st = Data.CurrentStep;
-                        //	for (var i = 0; i <= Data.NumberOfBotDeath; i++)
-                        //	{
-                        //		for (var j = 0; j <= Data.NumberOfBotDeath; j++)
-                        //		{
-                        //			if (i != j)
-                        //			{
-                        //				if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
-                        //				{
-                        //				}
-                        //			}
-                        //		}
-                        //	}
-                        //}
-                    }
-                }
-            }
-        }
 
         private void ToReproductionList()
         {
@@ -419,7 +376,7 @@ namespace WindowsFormsApp1.GameLogic
         {
             if (Yi < Data.PhotosynthesisLayerHeight)
             {
-                EnergyPlus(Data.PhotosynthesisEnergy);
+                EnergyChange(Data.PhotosynthesisEnergy);
                 lock (_busyTotalEnergy)
                 {
                     Data.TotalEnergy += Data.PhotosynthesisEnergy;
@@ -445,6 +402,9 @@ namespace WindowsFormsApp1.GameLogic
 
             long cont = -1;
 
+
+            // Grass
+            bool grass = false;
             if (Data.World[nXi, nYi] == 65500)
             {
                 lock (_busyWorld1)
@@ -452,20 +412,22 @@ namespace WindowsFormsApp1.GameLogic
                     if (Data.World[nXi, nYi] == 65500)
                     {
                         Data.World[nXi, nYi] = 0;
-                        cont = 65500;
+                        grass = true;
                     }
                 }
             }
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
 
-            if (cont == 65500)  //Grass
+            if (grass)
             {
-                EnergyPlus(Data.FoodEnergy);
+                EnergyChange(Data.FoodEnergy);
                 if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
                 return ((int)RefContent.Grass, true);
             }
 
+
             cont = Data.World[nXi, nYi];
+
+            // для расчета shift code
             var refContent = cont switch
             {
                 0 => RefContent.Free,
@@ -480,14 +442,12 @@ namespace WindowsFormsApp1.GameLogic
                         : RefContent.Bot
                     : throw new Exception("return cont switch")
             };
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
 
-
-            if (refContent == RefContent.Bot || refContent == RefContent.Relative)  //Bot || Relative
+			// Bot || Relative
+			if (refContent == RefContent.Bot || refContent == RefContent.Relative)  
             {
                 EatBot(cont);
             }
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
 
             return ((int)refContent, true);
         }
@@ -513,30 +473,13 @@ namespace WindowsFormsApp1.GameLogic
             //}
             
             
-            var gotEnergyByEating = eatedBot.Bite();
+            var gotEnergyByEating = eatedBot.EnergyChange(-Data.BiteEnergy);
+			EnergyChange(gotEnergyByEating);
 
-            if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
-
-            EnergyPlus(gotEnergyByEating);
-
-
-
+			if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
 
             eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
             Log.AddLog($"bot bite bot{cont} and got {gotEnergyByEating} energy.");
-            if (eatedBot.Energy <= 0)
-            {
-                eatedBot.ToDeathList();
-                eatedBot.Log.AddLog("bot was bited anв inserted to DeathList");
-            }
-        }
-
-
-        public int Bite()
-        {
-            var eatenEnergy = EnergyMinus(Data.BiteEnergy);
-
-            return eatenEnergy;
         }
 
 
@@ -579,7 +522,7 @@ namespace WindowsFormsApp1.GameLogic
             return (2, false);
         }
 
-
+		//https://www.messletters.com/ru/big-text/ banner3
         //////////////////////////////////////////////////////////////////
         //			##     ##  #######  ##     ## ######## 
         //			###   ### ##     ## ##     ## ##       
@@ -605,7 +548,7 @@ namespace WindowsFormsApp1.GameLogic
                 // ПЕРЕМЕЩЕНИЕ
                 Xd = nXd;
                 Yd = nYd;
-                return (0, true);
+                return ((int)RefContent.Free, true);
             }
 
 
@@ -614,7 +557,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 
-            long cont = -1;
+            bool move = false;
 
             if (Data.World[nXi, nYi] == 0) //Free
             {
@@ -626,12 +569,12 @@ namespace WindowsFormsApp1.GameLogic
                         Data.World[Xi, Yi] = 0;
                         //Thread.MemoryBarrier();
                         Data.World[nXi, nYi] = Index;
-                        cont = 0;
+                        move = true;
                     }
                 }
             }
 
-            if (cont == 0)
+            if (move)
             {
                 // ПЕРЕМЕЩЕНИЕ B
 
@@ -657,7 +600,7 @@ namespace WindowsFormsApp1.GameLogic
             //Func.CheckWorld2(Index, Num, Xi, Yi);
 
 
-            cont = Data.World[nXi, nYi];
+            var cont = Data.World[nXi, nYi];
             var refContent = cont switch
             {
                 0 => RefContent.Free,

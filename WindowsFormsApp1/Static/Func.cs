@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Static;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DrawMode = WindowsFormsApp1.Enums.DrawMode;
@@ -28,12 +29,14 @@ namespace WindowsFormsApp1.Static
     {
         private static readonly object _busyWorld = new object();
         private static readonly object _busyChWorld = new object();
+		private static int removedbots1;
+		private static int removedbots2;
 
-        // Список измененных ячеек для последующей отрисовки
-        //public long[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
-        //public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
-        //public long NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
-        public static void FixChangeCell(int x, int y, Color? color)
+		// Список измененных ячеек для последующей отрисовки
+		//public long[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
+		//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
+		//public long NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
+		public static void FixChangeCell(int x, int y, Color? color)
         {
             // возможно ли в паралелли одновременное изменение одной клетки? а то приходится локи городить из-за этой возможности
             bool first = false;
@@ -77,8 +80,6 @@ namespace WindowsFormsApp1.Static
             }
         }
 
-        private static int removedbots1;
-        private static int removedbots2;
         public static void Death()
         {
             //SearchDouble();
@@ -86,33 +87,8 @@ namespace WindowsFormsApp1.Static
             removedbots1 = 0;
             removedbots2 = 0;
 
-            int cnt0 = 0;
-            List<long> lst0 = new List<long>();
-            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-            {
-                if (Data.Bots[botNumber].InsertedToDeathList)
-                {
-                    cnt0++;
-                    lst0.Add(Data.Bots[botNumber].Index);
-                }
-            }
-
-            if (cnt0 != (int)Data.NumberOfBotDeath + 1) throw new Exception("dfgdf");
 
             Parallel.For(0, (int)Data.NumberOfBotDeath + 1, DeathBot);
-
-            int cnt1 = 0;
-            List<long> lst1 = new List<long>();
-            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-            {
-                if (Data.Bots[botNumber].InsertedToDeathList)
-                {
-                    cnt1++;
-                    lst1.Add(Data.Bots[botNumber].Index);
-                }
-            }
-
-            if (cnt1 != 0) throw new Exception("dfgdf");
 
             Test.NextInterval(20, "death parallel");
 
@@ -139,16 +115,10 @@ namespace WindowsFormsApp1.Static
                     }
                 }
 
-
                 // все обработаны
                 if (maxdeathindex == -1) break;
 
                 Data.BotDeath[maxdeathindex] = null;
-
-                if (maxworlddeathindex > Data.CurrentNumberOfBots)
-                {
-                    throw new Exception("if (_ind > Data.CurrentBotsNumber)");
-                }
 
                 if (maxworlddeathindex < Data.CurrentNumberOfBots)
                 {
@@ -180,7 +150,6 @@ namespace WindowsFormsApp1.Static
             //SearchDouble();
             //Func.CheckWorld2();
 
-            if (removedbots1 != removedbots2) throw new Exception("dfgdfgf");
 
 
             Data.DeathCnt += removedbots1;
@@ -193,13 +162,9 @@ namespace WindowsFormsApp1.Static
             var bot = Data.BotDeath[index];
             bot.InsertedToDeathList = false;
 
-
             //Func.CheckWorld2();
-            if (bot.Energy > 0) return; //бот успел поесть
+            if (bot.Energy > 0) return; //бот успел поесть и выжил
 
-
-
-            if (bot.Energy < -1) throw new Exception("rtfghrthrt");
 
             lock (_busyWorld)
             {
@@ -213,61 +178,21 @@ namespace WindowsFormsApp1.Static
                 FixChangeCell(bot.Xi, bot.Yi, null); // при следующей отрисовке бот стерется с экрана
             }
 
-            bot.Genom.RemoveBot(bot.Age);
+            bot.Genom.DecBot(bot.Age);
             Interlocked.Increment(ref removedbots1);
-        }
+		}
 
 
-        public static (int, Dictionary<long, int>) GetBotsEnergy()
-        {
-            var te = 0;
-            var dct = new Dictionary<long, int>();
-            int en;
-
-            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
-            {
-                en = Data.Bots[botIndex].Energy;
-                te += en;
-                dct.Add(botIndex, en);
-            }
-
-            return (te, dct);
-        }
-
-        public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
-        {
-            var te2 = 0;
-            int en;
-            var dct2 = new Dictionary<long, (int, int)>();
-
-            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
-            {
-                en = Data.Bots[botIndex].Energy;
-                te2 += en;
-                if (dct[botIndex] != en)
-                {
-                    dct2.Add(botIndex, (dct[botIndex], en));
-                }
-            }
-
-            if (te1 != te2 && dct2.Count > 0)
-            {
-                var st = Data.CurrentStep;
-                var bc2 = Data.CurrentNumberOfBots;
-                var indttt = dct2.First().Key;
-                var bttt = Data.Bots[indttt];
-                var log = bttt.Log.GetLog();
-            }
-        }
 
 
 
         //https://symbl.cc/ru/tools/text-to-symbols/
-        //    ████─█──█─█───██─██────████─████─███─████─███─███─█──█─████────████──████─███─███
-        //    █──█─██─█─█────███─────█──█─█──█─█───█──█──█───█──██─█─█───────█──██─█──█──█──█──
-        //    █──█─█─██─█─────█──────█────████─███─████──█───█──█─██─█─██────████──█──█──█──███
-        //    █──█─█──█─█─────█──────█──█─█─█──█───█──█──█───█──█──█─█──█────█──██─█──█──█────█
-        //    ████─█──█─███───█──────████─█─█──███─█──█──█──███─█──█─████────████──████──█──███ 
+        //      ████─█──█─█───██─██────█───█─█──█─███─█──█────████─████─███─████─███─███─█──█─████────████──████─███─███
+        //      █──█─██─█─█────███─────█───█─█──█─█───██─█────█──█─█──█─█───█──█──█───█──██─█─█───────█──██─█──█──█──█──
+        //      █──█─█─██─█─────█──────█─█─█─████─███─█─██────█────████─███─████──█───█──█─██─█─██────████──█──█──█──███
+        //      █──█─█──█─█─────█──────█████─█──█─█───█──█────█──█─█─█──█───█──█──█───█──█──█─█──█────█──██─█──█──█────█
+        //      ████─█──█─███───█───────█─█──█──█─███─█──█────████─█─█──███─█──█──█──███─█──█─████────████──████──█──███
+
 
         public static void Reproduction()
         {
@@ -293,7 +218,7 @@ namespace WindowsFormsApp1.Static
             var genom = Func.Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
 
             CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
-            reproductedBot.EnergyMinus(Data.InitialBotEnergy);
+            reproductedBot.EnergyChange(-Data.InitialBotEnergy);
 
             Interlocked.Increment(ref Data.ReproductionCnt);
         }
@@ -428,7 +353,7 @@ namespace WindowsFormsApp1.Static
                 x = ThreadSafeRandom.Next(0, Data.WorldWidth);
                 y = ThreadSafeRandom.Next(0, Data.WorldHeight);
             }
-            while (CellIsBusy(x, y) && ++i < 1000);
+            while (Data.World[x, y] != 0 && ++i < 1000);
 
             if (i >= 1000)
             {
@@ -438,10 +363,6 @@ namespace WindowsFormsApp1.Static
             return true;
         }
 
-        private static bool CellIsBusy(int x, int y)
-        {
-            return Data.World[x, y] != 0;
-        }
 
         public static (int, int) GetRandomSpeed()
         {
@@ -459,8 +380,149 @@ namespace WindowsFormsApp1.Static
             return (0, 0);
         }
 
-    }
 
+        public static void CHECK1()
+        {
+			for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
+            {
+                var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
+
+				if (Data.Bots[ind].Xd != Data.BotDeath[i].Xd || Data.Bots[ind].Yd != Data.BotDeath[i].Yd)
+				{
+					throw new Exception("fgfdgdfgf");
+				}
+			
+                if (Data.World[Data.BotDeath[i].Xi, Data.BotDeath[i].Yi] != Data.BotDeath[i].Index)
+				{
+					throw new Exception("fdgdfgdfg");
+				}
+
+                if (!Data.BotDeath[i].InsertedToDeathList)
+                {
+					throw new Exception("fdgdfgdfg2");
+				}
+
+				if (Data.BotDeath[i].Index > Data.CurrentNumberOfBots)
+				{
+					throw new Exception("if (_ind > Data.CurrentBotsNumber)");
+				}
+
+
+				for (var j = 0; j < (int)Data.NumberOfBotDeath + 1; j++)
+				{
+                    if (i != j)
+                    {
+                        if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
+                        {
+							throw new Exception("if (_insdfdfsdfsdd > Data.CurrentBotsNumber)");
+						}
+					}
+                }
+			}
+
+			for (var i = 0; i < (int)Data.NumberOfBotReproduction + 1; i++)
+			{
+				var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotReproduction[i].Index && x.Num == Data.BotReproduction[i].Num);
+
+				if (Data.Bots[ind].Xd != Data.BotReproduction[i].Xd || Data.Bots[ind].Yd != Data.BotReproduction[i].Yd)
+				{
+					throw new Exception("fgfdg34dfgf");
+				}
+
+				if (Data.World[Data.BotReproduction[i].Xi, Data.BotReproduction[i].Yi] != Data.BotReproduction[i].Index)
+				{
+					throw new Exception("fdgdfgd34fg");
+				}
+
+				if (!Data.BotReproduction[i].InsertedToReproductionList)
+				{
+					throw new Exception("fdgdfgd34fg2");
+				}
+			}
+
+			int cnt0 = 0;
+			int cnt1 = 0;
+			for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			{
+				if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
+
+				if (Data.Bots[botNumber].InsertedToDeathList)
+				{
+					cnt0++;
+				}
+
+				if (Data.Bots[botNumber].InsertedToReproductionList)
+				{
+					cnt1++;
+				}
+			}
+			if (cnt0 != Data.NumberOfBotDeath + 1) throw new Exception("fdgergg");
+			if (cnt1 != Data.NumberOfBotReproduction + 1) throw new Exception("fdgergsdsdg");
+		}
+
+		public static void CHECK2()
+		{
+			if (removedbots1 != removedbots2) throw new Exception("dfgdfgf");
+
+			if (Data.NumberOfBotDeath != -1)
+			{
+				throw new Exception("fdgdfgds34fg2");
+			}
+
+			if (Data.NumberOfBotReproduction != -1)
+			{
+				throw new Exception("fdgdfgd3df4fg2");
+			}
+
+			var te = 0;
+			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			{
+                if (Data.Bots[i].Index != i)
+                {
+					throw new Exception("fdgdfgdsdfdf34f435345g");
+				}
+
+				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+				{
+					throw new Exception("fdgdfgd34f435345g");
+				}
+
+				te += Data.Bots[i].Energy;
+			}
+
+            //if(te != Data.TotalEnergy) throw new Exception("fdgdfgsdfd34f435345g");
+
+			var cnt = 0;
+            var dct = new Dictionary<long, int>();
+            long cont;
+
+            for (var x = 0; x < Data.WorldWidth; x++)
+            {
+                for (var y = 0; y < Data.WorldHeight; y++)
+                {
+                    cont = Data.World[x,y];
+                    if (cont<0) throw new Exception("fgfrgreg45645sdfds7");
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+						cnt++;
+
+                        if (dct.ContainsKey(cont))
+                        {
+                            dct[cont]++;
+                        }
+                        else 
+                        {
+                            dct.Add(cont, 1);
+                        }
+					}
+				}
+			}
+
+			if (cnt != Data.CurrentNumberOfBots) throw new Exception("fdfdgfdgd");
+			if (dct.Any(d=>d.Value>1)) throw new Exception("fdfdgf654dgd");
+		}
+	}
 }
 
 //              ███─███─████─███─█───█
@@ -487,7 +549,6 @@ namespace WindowsFormsApp1.Static
 //		}
 //	}
 //}
-
 
 
 // НАЙТИ ЕСТЬ ЛИ В МАССИВЕ WORLD ИНДЕКС БОЛЬШИЙ ЧЕМ Data.CurrentNumberOfBots
@@ -532,6 +593,17 @@ namespace WindowsFormsApp1.Static
 //	}
 
 //	return (cnt, lst);
+//}
+
+// ПРОВЕРИТЬ ЧТО У ВСЕХ БОТОВ Index СООТВЕТСТВУЕТ РЕАЛЬНОМУ ИНДЕКСУ В МАССИВЕ Data.Bots
+//private static void CheckIndex()
+//{
+//	for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+//	{
+//		if (Data.Bots[i].Index != i)
+//		{ 
+//		}
+//	}
 //}
 
 
@@ -662,63 +734,6 @@ namespace WindowsFormsApp1.Static
 //	return true;
 //}
 
-
-// ПРОВЕРИТЬ ЧТО КОЛИЧЕТВО ТОЧЕК В WORLD СОВПАДАЕТ С Data.CurrentNumberOfBots, ЕСЛИ НЕТ ТО
-// ВЫДАТЬ ИНФОРМАЦИЮ О ДУБЛЕ ИЛИ ОТСУТСТВУЮЩЕМ С ЕГО ЛОГОМ
-//public static bool CheckWorld3()
-//{
-//	var cnt = 0;
-//	long sum = 0;
-//	for (var x = 0; x < Data.WorldWidth; x++)
-//	{
-//		for (var y = 0; y < Data.WorldHeight; y++)
-//		{
-//			var cont = Data.World[x, y];
-
-//			if (cont > 0 && (cont < 65000 || cont > 65504))
-//			{
-//				sum += cont;
-//				cnt++;
-//			}
-//		}
-//	}
-
-//	long ttt;
-//	Bot1 bttt;
-//	List<LogRecord> log;
-//	long contttt;
-
-//	if (cnt != Data.CurrentNumberOfBots)
-//	{
-//		var st = Data.CurrentStep;
-//		var fcd = Data.BotDeath;
-
-//		if (Data.CurrentNumberOfBots - cnt == 1)
-//		{
-//			ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
-//			bttt = Data.Bots[ttt];
-//			log = bttt.Log.GetLog();
-//			contttt = Data.World[bttt.Xi, bttt.Yi];
-//		}
-
-//		if (Data.CurrentNumberOfBots - cnt == -1)
-//		{
-//			ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
-//			bttt = Data.Bots[ttt];
-//			log = bttt.Log.GetLog();
-//			contttt = Data.World[bttt.Xi, bttt.Yi];
-//			SearchDouble();
-
-//		}
-
-//		var numberOfBotDeath = Data.NumberOfBotDeath;
-//		return false;
-//	}
-
-//	return true;
-//}
-
-
 // ПРОЙТИ ПО ВСЕМУ МАССИВУ WORLD НАЙТИ ВСЕ ДУБЛИКАТЫ С КООРДИНАТАМИ И NUMS И ВЫДАТЬ ПОДРОБНУЮ ИНФОРМАЦИЮ ПО ДУБЛИКАТАМ
 //private static void SearchDouble()
 //{
@@ -776,15 +791,60 @@ namespace WindowsFormsApp1.Static
 //}
 
 
-// ПРОВЕРИТЬ ЧТО У ВСЕХ БОТОВ Index СООТВЕТСТВУЕТ РЕАЛЬНОМУ ИНДЕКСУ В МАССИВЕ Data.Bots
-//private static void CheckIndex()
+// ПРОВЕРИТЬ ЧТО КОЛИЧЕТВО ТОЧЕК В WORLD СОВПАДАЕТ С Data.CurrentNumberOfBots, ЕСЛИ НЕТ ТО
+// ВЫДАТЬ ИНФОРМАЦИЮ О ДУБЛЕ ИЛИ ОТСУТСТВУЮЩЕМ С ЕГО ЛОГОМ
+//public static bool CheckWorld3()
 //{
-//	for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+//	var cnt = 0;
+//	long sum = 0;
+//	for (var x = 0; x < Data.WorldWidth; x++)
 //	{
-//		if (Data.Bots[i].Index != i)
-//		{ 
+//		for (var y = 0; y < Data.WorldHeight; y++)
+//		{
+//			var cont = Data.World[x, y];
+
+//			if (cont > 0 && (cont < 65000 || cont > 65504))
+//			{
+//				sum += cont;
+//				cnt++;
+//			}
 //		}
 //	}
+
+//	long ttt;
+//	Bot1 bttt;
+//	List<LogRecord> log;
+//	long contttt;
+
+
+//	if (cnt != Data.CurrentNumberOfBots)
+//	{
+//		var st = Data.CurrentStep;
+//		var fcd = Data.BotDeath;
+
+//		if (Data.CurrentNumberOfBots - cnt == 1)
+//		{
+//			ttt = Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2 - sum;
+//			bttt = Data.Bots[ttt];
+//			log = bttt.Log.GetLog();
+//			contttt = Data.World[bttt.Xi, bttt.Yi];
+//		}
+
+//		if (Data.CurrentNumberOfBots - cnt == -1)
+//		{
+//			ttt = sum - Data.CurrentNumberOfBots * (Data.CurrentNumberOfBots + 1) / 2;
+//			bttt = Data.Bots[ttt];
+//			log = bttt.Log.GetLog();
+//			contttt = Data.World[bttt.Xi, bttt.Yi];
+//			SearchDouble();
+
+//		}
+
+//		var numberOfBotDeath = Data.NumberOfBotDeath;
+//		return false;
+//	}
+
+//	return true;
 //}
 
 
@@ -799,3 +859,49 @@ namespace WindowsFormsApp1.Static
 
 //    return te;
 //}
+
+
+//public static (int, Dictionary<long, int>) GetAllBotsEnergy()
+//{
+//	var te = 0;
+//	var dct = new Dictionary<long, int>();
+//	int en;
+
+//	for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+//	{
+//		en = Data.Bots[botIndex].Energy;
+//		te += en;
+//		dct.Add(botIndex, en);
+//	}
+
+//	return (te, dct);
+//}
+
+
+//public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
+//{
+//	var te2 = 0;
+//	int en;
+//	var dct2 = new Dictionary<long, (int, int)>();
+
+//	for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+//	{
+//		en = Data.Bots[botIndex].Energy;
+//		te2 += en;
+//		if (dct[botIndex] != en)
+//		{
+//			dct2.Add(botIndex, (dct[botIndex], en));
+//		}
+//	}
+
+//	if (te1 != te2 && dct2.Count > 0)
+//	{
+//		var st = Data.CurrentStep;
+//		var bc2 = Data.CurrentNumberOfBots;
+//		var indttt = dct2.First().Key;
+//		var bttt = Data.Bots[indttt];
+//		var log = bttt.Log.GetLog();
+//	}
+//}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
