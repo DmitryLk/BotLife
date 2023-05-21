@@ -130,7 +130,7 @@ namespace WindowsFormsApp1.Static
                     var lastIndex = lastBot.Index;
                     Data.Bots[maxworlddeathindex] = lastBot;
                     lastBot.Index = maxworlddeathindex;
-                    lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
+                    //lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
                     Data.World[lastBot.Xi, lastBot.Yi] = maxworlddeathindex;
 
                     //Func.CheckWorld2();

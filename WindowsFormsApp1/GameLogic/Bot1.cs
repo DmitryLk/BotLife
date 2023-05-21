@@ -47,7 +47,7 @@ namespace WindowsFormsApp1.GameLogic
         public int OldPointer;
 
         public CodeHistory Hist;
-        public BotLog Log;
+        //public BotLog Log;
 
         public double Xd;
         public double Yd;
@@ -140,7 +140,7 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						if (!InsertedToDeathList)
 						{
-							Log.AddLog("bot inserted to DeathList");
+							//Log.AddLog("bot inserted to DeathList");
 
 							InsertedToDeathList = true;
 							var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
@@ -171,7 +171,7 @@ namespace WindowsFormsApp1.GameLogic
             OldPointer = pointer;
             this.Genom = genom;
             Hist = new CodeHistory();
-            Log = new BotLog();
+            //Log = new BotLog();
 
             Direction = dir;
             Num = botNumber;
@@ -186,7 +186,7 @@ namespace WindowsFormsApp1.GameLogic
 
             InsertedToDeathList = false;
             InsertedToReproductionList = false;
-            Log.AddLog($"bot was born. index:{Index}");
+            //Log.AddLog($"bot was born. index:{Index}");
         }
 
         public void RefreshColor()
@@ -478,8 +478,8 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
 
-            eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
-            Log.AddLog($"bot bite bot{cont} and got {gotEnergyByEating} energy.");
+            //eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
+            //Log.AddLog($"bot bite bot{cont} and got {gotEnergyByEating} energy.");
         }
 
 
@@ -584,7 +584,7 @@ namespace WindowsFormsApp1.GameLogic
                     Func.FixChangeCell(nXi, nYi, Color);
                 }
 
-                Log.AddLog($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
+                //Log.AddLog($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
 
                 Xd = nXd;
                 Yd = nYd;

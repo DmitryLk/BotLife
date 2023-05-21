@@ -164,10 +164,6 @@ namespace WindowsFormsApp1
 			Data.Checks = !Data.Checks;
 		}
 
-		//case Keys.D1: Game.GenomInfo(GenomInfoMode.LiveBotsNumber); break;
-		//case Keys.D2: Game.GenomInfo(GenomInfoMode.GenomLifetime); break;
-		//case Keys.D3: Game.GenomInfo(GenomInfoMode.AllBotsNumber); break;
-		//case Keys.D4: Game.GenomInfo(GenomInfoMode.AverageBotsLifetime); break;
 		public void GenomInfo(GenomInfoMode mode)
 		{
 			_PRINTER.Print2(mode);

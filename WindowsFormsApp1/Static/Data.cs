@@ -192,9 +192,9 @@ namespace WindowsFormsApp1.Static
 				return Color.FromArgb(255, v, p, q);
 		}
 
-		public static string GetTextForCaption()
+		public static string GetTextForCaption(double fps)
 		{
-			return CurrentNumberOfBots.ToString();
+			return $"Bots: {CurrentNumberOfBots}                Fps: {fps.ToString("#")}";
 		}
 
 		public static string GetText(double fps)

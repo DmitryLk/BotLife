@@ -163,49 +163,45 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}");
 			sb.AppendLine("");
 
+            IEnumerable<Genom> genoms;
 			switch (mode)
 			{
 				case GenomInfoMode.LiveBotsNumber:
-					sb.AppendLine("По кол-ву живых ботов");
-					var genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderByDescending(g => g.CurBots).Take(10);
-					foreach (var g in genoms)
-					{
-						sb.AppendLine($"{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
-					}
+					sb.AppendLine("ПО КОЛ-ВУ ЖИВЫХ БОТОВ");
+					genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderByDescending(g => g.CurBots).Take(10);
 					break;
 
 				case GenomInfoMode.GenomLifetime:
-					sb.AppendLine("По времени жизни генома");
+					sb.AppendLine("ПО ВРЕМЕНИ ЖИЗНИ ГЕНОМА");
 					genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderBy(g => g.BeginStep).Take(10);
-					foreach (var g in genoms)
-					{
-						sb.AppendLine($"{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  ={Data.CurrentStep - g.BeginStep}");
-					}
 					break;
 
 				case GenomInfoMode.AllBotsNumber:
-					sb.AppendLine("По общему кол-ву ботов");
+					sb.AppendLine("ПО ОБЩЕМУ КОЛ-ВУ БОТОВ");
 					genoms = GENOMS.Keys.OrderByDescending(g => g.AllBots).Take(10);
-					foreach (var g in genoms)
-					{
-						sb.AppendLine($"{g.AllBots}/{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  {(g._curBots == 0 ? $"{g.EndStep - g.BeginStep}" : "L")}");
-					}
 					break;
 
 				case GenomInfoMode.AverageBotsLifetime:
-					sb.AppendLine("По ср.пр.жизни ботов");
+					sb.AppendLine("По СР.ВОЗРАСТУ БОТОВ");
 					genoms = GENOMS.Keys.Where(g => g.RemovedBots > 10).OrderByDescending(g => g.AgeBots / g.RemovedBots).Take(10);
-					foreach (var g in genoms)
-					{
-						sb.AppendLine($"{g.AllBots}/{g.CurBots} - {g.PraNum}({g.Num})  L{g.Level}  {g.AgeBots / g.RemovedBots}");
-					}
 					break;
 
 				default: throw new Exception("fgfdgfdg");
 
 			}
 
-			return sb.ToString();
+            sb.AppendLine("Живых|Всего |Первый|Текущий|Поколение |Возраст |Ср.возраст|");
+            sb.AppendLine("ботов  |ботов  |геном   |геном    |генома        |генома   |ботов        |");
+
+			foreach (var g in genoms)
+            {
+                var genomAge = g._curBots == 0 ? $"{g.EndStep - g.BeginStep}N" : $"{Data.CurrentStep - g.BeginStep}L";
+
+				sb.AppendLine($"|  {g.CurBots,-8}|  {g.AllBots,-8}|  {g.PraNum,-10}|  {g.Num,-11}|  {g.Level,-15}|  {genomAge,-11}|  {(g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0),-14}|");
+            }
+
+            
+            return sb.ToString();
 		}
 	}
 }

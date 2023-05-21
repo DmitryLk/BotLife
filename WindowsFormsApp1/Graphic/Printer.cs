@@ -60,10 +60,7 @@ namespace WindowsFormsApp1.Graphic
                 _textBoxes[1].Text = Data.GetText(fps);
                 _textBoxes[1].Update();
 
-                //_textBoxes[2].Text = Genom.GetText();
-                //_textBoxes[2].Update();
-
-                _form.Text = $"Bots: {Data.GetTextForCaption()}";
+                _form.Text = Data.GetTextForCaption(fps);
 
 
 				Print5();
@@ -78,14 +75,7 @@ namespace WindowsFormsApp1.Graphic
 
 		public void Print3(Bot1 bot)
         {
-            if (bot != null)
-            {
-                _textBoxes[3].Text = bot.GetText1();
-            }
-            else
-            {
-                _textBoxes[3].Text = "";
-            }
+            _textBoxes[3].Text = bot != null ? bot.GetText1() : "";
             _textBoxes[3].Update();
 
             //_cnt++;
@@ -103,14 +93,7 @@ namespace WindowsFormsApp1.Graphic
 
         public void Print4(Bot1 bot, int delta)
         {
-            if (bot != null)
-            {
-                _textBoxes[4].Text = bot.GetText2(delta);
-            }
-            else
-            {
-                _textBoxes[4].Text = "";
-            }
+            _textBoxes[4].Text = bot != null ? bot.GetText2(delta) : "";
             _textBoxes[4].Update();
         }
 
