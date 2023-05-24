@@ -30,11 +30,11 @@ namespace WindowsFormsApp1.GameLogic
 
         private static readonly object _busyWorld1 = new object();
         private static readonly object _busyWorld2 = new object();
-        private static readonly object _busyTotalEnergy = new object();
-
-
         private readonly object _busyBotEnergy = new object();
+        private readonly object _busyInsertedToReproductionList = new object();
+        //private static readonly object _busyTotalEnergy = new object();
         //private readonly object _busyBite = new object();
+        //private readonly object _busyInsertedToDeathList = new object();
 
 
 
@@ -65,8 +65,6 @@ namespace WindowsFormsApp1.GameLogic
 
         public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
         public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
-        private readonly object _busyInsertedToDeathList = new object();
-        private readonly object _busyInsertedToReproductionList = new object();
 
         private int df = 0;
 
@@ -108,64 +106,38 @@ namespace WindowsFormsApp1.GameLogic
 
         public int EnergyChange(int delta)
         {
-            int olden;
-            int newen;
             lock (_busyBotEnergy)
             {
-                olden = _en;
+                if (_en + delta < 0) delta = -_en;
                 _en += delta;
-                if (_en <= 0) _en = 0;
-                newen = _en;
+                if (_en == 0 && !InsertedToDeathList)
+                {
+                    //Log.AddLog("bot inserted to DeathList");
+                    InsertedToDeathList = true;
+                    Data.BotDeath[Interlocked.Increment(ref Data.NumberOfBotDeath)] = this;
+                }
             }
 
-			if (newen < 0)
-			{
+            if (_en < 0)
+            {
                 throw new Exception("fdgdfgdfg");
             }
 
-			if (newen == 0)
-			{
-				ToDeathList();
-			}
+            if (Data.BotColorMode == BotColorMode.Energy)
+            {
+                Color = GetGraduatedColor(Energy, 0, 6000);
+                if (Data.DrawType == DrawType.OnlyChangedCells)
+                {
+                    Func.FixChangeCell(Xi, Yi, Color);
+                }
+            }
 
-			ChangeEnergyColor();
-
-            return olden - newen;
-
-			void ToDeathList()
-			{
-				if (!InsertedToDeathList)
-				{
-					lock (_busyInsertedToDeathList)
-					{
-						if (!InsertedToDeathList)
-						{
-							//Log.AddLog("bot inserted to DeathList");
-
-							InsertedToDeathList = true;
-							var num = Interlocked.Increment(ref Data.NumberOfBotDeath);
-							Data.BotDeath[num] = this;
-    					}
-					}
-				}
-			}
-
-			void ChangeEnergyColor()
-			{
-				if (Data.BotColorMode == BotColorMode.Energy)
-				{
-					Color = GetGraduatedColor(Energy, 0, 6000);
-					if (Data.DrawType == DrawType.OnlyChangedCells)
-					{
-						Func.FixChangeCell(Xi, Yi, Color);
-					}
-				}
-			}
-		}
+            return -delta;
+        }
 
 
 
-		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
+        public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
         {
             Pointer = pointer;
             OldPointer = pointer;
@@ -294,10 +266,7 @@ namespace WindowsFormsApp1.GameLogic
 
             EnergyChange(Data.DeltaEnergyOnStep);
 
-            lock (_busyTotalEnergy)
-            {
-                Data.TotalEnergy += Data.DeltaEnergyOnStep;
-            }
+            Interlocked.Add(ref Data.TotalEnergy, Data.DeltaEnergyOnStep);
 
 
             //Func.CheckWorld2(Index, Num, Xi, Yi);
@@ -364,9 +333,7 @@ namespace WindowsFormsApp1.GameLogic
                     {
 
                         InsertedToReproductionList = true;
-                        var num = Interlocked.Increment(ref Data.NumberOfBotReproduction);
-                        Data.BotReproduction[num] = this;
-
+                        Data.BotReproduction[Interlocked.Increment(ref Data.NumberOfBotReproduction)] = this;
                     }
                 }
             }
@@ -377,10 +344,7 @@ namespace WindowsFormsApp1.GameLogic
             if (Yi < Data.PhotosynthesisLayerHeight)
             {
                 EnergyChange(Data.PhotosynthesisEnergy);
-                lock (_busyTotalEnergy)
-                {
-                    Data.TotalEnergy += Data.PhotosynthesisEnergy;
-                }
+                Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
                 Genom.Plant = true;
                 //genom.Color = Color.Green;
                 return (1, true);
@@ -443,8 +407,8 @@ namespace WindowsFormsApp1.GameLogic
                     : throw new Exception("return cont switch")
             };
 
-			// Bot || Relative
-			if (refContent == RefContent.Bot || refContent == RefContent.Relative)  
+            // Bot || Relative
+            if (refContent == RefContent.Bot || refContent == RefContent.Relative)
             {
                 EatBot(cont);
             }
@@ -471,12 +435,12 @@ namespace WindowsFormsApp1.GameLogic
             //		return;
             //	}
             //}
-            
-            
-            var gotEnergyByEating = eatedBot.EnergyChange(-Data.BiteEnergy);
-			EnergyChange(gotEnergyByEating);
 
-			if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+
+            var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+            EnergyChange(gotEnergyByEating);
+
+            if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
 
             //eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
             //Log.AddLog($"bot bite bot{cont} and got {gotEnergyByEating} energy.");
@@ -522,7 +486,7 @@ namespace WindowsFormsApp1.GameLogic
             return (2, false);
         }
 
-		//https://www.messletters.com/ru/big-text/ banner3
+        //https://www.messletters.com/ru/big-text/ banner3
         //////////////////////////////////////////////////////////////////
         //			##     ##  #######  ##     ## ######## 
         //			###   ### ##     ## ##     ## ##       

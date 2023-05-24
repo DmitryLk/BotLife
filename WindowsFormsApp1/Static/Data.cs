@@ -129,7 +129,7 @@ namespace WindowsFormsApp1.Static
 			GrColors = new Color[361];
 
 			BotDeath = new Bot1[3000];
-			BotReproduction = new Bot1[3000];
+			BotReproduction = new Bot1[5000];
 			NumberOfBotDeath = -1;
 			NumberOfBotReproduction = -1;
 			DeathCnt = 0;

@@ -42,8 +42,8 @@
   "SeedBotEnergy": 1000,
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
-  "BiteEnergy": 1000,
-  "DeltaEnergyOnStep": -1,
+  "BiteEnergy": -1000,
+  "DeltaEnergyOnStep": 0,
   "PhotosynthesisEnergy": 30,
   "PhotosynthesisLayerHeight": 0,
 
