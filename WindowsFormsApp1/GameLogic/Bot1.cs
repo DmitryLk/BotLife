@@ -110,10 +110,22 @@ namespace WindowsFormsApp1.GameLogic
             {
                 if (_en + delta < 0) delta = -_en;
                 _en += delta;
+
+
+                if (InsertedToDeathList)
+                { 
+                    if (_en>0)
+                    {
+                        InsertedToDeathList = false;
+                        Interlocked.Decrement(ref Data.NumberOfBotDeathFactCnt);
+                    }
+                }
+
                 if (_en == 0 && !InsertedToDeathList)
                 {
                     //Log.AddLog("bot inserted to DeathList");
                     InsertedToDeathList = true;
+                    Interlocked.Increment(ref Data.NumberOfBotDeathFactCnt);
                     Data.BotDeath[Interlocked.Increment(ref Data.NumberOfBotDeath)] = this;
                 }
             }
@@ -135,6 +147,15 @@ namespace WindowsFormsApp1.GameLogic
             return -delta;
         }
 
+        public void EnergySet(int en)
+        {
+            if (en <= 0) throw new Exception("sdfsdf");
+
+            lock (_busyBotEnergy)
+            {
+                _en = en;
+            }
+        }
 
 
         public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)

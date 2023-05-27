@@ -73,9 +73,11 @@ namespace WindowsFormsApp1.Static
 		public static long SeedTotalEnergy;
 
 		// Death Reproduction		
-		public static Bot1[] BotDeath;
+        public static Bot1[] BotDeath;
 		public static Bot1[] BotReproduction;
-		public static long NumberOfBotDeath;
+        public static long NumberOfBotDeath;
+        public static long NumberOfBotDeathFactCnt;
+        public static long NumberOfBotDeathForReproduction;
 		public static long NumberOfBotReproduction;
 		public static long DeathCnt;
 		public static long ReproductionCnt;
@@ -131,6 +133,7 @@ namespace WindowsFormsApp1.Static
 			BotDeath = new Bot1[3000];
 			BotReproduction = new Bot1[5000];
 			NumberOfBotDeath = -1;
+            NumberOfBotDeathFactCnt = 0;
 			NumberOfBotReproduction = -1;
 			DeathCnt = 0;
 			ReproductionCnt = 0;

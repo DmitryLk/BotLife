@@ -62,44 +62,59 @@ namespace WindowsFormsApp1.GameLogic
 			if (Data.Checks) Func.CHECK1();
 
 
+            // ============ REPRODUCTION ===================================================================
+            Data.NumberOfBotDeathForReproduction = -1;
+            if (Data.NumberOfBotReproduction > -1)
+            {
+                //SearchDouble();
+                Parallel.For(0, (int)Data.NumberOfBotReproduction + 1, Func.ReproductionBot);
+                //SearchDouble();
+                Data.NumberOfBotReproduction = -1;
+            }
+			Test.NextInterval(12, "reproduction");
+            // =============================================================================================
 
-			if (Data.NumberOfBotDeath > -1)
-			{
+
+
+			// ============ DEATH ==========================================================================
+			if (Data.NumberOfBotDeathForReproduction < Data.NumberOfBotDeath) // еще есть в запасе умирающие боты
+            {
 				// МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
-				Func.Death();
+                Func.Removedbots1 = 0;
+                Func.NumberOfLastBot = Data.CurrentNumberOfBots + 1;
+				Parallel.For((int)Data.NumberOfBotDeathForReproduction + 1, (int)Data.NumberOfBotDeath + 1, Func.DeathBot);
+                Data.DeathCnt += Func.Removedbots1;
+                Data.NumberOfBotDeath = -1;
+                Data.NumberOfBotDeathFactCnt = 0;
 			}
+			Test.NextInterval(11, "death");
+            // =============================================================================================
 
-   //         int cnt3 = 0;
-   //         for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-   //         {
-   //             if (Data.Bots[botNumber].InsertedToDeathList)
-   //             {
+
+
+			if (Data.Checks) Func.CHECK2();
+
+
+            
+            
+            //         int cnt3 = 0;
+			//         for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			//         {
+			//             if (Data.Bots[botNumber].InsertedToDeathList)
+			//             {
 			//		for (var i = 1; i < Data.MaxBotsNumber; i++)
-   //                 {
-   //                     if (Data.Bots[i] == null)
-   //                     {
-   //                         goto frg;
-   //                     }
-
-   //                     cnt3 += Data.Bots[i].InsertedToDeathList ? 1 : 0;
-   //                 }
+			//                 {
+			//                     if (Data.Bots[i] == null)
+			//                     {
+			//                         goto frg;
+			//                     }
+			//                     cnt3 += Data.Bots[i].InsertedToDeathList ? 1 : 0;
+			//                 }
 			//		//var cnt2 = Data.Bots.Take(100).Count(b => b.InsertedToDeathList);
 			//	}
 			//}
 			//frg:
-
-
-
-            Test.NextInterval(11, "death");
-
 			//Func.CheckWorld3();
-
-			if (Data.NumberOfBotReproduction > -1)
-			{
-				Func.Reproduction();
-			}
-			Test.NextInterval(12, "reproduction");
-
 			//int cnt5 = 0;
 			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
 			//{
@@ -108,24 +123,17 @@ namespace WindowsFormsApp1.GameLogic
 			//        cnt5++;
 			//    }
 			//}
-
 			//if (cnt5 != 0) throw new Exception("dfgdf");
-
-			if (Data.Checks) Func.CHECK2();
-
-
 			//Func.CheckWorld3();
 			//Func.CheckWorld2();
-
 			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
 			//{
-
 			//	Data.Bots[botNumber].Step();
 			//	//Bots[botNumber].Live();
 			//	//Bots[botNumber].Move();
 			//}
-			Data.CurrentStep++;
 
+            Data.CurrentStep++;
 			while (Data.TotalEnergy < Data.SeedTotalEnergy)
 			{
 				if (Func.TryGetRandomFreeCell(out var x, out var y))
@@ -134,7 +142,6 @@ namespace WindowsFormsApp1.GameLogic
 					Func.FixChangeCell(x, y, Color.Green);
 
 					Data.TotalEnergy += Data.FoodEnergy;
-
 				}
 				else
 				{
@@ -148,7 +155,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 /*
- 
+// Возможные ошибки: может ли бот одновременно быть вставлен в оба списка? 
 
 // Включен лог
 
