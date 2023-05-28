@@ -245,12 +245,20 @@ namespace WindowsFormsApp1.Static
             if (Data.NumberOfBotDeathForReproduction < Data.NumberOfBotDeath) // еще есть в запасе умирающие боты
             {
                 long ind;
+                int en;
                 do
                 {
                     ind = Interlocked.Increment(ref Data.NumberOfBotDeathForReproduction);
+                    en = Data.BotDeath[ind].Energy;
+
+
+					if (en > 0)
+                    {
+						Data.BotDeath[ind].InsertedToDeathList = false;  
+					}
                     //если энергия бота >0 то здесь его надо убрать из массива
                 }
-                while (ind < Data.NumberOfBotDeath && Data.BotDeath[ind].Energy > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
+                while (ind < Data.NumberOfBotDeath && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
 
                 if (ind <= Data.NumberOfBotDeath)
                 {
@@ -504,7 +512,7 @@ namespace WindowsFormsApp1.Static
                     throw new Exception("fdgdfgdfg");
                 }
 
-                if (!Data.BotDeath[i].InsertedToDeathList)
+                if (!Data.BotDeath[i].InsertedToDeathList && Data.BotDeath[i].Energy == 0)
                 {
                     throw new Exception("fdgdfgdfg2");
                 }
@@ -551,7 +559,8 @@ namespace WindowsFormsApp1.Static
             int cnt1 = 0;
             for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
             {
-                if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
+                if (Data.Bots[botNumber] == null) throw new Exception("rtfghrsfd45tsdfsdfhrt");
+				if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
 
                 if (Data.Bots[botNumber].InsertedToDeathList)
                 {
@@ -584,7 +593,8 @@ namespace WindowsFormsApp1.Static
             var te = 0;
             for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
             {
-                if (Data.Bots[i].Index != i)
+				if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+				if (Data.Bots[i].Index != i)
                 {
                     throw new Exception("fdgdfgdsdfdf34f435345g");
                 }

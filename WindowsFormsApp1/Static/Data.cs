@@ -143,7 +143,7 @@ namespace WindowsFormsApp1.Static
 			PausedMode = false;
 			LensOn = false;
 			Parallel = true;
-			Checks = false;
+			Checks = true;
 
 			DrawMode = DrawMode.EachStep;
 			NextDrawMode = DrawMode.EachStep;

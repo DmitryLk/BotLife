@@ -63,6 +63,7 @@ namespace WindowsFormsApp1.GameLogic
         private int _en;
         private int _size;
 
+        public bool Alive;
         public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
         public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
 
@@ -112,23 +113,25 @@ namespace WindowsFormsApp1.GameLogic
                 _en += delta;
 
 
-                if (InsertedToDeathList)
-                { 
-                    if (_en>0)
-                    {
-                        InsertedToDeathList = false;
-                        Interlocked.Decrement(ref Data.NumberOfBotDeathFactCnt);
-                    }
-                }
-
-                if (_en == 0 && !InsertedToDeathList)
+                if (!Alive && _en > 0)
                 {
-                    //Log.AddLog("bot inserted to DeathList");
-                    InsertedToDeathList = true;
-                    Interlocked.Increment(ref Data.NumberOfBotDeathFactCnt);
-                    Data.BotDeath[Interlocked.Increment(ref Data.NumberOfBotDeath)] = this;
-                }
-            }
+                    Alive = true;
+					Interlocked.Decrement(ref Data.NumberOfBotDeathFactCnt);
+					//InsertedToDeathList = false;
+				}
+
+				if (_en == 0 && Alive)
+                {
+                    Alive = false;
+					Interlocked.Increment(ref Data.NumberOfBotDeathFactCnt);
+					if (!InsertedToDeathList)
+                    {
+						InsertedToDeathList = true;
+						Data.BotDeath[Interlocked.Increment(ref Data.NumberOfBotDeath)] = this;
+						//Log.AddLog("bot inserted to DeathList");
+					}
+				}
+			}
 
             if (_en < 0)
             {
@@ -179,6 +182,7 @@ namespace WindowsFormsApp1.GameLogic
 
             InsertedToDeathList = false;
             InsertedToReproductionList = false;
+            Alive = true;
             //Log.AddLog($"bot was born. index:{Index}");
         }
 

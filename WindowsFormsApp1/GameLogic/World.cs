@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
+using System.Threading;
 using System.Threading.Tasks;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
@@ -83,10 +84,11 @@ namespace WindowsFormsApp1.GameLogic
                 Func.Removedbots1 = 0;
                 Func.NumberOfLastBot = Data.CurrentNumberOfBots + 1;
 				Parallel.For((int)Data.NumberOfBotDeathForReproduction + 1, (int)Data.NumberOfBotDeath + 1, Func.DeathBot);
-                Data.DeathCnt += Func.Removedbots1;
-                Data.NumberOfBotDeath = -1;
-                Data.NumberOfBotDeathFactCnt = 0;
+				Data.CurrentNumberOfBots -= Func.Removedbots1;
+				Data.DeathCnt += Func.Removedbots1;
 			}
+			Data.NumberOfBotDeathFactCnt = 0;
+			Data.NumberOfBotDeath = -1;
 			Test.NextInterval(11, "death");
             // =============================================================================================
 
