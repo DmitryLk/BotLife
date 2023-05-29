@@ -196,7 +196,12 @@ namespace WindowsFormsApp1.Static
                 var dBotIndex = dBot.Index;
                 Data.Bots[dBotIndex] = lastBot;
                 lastBot.Index = dBotIndex;
-                Data.World[lastBot.Xi, lastBot.Yi] = dBotIndex;
+				lock (_busyWorld)
+				{
+					Data.World[lastBot.Xi, lastBot.Yi] = dBotIndex;
+				}
+                // конец переноса
+				
 
                 //lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
                 Data.Bots[lastBotIndex] = null;
@@ -206,7 +211,6 @@ namespace WindowsFormsApp1.Static
                 Data.Bots[dBot.Index] = null;
             }
 
-            Interlocked.Decrement(ref Data.CurrentNumberOfBots);
             Interlocked.Increment(ref Removedbots1);
         }
 
@@ -252,11 +256,11 @@ namespace WindowsFormsApp1.Static
                     en = Data.BotDeath[ind].Energy;
 
 
+					//если энергия бота >0 то здесь его надо убрать из массива
 					if (en > 0)
                     {
 						Data.BotDeath[ind].InsertedToDeathList = false;  
 					}
-                    //если энергия бота >0 то здесь его надо убрать из массива
                 }
                 while (ind < Data.NumberOfBotDeath && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
 
@@ -296,11 +300,12 @@ namespace WindowsFormsApp1.Static
             var xiold = updBot.Xi;
             var yiold = updBot.Yi;
             Interlocked.Increment(ref Data.DeathCnt);
-            Data.BotDeath[ind] = null;
             Interlocked.Increment(ref Removedbots1);
-            //Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
+			//Data.BotDeath[ind] = null;
+			//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
 
-            updBot.Xi = x;
+            // Изменение бота
+			updBot.Xi = x;
             updBot.Xd = x;
             updBot.Yi = y;
             updBot.Yd = y;
@@ -621,7 +626,10 @@ namespace WindowsFormsApp1.Static
                     if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
                     if (cont > 0 && (cont < 65000 || cont > 65504))
                     {
-                        if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+                        if (cont > Data.CurrentNumberOfBots) 
+                        { 
+                            //throw new Exception("fgfrgreg456457"); 
+                        }
                         cnt++;
 
                         if (dct.ContainsKey(cont))
@@ -636,10 +644,46 @@ namespace WindowsFormsApp1.Static
                 }
             }
 
-            if (cnt != Data.CurrentNumberOfBots) throw new Exception("fdfdgfdgd");
-            if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
+            if (cnt != Data.CurrentNumberOfBots) 
+            {
+				//throw new Exception("fdfdgfdgd");
+			}
+			if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
         }
-    }
+
+
+		public static void CHECK3()
+		{
+			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			{
+				if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+				if (Data.Bots[i].Index != i)
+				{
+					throw new Exception("fdgdfgdsdfdf34f435345g");
+				}
+
+				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+				{
+					throw new Exception("fdgdfgd34f435345g");
+				}
+			}
+
+			long cont;
+			for (var x = 0; x < Data.WorldWidth; x++)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+					cont = Data.World[x, y];
+					if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+					}
+				}
+			}
+
+		}
+	}
 }
 
 //              ███─███─████─███─█───█

@@ -73,19 +73,52 @@ namespace WindowsFormsApp1.GameLogic
                 Data.NumberOfBotReproduction = -1;
             }
 			Test.NextInterval(12, "reproduction");
-            // =============================================================================================
+			// =============================================================================================
 
+			if (Data.Checks) Func.CHECK3();
 
 
 			// ============ DEATH ==========================================================================
+			long cont;
 			if (Data.NumberOfBotDeathForReproduction < Data.NumberOfBotDeath) // еще есть в запасе умирающие боты
             {
+				for (var x = 0; x < Data.WorldWidth; x++)
+				{
+					for (var y = 0; y < Data.WorldHeight; y++)
+					{
+						cont = Data.World[x, y];
+						if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+						if (cont > 0 && (cont < 65000 || cont > 65504))
+						{
+							if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+						}
+					}
+				}
 				// МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
-                Func.Removedbots1 = 0;
+				Func.Removedbots1 = 0;
                 Func.NumberOfLastBot = Data.CurrentNumberOfBots + 1;
 				Parallel.For((int)Data.NumberOfBotDeathForReproduction + 1, (int)Data.NumberOfBotDeath + 1, Func.DeathBot);
 				Data.CurrentNumberOfBots -= Func.Removedbots1;
 				Data.DeathCnt += Func.Removedbots1;
+
+				for (var x = 0; x < Data.WorldWidth; x++)
+				{
+					for (var y = 0; y < Data.WorldHeight; y++)
+					{
+						cont = Data.World[x, y];
+						if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+						if (cont > 0 && (cont < 65000 || cont > 65504))
+						{
+							if (cont > Data.CurrentNumberOfBots)
+							{
+								var st = Data.CurrentStep;
+								var t = Data.BotDeath;
+								throw new Exception("fgfrgreg456457");
+							}
+						}
+					}
+				}
+
 			}
 			Data.NumberOfBotDeathFactCnt = 0;
 			Data.NumberOfBotDeath = -1;
