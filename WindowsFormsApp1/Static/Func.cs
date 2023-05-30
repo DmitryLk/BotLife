@@ -29,9 +29,18 @@ namespace WindowsFormsApp1.Static
     {
         private static readonly object _busyWorld = new object();
         private static readonly object _busyChWorld = new object();
+        
+        
+        // Counters:
         public static int Removedbots1;
         public static long NumberOfLastBot;
+        public static long NumberOfFailedReproductionCnt;
+        public static long IndexEnclusiveBeforeReplacesBots;
         //private static int removedbots2;
+
+
+
+
 
         // Список измененных ячеек для последующей отрисовки
         //public long[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
@@ -162,9 +171,10 @@ namespace WindowsFormsApp1.Static
             var dBot = Data.BotDeath[index];
 
             //Func.CheckWorld2();
-            if (dBot.Energy > 0) 
+            if (dBot.Energy > 0)
             {
                 dBot.InsertedToDeathList = false;
+                Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Failed Energy > 0");
                 return; //бот успел поесть и выжил
             }
 
@@ -181,34 +191,47 @@ namespace WindowsFormsApp1.Static
             dBot.Genom.DecBot(dBot.Age);
 
             // Разобраться надо ли обменивать этого бота
-            if (dBot.Index <= Data.CurrentNumberOfBots - Data.NumberOfBotDeathFactCnt)
+            if (dBot.Index <= Func.IndexEnclusiveBeforeReplacesBots)
             {
-                // Найти бота для обмена в конце списка
+                // Найти живого бота для обмена в конце списка (с индексом > Func.IndexEnclusiveBeforeReplacesBots)
                 long lastBotIndex;
                 do
                 {
                     lastBotIndex = Interlocked.Decrement(ref NumberOfLastBot);
                 }
-                while (Data.Bots[lastBotIndex].InsertedToDeathList && Data.Bots[lastBotIndex].Energy == 0);
+                while (Data.Bots[lastBotIndex] == null || 
+                       (Data.Bots[lastBotIndex].InsertedToDeathList && Data.Bots[lastBotIndex].Energy == 0));
 
-                // Перенос lastBot на место dBot
-                var lastBot = Data.Bots[lastBotIndex];
-                var dBotIndex = dBot.Index;
-                Data.Bots[dBotIndex] = lastBot;
-                lastBot.Index = dBotIndex;
-				lock (_busyWorld)
-				{
-					Data.World[lastBot.Xi, lastBot.Yi] = dBotIndex;
-				}
-                // конец переноса
-				
+                //!!!!!!!Переносить только если lastBotIndex > Func.IndexEnclusiveBeforeReplacesBots
+                if (lastBotIndex > Func.IndexEnclusiveBeforeReplacesBots)
+                {
+                    // Перенос lastBot на место dBot
+                    var lastBot = Data.Bots[lastBotIndex];
+                    var dBotIndex = dBot.Index;
+                    Data.Bots[dBotIndex] = lastBot;
+                    lastBot.Index = dBotIndex;
+                    lock (_busyWorld)
+                    {
+                        Data.World[lastBot.Xi, lastBot.Yi] = dBotIndex;
+                    }
+                    // конец переноса
 
-                //lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
-                Data.Bots[lastBotIndex] = null;
+
+                    //lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
+                    Data.Bots[lastBotIndex] = null;
+                    Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
+                }
+                else
+                {
+                    Data.Bots[dBot.Index] = null;
+                    Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index}");
+                    throw new Exception("странно");
+                }
             }
             else
             {
                 Data.Bots[dBot.Index] = null;
+                Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index}");
             }
 
             Interlocked.Increment(ref Removedbots1);
@@ -232,8 +255,19 @@ namespace WindowsFormsApp1.Static
             var reproductedBot = Data.BotReproduction[index];
             reproductedBot.InsertedToReproductionList = false;
 
-            if (!reproductedBot.CanReproduct()) return;
-            if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x, out var y)) return;
+            if (!reproductedBot.CanReproduct())
+            {
+                Interlocked.Increment(ref Func.NumberOfFailedReproductionCnt);
+                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.LastIndexOfBotDeathArrayUsedForReproduction}");
+                return;
+            }
+            if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x,
+                    out var y))
+            {
+                Interlocked.Increment(ref Func.NumberOfFailedReproductionCnt);
+                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.LastIndexOfBotDeathArrayUsedForReproduction}");
+                return;
+            }
 
 
             var genom = Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
@@ -246,38 +280,49 @@ namespace WindowsFormsApp1.Static
             // Data.NumberOfBotDeathForReproduction = -1 - первоначально
             // Data.BotDeath - массив умирающих ботов
 
-            if (Data.NumberOfBotDeathForReproduction < Data.NumberOfBotDeath) // еще есть в запасе умирающие боты
+            if (Data.LastIndexOfBotDeathArrayUsedForReproduction < Data.LastArrayIndexOfBotDeath) // еще есть в запасе умирающие боты
             {
                 long ind;
                 int en;
                 do
                 {
-                    ind = Interlocked.Increment(ref Data.NumberOfBotDeathForReproduction);
-                    en = Data.BotDeath[ind].Energy;
+                    ind = Interlocked.Increment(ref Data.LastIndexOfBotDeathArrayUsedForReproduction);
 
-
-					//если энергия бота >0 то здесь его надо убрать из массива
-					if (en > 0)
+                    if (ind <= Data.LastArrayIndexOfBotDeath)
                     {
-						Data.BotDeath[ind].InsertedToDeathList = false;  
-					}
+                        en = Data.BotDeath[ind].Energy;
+                        //если энергия бота >0 то здесь его надо убрать из массива
+                        if (en > 0)
+                        {
+                            Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} BotDeath Skipped (en>0)  LIOBDAUFR:{Data.LastIndexOfBotDeathArrayUsedForReproduction}");
+                            Data.BotDeath[ind].InsertedToDeathList = false;
+                        }
+                    }
+                    else
+                    {
+                        en = 0;
+                    }
                 }
-                while (ind < Data.NumberOfBotDeath && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
+                while (ind < Data.LastArrayIndexOfBotDeath && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
 
-                if (ind <= Data.NumberOfBotDeath)
+                if (ind <= Data.LastArrayIndexOfBotDeath)  // ind не вылетел за пределы списка умирающих ботов. 
                 {
                     UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
+                    Interlocked.Increment(ref Data.NumberOfBotDeathFactUsedForReproductionCnt);
+                    Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.LastIndexOfBotDeathArrayUsedForReproduction}");
                 }
-                else
+                else // ind вылетел за пределы списка умирающих ботов
                 {
                     var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
                     CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
+                    Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1  LIOBDAUFR:{Data.LastIndexOfBotDeathArrayUsedForReproduction}");
                 }
             }
             else
             {
                 var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
                 CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
+                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 2  LIOBDAUFR:{Data.LastIndexOfBotDeathArrayUsedForReproduction}");
             }
 
 
@@ -292,7 +337,7 @@ namespace WindowsFormsApp1.Static
             var pointer = 0;
             var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
             genom.IncBot();
-            
+
 
             var updBot = Data.BotDeath[ind];
             var index = Data.BotDeath[ind].Index;
@@ -300,12 +345,12 @@ namespace WindowsFormsApp1.Static
             var xiold = updBot.Xi;
             var yiold = updBot.Yi;
             Interlocked.Increment(ref Data.DeathCnt);
-            Interlocked.Increment(ref Removedbots1);
-			//Data.BotDeath[ind] = null;
-			//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
+            //Interlocked.Increment(ref Removedbots1);
+            //Data.BotDeath[ind] = null;
+            //Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
 
             // Изменение бота
-			updBot.Xi = x;
+            updBot.Xi = x;
             updBot.Xd = x;
             updBot.Yi = y;
             updBot.Yd = y;
@@ -317,8 +362,9 @@ namespace WindowsFormsApp1.Static
             updBot.OldPointer = pointer;
             updBot.Age = 0;
             updBot.InsertedToDeathList = false;
+            updBot.Alive = true;
             updBot.Hist = new CodeHistory();
-            
+
             updBot.RefreshColor();
 
 
@@ -357,7 +403,7 @@ namespace WindowsFormsApp1.Static
                 FixChangeCell(x, y, bot.Color);
             }
         }
-    
+
 
 
         private static bool TryOccupyRandomFreeCellNearby(int Xi, int Yi, long reprBotIndex, out int nXi, out int nYi)
@@ -500,10 +546,23 @@ namespace WindowsFormsApp1.Static
             return (0, 0);
         }
 
-
         public static void CHECK1()
         {
-            for (var i = 0; i < (int)Data.NumberOfBotDeath + 1; i++)
+            if (Data.LastArrayIndexOfBotDeath != -1)
+            {
+                throw new Exception("fdgdfgds34fg2");
+            }
+
+            if (Data.NumberOfBotDeathFactCnt != 0)
+            {
+                throw new Exception("fdgdf45646gds34fg2");
+            }
+        }
+
+        public static void CHECK2()
+        {
+            
+            for (var i = 0; i < (int)Data.LastArrayIndexOfBotDeath + 1; i++)
             {
                 var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
 
@@ -528,7 +587,7 @@ namespace WindowsFormsApp1.Static
                 }
 
 
-                for (var j = 0; j < (int)Data.NumberOfBotDeath + 1; j++)
+                for (var j = 0; j < (int)Data.LastArrayIndexOfBotDeath + 1; j++)
                 {
                     if (i != j)
                     {
@@ -540,7 +599,7 @@ namespace WindowsFormsApp1.Static
                 }
             }
 
-            for (var i = 0; i < (int)Data.NumberOfBotReproduction + 1; i++)
+            for (var i = 0; i < (int)Data.LastArrayIndexOfBotReproduction + 1; i++)
             {
                 var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotReproduction[i].Index && x.Num == Data.BotReproduction[i].Num);
 
@@ -562,10 +621,11 @@ namespace WindowsFormsApp1.Static
 
             int cnt0 = 0;
             int cnt1 = 0;
+            var cnt2 = 0;
             for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
             {
                 if (Data.Bots[botNumber] == null) throw new Exception("rtfghrsfd45tsdfsdfhrt");
-				if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
+                if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
 
                 if (Data.Bots[botNumber].InsertedToDeathList)
                 {
@@ -576,30 +636,32 @@ namespace WindowsFormsApp1.Static
                 {
                     cnt1++;
                 }
+
+                if (!Data.Bots[botNumber].Alive)
+                {
+                    cnt2++;
+                }
             }
-            if (cnt0 != Data.NumberOfBotDeath + 1) throw new Exception("fdgergg");
-            if (cnt1 != Data.NumberOfBotReproduction + 1) throw new Exception("fdgergsdsdg");
+            if (cnt0 != Data.LastArrayIndexOfBotDeath + 1) throw new Exception("fdgergg");
+            if (cnt1 != Data.LastArrayIndexOfBotReproduction + 1) throw new Exception("fdgergsdsdg");
+            if (cnt2 != Data.NumberOfBotDeathFactCnt) throw new Exception("fdgerdsfsd34gg");
         }
 
-        public static void CHECK2()
+        public static void CHECK4()
         {
             //if (removedbots1 != removedbots2) throw new Exception("dfgdfgf");
 
-            if (Data.NumberOfBotDeath != -1)
-            {
-                throw new Exception("fdgdfgds34fg2");
-            }
-
-            if (Data.NumberOfBotReproduction != -1)
+            if (Data.LastArrayIndexOfBotReproduction != -1)
             {
                 throw new Exception("fdgdfgd3df4fg2");
             }
 
             var te = 0;
+            var cnt2 = 0;
             for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
             {
-				if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
-				if (Data.Bots[i].Index != i)
+                if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+                if (Data.Bots[i].Index != i)
                 {
                     throw new Exception("fdgdfgdsdfdf34f435345g");
                 }
@@ -609,8 +671,15 @@ namespace WindowsFormsApp1.Static
                     throw new Exception("fdgdfgd34f435345g");
                 }
 
+                if (!Data.Bots[i].Alive)
+                {
+                    cnt2++;
+                }
+
+
                 te += Data.Bots[i].Energy;
             }
+            if (cnt2 != 0) throw new Exception("fdge34sd34gg");
 
             //if(te != Data.TotalEnergy) throw new Exception("fdgdfgsdfd34f435345g");
 
@@ -626,8 +695,8 @@ namespace WindowsFormsApp1.Static
                     if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
                     if (cont > 0 && (cont < 65000 || cont > 65504))
                     {
-                        if (cont > Data.CurrentNumberOfBots) 
-                        { 
+                        if (cont > Data.CurrentNumberOfBots)
+                        {
                             //throw new Exception("fgfrgreg456457"); 
                         }
                         cnt++;
@@ -644,46 +713,48 @@ namespace WindowsFormsApp1.Static
                 }
             }
 
-            if (cnt != Data.CurrentNumberOfBots) 
+            if (cnt != Data.CurrentNumberOfBots)
             {
-				//throw new Exception("fdfdgfdgd");
-			}
-			if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
+                //throw new Exception("fdfdgfdgd");
+            }
+            if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
         }
 
 
-		public static void CHECK3()
-		{
-			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-			{
-				if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
-				if (Data.Bots[i].Index != i)
-				{
-					throw new Exception("fdgdfgdsdfdf34f435345g");
-				}
+        public static void CHECK3()
+        {
+            if (Data.NumberOfBotDeathFactCnt < 0) throw new Exception("rtfg65765");
 
-				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
-				{
-					throw new Exception("fdgdfgd34f435345g");
-				}
-			}
+            for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+            {
+                if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+                if (Data.Bots[i].Index != i)
+                {
+                    throw new Exception("fdgdfgdsdfdf34f435345g");
+                }
 
-			long cont;
-			for (var x = 0; x < Data.WorldWidth; x++)
-			{
-				for (var y = 0; y < Data.WorldHeight; y++)
-				{
-					cont = Data.World[x, y];
-					if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
-					if (cont > 0 && (cont < 65000 || cont > 65504))
-					{
-						if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
-					}
-				}
-			}
+                if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+                {
+                    throw new Exception("fdgdfgd34f435345g");
+                }
+            }
 
-		}
-	}
+            long cont;
+            for (var x = 0; x < Data.WorldWidth; x++)
+            {
+                for (var y = 0; y < Data.WorldHeight; y++)
+                {
+                    cont = Data.World[x, y];
+                    if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+                    if (cont > 0 && (cont < 65000 || cont > 65504))
+                    {
+                        if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+                    }
+                }
+            }
+
+        }
+    }
 }
 
 //              ███─███─████─███─█───█

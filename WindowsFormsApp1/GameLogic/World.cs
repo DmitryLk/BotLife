@@ -13,36 +13,41 @@ using static System.Windows.Forms.Design.AxImporter;
 
 namespace WindowsFormsApp1.GameLogic
 {
-	public class World
-	{
-		private readonly Seeder _seeder;
+    public class World
+    {
+        private readonly Seeder _seeder;
 
-		public World()
-		{
-			_seeder = new Seeder();
-		}
+        public World()
+        {
+            _seeder = new Seeder();
+        }
 
-		public void Initialize()
-		{
-			// Засевание объектов
-			_seeder.SeedItems();
+        public void Initialize()
+        {
+            // Засевание объектов
+            _seeder.SeedItems();
 
-			// Засевание ботов
-			_seeder.SeedBots();
-
-
-			Data.SeedTotalEnergy = Data.TotalEnergy;
-		}
+            // Засевание ботов
+            _seeder.SeedBots();
 
 
-		public void Step()
-		{
+            Data.SeedTotalEnergy = Data.TotalEnergy;
+        }
+
+
+        public void Step()
+        {
             //Func.CheckWorld3();
             //Func.CheckWorld2();
             //var bc1 = Data.CurrentNumberOfBots;
             //var (totalEnergy, dctEnergy) = Func.GetBotsEnergy();
 
-			Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
+            Data.NumberOfBotDeathFactCnt = 0;
+            Data.LastArrayIndexOfBotDeath = -1;
+
+            if (Data.Checks) Func.CHECK1();
+
+            Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
             {
                 Data.Bots[i].Step();
             });
@@ -50,142 +55,202 @@ namespace WindowsFormsApp1.GameLogic
             //Func.CheckBotsEnergy(dctEnergy, totalEnergy);
 
             //for (var i =1; i<=Data.CurrentNumberOfBots; i++)
-			//{
-			//    Data.Bots[i].Step();
-			//}
+            //{
+            //    Data.Bots[i].Step();
+            //}
 
 
-			Test.NextInterval(10, "BOTS ACTIONS CYCLE");
+            Test.NextInterval(10, "BOTS ACTIONS CYCLE");
 
-			//Func.CheckWorld3();
-			//Func.CheckWorld2();
+            //Func.CheckWorld3();
+            //Func.CheckWorld2();
 
-			if (Data.Checks) Func.CHECK1();
+            if (Data.Checks) Func.CHECK2();
 
 
+            Data.Wlog.ClearLog();
             // ============ REPRODUCTION ===================================================================
-            Data.NumberOfBotDeathForReproduction = -1;
-            if (Data.NumberOfBotReproduction > -1)
+
+            var forlog1 = Data.LastArrayIndexOfBotReproduction + 1;
+            var forlog2 = Data.ReproductionCnt;
+            var forlog3 = Data.LastArrayIndexOfBotDeath + 1;
+            var forlog4 = Data.NumberOfBotDeathFactCnt;
+            var forlog5 = Data.DeathCnt;
+
+            Data.LastIndexOfBotDeathArrayUsedForReproduction = -1;
+            Data.NumberOfBotDeathFactUsedForReproductionCnt = 0;
+            Func.NumberOfFailedReproductionCnt = 0;
+            if (Data.LastArrayIndexOfBotReproduction > -1)
             {
                 //SearchDouble();
-                Parallel.For(0, (int)Data.NumberOfBotReproduction + 1, Func.ReproductionBot);
+                Parallel.For(0, (int)Data.LastArrayIndexOfBotReproduction + 1, Func.ReproductionBot);
                 //SearchDouble();
-                Data.NumberOfBotReproduction = -1;
+                Data.LastArrayIndexOfBotReproduction = -1;
             }
-			Test.NextInterval(12, "reproduction");
-			// =============================================================================================
 
-			if (Data.Checks) Func.CHECK3();
+            Data.Wlog.LogInfo("");
+            Data.Wlog.LogInfo("REPRODUCTION");
+            Data.Wlog.LogInfo($"Data.ArraySizeOfBotReproduction: {forlog1} - Failed:{Func.NumberOfFailedReproductionCnt} = {forlog1 - Func.NumberOfFailedReproductionCnt}");
+            Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.LastIndexOfBotDeathArrayUsedForReproduction}");
+            Data.Wlog.LogInfo($"Data.ReproductionCnt: {forlog2} > {Data.ReproductionCnt}   {Data.ReproductionCnt - forlog2}");
+
+            Data.Wlog.LogInfo("");
+            Data.Wlog.LogInfo("DEATH AT REPRODUCTION");
+            Data.Wlog.LogInfo($"Data.ArraySizeOfBotDeath: {forlog3}");
+            Data.Wlog.LogInfo($"Data.NumberOfBotDeathFactCnt: {forlog4}");
+            Data.Wlog.LogInfo($"Data.DeathCnt: {forlog5} > {Data.DeathCnt}   {Data.DeathCnt - forlog5}");
+
+            Test.NextInterval(12, "reproduction");
+            // =============================================================================================
+
+            if (Data.Checks) Func.CHECK3();
 
 
-			// ============ DEATH ==========================================================================
-			long cont;
-			if (Data.NumberOfBotDeathForReproduction < Data.NumberOfBotDeath) // еще есть в запасе умирающие боты
+            // ============ DEATH ==========================================================================
+            long cont;
+            if (Data.LastIndexOfBotDeathArrayUsedForReproduction < Data.LastArrayIndexOfBotDeath) // еще есть в запасе умирающие боты
             {
-				for (var x = 0; x < Data.WorldWidth; x++)
-				{
-					for (var y = 0; y < Data.WorldHeight; y++)
-					{
-						cont = Data.World[x, y];
-						if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
-						if (cont > 0 && (cont < 65000 || cont > 65504))
-						{
-							if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
-						}
-					}
-				}
-				// МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
-				Func.Removedbots1 = 0;
+                for (var x = 0; x < Data.WorldWidth; x++)
+                {
+                    for (var y = 0; y < Data.WorldHeight; y++)
+                    {
+                        cont = Data.World[x, y];
+                        if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+                        if (cont > 0 && (cont < 65000 || cont > 65504))
+                        {
+                            if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+                        }
+                    }
+                }
+                for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+                {
+                    if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+                    if (Data.Bots[i].Index != i)
+                    {
+                        throw new Exception("fdgdfgdsdfdf34f435345g");
+                    }
+
+                    if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+                    {
+                        throw new Exception("fdgdfgd34f435345g");
+                    }
+                }
+
+
+
+                Data.Wlog.LogInfo("");
+                Data.Wlog.LogInfo("DEATH");
+                Data.Wlog.LogInfo($"Data.CurrentNumberOfBots: {Data.CurrentNumberOfBots}");
+                Data.Wlog.LogInfo($"Data.NumberOfBotDeathFactCnt: {Data.NumberOfBotDeathFactCnt}");
+                Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.LastIndexOfBotDeathArrayUsedForReproduction}");
+                Data.Wlog.LogInfo("Data.CurrentNumberOfBots - Data.NumberOfBotDeathFactCnt + Data.NumberOfBotDeathFactUsedForReproductionCnt: " +
+                                  $"{Data.CurrentNumberOfBots - Data.NumberOfBotDeathFactCnt + Data.NumberOfBotDeathFactUsedForReproductionCnt}");
+
+                Func.IndexEnclusiveBeforeReplacesBots = Data.CurrentNumberOfBots - Data.NumberOfBotDeathFactCnt + Data.NumberOfBotDeathFactUsedForReproductionCnt;
+                Func.Removedbots1 = 0;
                 Func.NumberOfLastBot = Data.CurrentNumberOfBots + 1;
-				Parallel.For((int)Data.NumberOfBotDeathForReproduction + 1, (int)Data.NumberOfBotDeath + 1, Func.DeathBot);
-				Data.CurrentNumberOfBots -= Func.Removedbots1;
-				Data.DeathCnt += Func.Removedbots1;
+                // МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
+                Parallel.For((int)Data.LastIndexOfBotDeathArrayUsedForReproduction + 1, (int)Data.LastArrayIndexOfBotDeath + 1, Func.DeathBot);
+                Data.CurrentNumberOfBots -= Func.Removedbots1;
+                Data.DeathCnt += Func.Removedbots1;
 
-				for (var x = 0; x < Data.WorldWidth; x++)
-				{
-					for (var y = 0; y < Data.WorldHeight; y++)
-					{
-						cont = Data.World[x, y];
-						if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
-						if (cont > 0 && (cont < 65000 || cont > 65504))
-						{
-							if (cont > Data.CurrentNumberOfBots)
-							{
-								var st = Data.CurrentStep;
-								var t = Data.BotDeath;
-								throw new Exception("fgfrgreg456457");
-							}
-						}
-					}
-				}
+                for (var x = 0; x < Data.WorldWidth; x++)
+                {
+                    for (var y = 0; y < Data.WorldHeight; y++)
+                    {
+                        cont = Data.World[x, y];
+                        if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+                        if (cont > 0 && (cont < 65000 || cont > 65504))
+                        {
+                            if (cont > Data.CurrentNumberOfBots)
+                            {
+                                var st = Data.CurrentStep;
+                                var t = Data.BotDeath;
+                                var log222 = Data.Wlog.GetLogString();
+                                throw new Exception("fgfrgreg456457");
+                            }
+                        }
+                    }
+                }
+                for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+                {
+                    if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+                    if (Data.Bots[i].Index != i)
+                    {
+                        throw new Exception("fdgdfgdsdfdf34f435345g");
+                    }
 
-			}
-			Data.NumberOfBotDeathFactCnt = 0;
-			Data.NumberOfBotDeath = -1;
-			Test.NextInterval(11, "death");
+                    if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+                    {
+                        throw new Exception("fdgdfgd34f435345g");
+                    }
+                }
+
+            }
+            Test.NextInterval(11, "death");
             // =============================================================================================
 
 
 
-			if (Data.Checks) Func.CHECK2();
+            if (Data.Checks) Func.CHECK4();
 
 
-            
-            
+
+
             //         int cnt3 = 0;
-			//         for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-			//         {
-			//             if (Data.Bots[botNumber].InsertedToDeathList)
-			//             {
-			//		for (var i = 1; i < Data.MaxBotsNumber; i++)
-			//                 {
-			//                     if (Data.Bots[i] == null)
-			//                     {
-			//                         goto frg;
-			//                     }
-			//                     cnt3 += Data.Bots[i].InsertedToDeathList ? 1 : 0;
-			//                 }
-			//		//var cnt2 = Data.Bots.Take(100).Count(b => b.InsertedToDeathList);
-			//	}
-			//}
-			//frg:
-			//Func.CheckWorld3();
-			//int cnt5 = 0;
-			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-			//{
-			//    if (Data.Bots[botNumber].InsertedToReproductionList)
-			//    {
-			//        cnt5++;
-			//    }
-			//}
-			//if (cnt5 != 0) throw new Exception("dfgdf");
-			//Func.CheckWorld3();
-			//Func.CheckWorld2();
-			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-			//{
-			//	Data.Bots[botNumber].Step();
-			//	//Bots[botNumber].Live();
-			//	//Bots[botNumber].Move();
-			//}
+            //         for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            //         {
+            //             if (Data.Bots[botNumber].InsertedToDeathList)
+            //             {
+            //		for (var i = 1; i < Data.MaxBotsNumber; i++)
+            //                 {
+            //                     if (Data.Bots[i] == null)
+            //                     {
+            //                         goto frg;
+            //                     }
+            //                     cnt3 += Data.Bots[i].InsertedToDeathList ? 1 : 0;
+            //                 }
+            //		//var cnt2 = Data.Bots.Take(100).Count(b => b.InsertedToDeathList);
+            //	}
+            //}
+            //frg:
+            //Func.CheckWorld3();
+            //int cnt5 = 0;
+            //for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            //{
+            //    if (Data.Bots[botNumber].InsertedToReproductionList)
+            //    {
+            //        cnt5++;
+            //    }
+            //}
+            //if (cnt5 != 0) throw new Exception("dfgdf");
+            //Func.CheckWorld3();
+            //Func.CheckWorld2();
+            //for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+            //{
+            //	Data.Bots[botNumber].Step();
+            //	//Bots[botNumber].Live();
+            //	//Bots[botNumber].Move();
+            //}
 
             Data.CurrentStep++;
-			while (Data.TotalEnergy < Data.SeedTotalEnergy)
-			{
-				if (Func.TryGetRandomFreeCell(out var x, out var y))
-				{
-					Data.World[x, y] = (long)CellContent.Grass;
-					Func.FixChangeCell(x, y, Color.Green);
+            while (Data.TotalEnergy < Data.SeedTotalEnergy)
+            {
+                if (Func.TryGetRandomFreeCell(out var x, out var y))
+                {
+                    Data.World[x, y] = (long)CellContent.Grass;
+                    Func.FixChangeCell(x, y, Color.Green);
 
-					Data.TotalEnergy += Data.FoodEnergy;
-				}
-				else
-				{
-					break;
-				}
-			}
-    		//Func.CheckWorld3();
-		}
-	}
+                    Data.TotalEnergy += Data.FoodEnergy;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            //Func.CheckWorld3();
+        }
+    }
 }
 
 
@@ -213,6 +278,7 @@ namespace WindowsFormsApp1.GameLogic
 В стандартном режиме цвет зависит от способа получения энергии. Любители фотосинтеза зеленеют, любители «минералов» синеют, а мясоеды краснеют.
 У всеядных может быть промежуточный цвет.
 В режиме отображения энергии, чем больше энергии, тем бот краснее, чем меньше энергии, тем бот желтее.
+todo размножение делать не на каждом шаге а раз в 10 шагов, а то облепленные другими боты на каждом шаге не могут размножиться
 todo если геном больше не используется (Bots=0) то удалять геном чтоб память не забивал
 todo при поедании если релатив возвращать что просто бот как у foo52 ?
 todo добавить обработку если наступил на яд

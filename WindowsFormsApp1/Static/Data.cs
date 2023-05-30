@@ -75,10 +75,11 @@ namespace WindowsFormsApp1.Static
 		// Death Reproduction		
         public static Bot1[] BotDeath;
 		public static Bot1[] BotReproduction;
-        public static long NumberOfBotDeath;
+        public static long LastArrayIndexOfBotDeath;
         public static long NumberOfBotDeathFactCnt;
-        public static long NumberOfBotDeathForReproduction;
-		public static long NumberOfBotReproduction;
+		public static long NumberOfBotDeathFactUsedForReproductionCnt;
+        public static long LastIndexOfBotDeathArrayUsedForReproduction;
+		public static long LastArrayIndexOfBotReproduction;
 		public static long DeathCnt;
 		public static long ReproductionCnt;
 
@@ -117,6 +118,7 @@ namespace WindowsFormsApp1.Static
 		public static int CursorY;
 		public static int DeltaHistory;
 
+        public static Log.Log Wlog;
 
 		public static void Initialize()
 		{
@@ -132,9 +134,10 @@ namespace WindowsFormsApp1.Static
 
 			BotDeath = new Bot1[3000];
 			BotReproduction = new Bot1[5000];
-			NumberOfBotDeath = -1;
+			LastArrayIndexOfBotDeath = -1;
             NumberOfBotDeathFactCnt = 0;
-			NumberOfBotReproduction = -1;
+            NumberOfBotDeathFactUsedForReproductionCnt = 0;
+			LastArrayIndexOfBotReproduction = -1;
 			DeathCnt = 0;
 			ReproductionCnt = 0;
 
@@ -163,6 +166,8 @@ namespace WindowsFormsApp1.Static
 			LensY = 10;
 			CursorX = 10;
 			CursorY = 10;
+
+            Wlog = new Log.Log();
 
 			for (var hue = 0; hue <= 360; hue++)
 			{
