@@ -27,6 +27,7 @@ namespace WindowsFormsApp1.GameLogic
 		public byte[] ptrs = new byte[maxy];
 		public int historyPointerY = -1;
 
+
 		public CodeHistory()
 		{
 			for (var y = 0; y < maxy; y++)
@@ -70,5 +71,12 @@ namespace WindowsFormsApp1.GameLogic
 
 			return (codeHistory[ptr], ptrs[ptr]);
 		}
+
+        public void Clear()
+        {
+            Array.Clear(codeHistory, 0, codeHistory.Length);
+            Array.Clear(ptrs, 0, ptrs.Length);
+            historyPointerY = -1;
+        }
 	}
 }

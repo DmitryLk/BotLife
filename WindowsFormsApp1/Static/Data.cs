@@ -75,13 +75,19 @@ namespace WindowsFormsApp1.Static
 		// Death Reproduction		
         public static Bot1[] BotDeath;
 		public static Bot1[] BotReproduction;
-        public static long LastArrayIndexOfBotDeath;
-        public static long NumberOfBotDeathFactCnt;
-		public static long NumberOfBotDeathFactUsedForReproductionCnt;
-        public static long LastIndexOfBotDeathArrayUsedForReproduction;
-		public static long LastArrayIndexOfBotReproduction;
-		public static long DeathCnt;
-		public static long ReproductionCnt;
+        public static long QtyAllBotDeathMinusOne;  // Количество собирающихся и собиравшихся умереть ботов
+		public static long QtyFactBotDeath;			// Фактическое количество умирающих ботов
+		public static long QtyFactBotDeathUsedForReproduction;
+        public static long IndexOfLastBotDeathArrayUsedForReproduction;
+        public static long IndexOfLastBotReproduction;  // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
+		public static long TotalQtyBotDeath;
+		public static long TotalQtyBotReproduction;
+        public static long IndexEnclusiveBeforeReplacesBots;
+        public static long Check_QtyFailedReproduction;
+		public static int QtyRemovedBotsOnStep;
+        public static long IndexOfLastBotPlusOne;
+		//private static int removedbots2;
+
 
 		// Настройки игры
 		public static bool Started;
@@ -134,12 +140,12 @@ namespace WindowsFormsApp1.Static
 
 			BotDeath = new Bot1[3000];
 			BotReproduction = new Bot1[5000];
-			LastArrayIndexOfBotDeath = -1;
-            NumberOfBotDeathFactCnt = 0;
-            NumberOfBotDeathFactUsedForReproductionCnt = 0;
-			LastArrayIndexOfBotReproduction = -1;
-			DeathCnt = 0;
-			ReproductionCnt = 0;
+			QtyAllBotDeathMinusOne = -1;
+            QtyFactBotDeath = 0;
+            QtyFactBotDeathUsedForReproduction = 0;
+			IndexOfLastBotReproduction = -1;
+			TotalQtyBotDeath = 0;
+			TotalQtyBotReproduction = 0;
 
 			Mutation = true;
 			Started = false;
@@ -215,8 +221,8 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"Bots: {CurrentNumberOfBots}");
 			sb.AppendLine($"ChangedCells: {NumberOfChangedCellsForInfo}");
 
-			sb.AppendLine($"deathCnt: {DeathCnt}");
-			sb.AppendLine($"reproductionCnt: {ReproductionCnt}");
+			sb.AppendLine($"deathCnt: {TotalQtyBotDeath}");
+			sb.AppendLine($"reproductionCnt: {TotalQtyBotReproduction}");
 			sb.AppendLine($"mutationCnt: {MutationCnt}");
 			sb.AppendLine($"TotalEnergy: {TotalEnergy.ToString("n", f)}");
 

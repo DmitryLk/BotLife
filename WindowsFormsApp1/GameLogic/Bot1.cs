@@ -116,18 +116,18 @@ namespace WindowsFormsApp1.GameLogic
                 if (!Alive && _en > 0)
                 {
                     Alive = true;
-					Interlocked.Decrement(ref Data.NumberOfBotDeathFactCnt);
+					Interlocked.Decrement(ref Data.QtyFactBotDeath);
 					//InsertedToDeathList = false;
 				}
 
 				if (_en == 0 && Alive)
                 {
                     Alive = false;
-					Interlocked.Increment(ref Data.NumberOfBotDeathFactCnt);
+					Interlocked.Increment(ref Data.QtyFactBotDeath);
 					if (!InsertedToDeathList)
                     {
 						InsertedToDeathList = true;
-						Data.BotDeath[Interlocked.Increment(ref Data.LastArrayIndexOfBotDeath)] = this;
+						Data.BotDeath[Interlocked.Increment(ref Data.QtyAllBotDeathMinusOne)] = this;
 						//Log.AddLog("bot inserted to DeathList");
 					}
 				}
@@ -358,7 +358,7 @@ namespace WindowsFormsApp1.GameLogic
                     {
 
                         InsertedToReproductionList = true;
-                        Data.BotReproduction[Interlocked.Increment(ref Data.LastArrayIndexOfBotReproduction)] = this;
+                        Data.BotReproduction[Interlocked.Increment(ref Data.IndexOfLastBotReproduction)] = this;
                     }
                 }
             }
