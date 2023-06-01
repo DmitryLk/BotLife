@@ -83,7 +83,7 @@ namespace WindowsFormsApp1.Static
 		public static long TotalQtyBotDeath;
 		public static long TotalQtyBotReproduction;
         public static long IndexEnclusiveBeforeReplacesBots;
-        public static long Check_QtyFailedReproduction;
+        //public static long Check_QtyFailedReproduction;
 		public static int QtyRemovedBotsOnStep;
         public static long IndexOfLastBotPlusOne;
 		//private static int removedbots2;
@@ -124,7 +124,7 @@ namespace WindowsFormsApp1.Static
 		public static int CursorY;
 		public static int DeltaHistory;
 
-        public static Log.Log Wlog;
+        //public static Log.Log Wlog;
 
 		public static void Initialize()
 		{
@@ -173,7 +173,7 @@ namespace WindowsFormsApp1.Static
 			CursorX = 10;
 			CursorY = 10;
 
-            Wlog = new Log.Log();
+            //Wlog = new Log.Log();
 
 			for (var hue = 0; hue <= 360; hue++)
 			{

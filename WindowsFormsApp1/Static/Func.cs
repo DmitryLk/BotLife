@@ -72,7 +72,7 @@ namespace WindowsFormsApp1.Static
             if (dBot.Energy > 0)
             {
                 dBot.InsertedToDeathList = false;
-                Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Failed Energy > 0");
+                //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Failed Energy > 0");
                 return; //бот успел поесть и выжил
             }
 
@@ -127,14 +127,14 @@ namespace WindowsFormsApp1.Static
                 // конец переноса
 
 
-                //lastBot.Log.AddLog($"Index changed from {lastIndex}/{Data.CurrentNumberOfBots} to {maxworlddeathindex}");
+                lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
                 //Data.Bots[lastBotIndex] = null;  // todo надо ли это? может лучше оставить и потом просто Update делать
-                Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
+                //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
             }
             else
             {
                 //Data.Bots[dBot.Index] = null;   // todo надо ли это? может лучше оставить и потом просто Update делать
-                Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index}");
+                //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index}");
             }
 
 
@@ -161,18 +161,19 @@ namespace WindowsFormsApp1.Static
 
             if (!reproductedBot.CanReproduct())
             {
-                Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
-                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                 return;
             }
             if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x,
                     out var y)) // Вставляем в World[x,y] индекс размножающегося бота-родителя !!!
             {
-                Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
-                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                 return;
             }
 
+            reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
 
             var genom = Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
 
@@ -199,9 +200,11 @@ namespace WindowsFormsApp1.Static
                         //если энергия бота >0 то здесь его надо убрать из массива
                         if (en > 0)
                         {
-                            Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} BotDeath Skipped (en>0)  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                            //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} BotDeath Skipped (en>0)  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                             Data.BotDeath[ind].InsertedToDeathList = false;
                         }
+
+                        if (en == 0) update = true;
                     }
                     else
                     {
@@ -209,8 +212,6 @@ namespace WindowsFormsApp1.Static
                     }
                 }
                 while (ind < Data.QtyAllBotDeathMinusOne && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
-
-                if (ind <= Data.QtyAllBotDeathMinusOne) update = true;  // ind в пределах списка умирающих ботов
             }
 
 
@@ -218,15 +219,16 @@ namespace WindowsFormsApp1.Static
             {
                 UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
                 Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
-                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
             else
             {
                 var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
                 CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
-                Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
-
 
             reproductedBot.EnergyChange(-Data.InitialBotEnergy);
 
@@ -617,7 +619,7 @@ namespace WindowsFormsApp1.Static
 
         public static void CHECK4()
         {
-            var l234324234 = Data.Wlog.GetLogString();
+            //var l234324234 = Data.Wlog.GetLogString();
 
             if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne)
             {
@@ -699,6 +701,57 @@ namespace WindowsFormsApp1.Static
                 throw new Exception("fdfdgfdgd");
             }
             if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
+        }
+
+        public static (int, Dictionary<long, int>) GetAllBotsEnergy()
+        {
+            var te = 0;
+            var dct = new Dictionary<long, int>();
+            int en;
+
+            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+            {
+                en = Data.Bots[botIndex].Energy;
+                te += en;
+                dct.Add(botIndex, en);
+            }
+
+            return (te, dct);
+        }
+
+
+        public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
+        {
+            var te2 = 0;
+            int en;
+            var dct2 = new Dictionary<long, (int, int)>();
+
+            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+            {
+                en = Data.Bots[botIndex].Energy;
+                te2 += en;
+                if (dct.ContainsKey(botIndex))
+                {
+                    if (dct[botIndex] != en)
+                    {
+                        dct2.Add(botIndex, (dct[botIndex], en));
+                    }
+                }
+                else
+                {
+                    dct2.Add(botIndex, (0, en));
+                }
+            }
+
+            if (te1 != te2 && dct2.Count > 0)
+            {
+                var bts = Data.Bots;
+                var st = Data.CurrentStep;
+                var bc2 = Data.CurrentNumberOfBots;
+                var indttt = dct2.First().Key;
+                var bttt = Data.Bots[indttt];
+                var log = bttt.Log.GetLog();
+            }
         }
     }
 }
@@ -1039,47 +1092,5 @@ namespace WindowsFormsApp1.Static
 //}
 
 
-//public static (int, Dictionary<long, int>) GetAllBotsEnergy()
-//{
-//	var te = 0;
-//	var dct = new Dictionary<long, int>();
-//	int en;
-
-//	for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
-//	{
-//		en = Data.Bots[botIndex].Energy;
-//		te += en;
-//		dct.Add(botIndex, en);
-//	}
-
-//	return (te, dct);
-//}
-
-
-//public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
-//{
-//	var te2 = 0;
-//	int en;
-//	var dct2 = new Dictionary<long, (int, int)>();
-
-//	for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
-//	{
-//		en = Data.Bots[botIndex].Energy;
-//		te2 += en;
-//		if (dct[botIndex] != en)
-//		{
-//			dct2.Add(botIndex, (dct[botIndex], en));
-//		}
-//	}
-
-//	if (te1 != te2 && dct2.Count > 0)
-//	{
-//		var st = Data.CurrentStep;
-//		var bc2 = Data.CurrentNumberOfBots;
-//		var indttt = dct2.First().Key;
-//		var bttt = Data.Bots[indttt];
-//		var log = bttt.Log.GetLog();
-//	}
-//}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

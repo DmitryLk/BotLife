@@ -16,6 +16,7 @@ using System.Xml;
 using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
+using WindowsFormsApp1.Log;
 using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1.GameLogic
@@ -110,28 +111,29 @@ namespace WindowsFormsApp1.GameLogic
             lock (_busyBotEnergy)
             {
                 if (_en + delta < 0) delta = -_en;
+                Log.LogInfo($"Change Energy from {_en} to {_en + delta}");
                 _en += delta;
 
 
                 if (!Alive && _en > 0)
                 {
                     Alive = true;
-					Interlocked.Decrement(ref Data.QtyFactBotDeath);
-					//InsertedToDeathList = false;
-				}
+                    Interlocked.Decrement(ref Data.QtyFactBotDeath);
+                    //InsertedToDeathList = false;
+                }
 
-				if (_en == 0 && Alive)
+                if (_en == 0 && Alive)
                 {
                     Alive = false;
-					Interlocked.Increment(ref Data.QtyFactBotDeath);
-					if (!InsertedToDeathList)
+                    Interlocked.Increment(ref Data.QtyFactBotDeath);
+                    if (!InsertedToDeathList)
                     {
-						InsertedToDeathList = true;
-						Data.BotDeath[Interlocked.Increment(ref Data.QtyAllBotDeathMinusOne)] = this;
-						//Log.AddLog("bot inserted to DeathList");
-					}
-				}
-			}
+                        InsertedToDeathList = true;
+                        Data.BotDeath[Interlocked.Increment(ref Data.QtyAllBotDeathMinusOne)] = this;
+                        Log.LogInfo("bot inserted to DeathList");
+                    }
+                }
+            }
 
             if (_en < 0)
             {
@@ -153,6 +155,7 @@ namespace WindowsFormsApp1.GameLogic
         public void EnergySet(int en)
         {
             if (en <= 0) throw new Exception("sdfsdf");
+            if (_en != 0) throw new Exception("fglkeru84");
 
             lock (_busyBotEnergy)
             {
@@ -167,7 +170,7 @@ namespace WindowsFormsApp1.GameLogic
             OldPointer = pointer;
             this.Genom = genom;
             Hist = new CodeHistory();
-            //Log = new BotLog();
+            Log = new BotLog();
 
             Direction = dir;
             Num = botNumber;
@@ -183,7 +186,7 @@ namespace WindowsFormsApp1.GameLogic
             InsertedToDeathList = false;
             InsertedToReproductionList = false;
             Alive = true;
-            //Log.AddLog($"bot was born. index:{Index}");
+            Log.LogInfo($"bot was born. index:{Index}");
         }
 
         public void RefreshColor()
@@ -463,12 +466,13 @@ namespace WindowsFormsApp1.GameLogic
 
 
             var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+            var olden = Energy;
             EnergyChange(gotEnergyByEating);
 
             if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
 
-            //eatedBot.Log.AddLog($"bot was bited. energy:{eatedBot.Energy}");
-            //Log.AddLog($"bot bite bot{cont} and got {gotEnergyByEating} energy.");
+            eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
+            Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
         }
 
 
@@ -573,7 +577,7 @@ namespace WindowsFormsApp1.GameLogic
                     Func.FixChangeCell(nXi, nYi, Color);
                 }
 
-                //Log.AddLog($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
+                Log.LogInfo($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
 
                 Xd = nXd;
                 Yd = nYd;

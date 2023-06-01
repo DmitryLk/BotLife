@@ -40,7 +40,7 @@ namespace WindowsFormsApp1.GameLogic
             //Func.CheckWorld3();
             //Func.CheckWorld2();
             //var bc1 = Data.CurrentNumberOfBots;
-            //var (totalEnergy, dctEnergy) = Func.GetBotsEnergy();
+            
 
             Data.QtyFactBotDeath = 0;
             Data.QtyAllBotDeathMinusOne = -1;
@@ -58,7 +58,6 @@ namespace WindowsFormsApp1.GameLogic
             //    Data.Bots[i].Step();
             //}
 
-            //Func.CheckBotsEnergy(dctEnergy, totalEnergy);
 
 
             Test.NextInterval(10, "BOTS ACTIONS CYCLE");
@@ -69,18 +68,19 @@ namespace WindowsFormsApp1.GameLogic
             if (Data.Checks) Func.CHECK2();
 
 
-            Data.Wlog.ClearLog();
+            //Data.Wlog.ClearLog();
+            var (totalEnergy, dctEnergy) = Func.GetAllBotsEnergy();
             // ============ REPRODUCTION ===================================================================
 
-            var forlog1 = Data.IndexOfLastBotReproduction + 1;      // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
-            var forlog2 = Data.QtyAllBotDeathMinusOne + 1;          // Количество собирающихся и собиравшихся умереть ботов
-            var forlog3 = Data.QtyFactBotDeath;                     // Фактическое количество умирающих ботов
-            var forlog4 = Data.TotalQtyBotReproduction;
-            var forlog5 = Data.TotalQtyBotDeath;
+            //var forlog1 = Data.IndexOfLastBotReproduction + 1;      // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
+            //var forlog2 = Data.QtyAllBotDeathMinusOne + 1;          // Количество собирающихся и собиравшихся умереть ботов
+            //var forlog3 = Data.QtyFactBotDeath;                     // Фактическое количество умирающих ботов
+            //var forlog4 = Data.TotalQtyBotReproduction;
+            //var forlog5 = Data.TotalQtyBotDeath;
 
             Data.IndexOfLastBotDeathArrayUsedForReproduction = -1;
             Data.QtyFactBotDeathUsedForReproduction = 0;
-            Data.Check_QtyFailedReproduction = 0;                       // Количество неуспешных размножений (изза нехватки энергии или места)
+            //Data.Check_QtyFailedReproduction = 0;                       // Количество неуспешных размножений (изза нехватки энергии или места)
             if (Data.IndexOfLastBotReproduction > -1)
             {
                 //SearchDouble();
@@ -89,40 +89,41 @@ namespace WindowsFormsApp1.GameLogic
             }
             Data.TotalQtyBotDeath += Data.QtyFactBotDeathUsedForReproduction;
 
-            Data.Wlog.LogInfo("");
-            Data.Wlog.LogInfo("REPRODUCTION");
-            Data.Wlog.LogInfo($"Data.ArraySizeOfBotReproduction: {forlog1} - Failed:{Data.Check_QtyFailedReproduction} = {forlog1 - Data.Check_QtyFailedReproduction}");
-            Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-            Data.Wlog.LogInfo($"Data.ReproductionCnt: {forlog4} > {Data.TotalQtyBotReproduction}   {Data.TotalQtyBotReproduction - forlog4}");
+            //Data.Wlog.LogInfo("");
+            //Data.Wlog.LogInfo("REPRODUCTION");
+            //Data.Wlog.LogInfo($"Data.ArraySizeOfBotReproduction: {forlog1} - Failed:{Data.Check_QtyFailedReproduction} = {forlog1 - Data.Check_QtyFailedReproduction}");
+            //Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+            //Data.Wlog.LogInfo($"Data.ReproductionCnt: {forlog4} > {Data.TotalQtyBotReproduction}   {Data.TotalQtyBotReproduction - forlog4}");
 
-            Data.Wlog.LogInfo("");
-            Data.Wlog.LogInfo("DEATH AT REPRODUCTION");
-            Data.Wlog.LogInfo($"Data.ArraySizeOfBotDeath: {forlog2}");
-            Data.Wlog.LogInfo($"Data.NumberOfBotDeathFactCnt: {forlog3}");
-            Data.Wlog.LogInfo($"Data.DeathCnt: {forlog5} > {Data.TotalQtyBotDeath}   {Data.TotalQtyBotDeath - forlog5}");
+            //Data.Wlog.LogInfo("");
+            //Data.Wlog.LogInfo("DEATH AT REPRODUCTION");
+            //Data.Wlog.LogInfo($"Data.ArraySizeOfBotDeath: {forlog2}");
+            //Data.Wlog.LogInfo($"Data.NumberOfBotDeathFactCnt: {forlog3}");
+            //Data.Wlog.LogInfo($"Data.DeathCnt: {forlog5} > {Data.TotalQtyBotDeath}   {Data.TotalQtyBotDeath - forlog5}");
 
             Test.NextInterval(12, "reproduction");
             // =============================================================================================
+            Func.CheckBotsEnergy(dctEnergy, totalEnergy);
 
             if (Data.Checks) Func.CHECK3();
 
 
             // ============ DEATH ==========================================================================
             long cont;
-            Data.Wlog.LogInfo("");
-            Data.Wlog.LogInfo("DEATH");
-            Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-            Data.Wlog.LogInfo($"Data.QtyAllBotDeathMinusOne: {Data.QtyAllBotDeathMinusOne}");
-            Data.Wlog.LogInfo($"Data.QtyFactBotDeathUsedForReproduction: {Data.QtyFactBotDeathUsedForReproduction}");
-            Data.Wlog.LogInfo($"Data.QtyRemovedBotsOnStep: {Data.QtyRemovedBotsOnStep}");
-            Data.Wlog.LogInfo($"Data.QtyFactBotDeath: {Data.QtyFactBotDeath}");
+            //Data.Wlog.LogInfo("");
+            //Data.Wlog.LogInfo("DEATH");
+            //Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+            //Data.Wlog.LogInfo($"Data.QtyAllBotDeathMinusOne: {Data.QtyAllBotDeathMinusOne}");
+            //Data.Wlog.LogInfo($"Data.QtyFactBotDeathUsedForReproduction: {Data.QtyFactBotDeathUsedForReproduction}");
+            //Data.Wlog.LogInfo($"Data.QtyRemovedBotsOnStep: {Data.QtyRemovedBotsOnStep}");
+            //Data.Wlog.LogInfo($"Data.QtyFactBotDeath: {Data.QtyFactBotDeath}");
 
             if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne) // еще есть в запасе умирающие боты
             {
-                Data.Wlog.LogInfo($"Data.CurrentNumberOfBots: {Data.CurrentNumberOfBots}");
-                Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                Data.Wlog.LogInfo("Data.CurrentNumberOfBots - Data.NumberOfBotDeathFactCnt + Data.NumberOfBotDeathFactUsedForReproductionCnt: " +
-                                  $"{Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction}");
+                //Data.Wlog.LogInfo($"Data.CurrentNumberOfBots: {Data.CurrentNumberOfBots}");
+                //Data.Wlog.LogInfo($"Data.LastIndexOfBotDeathArrayUsedForReproduction: {Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //Data.Wlog.LogInfo("Data.CurrentNumberOfBots - Data.NumberOfBotDeathFactCnt + Data.NumberOfBotDeathFactUsedForReproductionCnt: " +
+                //                  $"{Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction}");
 
                 Data.IndexEnclusiveBeforeReplacesBots = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
                 Data.QtyRemovedBotsOnStep = 0;
@@ -174,7 +175,7 @@ namespace WindowsFormsApp1.GameLogic
             //}
 
             Data.CurrentStep++;
-            while (Data.TotalEnergy < Data.SeedTotalEnergy)
+            while (Data.SeedFood && Data.TotalEnergy < Data.SeedTotalEnergy)
             {
                 if (Func.TryGetRandomFreeCell(out var x, out var y))
                 {
