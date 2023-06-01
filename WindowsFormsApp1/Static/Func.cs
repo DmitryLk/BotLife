@@ -127,7 +127,7 @@ namespace WindowsFormsApp1.Static
                 // конец переноса
 
 
-                lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
+                //lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
                 //Data.Bots[lastBotIndex] = null;  // todo надо ли это? может лучше оставить и потом просто Update делать
                 //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
             }
@@ -161,19 +161,19 @@ namespace WindowsFormsApp1.Static
 
             if (!reproductedBot.CanReproduct())
             {
-                //Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+                Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                 return;
             }
             if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x,
                     out var y)) // Вставляем в World[x,y] индекс размножающегося бота-родителя !!!
             {
-                //Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+                Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                 return;
             }
 
-            reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
+            //reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
 
             var genom = Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
 
@@ -220,14 +220,14 @@ namespace WindowsFormsApp1.Static
                 UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
                 Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
             else
             {
                 var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
                 CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
 
             reproductedBot.EnergyChange(-Data.InitialBotEnergy);
@@ -750,7 +750,7 @@ namespace WindowsFormsApp1.Static
                 var bc2 = Data.CurrentNumberOfBots;
                 var indttt = dct2.First().Key;
                 var bttt = Data.Bots[indttt];
-                var log = bttt.Log.GetLog();
+                //var log = bttt.Log.GetLog();
             }
         }
     }

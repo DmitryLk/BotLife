@@ -83,7 +83,7 @@ namespace WindowsFormsApp1.Static
 		public static long TotalQtyBotDeath;
 		public static long TotalQtyBotReproduction;
         public static long IndexEnclusiveBeforeReplacesBots;
-        //public static long Check_QtyFailedReproduction;
+        public static long Check_QtyFailedReproduction;
 		public static int QtyRemovedBotsOnStep;
         public static long IndexOfLastBotPlusOne;
 		//private static int removedbots2;

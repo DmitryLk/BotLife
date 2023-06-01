@@ -34,6 +34,8 @@ namespace WindowsFormsApp1.GameLogic
             Data.SeedTotalEnergy = Data.TotalEnergy;
         }
 
+        static long cnt51 = 0;
+        static long cnt52 = 0;
 
         public void Step()
         {
@@ -69,7 +71,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
             //Data.Wlog.ClearLog();
-            var (totalEnergy, dctEnergy) = Func.GetAllBotsEnergy();
+            //var (totalEnergy, dctEnergy) = Func.GetAllBotsEnergy();
             // ============ REPRODUCTION ===================================================================
 
             //var forlog1 = Data.IndexOfLastBotReproduction + 1;      // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
@@ -80,7 +82,7 @@ namespace WindowsFormsApp1.GameLogic
 
             Data.IndexOfLastBotDeathArrayUsedForReproduction = -1;
             Data.QtyFactBotDeathUsedForReproduction = 0;
-            //Data.Check_QtyFailedReproduction = 0;                       // Количество неуспешных размножений (изза нехватки энергии или места)
+            Data.Check_QtyFailedReproduction = 0;                       // Количество неуспешных размножений (изза нехватки энергии или места)
             if (Data.IndexOfLastBotReproduction > -1)
             {
                 //SearchDouble();
@@ -103,7 +105,7 @@ namespace WindowsFormsApp1.GameLogic
 
             Test.NextInterval(12, "reproduction");
             // =============================================================================================
-            Func.CheckBotsEnergy(dctEnergy, totalEnergy);
+            //Func.CheckBotsEnergy(dctEnergy, totalEnergy);
 
             if (Data.Checks) Func.CHECK3();
 
@@ -190,6 +192,35 @@ namespace WindowsFormsApp1.GameLogic
                 }
             }
             //Func.CheckWorld3();
+
+            var cnt1 = 0;
+            var cnt2 = 0;
+            cnt51 = cnt52;
+            cnt52 = Data.CurrentNumberOfBots;
+            var cnt3 = Data.QtyFactBotDeath;
+            var cnt4 = Data.TotalQtyBotReproduction;
+            var cnt5 = Data.Check_QtyFailedReproduction;
+            for (var i = 1; i < Data.NumberOfChangedCells; i++)
+            {
+                var obj = Data.ChangedCells[i];
+
+                if (obj.Color != null)
+                {
+                    var qwe = Data.World[obj.X, obj.Y];
+                    if (qwe == 0)
+                    {
+                    }
+                    cnt1++;
+                }
+                else
+                {
+                    cnt2++;
+                }
+
+
+                Data.ChWorld[obj.X, obj.Y] = 0;
+            }
+
         }
     }
 }
