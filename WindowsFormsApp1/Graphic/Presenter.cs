@@ -143,6 +143,11 @@ namespace WindowsFormsApp1.Graphic
             _mainImageWrapper.EmptySquare1(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
         }
 
+        public Color GetPixel(int x, int y)
+        {
+            return _mainImageWrapper.GetPixel(x * _cellWidth, y * _cellHeight);
+        }
+
         public void IntermediateFrameSave()
         {
             _mainImageWrapper.IntervalEditing();

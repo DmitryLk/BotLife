@@ -408,6 +408,33 @@ namespace WindowsFormsApp1.Graphic
             }
         }
 
+        public unsafe Color GetPixel(int x, int y)
+        {
+            byte* curpos;
+            
+            if (x < 0 || x >= _width || y < 0 || y >= _height) return default;
+            var ind = x * 4 + y * _stride;
+
+            if (_useEditArray)
+            {
+                return Color.FromArgb(_editArray[ind+3], _editArray[ind+2], _editArray[ind+1], _editArray[ind]);
+            }
+            else
+            {
+                //_bmpData = _bmp.LockBits(new Rectangle(0, 0, _width, _height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+
+                curpos = (byte*)_bmpData.Scan0 + ind;
+
+                var color = Color.FromArgb(*(curpos + 3), *(curpos + 2), *(curpos + 1), *curpos);
+
+                //_bmp.UnlockBits(_bmpData);
+
+                return color;
+
+            }
+        }
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

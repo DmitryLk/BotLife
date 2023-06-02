@@ -193,34 +193,30 @@ namespace WindowsFormsApp1.GameLogic
             }
             //Func.CheckWorld3();
 
-            var cnt1 = 0;
-            var cnt2 = 0;
-            cnt51 = cnt52;
-            cnt52 = Data.CurrentNumberOfBots;
-            var cnt3 = Data.QtyFactBotDeath;
-            var cnt4 = Data.TotalQtyBotReproduction;
-            var cnt5 = Data.Check_QtyFailedReproduction;
-            for (var i = 1; i < Data.NumberOfChangedCells; i++)
-            {
-                var obj = Data.ChangedCells[i];
+            //var cnt1 = 0;
+            //var cnt2 = 0;
+            //cnt51 = cnt52;
+            //cnt52 = Data.CurrentNumberOfBots;
+            //var cnt3 = Data.QtyFactBotDeath;
+            //var cnt4 = Data.TotalQtyBotReproduction;
+            //var cnt5 = Data.Check_QtyFailedReproduction;
+            //for (var i = 1; i < Data.NumberOfChangedCells; i++)
+            //{
+            //    var obj = Data.ChangedCells[i];
 
-                if (obj.Color != null)
-                {
-                    var qwe = Data.World[obj.X, obj.Y];
-                    if (qwe == 0)
-                    {
-                    }
-                    cnt1++;
-                }
-                else
-                {
-                    cnt2++;
-                }
-
-
-                Data.ChWorld[obj.X, obj.Y] = 0;
-            }
-
+            //    if (obj.Color != null)
+            //    {
+            //        var qwe = Data.World[obj.X, obj.Y];
+            //        if (qwe == 0)
+            //        {
+            //        }
+            //        cnt1++;
+            //    }
+            //    else
+            //    {
+            //        cnt2++;
+            //    }
+            //}
         }
     }
 }

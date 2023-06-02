@@ -135,6 +135,7 @@ namespace WindowsFormsApp1.Static
 			World = new long[WorldWidth, WorldHeight];
 			Bots = new Bot1[MaxBotsNumber];
 			ChWorld = new long[WorldWidth, WorldHeight];
+			Array.Clear(ChWorld, 0 , ChWorld.Length);
 			ChangedCells = new ChangedCell[MaxBotsNumber];
 			GrColors = new Color[361];
 

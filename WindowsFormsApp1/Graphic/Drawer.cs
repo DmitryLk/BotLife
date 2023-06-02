@@ -74,8 +74,9 @@ namespace WindowsFormsApp1.Graphic
 						var obj = Data.ChangedCells[i];
 
 						_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
-						Data.ChWorld[obj.X, obj.Y] = 0;
-					}
+                        Data.ChWorld[obj.X, obj.Y] = 0;
+
+                    }
 					Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
 					Data.NumberOfChangedCells = 0;
 					break;
@@ -99,9 +100,12 @@ namespace WindowsFormsApp1.Graphic
 			}
 		}
 
+        public Color GetPixel(int x, int y)
+        {
+            return _PRESENTER.GetPixel(x, y);
+        }
 
-
-		private void DrawLens()
+        private void DrawLens()
 		{
 			_PRESENTER.IntermediateFrameSave();  // сохранить в промежуточный массив экран без дополнительной графики
 
