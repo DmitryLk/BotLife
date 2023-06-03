@@ -58,9 +58,11 @@ namespace WindowsFormsApp1.Static
                 }
                 else
                 {
-                    if (Data.ChangedCells[num].X != x || Data.ChangedCells[num].Y != y) throw new Exception("fd546gdf");
-                    //Data.ChangedCells[num].X = x;
-                    //Data.ChangedCells[num].Y = y;
+					//var x1 = Data.ChangedCells[num].X;
+					//var y1 = Data.ChangedCells[num].Y;
+					//if (Data.ChangedCells[num].X != x || Data.ChangedCells[num].Y != y) throw new Exception("fd546gdf");
+                    Data.ChangedCells[num].X = x;
+                    Data.ChangedCells[num].Y = y;
                     Data.ChangedCells[num].Color = color;
                 }
             }
@@ -496,25 +498,30 @@ namespace WindowsFormsApp1.Static
                 throw new Exception("fdgdfgd3df4fg2");
             }
 
-            var cnt0 = 0;
-            for (var x = 0; x < Data.WorldWidth; x++)
-            {
-                for (var y = 0; y < Data.WorldHeight; y++)
-                {
-                    var cont = Data.ChWorld[x, y];
-                    if (cont != 0)
-                    {
-                        cnt0++;
-                        throw new Exception("fgs7565667657");
-                    }
-                }
-            }
 
-            if (cnt0 != 0)
+			var st = Data.CurrentStep;
+			if (st != 0)
             {
-                throw new Exception("fgs75656676574");
-            }
-        }
+				var cnt0 = 0;
+				for (var x = 0; x < Data.WorldWidth; x++)
+				{
+					for (var y = 0; y < Data.WorldHeight; y++)
+					{
+						var cont = Data.ChWorld[x, y];
+						if (cont != 0)
+						{
+							cnt0++;
+							throw new Exception("fgs7565667657");
+						}
+					}
+				}
+
+				if (cnt0 != 0)
+				{
+					throw new Exception("fgs75656676574");
+				}
+			}
+		}
 
         public static void CHECK2()
         {

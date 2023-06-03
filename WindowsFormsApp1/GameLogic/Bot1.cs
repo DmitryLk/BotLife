@@ -16,7 +16,6 @@ using System.Xml;
 using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
-using WindowsFormsApp1.Log;
 using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1.GameLogic
