@@ -29,7 +29,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		public void AddLog(string text)
+		public void LogInfo(string text)
 		{
 			_log.Add(new LogRecord
 			{
