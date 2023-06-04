@@ -159,10 +159,25 @@ namespace WindowsFormsApp1
 			Data.Parallel = !Data.Parallel;
 		}
 
-		public void ChecksToggle()
-		{
-			Data.Checks = !Data.Checks;
-		}
+        public void ChecksToggle()
+        {
+            Data.Checks = !Data.Checks;
+        }
+
+        public void HistToggle()
+        {
+            Data.Hist = !Data.Hist;
+        }
+
+        public void Fastest()
+        {
+            Data.Hist = false;
+			//Data.Logs = false;
+            Data.Checks = false;
+            Data.Parallel = true;
+            Data.NextDrawMode = DrawMode.NoDraw;
+            Data.NextDrawType = DrawType.OnlyChangedCells;
+        }
 
 		public void GenomInfo(GenomInfoMode mode)
 		{

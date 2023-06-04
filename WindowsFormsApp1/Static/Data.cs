@@ -97,7 +97,8 @@ namespace WindowsFormsApp1.Static
 		public static bool LensOn;
 		public static bool Mutation;
 		public static bool Parallel;
-		public static bool Checks;
+        public static bool Checks;
+        public static bool Hist;
 		public static DrawMode DrawMode;
 		public static DrawMode NextDrawMode;
 		public static DrawType DrawType;
@@ -142,7 +143,7 @@ namespace WindowsFormsApp1.Static
             //ClWorld = new BotLog[WorldWidth, WorldHeight];
             //Array.Clear(ClWorld, 0, ClWorld.Length);
 
-			ChangedCells = new ChangedCell[MaxBotsNumber];
+			ChangedCells = new ChangedCell[MaxBotsNumber + 10];
 			GrColors = new Color[361];
 
 			BotDeath = new Bot1[3000];
@@ -159,7 +160,8 @@ namespace WindowsFormsApp1.Static
 			PausedMode = false;
 			LensOn = false;
 			Parallel = true;
-			Checks = true;
+			Checks = false;
+            Hist = false;
 
 			DrawMode = DrawMode.EachStep;
 			NextDrawMode = DrawMode.EachStep;
@@ -251,7 +253,8 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"DrawType: {DrawType.ToString()}");
 			sb.AppendLine($"BotColorMode: {BotColorMode.ToString()}");
 			sb.AppendLine($"Parallel: {(Data.Parallel ? "true" : "false")}");
-			sb.AppendLine($"Checks: {(Data.Checks ? "true" : "false")}");
+            sb.AppendLine($"Checks: {(Data.Checks ? "true" : "false")}");
+            sb.AppendLine($"History: {(Data.Hist ? "true" : "false")}");
 			return sb.ToString();
 		}
 

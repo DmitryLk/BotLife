@@ -234,13 +234,13 @@ namespace WindowsFormsApp1.GameLogic
             //Func.CheckWorld2(Index, Num, Xi, Yi);
             //Func.CheckWorld2(Index, Num, Xi, Yi);
 
+            if (Data.Hist) Hist.BeginNewStep();
 
-            Hist.BeginNewStep();
             do
             {
                 // 1. Определяем команду которую будет делать бот
                 var cmdCode = Genom.GetCurrentCommand(Pointer);
-                Hist.SavePtr(Pointer);
+                if (Data.Hist) Hist.SavePtr(Pointer);
 
                 // 2. Выполняем команду
                 switch (cmdCode)

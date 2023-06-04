@@ -48,12 +48,12 @@ namespace WindowsFormsApp1
 								space - start/step
 								M - mutation on/off
 
-								D - NoDraw
-								F - EachStep
+								N - NoDraw
+								D - EachStep
 								G - Periodical
 								
-								H - OnlyChangedCells
-								J - AllCells
+								O - OnlyChangedCells
+								A - AllCells
 								
 								F1 - GenomColor
 								F2 - PraGenomColor
@@ -64,6 +64,9 @@ namespace WindowsFormsApp1
 
 								V  - Paralel
 								С  - Checks
+
+								H  - History log
+								F  - Fastest
 
 								1 - по кол-ву живых ботов
 								2 - по длительности сущестования генома
@@ -101,12 +104,12 @@ namespace WindowsFormsApp1
 					case Keys.L: LensToggle(); break;
 					case Keys.M: Game.MutationToggle(); break;
 
-					case Keys.D: Game.ChangeDrawMode(DrawMode.NoDraw); break;
-					case Keys.F: Game.ChangeDrawMode(DrawMode.EachStep); break;
+					case Keys.N: Game.ChangeDrawMode(DrawMode.NoDraw); break;
+					case Keys.D: Game.ChangeDrawMode(DrawMode.EachStep); break;
 					case Keys.G: Game.ChangeDrawMode(DrawMode.Periodical); break;
 
-					case Keys.H: Game.ChangeDrawType(DrawType.OnlyChangedCells); break;
-					case Keys.J: Game.ChangeDrawType(DrawType.AllCells); break;
+					case Keys.O: Game.ChangeDrawType(DrawType.OnlyChangedCells); break;
+					case Keys.A: Game.ChangeDrawType(DrawType.AllCells); break;
 
 					case Keys.Up: Game.LensUp(); break;
 					case Keys.Down: Game.LensDown(); break;
@@ -134,7 +137,10 @@ namespace WindowsFormsApp1
 					case Keys.D4: Game.GenomInfo(GenomInfoMode.AverageBotsLifetime); break;
 
 					case Keys.V: Game.ParallelToggle(); break;
-					case Keys.C: Game.ChecksToggle(); break;
+                    case Keys.C: Game.ChecksToggle(); break;
+
+                    case Keys.H: Game.HistToggle(); break;
+                    case Keys.F: Game.Fastest(); break;
 					default: break;
 				}
 			}
