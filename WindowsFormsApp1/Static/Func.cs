@@ -184,6 +184,7 @@ namespace WindowsFormsApp1.Static
                     out var y)) // Вставляем в World[x,y] индекс размножающегося бота-родителя !!!
             {
                 Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+                reproductedBot.HoldReproduction();
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                 return;
             }

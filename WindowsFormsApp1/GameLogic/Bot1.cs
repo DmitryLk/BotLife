@@ -67,6 +67,7 @@ namespace WindowsFormsApp1.GameLogic
         public bool Alive;
         public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
         public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
+        private int _reproductionCycle;
 
         private int df = 0;
 
@@ -186,6 +187,7 @@ namespace WindowsFormsApp1.GameLogic
             InsertedToDeathList = false;
             InsertedToReproductionList = false;
             Alive = true;
+            _reproductionCycle = 0;
             //Log.LogInfo($"bot was born. index:{Index}");
         }
 
@@ -350,9 +352,15 @@ namespace WindowsFormsApp1.GameLogic
             return Energy >= Data.ReproductionBotEnergy;
         }
 
+        public void HoldReproduction() 
+        {
+            _reproductionCycle = 20;
+        }
 
         private void ToReproductionList()
         {
+            if (_reproductionCycle-- > 0) return;
+            
             if (!InsertedToReproductionList)
             {
                 lock (_busyInsertedToReproductionList)
@@ -456,17 +464,17 @@ namespace WindowsFormsApp1.GameLogic
             }
 
             // Животное может есть растение, но ни тогда когда его осталось мало
-            //if (!genom.Plant && eatedBot.genom.Plant)
-            //{
-            //	if (eatedBot.genom.Bots < 2)
-            //	{
-            //		return;
-            //	}
-            //}
+            if (!Genom.Plant && eatedBot.Genom.Plant)
+            {
+                if (eatedBot.Genom.CurBots < 2)
+                {
+                    return;
+                }
+            }
 
 
             var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
-            var olden = Energy;
+            //var olden = Energy;
             EnergyChange(gotEnergyByEating);
 
             if (gotEnergyByEating < 0) throw new Exception("dfgdfg");

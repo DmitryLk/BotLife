@@ -45,7 +45,7 @@
   "BiteEnergy": -1000,
   "DeltaEnergyOnStep": -1,
   "PhotosynthesisEnergy": 30,
-  "PhotosynthesisLayerHeight": 0,
+  "PhotosynthesisLayerHeight": 100,
 
   //Size
   "MinSize": 300,

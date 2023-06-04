@@ -146,8 +146,8 @@ namespace WindowsFormsApp1.Static
 			ChangedCells = new ChangedCell[MaxBotsNumber + 10];
 			GrColors = new Color[361];
 
-			BotDeath = new Bot1[3000];
-			BotReproduction = new Bot1[5000];
+			BotDeath = new Bot1[5_000];
+			BotReproduction = new Bot1[10_000];
 			QtyAllBotDeathMinusOne = -1;
             QtyFactBotDeath = 0;
             QtyFactBotDeathUsedForReproduction = 0;

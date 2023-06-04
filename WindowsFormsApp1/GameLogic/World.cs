@@ -177,20 +177,23 @@ namespace WindowsFormsApp1.GameLogic
             //}
 
             Data.CurrentStep++;
-            while (Data.SeedFood && Data.TotalEnergy < Data.SeedTotalEnergy)
-            {
-                if (Func.TryGetRandomFreeCell(out var x, out var y))
-                {
-                    Data.World[x, y] = (long)CellContent.Grass;
-                    Func.FixChangeCell(x, y,Color.Green);
 
-                    Data.TotalEnergy += Data.FoodEnergy;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            //while (Data.SeedFood && Data.TotalEnergy < Data.SeedTotalEnergy)
+            //{
+            //    if (Func.TryGetRandomFreeCell(out var x, out var y))
+            //    {
+            //        Data.World[x, y] = (long)CellContent.Grass;
+            //        Func.FixChangeCell(x, y,Color.Green);
+
+            //        Data.TotalEnergy += Data.FoodEnergy;
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+
+
             //Func.CheckWorld3();
 
             //var cnt1 = 0;
