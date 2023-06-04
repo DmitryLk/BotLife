@@ -99,18 +99,18 @@ namespace WindowsFormsApp1
 			_PRINTER.Print015();
 
 
-     //       for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-     //       {
-     //           var bot = Data.Bots[i];
-     //           var x = bot.Xi;
-     //           var y = bot.Yi;
-     //           var color = _DRAWER.GetPixel(x, y);
+			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			{
+				var bot = Data.Bots[i];
+				var x = bot.Xi;
+				var y = bot.Yi;
+				var color = _DRAWER.GetPixel(x, y);
 
-     //           if (color != bot.Color)
-     //           {
-					////throw new Exception("fger675");
-     //           }
-     //       }
+				if (color != bot.Color)
+				{
+					//throw new Exception("fger675");
+				}
+			}
 
 			Test.NextInterval(1, "PrintInfo();");
 		}

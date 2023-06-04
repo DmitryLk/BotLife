@@ -47,7 +47,7 @@ namespace WindowsFormsApp1.GameLogic
         public int OldPointer;
 
         public CodeHistory Hist;
-        //public BotLog Log;
+        public BotLog Log;
 
         public double Xd;
         public double Yd;
@@ -110,7 +110,7 @@ namespace WindowsFormsApp1.GameLogic
             lock (_busyBotEnergy)
             {
                 if (_en + delta < 0) delta = -_en;
-                //Log.LogInfo($"Change Energy from {_en} to {_en + delta}");
+                Log.LogInfo($"Change Energy from {_en} to {_en + delta}");
                 _en += delta;
 
 
@@ -129,7 +129,7 @@ namespace WindowsFormsApp1.GameLogic
                     {
                         InsertedToDeathList = true;
                         Data.BotDeath[Interlocked.Increment(ref Data.QtyAllBotDeathMinusOne)] = this;
-                        //Log.LogInfo("bot inserted to DeathList");
+                        Log.LogInfo("bot inserted to DeathList");
                     }
                 }
             }
@@ -169,7 +169,7 @@ namespace WindowsFormsApp1.GameLogic
             OldPointer = pointer;
             this.Genom = genom;
             Hist = new CodeHistory();
-            //Log = new BotLog();
+            Log = new BotLog();
 
             Direction = dir;
             Num = botNumber;
@@ -185,7 +185,7 @@ namespace WindowsFormsApp1.GameLogic
             InsertedToDeathList = false;
             InsertedToReproductionList = false;
             Alive = true;
-            //Log.LogInfo($"bot was born. index:{Index}");
+            Log.LogInfo($"bot was born. index:{Index}");
         }
 
         public void RefreshColor()
@@ -470,8 +470,8 @@ namespace WindowsFormsApp1.GameLogic
 
             if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
 
-            //eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
-            //Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
+            eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
+            Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
         }
 
 
@@ -576,7 +576,7 @@ namespace WindowsFormsApp1.GameLogic
                     Func.FixChangeCell(nXi, nYi, Color);
                 }
 
-                //Log.LogInfo($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
+                Log.LogInfo($"bot was moved from {Xi}/{Yi} to {nXi}/{nYi}.");
 
                 Xd = nXd;
                 Yd = nYd;

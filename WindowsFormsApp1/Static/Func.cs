@@ -132,7 +132,7 @@ namespace WindowsFormsApp1.Static
                 // конец переноса
 
 
-                //lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
+                lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
                 //Data.Bots[lastBotIndex] = null;  // todo надо ли это? может лучше оставить и потом просто Update делать
                 //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
             }
@@ -178,7 +178,7 @@ namespace WindowsFormsApp1.Static
                 return;
             }
 
-            //reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
+            reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
 
             var genom = Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
 
@@ -225,14 +225,14 @@ namespace WindowsFormsApp1.Static
                 UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
                 Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
             else
             {
                 var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
                 CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
 
             reproductedBot.EnergyChange(-Data.InitialBotEnergy);
@@ -779,7 +779,7 @@ namespace WindowsFormsApp1.Static
                 var bc2 = Data.CurrentNumberOfBots;
                 var indttt = dct2.First().Key;
                 var bttt = Data.Bots[indttt];
-                //var log = bttt.Log.GetLog();
+                var log = bttt.Log.GetLog();
             }
         }
     }
