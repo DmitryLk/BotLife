@@ -19,7 +19,7 @@ namespace WindowsFormsApp1.Static
         //public long[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
         //public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
         //public long NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
-        public static void FixChangeCell(int x, int y, Color? color)
+        public static void FixChangeCell(int x, int y, /*int index,*/ Color? color)
         {
             // возможно ли в паралелли одновременное изменение одной клетки? а то приходится локи городить из-за этой возможности
             bool first = false;
@@ -45,6 +45,7 @@ namespace WindowsFormsApp1.Static
                 {
                     X = x,
                     Y = y,
+                    //Index = index,
                     Color = color
                 };
             }
@@ -54,6 +55,7 @@ namespace WindowsFormsApp1.Static
                 {
                     Data.ChangedCells[num].X = x;
                     Data.ChangedCells[num].Y = y;
+                    //Data.ChangedCells[num].Index = index;
                     Data.ChangedCells[num].Color = color;
                 }
                 else
@@ -61,8 +63,16 @@ namespace WindowsFormsApp1.Static
 					//var x1 = Data.ChangedCells[num].X;
 					//var y1 = Data.ChangedCells[num].Y;
 					//if (Data.ChangedCells[num].X != x || Data.ChangedCells[num].Y != y) throw new Exception("fd546gdf");
+                    //var rk = Data.ChangedCells[num];
+                    //var st = Data.CurrentStep;
+                    //if (st > 0)
+                    //{
+                    //    var bl = Data.Bots[index];
+                    //}
+
                     Data.ChangedCells[num].X = x;
                     Data.ChangedCells[num].Y = y;
+                    //Data.ChangedCells[num].Index = index;
                     Data.ChangedCells[num].Color = color;
                 }
             }
@@ -132,7 +142,7 @@ namespace WindowsFormsApp1.Static
                 // конец переноса
 
 
-                lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
+                //lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
                 //Data.Bots[lastBotIndex] = null;  // todo надо ли это? может лучше оставить и потом просто Update делать
                 //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
             }
@@ -178,7 +188,7 @@ namespace WindowsFormsApp1.Static
                 return;
             }
 
-            reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
+            //reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
 
             var genom = Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
 
@@ -191,7 +201,7 @@ namespace WindowsFormsApp1.Static
             // Data.BotDeath - массив умирающих ботов
 
             bool update = false;
-            long ind = -1;
+            int ind = -1;
             int en;
             if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne) // еще есть в запасе умирающие боты
             {
@@ -225,14 +235,14 @@ namespace WindowsFormsApp1.Static
                 UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
                 Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
             else
             {
                 var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
                 CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
             }
 
             reproductedBot.EnergyChange(-Data.InitialBotEnergy);
@@ -240,7 +250,7 @@ namespace WindowsFormsApp1.Static
             Interlocked.Increment(ref Data.TotalQtyBotReproduction);
         }
 
-        public static void UpdateBot(long ind, int x, int y, int en, Genom genom)
+        public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
         {
             var dir = GetRandomDirection();
             var pointer = 0;
@@ -497,30 +507,6 @@ namespace WindowsFormsApp1.Static
             {
                 throw new Exception("fdgdfgd3df4fg2");
             }
-
-
-			var st = Data.CurrentStep;
-			if (st != 0)
-            {
-				var cnt0 = 0;
-				for (var x = 0; x < Data.WorldWidth; x++)
-				{
-					for (var y = 0; y < Data.WorldHeight; y++)
-					{
-						var cont = Data.ChWorld[x, y];
-						if (cont != 0)
-						{
-							cnt0++;
-							throw new Exception("fgs7565667657");
-						}
-					}
-				}
-
-				if (cnt0 != 0)
-				{
-					throw new Exception("fgs75656676574");
-				}
-			}
 		}
 
         public static void CHECK2()
@@ -732,6 +718,48 @@ namespace WindowsFormsApp1.Static
             if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
         }
 
+        public static void CHECK5()
+        {
+            //for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+            //{
+            //    var bot = Data.Bots[i];
+            //    var x = bot.Xi;
+            //    var y = bot.Yi;
+            //    var color = _DRAWER.GetPixel(x, y);
+            //    var lllll = bot.Log.GetLog();
+            //    var lllll2 = Data.ClWorld[x, y].GetLog();
+
+
+            //    if (color != bot.Color)
+            //    {
+            //        //throw new Exception("fger675");
+            //    }
+            //}
+
+            var st = Data.CurrentStep;
+            if (st != 0)
+            {
+                var cnt0 = 0;
+                for (var x = 0; x < Data.WorldWidth; x++)
+                {
+                    for (var y = 0; y < Data.WorldHeight; y++)
+                    {
+                        var cont = Data.ChWorld[x, y];
+                        if (cont != 0)
+                        {
+                            cnt0++;
+                            throw new Exception("fgs7565667657");
+                        }
+                    }
+                }
+
+                if (cnt0 != 0)
+                {
+                    throw new Exception("fgs75656676574");
+                }
+            }
+        }
+
         public static (int, Dictionary<long, int>) GetAllBotsEnergy()
         {
             var te = 0;
@@ -779,7 +807,7 @@ namespace WindowsFormsApp1.Static
                 var bc2 = Data.CurrentNumberOfBots;
                 var indttt = dct2.First().Key;
                 var bttt = Data.Bots[indttt];
-                var log = bttt.Log.GetLog();
+                //var log = bttt.Log.GetLog();
             }
         }
     }

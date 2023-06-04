@@ -182,7 +182,7 @@ namespace WindowsFormsApp1.GameLogic
                 if (Func.TryGetRandomFreeCell(out var x, out var y))
                 {
                     Data.World[x, y] = (long)CellContent.Grass;
-                    Func.FixChangeCell(x, y, Color.Green);
+                    Func.FixChangeCell(x, y,Color.Green);
 
                     Data.TotalEnergy += Data.FoodEnergy;
                 }

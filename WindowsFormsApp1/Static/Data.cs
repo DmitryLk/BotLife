@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Logger;
 using WindowsFormsApp1.Options;
 using static System.Windows.Forms.Design.AxImporter;
 
@@ -78,8 +79,8 @@ namespace WindowsFormsApp1.Static
         public static long QtyAllBotDeathMinusOne;  // Количество собирающихся и собиравшихся умереть ботов
 		public static long QtyFactBotDeath;			// Фактическое количество умирающих ботов
 		public static long QtyFactBotDeathUsedForReproduction;
-        public static long IndexOfLastBotDeathArrayUsedForReproduction;
-        public static long IndexOfLastBotReproduction;  // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
+        public static int IndexOfLastBotDeathArrayUsedForReproduction;
+        public static int IndexOfLastBotReproduction;  // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
 		public static long TotalQtyBotDeath;
 		public static long TotalQtyBotReproduction;
         public static long IndexEnclusiveBeforeReplacesBots;
@@ -106,7 +107,8 @@ namespace WindowsFormsApp1.Static
 
 
 		//Для поддержки эффективной перерисовки
-		public static long[,] ChWorld;
+        public static long[,] ChWorld;
+        //public static BotLog[,] ClWorld;
 		public static ChangedCell[] ChangedCells;
 		public static long NumberOfChangedCells;
 		public static long NumberOfChangedCellsForInfo;
@@ -136,6 +138,10 @@ namespace WindowsFormsApp1.Static
 			Bots = new Bot1[MaxBotsNumber];
 			ChWorld = new long[WorldWidth, WorldHeight];
 			Array.Clear(ChWorld, 0 , ChWorld.Length);
+
+            //ClWorld = new BotLog[WorldWidth, WorldHeight];
+            //Array.Clear(ClWorld, 0, ClWorld.Length);
+
 			ChangedCells = new ChangedCell[MaxBotsNumber];
 			GrColors = new Color[361];
 

@@ -13,6 +13,7 @@ namespace WindowsFormsApp1.Dto
 	{
         public int X;
 		public int Y;
+		//public int Index;
 		public Color? Color;
 	}
 }

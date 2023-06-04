@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Logger;
 using WindowsFormsApp1.Static;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.Design.AxImporter;
@@ -36,6 +37,8 @@ namespace WindowsFormsApp1.Graphic
 
 			DrawBotsWorld();
 
+			if (Data.Checks) Func.CHECK5();
+            
             Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
 
 
@@ -76,29 +79,15 @@ namespace WindowsFormsApp1.Graphic
 						_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
                         Data.ChWorld[obj.X, obj.Y] = 0;
 
+
+                        //if (Data.ClWorld[obj.X, obj.Y] == null)
+                        //{
+                        //    Data.ClWorld[obj.X, obj.Y] = new BotLog();
+                        //}
+                        //Data.ClWorld[obj.X, obj.Y].LogInfo($"Color:{obj.Color}   Index:{obj.Index}");
                     }
 					Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
 					Data.NumberOfChangedCells = 0;
-
-					//var cnt0 = 0;
-					//for (var x = 0; x < Data.WorldWidth; x++)
-					//{
-					//	for (var y = 0; y < Data.WorldHeight; y++)
-					//	{
-					//		var cont = Data.ChWorld[x, y];
-					//		if (cont != 0)
-					//		{
-					//			cnt0++;
-					//			throw new Exception("fgs7565667657");
-					//		}
-					//	}
-					//}
-
-					//if (cnt0 != 0)
-					//{
-					//	throw new Exception("fgs75656676574");
-					//}
-
 
 					break;
 
