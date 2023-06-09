@@ -44,13 +44,13 @@ namespace WindowsFormsApp1
 
 			trackBar1.Value = Data.PhotosynthesisEnergy;
 
-			label2.Text = $@"	P - pause mode
-								space - start/step
+			label2.Text = $@"	Enter - pause mode
+								Space - start/step
 								M - mutation on/off
 
 								N - NoDraw
 								D - EachStep
-								G - Periodical
+								T - Periodical
 								
 								O - OnlyChangedCells
 								A - AllCells
@@ -62,7 +62,7 @@ namespace WindowsFormsApp1
 								F5 - Age
 								F6 - GenomAge
 
-								V  - Paralel
+								P  - Parallel
 								С  - Checks
 
 								H  - History log
@@ -98,7 +98,7 @@ namespace WindowsFormsApp1
 
 				switch (e.KeyCode)
 				{
-					case Keys.P: PauseToggle(); break;
+					case Keys.Enter: PauseToggle(); break;
 					case Keys.Space: StepPause(); break;
 
 					case Keys.L: LensToggle(); break;
@@ -106,7 +106,7 @@ namespace WindowsFormsApp1
 
 					case Keys.N: Game.ChangeDrawMode(DrawMode.NoDraw); break;
 					case Keys.D: Game.ChangeDrawMode(DrawMode.EachStep); break;
-					case Keys.G: Game.ChangeDrawMode(DrawMode.Periodical); break;
+					case Keys.T: Game.ChangeDrawMode(DrawMode.Periodical); break;
 
 					case Keys.O: Game.ChangeDrawType(DrawType.OnlyChangedCells); break;
 					case Keys.A: Game.ChangeDrawType(DrawType.AllCells); break;
@@ -136,7 +136,7 @@ namespace WindowsFormsApp1
 					case Keys.D3: Game.GenomInfo(GenomInfoMode.AllBotsNumber); break;
 					case Keys.D4: Game.GenomInfo(GenomInfoMode.AverageBotsLifetime); break;
 
-					case Keys.V: Game.ParallelToggle(); break;
+					case Keys.P: Game.ParallelToggle(); break;
                     case Keys.C: Game.ChecksToggle(); break;
 
                     case Keys.H: Game.HistToggle(); break;

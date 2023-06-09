@@ -58,7 +58,20 @@ namespace WindowsFormsApp1.Graphic
             Test.NextInterval(5, "PaintFrame();");
 		}
 
+        private void DrawCell(int index)
+        {
+            var obj = Data.ChangedCells[index];
 
+            _PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
+            Data.ChWorld[obj.X, obj.Y] = 0;
+
+
+            //if (Data.ClWorld[obj.X, obj.Y] == null)
+            //{
+            //    Data.ClWorld[obj.X, obj.Y] = new BotLog();
+            //}
+            //Data.ClWorld[obj.X, obj.Y].LogInfo($"Color:{obj.Color}   Index:{obj.Index}");
+		}
 
 		// Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
 		private void DrawBotsWorld()
@@ -72,20 +85,18 @@ namespace WindowsFormsApp1.Graphic
                     
                     Test.NextInterval(3, "RedrawWorld();");
 
-					for (var i = 1; i <= Data.NumberOfChangedCells; i++)
-					{
-						var obj = Data.ChangedCells[i];
-
-						_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
-                        Data.ChWorld[obj.X, obj.Y] = 0;
-
-
-                        //if (Data.ClWorld[obj.X, obj.Y] == null)
-                        //{
-                        //    Data.ClWorld[obj.X, obj.Y] = new BotLog();
-                        //}
-                        //Data.ClWorld[obj.X, obj.Y].LogInfo($"Color:{obj.Color}   Index:{obj.Index}");
+                    if (Data.Parallel)
+                    {
+                        Parallel.For(1, (int)Data.NumberOfChangedCells + 1, DrawCell);
                     }
+					else
+                    {
+                        for (var i = 1; i <= Data.NumberOfChangedCells; i++)
+                        {
+                            DrawCell(i);
+                        }
+                    }
+
 					Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
 					Data.NumberOfChangedCells = 0;
 

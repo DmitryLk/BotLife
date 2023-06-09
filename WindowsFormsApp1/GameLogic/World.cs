@@ -50,10 +50,18 @@ namespace WindowsFormsApp1.GameLogic
 
             if (Data.Checks) Func.CHECK1();
 
-            Parallel.For(1, Data.CurrentNumberOfBots, (i, state) =>
+            if (Data.Parallel)
             {
-                Data.Bots[i].Step();
-            });
+                Parallel.For(1, Data.CurrentNumberOfBots, i => { Data.Bots[i].Step(); });
+            }
+            else
+            {
+                for (var i = 1; i < Data.CurrentNumberOfBots; i++)
+                {
+                    Data.Bots[i].Step();
+                }
+            }
+
 
             //for (var i =1; i<=Data.CurrentNumberOfBots; i++)
             //{
@@ -86,7 +94,19 @@ namespace WindowsFormsApp1.GameLogic
             if (Data.IndexOfLastBotReproduction > -1)
             {
                 //SearchDouble();
-                Parallel.For(0, (int)Data.IndexOfLastBotReproduction + 1, Func.ReproductionBot);
+
+                if (Data.Parallel)
+                {
+                    Parallel.For(0, (int)Data.IndexOfLastBotReproduction + 1, Func.ReproductionBot);
+                }
+                else
+                {
+                    for (var i = 0; i < (int)Data.IndexOfLastBotReproduction + 1; i++)
+                    {
+                        Func.ReproductionBot(i);
+                    }
+                }
+
                 //SearchDouble();
             }
             Data.TotalQtyBotDeath += Data.QtyFactBotDeathUsedForReproduction;
@@ -130,8 +150,20 @@ namespace WindowsFormsApp1.GameLogic
                 Data.IndexEnclusiveBeforeReplacesBots = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
                 Data.QtyRemovedBotsOnStep = 0;
                 Data.IndexOfLastBotPlusOne = Data.CurrentNumberOfBots + 1;
+
                 // МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
-                Parallel.For((int)Data.IndexOfLastBotDeathArrayUsedForReproduction + 1, (int)Data.QtyAllBotDeathMinusOne + 1, Func.DeathBot);
+                if (Data.Parallel)
+                {
+                    Parallel.For((int)Data.IndexOfLastBotDeathArrayUsedForReproduction + 1, (int)Data.QtyAllBotDeathMinusOne + 1, Func.DeathBot);
+                }
+                else
+                {
+                    for (var i = (int)Data.IndexOfLastBotDeathArrayUsedForReproduction + 1; i < (int)Data.QtyAllBotDeathMinusOne + 1; i++)
+                    {
+                        Func.DeathBot(i);
+                    }
+                }
+
                 Data.CurrentNumberOfBots -= Data.QtyRemovedBotsOnStep; 
                 Data.TotalQtyBotDeath += Data.QtyRemovedBotsOnStep;
             }
