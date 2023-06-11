@@ -472,8 +472,13 @@ namespace WindowsFormsApp1.GameLogic
                 }
             }
 
+			// Не может есть родственника
+			if (Genom.GenomHash == eatedBot.Genom.GenomHash)
+			{
+				return;
+			}
 
-            var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+			var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
             //var olden = Energy;
             EnergyChange(gotEnergyByEating);
 
