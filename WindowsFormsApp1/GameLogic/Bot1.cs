@@ -47,6 +47,10 @@ namespace WindowsFormsApp1.GameLogic
         public int Pointer;
         public int OldPointer;
 
+        public byte[] Shield;
+        public byte AttackType;
+        public byte AttackLevel;
+        
         public CodeHistory Hist;
         //public BotLog Log;
 
@@ -354,7 +358,7 @@ namespace WindowsFormsApp1.GameLogic
 
         public void HoldReproduction() 
         {
-            _reproductionCycle = 20;
+            _reproductionCycle = Data.HoldReproductionTime;
         }
 
         private void ToReproductionList()

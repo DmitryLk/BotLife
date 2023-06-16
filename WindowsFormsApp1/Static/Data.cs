@@ -66,6 +66,8 @@ namespace WindowsFormsApp1.Static
 		public static int LensCellWidth;
 		public static int LensCellHeight;
 
+	
+		public static int HoldReproductionTime;
 
 		//=================VARIABLE CURRENT PARAMETERS==============================
 		public static long[,] World; // чтобы можно было узнать по координатам что там находится
@@ -314,6 +316,8 @@ namespace WindowsFormsApp1.Static
 			LensHeight = options.LensHeight;
 			LensCellWidth = options.LensCellWidth;
 			LensCellHeight = options.LensCellHeight;
+			
+			HoldReproductionTime = options.HoldReproductionTime;
 		}
 	}
 }

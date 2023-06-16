@@ -57,5 +57,7 @@
   "LensWidth": 20,
   "LensHeight": 20,
   "LensCellWidth": 20,
-  "LensCellHeight": 20
+  "LensCellHeight": 20,
+
+  "HoldReproductionTime": 20
 }

@@ -180,6 +180,7 @@ namespace WindowsFormsApp1.Static
                 //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
                 return;
             }
+
             if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x,
                     out var y)) // Вставляем в World[x,y] индекс размножающегося бота-родителя !!!
             {

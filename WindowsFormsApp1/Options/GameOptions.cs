@@ -49,5 +49,7 @@ namespace WindowsFormsApp1.Options
         public int LensHeight;
         public int LensCellWidth;
         public int LensCellHeight;
+        
+        public int HoldReproductionTime;
     }
 }
