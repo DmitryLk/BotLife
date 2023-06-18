@@ -52,6 +52,10 @@ namespace WindowsFormsApp1.GameLogic
 		public long RemovedBots { get => _removedBots; }
 		public int AgeBots { get => _ageBots; }
 
+		// Attack-Shield
+		public byte[] Shield;
+		public byte AttackType;
+		public byte AttackLevel;
 
 		private Genom()
 		{
@@ -65,17 +69,22 @@ namespace WindowsFormsApp1.GameLogic
 		}
 		public void DecBot(int age)
 		{
-			if (_curBots < 1)
+			if (_curBots == 0)
 			{
-				throw new Exception("if (_curBots < 1)");
+				throw new Exception("if (_curBots == 0)");
 			}
 
 
-			Interlocked.Decrement(ref _curBots);
+			var curBots = Interlocked.Decrement(ref _curBots);
 			Interlocked.Increment(ref _removedBots);
 
+			if (_curBots < 0 || curBots < 0)
+			{
+				throw new Exception("if (_curBots < 0)");
+			}
+
 			// Исчезновение генома
-			if (_curBots == 0)
+			if (curBots == 0)
 			{
 				EndStep = Data.CurrentStep;
 				Interlocked.Increment(ref ENDCOUNTER);
@@ -109,6 +118,11 @@ namespace WindowsFormsApp1.GameLogic
 				g.PraHash = g.GenomHash;
 				g.PraNum = g.Num;
 				g.Level = 1;
+
+				// Attack-Shield
+				g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
+				g.AttackType = Func.GetRandomAttackType(Data.AttackTypeCount);
+				g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
 			}
 			else
 			{
@@ -127,7 +141,15 @@ namespace WindowsFormsApp1.GameLogic
 				g.PraNum = parent.PraNum;
 				g.PraColor = parent.PraColor;
 				g.Level = parent.Level + 1;
-                Interlocked.Increment(ref Data.MutationCnt);
+				Interlocked.Increment(ref Data.MutationCnt);
+
+				// Attack-Shield
+				g.Shield = parent.Shield;
+				g.AttackType = parent.AttackType;
+				g.AttackLevel = parent.AttackLevel;
+				//g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
+				//g.AttackType = Func.GetRandomAttackType(Data.AttackTypeCount);
+				//g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
 			}
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
@@ -160,10 +182,14 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Count: {BEGINCOUNTER}");
 
 			var activeGemons = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
-			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}");
+			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}:{activeGemons}");
+
+			var activePraGemons = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
+			sb.AppendLine($"PraActive: {activePraGemons}");
+
 			sb.AppendLine("");
 
-            IEnumerable<Genom> genoms;
+			IEnumerable<Genom> genoms;
 			switch (mode)
 			{
 				case GenomInfoMode.LiveBotsNumber:
@@ -190,18 +216,18 @@ namespace WindowsFormsApp1.GameLogic
 
 			}
 
-            sb.AppendLine("Живых|Всего |Первый|Текущий|Поколение |Возраст |Ср.возраст|");
-            sb.AppendLine("ботов  |ботов  |геном   |геном    |генома        |генома   |ботов        |");
+			sb.AppendLine("Живых|Всего |Первый|Текущий|Поколение |Возраст |Ср.возраст|");
+			sb.AppendLine("ботов  |ботов  |геном   |геном    |генома        |генома   |ботов        |");
 
 			foreach (var g in genoms)
-            {
-                var genomAge = g._curBots == 0 ? $"{g.EndStep - g.BeginStep}N" : $"{Data.CurrentStep - g.BeginStep}L";
+			{
+				var genomAge = g._curBots == 0 ? $"{g.EndStep - g.BeginStep}N" : $"{Data.CurrentStep - g.BeginStep}L";
 
 				sb.AppendLine($"|  {g.CurBots,-8}|  {g.AllBots,-8}|  {g.PraNum,-10}|  {g.Num,-11}|  {g.Level,-15}|  {genomAge,-11}|  {(g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0),-14}|");
-            }
+			}
 
-            
-            return sb.ToString();
+
+			return sb.ToString();
 		}
 	}
 }

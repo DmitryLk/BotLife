@@ -66,7 +66,7 @@ namespace WindowsFormsApp1.Static
 		public static int LensCellWidth;
 		public static int LensCellHeight;
 
-	
+
 		public static int HoldReproductionTime;
 
 		//=================VARIABLE CURRENT PARAMETERS==============================
@@ -76,19 +76,19 @@ namespace WindowsFormsApp1.Static
 		public static long SeedTotalEnergy;
 
 		// Death Reproduction		
-        public static Bot1[] BotDeath;
+		public static Bot1[] BotDeath;
 		public static Bot1[] BotReproduction;
-        public static long QtyAllBotDeathMinusOne;  // Количество собирающихся и собиравшихся умереть ботов
-		public static long QtyFactBotDeath;			// Фактическое количество умирающих ботов
+		public static long QtyAllBotDeathMinusOne;  // Количество собирающихся и собиравшихся умереть ботов
+		public static long QtyFactBotDeath;         // Фактическое количество умирающих ботов
 		public static long QtyFactBotDeathUsedForReproduction;
-        public static int IndexOfLastBotDeathArrayUsedForReproduction;
-        public static int IndexOfLastBotReproduction;  // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
+		public static int IndexOfLastBotDeathArrayUsedForReproduction;
+		public static int IndexOfLastBotReproduction;  // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
 		public static long TotalQtyBotDeath;
 		public static long TotalQtyBotReproduction;
-        public static long IndexEnclusiveBeforeReplacesBots;
-        public static long Check_QtyFailedReproduction;
+		public static long IndexEnclusiveBeforeReplacesBots;
+		public static long Check_QtyFailedReproduction;
 		public static int QtyRemovedBotsOnStep;
-        public static long IndexOfLastBotPlusOne;
+		public static long IndexOfLastBotPlusOne;
 		//private static int removedbots2;
 
 
@@ -99,8 +99,8 @@ namespace WindowsFormsApp1.Static
 		public static bool LensOn;
 		public static bool Mutation;
 		public static bool Parallel;
-        public static bool Checks;
-        public static bool Hist;
+		public static bool Checks;
+		public static bool Hist;
 		public static DrawMode DrawMode;
 		public static DrawMode NextDrawMode;
 		public static DrawType DrawType;
@@ -110,8 +110,8 @@ namespace WindowsFormsApp1.Static
 
 
 		//Для поддержки эффективной перерисовки
-        public static long[,] ChWorld;
-        //public static BotLog[,] ClWorld;
+		public static long[,] ChWorld;
+		//public static BotLog[,] ClWorld;
 		public static ChangedCell[] ChangedCells;
 		public static long NumberOfChangedCells;
 		public static long NumberOfChangedCellsForInfo;
@@ -129,7 +129,16 @@ namespace WindowsFormsApp1.Static
 		public static int CursorY;
 		public static int DeltaHistory;
 
-        //public static Log.Log Wlog;
+		// Attack-Shield
+		public static int AttackMax;
+		public static int AttackTypeCount;
+		public static int ShieldSum;
+		public static int ShieldMax;
+		public static int ShieldTypeCount;
+		public static int ShieldTypeCountMax;
+
+
+		//public static Log.Log Wlog;
 
 		public static void Initialize()
 		{
@@ -140,10 +149,10 @@ namespace WindowsFormsApp1.Static
 			World = new long[WorldWidth, WorldHeight];
 			Bots = new Bot1[MaxBotsNumber];
 			ChWorld = new long[WorldWidth, WorldHeight];
-			Array.Clear(ChWorld, 0 , ChWorld.Length);
+			Array.Clear(ChWorld, 0, ChWorld.Length);
 
-            //ClWorld = new BotLog[WorldWidth, WorldHeight];
-            //Array.Clear(ClWorld, 0, ClWorld.Length);
+			//ClWorld = new BotLog[WorldWidth, WorldHeight];
+			//Array.Clear(ClWorld, 0, ClWorld.Length);
 
 			ChangedCells = new ChangedCell[MaxBotsNumber + 10];
 			GrColors = new Color[361];
@@ -151,8 +160,8 @@ namespace WindowsFormsApp1.Static
 			BotDeath = new Bot1[5_000];
 			BotReproduction = new Bot1[10_000];
 			QtyAllBotDeathMinusOne = -1;
-            QtyFactBotDeath = 0;
-            QtyFactBotDeathUsedForReproduction = 0;
+			QtyFactBotDeath = 0;
+			QtyFactBotDeathUsedForReproduction = 0;
 			IndexOfLastBotReproduction = -1;
 			TotalQtyBotDeath = 0;
 			TotalQtyBotReproduction = 0;
@@ -163,7 +172,7 @@ namespace WindowsFormsApp1.Static
 			LensOn = false;
 			Parallel = true;
 			Checks = false;
-            Hist = false;
+			Hist = false;
 
 			DrawMode = DrawMode.EachStep;
 			NextDrawMode = DrawMode.EachStep;
@@ -184,12 +193,20 @@ namespace WindowsFormsApp1.Static
 			CursorX = 10;
 			CursorY = 10;
 
-            //Wlog = new Log.Log();
+			//Wlog = new Log.Log();
 
 			for (var hue = 0; hue <= 360; hue++)
 			{
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
 			}
+
+			// Attack-Shield
+			AttackMax = 1;
+			AttackTypeCount = 5;
+			ShieldSum = 3;
+			ShieldMax = 1;
+			ShieldTypeCount = 5;
+			ShieldTypeCountMax = 20;
 		}
 
 		public static Color ColorFromHSV(double hue, double saturation, double value)
@@ -255,8 +272,9 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"DrawType: {DrawType.ToString()}");
 			sb.AppendLine($"BotColorMode: {BotColorMode.ToString()}");
 			sb.AppendLine($"Parallel: {(Data.Parallel ? "true" : "false")}");
-            sb.AppendLine($"Checks: {(Data.Checks ? "true" : "false")}");
-            sb.AppendLine($"History: {(Data.Hist ? "true" : "false")}");
+			sb.AppendLine($"Checks: {(Data.Checks ? "true" : "false")}");
+			sb.AppendLine($"History: {(Data.Hist ? "true" : "false")}");
+			//sb.AppendLine($"Paused Mode: {(Data.PausedMode ? "true" : "false")}");
 			return sb.ToString();
 		}
 
@@ -316,7 +334,7 @@ namespace WindowsFormsApp1.Static
 			LensHeight = options.LensHeight;
 			LensCellWidth = options.LensCellWidth;
 			LensCellHeight = options.LensCellHeight;
-			
+
 			HoldReproductionTime = options.HoldReproductionTime;
 		}
 	}

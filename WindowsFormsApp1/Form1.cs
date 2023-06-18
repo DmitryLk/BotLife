@@ -81,7 +81,7 @@ namespace WindowsFormsApp1
 			{
 				switch (e.KeyCode)
 				{
-					case Keys.P: PauseToggle(); break;
+					case Keys.Enter: PauseToggle(); break;
 					case Keys.Space:
 						{
 							await Game.Init();

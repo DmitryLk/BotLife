@@ -9,7 +9,7 @@
   "FrequencyOfPeriodicalDraw": 25,
 
   // Настройки мира
-  "StartBotsNumber": 1000,
+  "StartBotsNumber": 10000,
   "MaxBotsNumber": 250000,
   "WorldWidth": 500,
   "WorldHeight": 500,
@@ -44,8 +44,10 @@
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": -1000,
   "DeltaEnergyOnStep": 0,
+
+  //Photosynthesis
   "PhotosynthesisEnergy": 30,
-  "PhotosynthesisLayerHeight": 100,
+  "PhotosynthesisLayerHeight": 0,
 
   //Size
   "MinSize": 300,

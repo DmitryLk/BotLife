@@ -9,810 +9,836 @@ using WindowsFormsApp1.GameLogic;
 
 namespace WindowsFormsApp1.Static
 {
-    public static class Func
-    {
-        private static readonly object _busyWorld = new object();
-        private static readonly object _busyChWorld = new object();
-        
-       
-        // Список измененных ячеек для последующей отрисовки
-        //public long[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
-        //public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
-        //public long NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
-        public static void FixChangeCell(int x, int y, /*int index,*/ Color? color)
-        {
-            // возможно ли в паралелли одновременное изменение одной клетки? а то приходится локи городить из-за этой возможности
-            bool first = false;
-            long num;
+	public static class Func
+	{
+		private static readonly object _busyWorld = new object();
+		private static readonly object _busyChWorld = new object();
 
-            if (Data.ChWorld[x, y] == 0)
-            {
-                lock (_busyChWorld)
-                {
-                    if (Data.ChWorld[x, y] == 0)
-                    {
-                        Data.ChWorld[x, y] = Interlocked.Increment(ref Data.NumberOfChangedCells); // сюда записываем +1 чтобы 0 не записывать
-                        first = true;
-                    }
-                }
-            }
 
-            num = Data.ChWorld[x, y];
+		// Список измененных ячеек для последующей отрисовки
+		//public long[,] ChWorld;				- по координатам можно определить перерисовывать ли эту ячейку, там записам индекс массива ChangedCell
+		//public ChangedCell[] ChangedCells;	- массив перерисовки, в нем перечислены координаты перерисуеваемых ячеек и их цвета
+		//public long NumberOfChangedCells;		- количество изменившихся ячеек на экране колторые надо перерисовать в следующий раз
+		public static void FixChangeCell(int x, int y, /*int index,*/ Color? color)
+		{
+			// возможно ли в паралелли одновременное изменение одной клетки? а то приходится локи городить из-за этой возможности
+			bool first = false;
+			long num;
 
-            if (Data.ChangedCells[num] == null)
-            {
-                Data.ChangedCells[num] = new ChangedCell
-                {
-                    X = x,
-                    Y = y,
-                    //Index = index,
-                    Color = color
-                };
-            }
-            else
-            {
-                if (first)
-                {
-                    Data.ChangedCells[num].X = x;
-                    Data.ChangedCells[num].Y = y;
-                    //Data.ChangedCells[num].Index = index;
-                    Data.ChangedCells[num].Color = color;
-                }
-                else
-                {
+			if (Data.ChWorld[x, y] == 0)
+			{
+				lock (_busyChWorld)
+				{
+					if (Data.ChWorld[x, y] == 0)
+					{
+						Data.ChWorld[x, y] = Interlocked.Increment(ref Data.NumberOfChangedCells); // сюда записываем +1 чтобы 0 не записывать
+						first = true;
+					}
+				}
+			}
+
+			num = Data.ChWorld[x, y];
+
+			if (Data.ChangedCells[num] == null)
+			{
+				Data.ChangedCells[num] = new ChangedCell
+				{
+					X = x,
+					Y = y,
+					//Index = index,
+					Color = color
+				};
+			}
+			else
+			{
+				if (first)
+				{
+					Data.ChangedCells[num].X = x;
+					Data.ChangedCells[num].Y = y;
+					//Data.ChangedCells[num].Index = index;
+					Data.ChangedCells[num].Color = color;
+				}
+				else
+				{
 					//var x1 = Data.ChangedCells[num].X;
 					//var y1 = Data.ChangedCells[num].Y;
 					//if (Data.ChangedCells[num].X != x || Data.ChangedCells[num].Y != y) throw new Exception("fd546gdf");
-                    //var rk = Data.ChangedCells[num];
-                    //var st = Data.CurrentStep;
-                    //if (st > 0)
-                    //{
-                    //    var bl = Data.Bots[index];
-                    //}
-
-                    Data.ChangedCells[num].X = x;
-                    Data.ChangedCells[num].Y = y;
-                    //Data.ChangedCells[num].Index = index;
-                    Data.ChangedCells[num].Color = color;
-                }
-            }
-        }
-
-
-        public static void DeathBot(int index)
-        {
-            var dBot = Data.BotDeath[index];
-
-            //Func.CheckWorld2();
-            if (dBot.Energy > 0)
-            {
-                dBot.InsertedToDeathList = false;
-                //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Failed Energy > 0");
-                return; //бот успел поесть и выжил
-            }
-
-            lock (_busyWorld)
-            {
-                Data.World[dBot.Xi, dBot.Yi] = 0;
-            }
-
-            if (Data.DrawType == DrawType.OnlyChangedCells)
-            {
-                FixChangeCell(dBot.Xi, dBot.Yi, null); // при следующей отрисовке бот стерется с экрана
-            }
-
-            dBot.Genom.DecBot(dBot.Age);
-
-            // Разобраться надо ли обменивать этого бота
-            bool replace = false;
-            long lastBotIndex = -1;
-            if (dBot.Index <= Data.IndexEnclusiveBeforeReplacesBots)  // обменивать надо
-            {
-                // Найти живого бота для обмена в конце списка (с индексом > Data.IndexEnclusiveBeforeReplacesBots)
-                do
-                {
-                    lastBotIndex = Interlocked.Decrement(ref Data.IndexOfLastBotPlusOne);
-                }
-                while (!Data.Bots[lastBotIndex].Alive);
-
-                //!!!!!!!Переносить только если lastBotIndex > Func.IndexEnclusiveBeforeReplacesBots
-                if (lastBotIndex > Data.IndexEnclusiveBeforeReplacesBots)
-                {
-                    replace = true;
-                }
-                else
-                {
-                    throw new Exception("странно");
-                }
-            }
-
-            if (replace)
-            {
-                // Обмен ботов lastBot и dBot
-                var lastBot = Data.Bots[lastBotIndex];
-                var dBotIndex = dBot.Index;
-                Data.Bots[dBotIndex] = lastBot;
-                Data.Bots[lastBotIndex] = dBot;
-                lastBot.Index = dBotIndex;
-
-                lock (_busyWorld)
-                {
-                    Data.World[lastBot.Xi, lastBot.Yi] = dBotIndex;
-                }
-                // конец переноса
-
-
-                //lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
-                //Data.Bots[lastBotIndex] = null;  // todo надо ли это? может лучше оставить и потом просто Update делать
-                //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
-            }
-            else
-            {
-                //Data.Bots[dBot.Index] = null;   // todo надо ли это? может лучше оставить и потом просто Update делать
-                //Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index}");
-            }
-
-
-            Interlocked.Increment(ref Data.QtyRemovedBotsOnStep);
-        }
-
-
-
-
-
-        //https://symbl.cc/ru/tools/text-to-symbols/
-        //      ████─█──█─█───██─██────█───█─█──█─███─█──█────████─████─███─████─███─███─█──█─████────████──████─███─███
-        //      █──█─██─█─█────███─────█───█─█──█─█───██─█────█──█─█──█─█───█──█──█───█──██─█─█───────█──██─█──█──█──█──
-        //      █──█─█─██─█─────█──────█─█─█─████─███─█─██────█────████─███─████──█───█──█─██─█─██────████──█──█──█──███
-        //      █──█─█──█─█─────█──────█████─█──█─█───█──█────█──█─█─█──█───█──█──█───█──█──█─█──█────█──██─█──█──█────█
-        //      ████─█──█─███───█───────█─█──█──█─███─█──█────████─█─█──███─█──█──█──███─█──█─████────████──████──█──███
-
-
-
-        public static void ReproductionBot(int index)
-        {
-            var reproductedBot = Data.BotReproduction[index];
-            reproductedBot.InsertedToReproductionList = false;
-
-            if (!reproductedBot.CanReproduct())
-            {
-                Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
-                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                return;
-            }
-
-            if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x,
-                    out var y)) // Вставляем в World[x,y] индекс размножающегося бота-родителя !!!
-            {
-                Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
-                reproductedBot.HoldReproduction();
-                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                return;
-            }
-
-            //reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
-
-            var genom = Mutation() ? Genom.CreateGenom(reproductedBot.Genom) : reproductedBot.Genom;
-
-
-
-            // Узнать можно ли создать бота на основе умирающего бота
-            // Получить номер умирающего бота из BotDeath
-            // Data.NumberOfBotDeath - количество умирающих ботов - 1
-            // Data.NumberOfBotDeathForReproduction = -1 - первоначально
-            // Data.BotDeath - массив умирающих ботов
-
-            bool update = false;
-            int ind = -1;
-            int en;
-            if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne) // еще есть в запасе умирающие боты
-            {
-                do
-                {
-                    ind = Interlocked.Increment(ref Data.IndexOfLastBotDeathArrayUsedForReproduction);  // получаем индекс умирающего бота
-
-                    if (ind <= Data.QtyAllBotDeathMinusOne) // ind в пределах списка умирающих ботов?
-                    {
-                        en = Data.BotDeath[ind].Energy;
-                        //если энергия бота >0 то здесь его надо убрать из массива
-                        if (en > 0)
-                        {
-                            //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} BotDeath Skipped (en>0)  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                            Data.BotDeath[ind].InsertedToDeathList = false;
-                        }
-
-                        if (en == 0) update = true;
-                    }
-                    else
-                    {
-                        en = 0;
-                    }
-                }
-                while (ind < Data.QtyAllBotDeathMinusOne && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
-            }
-
-
-            if (update)
-            {
-                UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
-                Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
-                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-            }
-            else
-            {
-                var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-                CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
-                //Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-                //reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
-            }
-
-            reproductedBot.EnergyChange(-Data.InitialBotEnergy);
-
-            Interlocked.Increment(ref Data.TotalQtyBotReproduction);
-        }
-
-        public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
-        {
-            var dir = GetRandomDirection();
-            var pointer = 0;
-            var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
-            genom.IncBot();
-
-
-            var updBot = Data.BotDeath[ind];
-            var index = Data.BotDeath[ind].Index;
-            updBot.Genom.DecBot(updBot.Age);
-            var xiold = updBot.Xi;
-            var yiold = updBot.Yi;
-            //Interlocked.Increment(ref Removedbots1);
-            //Data.BotDeath[ind] = null;
-            //Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
-
-            // Изменение бота
-            updBot.Xi = x;
-            updBot.Xd = x;
-            updBot.Yi = y;
-            updBot.Yd = y;
-            updBot.Direction = dir;
-            updBot.Num = botNumber;
-            updBot.EnergySet(en);
-            updBot.Genom = genom;
-            updBot.Pointer = pointer;
-            updBot.OldPointer = pointer;
-            updBot.Age = 0;
-            updBot.InsertedToDeathList = false;
-            updBot.InsertedToReproductionList = false;
-            updBot.Alive = true;
-            updBot.Hist = new CodeHistory();
-
-            updBot.RefreshColor();
-
-
-            lock (_busyWorld)
-            {
-                Data.World[xiold, yiold] = 0;
-                Data.World[x, y] = index;
-            }
-
-            if (Data.DrawType == DrawType.OnlyChangedCells)
-            {
-                FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
-                FixChangeCell(x, y, updBot.Color);
-            }
-        }
-
-        public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
-        {
-            var dir = GetRandomDirection();
-            var pointer = 0;
-            var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
-            genom.IncBot();
-
-
-            Bot1 bot;
-            if (Data.Bots[botIndex] == null)
-            {
-                bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom, pointer);
-
-                Data.Bots[botIndex] = bot;
-            }
-            else
-            {
-                bot = Data.Bots[botIndex];
-                bot.Index = botIndex;
-                bot.Xi = x;
-                bot.Xd = x;
-                bot.Yi = y;
-                bot.Yd = y;
-                bot.Direction = dir;
-                bot.Num = botNumber;
-                bot.EnergySet(en);
-                bot.Genom = genom;
-                bot.Pointer = pointer;
-                bot.OldPointer = pointer;
-                bot.Age = 0;
-                bot.InsertedToDeathList = false;
-                bot.InsertedToReproductionList = false;
-                bot.Alive = true;
-                bot.Hist = new CodeHistory();
-            }
-
-            bot.RefreshColor();
-
-            lock (_busyWorld)
-            {
-                Data.World[x, y] = botIndex;
-            }
-
-            if (Data.DrawType == DrawType.OnlyChangedCells)
-            {
-                FixChangeCell(x, y, bot.Color);
-            }
-        }
-
-
-
-        private static bool TryOccupyRandomFreeCellNearby(int Xi, int Yi, long reprBotIndex, out int nXi, out int nYi)
-        {
-            var n = ThreadSafeRandom.Next(8);
-            var i = 0;
-            bool result = false;
-
-            do
-            {
-                (nXi, nYi) = GetCoordinatesByDelta(Xi, Yi, n);
-
-                if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
-                {
-                    if (Data.World[nXi, nYi] == 0)
-                    {
-                        lock (_busyWorld)
-                        {
-                            if (Data.World[nXi, nYi] == 0)
-                            {
-                                Data.World[nXi, nYi] = reprBotIndex;
-                                result = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                i++;
-                if (++n >= 8) n -= 8;
-            }
-            while (i <= 8);
-
-            return result;
-        }
-
-        private static (int nXi, int nYi) GetCoordinatesByDelta(int Xi, int Yi, int nDelta)
-        {
-            var (nXid, nYid) = Dir.NearbyCells[nDelta];
-
-
-            var nXi = Xi + nXid;
-            var nYi = Yi + nYid;
-
-            // Проверка перехода сквозь экран
-            if (!Data.LeftRightEdge)
-            {
-                if (nXi < 0)
-                {
-                    nXi += Data.WorldWidth;
-                }
-
-                if (nXi >= Data.WorldWidth)
-                {
-                    nXi -= Data.WorldWidth;
-                }
-            }
-
-            if (!Data.UpDownEdge)
-            {
-                if (nYi < 0)
-                {
-                    nYi += Data.WorldHeight;
-                }
-
-                if (nYi >= Data.WorldHeight)
-                {
-                    nYi -= Data.WorldHeight;
-                }
-            }
-
-            return (nXi, nYi);
-        }
-
-
-        public static int GetRandomDirection()
-        {
-            return ThreadSafeRandom.Next(Dir.NumberOfDirections);
-        }
-
-        public static byte GetRandomBotCode()
-        {
-            return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
-        }
-
-        public static Color GetRandomColor()
-        {
-            return Color.FromArgb(ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256));
-        }
-
-        public static int GetRandomBotCodeIndex()
-        {
-            return ThreadSafeRandom.Next(Data.GenomLength);
-        }
-
-        public static bool Mutation()
-        {
-            return Data.Mutation && ThreadSafeRandom.NextDouble() * 100 < Data.MutationProbabilityPercent;
-        }
-
-        //////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////
-
-
-        public static bool TryGetRandomFreeCell(out int x, out int y)
-        {
-            x = 0;
-            y = 0;
-            var i = 0;
-
-            do
-            {
-                x = ThreadSafeRandom.Next(0, Data.WorldWidth);
-                y = ThreadSafeRandom.Next(0, Data.WorldHeight);
-            }
-            while (Data.World[x, y] != 0 && ++i < 1000);
-
-            if (i >= 1000)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-
-        public static (int, int) GetRandomSpeed()
-        {
-            //do
-            //{
-            //	_vx = rnd.Next(-1, 2);
-            //	_vy = rnd.Next(-1, 2);
-            //}
-            //while (_vx == 0 && _vy == 0);
-
-            if (ThreadSafeRandom.Next(100) > 97)
-            {
-                return (ThreadSafeRandom.Next(-1, 2), ThreadSafeRandom.Next(-1, 2));
-            }
-            return (0, 0);
-        }
-
-        public static void CHECK1()
-        {
-            if (Data.QtyAllBotDeathMinusOne != -1)
-            {
-                throw new Exception("fdgdfgds34fg2");
-            }
-
-            if (Data.QtyFactBotDeath != 0)
-            {
-                throw new Exception("fdgdf45646gds34fg2");
-            }
-
-            if (Data.IndexOfLastBotReproduction != -1)
-            {
-                throw new Exception("fdgdfgd3df4fg2");
-            }
+					//var rk = Data.ChangedCells[num];
+					//var st = Data.CurrentStep;
+					//if (st > 0)
+					//{
+					//    var bl = Data.Bots[index];
+					//}
+
+					Data.ChangedCells[num].X = x;
+					Data.ChangedCells[num].Y = y;
+					//Data.ChangedCells[num].Index = index;
+					Data.ChangedCells[num].Color = color;
+				}
+			}
 		}
 
-        public static void CHECK2()
-        {
-            
-            for (var i = 0; i < (int)Data.QtyAllBotDeathMinusOne + 1; i++)
-            {
-                var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
 
-                if (Data.Bots[ind].Xd != Data.BotDeath[i].Xd || Data.Bots[ind].Yd != Data.BotDeath[i].Yd)
-                {
-                    throw new Exception("fgfdgdfgf");
-                }
+		public static void DeathBot(int index)
+		{
+			var dBot = Data.BotDeath[index];
 
-                if (Data.World[Data.BotDeath[i].Xi, Data.BotDeath[i].Yi] != Data.BotDeath[i].Index)
-                {
-                    throw new Exception("fdgdfgdfg");
-                }
+			//Func.CheckWorld2();
+			if (dBot.Energy > 0)
+			{
+				dBot.InsertedToDeathList = false;
+				//Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Failed Energy > 0");
+				return; //бот успел поесть и выжил
+			}
 
-                if (!Data.BotDeath[i].InsertedToDeathList && Data.BotDeath[i].Energy == 0)
-                {
-                    throw new Exception("fdgdfgdfg2");
-                }
+			lock (_busyWorld)
+			{
+				Data.World[dBot.Xi, dBot.Yi] = 0;
+			}
 
-                if (Data.BotDeath[i].Index > Data.CurrentNumberOfBots)
-                {
-                    throw new Exception("if (_ind > Data.CurrentBotsNumber)");
-                }
+			if (Data.DrawType == DrawType.OnlyChangedCells)
+			{
+				FixChangeCell(dBot.Xi, dBot.Yi, null); // при следующей отрисовке бот стерется с экрана
+			}
 
+			dBot.G.DecBot(dBot.Age);
 
-                for (var j = 0; j < (int)Data.QtyAllBotDeathMinusOne + 1; j++)
-                {
-                    if (i != j)
-                    {
-                        if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
-                        {
-                            throw new Exception("if (_insdfdfsdfsdd > Data.CurrentBotsNumber)");
-                        }
-                    }
-                }
-            }
+			// Разобраться надо ли обменивать этого бота
+			bool replace = false;
+			long lastBotIndex = -1;
+			if (dBot.Index <= Data.IndexEnclusiveBeforeReplacesBots)  // обменивать надо
+			{
+				// Найти живого бота для обмена в конце списка (с индексом > Data.IndexEnclusiveBeforeReplacesBots)
+				do
+				{
+					lastBotIndex = Interlocked.Decrement(ref Data.IndexOfLastBotPlusOne);
+				}
+				while (!Data.Bots[lastBotIndex].Alive);
 
-            for (var i = 0; i < (int)Data.IndexOfLastBotReproduction + 1; i++)
-            {
-                var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotReproduction[i].Index && x.Num == Data.BotReproduction[i].Num);
+				//!!!!!!!Переносить только если lastBotIndex > Func.IndexEnclusiveBeforeReplacesBots
+				if (lastBotIndex > Data.IndexEnclusiveBeforeReplacesBots)
+				{
+					replace = true;
+				}
+				else
+				{
+					throw new Exception("странно");
+				}
+			}
 
-                if (Data.Bots[ind].Xd != Data.BotReproduction[i].Xd || Data.Bots[ind].Yd != Data.BotReproduction[i].Yd)
-                {
-                    throw new Exception("fgfdg34dfgf");
-                }
+			if (replace)
+			{
+				// Обмен ботов lastBot и dBot
+				var lastBot = Data.Bots[lastBotIndex];
+				var dBotIndex = dBot.Index;
+				Data.Bots[dBotIndex] = lastBot;
+				Data.Bots[lastBotIndex] = dBot;
+				lastBot.Index = dBotIndex;
 
-                if (Data.World[Data.BotReproduction[i].Xi, Data.BotReproduction[i].Yi] != Data.BotReproduction[i].Index)
-                {
-                    throw new Exception("fdgdfgd34fg");
-                }
-
-                if (!Data.BotReproduction[i].InsertedToReproductionList)
-                {
-                    throw new Exception("fdgdfgd34fg2");
-                }
-            }
-
-            int cnt0 = 0;
-            int cnt1 = 0;
-            var cnt2 = 0;
-            for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
-            {
-                if (Data.Bots[botNumber] == null) throw new Exception("rtfghrsfd45tsdfsdfhrt");
-                if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
-
-                if (Data.Bots[botNumber].InsertedToDeathList)
-                {
-                    cnt0++;
-                }
-
-                if (Data.Bots[botNumber].InsertedToReproductionList)
-                {
-                    cnt1++;
-                }
-
-                if (!Data.Bots[botNumber].Alive)
-                {
-                    cnt2++;
-                }
-            }
-            if (cnt0 != Data.QtyAllBotDeathMinusOne + 1) throw new Exception("fdgergg");
-            if (cnt1 != Data.IndexOfLastBotReproduction + 1) throw new Exception("fdgergsdsdg");
-            if (cnt2 != Data.QtyFactBotDeath) throw new Exception("fdgerdsfsd34gg");
-        }
-
-        public static void CHECK3()
-        {
-            if (Data.QtyFactBotDeath < 0) throw new Exception("rtfg65765");
-
-            for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-            {
-                if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
-                if (Data.Bots[i].Index != i)
-                {
-                    throw new Exception("fdgdfgdsdfdf34f435345g");
-                }
-
-                if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
-                {
-                    throw new Exception("fdgdfgd34f435345g");
-                }
-
-                if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg23");
-            }
-
-            long cont;
-            for (var x = 0; x < Data.WorldWidth; x++)
-            {
-                for (var y = 0; y < Data.WorldHeight; y++)
-                {
-                    cont = Data.World[x, y];
-                    if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
-                    if (cont > 0 && (cont < 65000 || cont > 65504))
-                    {
-                        if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
-                    }
-                }
-            }
-        }
-
-        public static void CHECK4()
-        {
-            //var l234324234 = Data.Wlog.GetLogString();
-
-            if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne)
-            {
-                if (Data.QtyFactBotDeathUsedForReproduction + Data.QtyRemovedBotsOnStep != Data.QtyFactBotDeath) throw new Exception("dfgdfgf");
-
-                if (Data.IndexEnclusiveBeforeReplacesBots != 0)
-                {
-                    if (Data.CurrentNumberOfBots != Data.IndexEnclusiveBeforeReplacesBots) throw new Exception("grtgrtrtg");
-                }
-            }
-
-            //if (Data.QtyFactBotDeathUsedForReproduction + Data.Check_QtyFailedReproduction !=Data.IndexOfLastBotReproduction +1 ) throw new Exception("dfgdfgf5435");
-
-            var te = 0;
-            var cnt2 = 0;
-            for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-            {
-                if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
-                if (Data.Bots[i].Index != i)
-                {
-                    throw new Exception("fdgdfgdsdfdf34f435345g");
-                }
-
-                if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
-                {
-                    throw new Exception("fdgdfgd34f435345g");
-                }
-
-                if (!Data.Bots[i].Alive)
-                {
-                    cnt2++;
-                }
-
-                if (Data.Bots[i].InsertedToDeathList) throw new Exception("fdgdfgd34f43545345g");
-                if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
-
-                te += Data.Bots[i].Energy;
-            }
-
-            if (cnt2 != 0) throw new Exception("fdge34sd34gg");
-
-            //if(te != Data.TotalEnergy) throw new Exception("fdgdfgsdfd34f435345g");
-
-            var cnt = 0;
-            var dct = new Dictionary<long, int>();
-            long cont;
-
-            for (var x = 0; x < Data.WorldWidth; x++)
-            {
-                for (var y = 0; y < Data.WorldHeight; y++)
-                {
-                    cont = Data.World[x, y];
-                    if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
-                    if (cont > 0 && (cont < 65000 || cont > 65504))
-                    {
-                        if (cont > Data.CurrentNumberOfBots)
-                        {
-                            //var st = Data.CurrentStep;
-                            //var t = Data.BotDeath;
-                            //var log222 = Data.Wlog.GetLogString();
-                            throw new Exception("fgfrgreg456457"); 
-                        }
-                        cnt++;
-
-                        if (dct.ContainsKey(cont))
-                        {
-                            dct[cont]++;
-                        }
-                        else
-                        {
-                            dct.Add(cont, 1);
-                        }
-                    }
-                }
-            }
-
-            if (cnt != Data.CurrentNumberOfBots)
-            {
-                throw new Exception("fdfdgfdgd");
-            }
-            if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
-        }
-
-        public static void CHECK5()
-        {
-            //for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-            //{
-            //    var bot = Data.Bots[i];
-            //    var x = bot.Xi;
-            //    var y = bot.Yi;
-            //    var color = _DRAWER.GetPixel(x, y);
-            //    var lllll = bot.Log.GetLog();
-            //    var lllll2 = Data.ClWorld[x, y].GetLog();
+				lock (_busyWorld)
+				{
+					Data.World[lastBot.Xi, lastBot.Yi] = dBotIndex;
+				}
+				// конец переноса
 
 
-            //    if (color != bot.Color)
-            //    {
-            //        //throw new Exception("fger675");
-            //    }
-            //}
-
-            var st = Data.CurrentStep;
-            if (st != 0)
-            {
-                var cnt0 = 0;
-                for (var x = 0; x < Data.WorldWidth; x++)
-                {
-                    for (var y = 0; y < Data.WorldHeight; y++)
-                    {
-                        var cont = Data.ChWorld[x, y];
-                        if (cont != 0)
-                        {
-                            cnt0++;
-                            throw new Exception("fgs7565667657");
-                        }
-                    }
-                }
-
-                if (cnt0 != 0)
-                {
-                    throw new Exception("fgs75656676574");
-                }
-            }
-        }
-
-        public static (int, Dictionary<long, int>) GetAllBotsEnergy()
-        {
-            var te = 0;
-            var dct = new Dictionary<long, int>();
-            int en;
-
-            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
-            {
-                en = Data.Bots[botIndex].Energy;
-                te += en;
-                dct.Add(botIndex, en);
-            }
-
-            return (te, dct);
-        }
+				//lastBot.Log.LogInfo($"Index changed from {lastBotIndex}/{Data.CurrentNumberOfBots} to {dBotIndex}");
+				//Data.Bots[lastBotIndex] = null;  // todo надо ли это? может лучше оставить и потом просто Update делать
+				//Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index} Replace from {dBotIndex} to {lastBotIndex}");
+			}
+			else
+			{
+				//Data.Bots[dBot.Index] = null;   // todo надо ли это? может лучше оставить и потом просто Update делать
+				//Data.Wlog.LogInfo($"DeathBot {index}-{dBot.Index}");
+			}
 
 
-        public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
-        {
-            var te2 = 0;
-            int en;
-            var dct2 = new Dictionary<long, (int, int)>();
+			Interlocked.Increment(ref Data.QtyRemovedBotsOnStep);
+		}
 
-            for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
-            {
-                en = Data.Bots[botIndex].Energy;
-                te2 += en;
-                if (dct.ContainsKey(botIndex))
-                {
-                    if (dct[botIndex] != en)
-                    {
-                        dct2.Add(botIndex, (dct[botIndex], en));
-                    }
-                }
-                else
-                {
-                    dct2.Add(botIndex, (0, en));
-                }
-            }
 
-            if (te1 != te2 && dct2.Count > 0)
-            {
-                var bts = Data.Bots;
-                var st = Data.CurrentStep;
-                var bc2 = Data.CurrentNumberOfBots;
-                var indttt = dct2.First().Key;
-                var bttt = Data.Bots[indttt];
-                //var log = bttt.Log.GetLog();
-            }
-        }
-    }
+
+
+
+		//https://symbl.cc/ru/tools/text-to-symbols/
+		//      ████─█──█─█───██─██────█───█─█──█─███─█──█────████─████─███─████─███─███─█──█─████────████──████─███─███
+		//      █──█─██─█─█────███─────█───█─█──█─█───██─█────█──█─█──█─█───█──█──█───█──██─█─█───────█──██─█──█──█──█──
+		//      █──█─█─██─█─────█──────█─█─█─████─███─█─██────█────████─███─████──█───█──█─██─█─██────████──█──█──█──███
+		//      █──█─█──█─█─────█──────█████─█──█─█───█──█────█──█─█─█──█───█──█──█───█──█──█─█──█────█──██─█──█──█────█
+		//      ████─█──█─███───█───────█─█──█──█─███─█──█────████─█─█──███─█──█──█──███─█──█─████────████──████──█──███
+
+
+
+		public static void ReproductionBot(int index)
+		{
+			var reproductedBot = Data.BotReproduction[index];
+			reproductedBot.InsertedToReproductionList = false;
+
+			if (!reproductedBot.CanReproduct())
+			{
+				Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 1  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+				return;
+			}
+
+			if (!TryOccupyRandomFreeCellNearby(reproductedBot.Xi, reproductedBot.Yi, reproductedBot.Index, out var x,
+					out var y)) // Вставляем в World[x,y] индекс размножающегося бота-родителя !!!
+			{
+				Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
+				reproductedBot.HoldReproduction();
+				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+				return;
+			}
+
+			//reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
+
+			var genom = Mutation() ? Genom.CreateGenom(reproductedBot.G) : reproductedBot.G;
+
+
+
+			// Узнать можно ли создать бота на основе умирающего бота
+			// Получить номер умирающего бота из BotDeath
+			// Data.NumberOfBotDeath - количество умирающих ботов - 1
+			// Data.NumberOfBotDeathForReproduction = -1 - первоначально
+			// Data.BotDeath - массив умирающих ботов
+
+			bool update = false;
+			int ind = -1;
+			int en;
+			if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne) // еще есть в запасе умирающие боты
+			{
+				do
+				{
+					ind = Interlocked.Increment(ref Data.IndexOfLastBotDeathArrayUsedForReproduction);  // получаем индекс умирающего бота
+
+					if (ind <= Data.QtyAllBotDeathMinusOne) // ind в пределах списка умирающих ботов?
+					{
+						en = Data.BotDeath[ind].Energy;
+						//если энергия бота >0 то здесь его надо убрать из массива
+						if (en > 0)
+						{
+							//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} BotDeath Skipped (en>0)  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+							Data.BotDeath[ind].InsertedToDeathList = false;
+						}
+
+						if (en == 0) update = true;
+					}
+					else
+					{
+						en = 0;
+					}
+				}
+				while (ind < Data.QtyAllBotDeathMinusOne && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
+			}
+
+
+			if (update)
+			{
+				UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
+				Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
+				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+				//reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+			}
+			else
+			{
+				var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
+				CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
+				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+				//reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
+			}
+
+			reproductedBot.EnergyChange(-Data.InitialBotEnergy);
+
+			Interlocked.Increment(ref Data.TotalQtyBotReproduction);
+		}
+
+		public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
+		{
+			var dir = GetRandomDirection();
+			var pointer = 0;
+			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
+			genom.IncBot();
+
+
+			var updBot = Data.BotDeath[ind];
+			var index = Data.BotDeath[ind].Index;
+			updBot.G.DecBot(updBot.Age);
+			var xiold = updBot.Xi;
+			var yiold = updBot.Yi;
+			//Interlocked.Increment(ref Removedbots1);
+			//Data.BotDeath[ind] = null;
+			//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
+
+			// Изменение бота
+			updBot.Xi = x;
+			updBot.Xd = x;
+			updBot.Yi = y;
+			updBot.Yd = y;
+			updBot.Direction = dir;
+			updBot.Num = botNumber;
+			updBot.EnergySet(en);
+			updBot.G = genom;
+			updBot.Pointer = pointer;
+			updBot.OldPointer = pointer;
+			updBot.Age = 0;
+			updBot.InsertedToDeathList = false;
+			updBot.InsertedToReproductionList = false;
+			updBot.Alive = true;
+			updBot.Hist = new CodeHistory();
+
+			updBot.RefreshColor();
+
+
+			lock (_busyWorld)
+			{
+				Data.World[xiold, yiold] = 0;
+				Data.World[x, y] = index;
+			}
+
+			if (Data.DrawType == DrawType.OnlyChangedCells)
+			{
+				FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
+				FixChangeCell(x, y, updBot.Color);
+			}
+		}
+
+		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
+		{
+			var dir = GetRandomDirection();
+			var pointer = 0;
+			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
+			genom.IncBot();
+
+
+			Bot1 bot;
+			if (Data.Bots[botIndex] == null)
+			{
+				bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom, pointer);
+
+				Data.Bots[botIndex] = bot;
+			}
+			else
+			{
+				bot = Data.Bots[botIndex];
+				bot.Index = botIndex;
+				bot.Xi = x;
+				bot.Xd = x;
+				bot.Yi = y;
+				bot.Yd = y;
+				bot.Direction = dir;
+				bot.Num = botNumber;
+				bot.EnergySet(en);
+				bot.G = genom;
+				bot.Pointer = pointer;
+				bot.OldPointer = pointer;
+				bot.Age = 0;
+				bot.InsertedToDeathList = false;
+				bot.InsertedToReproductionList = false;
+				bot.Alive = true;
+				bot.Hist = new CodeHistory();
+			}
+
+			bot.RefreshColor();
+
+			lock (_busyWorld)
+			{
+				Data.World[x, y] = botIndex;
+			}
+
+			if (Data.DrawType == DrawType.OnlyChangedCells)
+			{
+				FixChangeCell(x, y, bot.Color);
+			}
+		}
+
+
+
+		private static bool TryOccupyRandomFreeCellNearby(int Xi, int Yi, long reprBotIndex, out int nXi, out int nYi)
+		{
+			var n = ThreadSafeRandom.Next(8);
+			var i = 0;
+			bool result = false;
+
+			do
+			{
+				(nXi, nYi) = GetCoordinatesByDelta(Xi, Yi, n);
+
+				if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+				{
+					if (Data.World[nXi, nYi] == 0)
+					{
+						lock (_busyWorld)
+						{
+							if (Data.World[nXi, nYi] == 0)
+							{
+								Data.World[nXi, nYi] = reprBotIndex;
+								result = true;
+								break;
+							}
+						}
+					}
+				}
+
+				i++;
+				if (++n >= 8) n -= 8;
+			}
+			while (i <= 8);
+
+			return result;
+		}
+
+		private static (int nXi, int nYi) GetCoordinatesByDelta(int Xi, int Yi, int nDelta)
+		{
+			var (nXid, nYid) = Dir.NearbyCells[nDelta];
+
+
+			var nXi = Xi + nXid;
+			var nYi = Yi + nYid;
+
+			// Проверка перехода сквозь экран
+			if (!Data.LeftRightEdge)
+			{
+				if (nXi < 0)
+				{
+					nXi += Data.WorldWidth;
+				}
+
+				if (nXi >= Data.WorldWidth)
+				{
+					nXi -= Data.WorldWidth;
+				}
+			}
+
+			if (!Data.UpDownEdge)
+			{
+				if (nYi < 0)
+				{
+					nYi += Data.WorldHeight;
+				}
+
+				if (nYi >= Data.WorldHeight)
+				{
+					nYi -= Data.WorldHeight;
+				}
+			}
+
+			return (nXi, nYi);
+		}
+
+		public static byte[] GetRandomShield(int ShieldSum, int ShieldMax, int ShieldTypeCount, int ShieldTypeCountMax)
+		{
+			int num;
+			var res = new byte[ShieldTypeCountMax];
+			for (var i = 0; i < ShieldSum; i++)
+			{
+				do
+				{
+					num = ThreadSafeRandom.Next(ShieldTypeCount);
+				}
+				while (res[num]>= ShieldMax);
+				res[num]++;
+			}
+
+			return res;
+		}
+
+		public static byte GetRandomAttackType(int AttackTypeCount)
+		{
+			return (byte)ThreadSafeRandom.Next(AttackTypeCount);
+		}
+
+		public static byte GetRandomAttackLevel(int AttackMax)
+		{
+			return (byte)(ThreadSafeRandom.Next(AttackMax) + 1);
+		}
+
+		public static int GetRandomDirection()
+		{
+			return ThreadSafeRandom.Next(Dir.NumberOfDirections);
+		}
+
+		public static byte GetRandomBotCode()
+		{
+			return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
+		}
+
+		public static Color GetRandomColor()
+		{
+			return Color.FromArgb(ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256));
+		}
+
+		public static int GetRandomBotCodeIndex()
+		{
+			return ThreadSafeRandom.Next(Data.GenomLength);
+		}
+
+		public static bool Mutation()
+		{
+			return Data.Mutation && ThreadSafeRandom.NextDouble() * 100 < Data.MutationProbabilityPercent;
+		}
+
+		//////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////
+
+
+		public static bool TryGetRandomFreeCell(out int x, out int y)
+		{
+			x = 0;
+			y = 0;
+			var i = 0;
+
+			do
+			{
+				x = ThreadSafeRandom.Next(0, Data.WorldWidth);
+				y = ThreadSafeRandom.Next(0, Data.WorldHeight);
+			}
+			while (Data.World[x, y] != 0 && ++i < 1000);
+
+			if (i >= 1000)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+
+		public static (int, int) GetRandomSpeed()
+		{
+			//do
+			//{
+			//	_vx = rnd.Next(-1, 2);
+			//	_vy = rnd.Next(-1, 2);
+			//}
+			//while (_vx == 0 && _vy == 0);
+
+			if (ThreadSafeRandom.Next(100) > 97)
+			{
+				return (ThreadSafeRandom.Next(-1, 2), ThreadSafeRandom.Next(-1, 2));
+			}
+			return (0, 0);
+		}
+
+		public static void CHECK1()
+		{
+			if (Data.QtyAllBotDeathMinusOne != -1)
+			{
+				throw new Exception("fdgdfgds34fg2");
+			}
+
+			if (Data.QtyFactBotDeath != 0)
+			{
+				throw new Exception("fdgdf45646gds34fg2");
+			}
+
+			if (Data.IndexOfLastBotReproduction != -1)
+			{
+				throw new Exception("fdgdfgd3df4fg2");
+			}
+		}
+
+		public static void CHECK2()
+		{
+
+			for (var i = 0; i < (int)Data.QtyAllBotDeathMinusOne + 1; i++)
+			{
+				var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotDeath[i].Index && x.Num == Data.BotDeath[i].Num);
+
+				if (Data.Bots[ind].Xd != Data.BotDeath[i].Xd || Data.Bots[ind].Yd != Data.BotDeath[i].Yd)
+				{
+					throw new Exception("fgfdgdfgf");
+				}
+
+				if (Data.World[Data.BotDeath[i].Xi, Data.BotDeath[i].Yi] != Data.BotDeath[i].Index)
+				{
+					throw new Exception("fdgdfgdfg");
+				}
+
+				if (!Data.BotDeath[i].InsertedToDeathList && Data.BotDeath[i].Energy == 0)
+				{
+					throw new Exception("fdgdfgdfg2");
+				}
+
+				if (Data.BotDeath[i].Index > Data.CurrentNumberOfBots)
+				{
+					throw new Exception("if (_ind > Data.CurrentBotsNumber)");
+				}
+
+
+				for (var j = 0; j < (int)Data.QtyAllBotDeathMinusOne + 1; j++)
+				{
+					if (i != j)
+					{
+						if (Data.BotDeath[i].Index == Data.BotDeath[j].Index)
+						{
+							throw new Exception("if (_insdfdfsdfsdd > Data.CurrentBotsNumber)");
+						}
+					}
+				}
+			}
+
+			for (var i = 0; i < (int)Data.IndexOfLastBotReproduction + 1; i++)
+			{
+				var ind = Array.FindIndex(Data.Bots, x => x != null && x.Index == Data.BotReproduction[i].Index && x.Num == Data.BotReproduction[i].Num);
+
+				if (Data.Bots[ind].Xd != Data.BotReproduction[i].Xd || Data.Bots[ind].Yd != Data.BotReproduction[i].Yd)
+				{
+					throw new Exception("fgfdg34dfgf");
+				}
+
+				if (Data.World[Data.BotReproduction[i].Xi, Data.BotReproduction[i].Yi] != Data.BotReproduction[i].Index)
+				{
+					throw new Exception("fdgdfgd34fg");
+				}
+
+				if (!Data.BotReproduction[i].InsertedToReproductionList)
+				{
+					throw new Exception("fdgdfgd34fg2");
+				}
+			}
+
+			int cnt0 = 0;
+			int cnt1 = 0;
+			var cnt2 = 0;
+			for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			{
+				if (Data.Bots[botNumber] == null) throw new Exception("rtfghrsfd45tsdfsdfhrt");
+				if (Data.Bots[botNumber].Energy < -1) throw new Exception("rtfghrsfd45thrt");
+
+				if (Data.Bots[botNumber].InsertedToDeathList)
+				{
+					cnt0++;
+				}
+
+				if (Data.Bots[botNumber].InsertedToReproductionList)
+				{
+					cnt1++;
+				}
+
+				if (!Data.Bots[botNumber].Alive)
+				{
+					cnt2++;
+				}
+			}
+			if (cnt0 != Data.QtyAllBotDeathMinusOne + 1) throw new Exception("fdgergg");
+			if (cnt1 != Data.IndexOfLastBotReproduction + 1) throw new Exception("fdgergsdsdg");
+			if (cnt2 != Data.QtyFactBotDeath) throw new Exception("fdgerdsfsd34gg");
+		}
+
+		public static void CHECK3()
+		{
+			if (Data.QtyFactBotDeath < 0) throw new Exception("rtfg65765");
+
+			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			{
+				if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+				if (Data.Bots[i].Index != i)
+				{
+					throw new Exception("fdgdfgdsdfdf34f435345g");
+				}
+
+				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+				{
+					throw new Exception("fdgdfgd34f435345g");
+				}
+
+				if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg23");
+			}
+
+			long cont;
+			for (var x = 0; x < Data.WorldWidth; x++)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+					cont = Data.World[x, y];
+					if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (cont > Data.CurrentNumberOfBots) throw new Exception("fgfrgreg456457");
+					}
+				}
+			}
+		}
+
+		public static void CHECK4()
+		{
+			//var l234324234 = Data.Wlog.GetLogString();
+
+			if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne)
+			{
+				if (Data.QtyFactBotDeathUsedForReproduction + Data.QtyRemovedBotsOnStep != Data.QtyFactBotDeath) throw new Exception("dfgdfgf");
+
+				if (Data.IndexEnclusiveBeforeReplacesBots != 0)
+				{
+					if (Data.CurrentNumberOfBots != Data.IndexEnclusiveBeforeReplacesBots) throw new Exception("grtgrtrtg");
+				}
+			}
+
+			//if (Data.QtyFactBotDeathUsedForReproduction + Data.Check_QtyFailedReproduction !=Data.IndexOfLastBotReproduction +1 ) throw new Exception("dfgdfgf5435");
+
+			var te = 0;
+			var cnt2 = 0;
+			for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			{
+				if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+				if (Data.Bots[i].Index != i)
+				{
+					throw new Exception("fdgdfgdsdfdf34f435345g");
+				}
+
+				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
+				{
+					throw new Exception("fdgdfgd34f435345g");
+				}
+
+				if (!Data.Bots[i].Alive)
+				{
+					cnt2++;
+				}
+
+				if (Data.Bots[i].InsertedToDeathList) throw new Exception("fdgdfgd34f43545345g");
+				if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
+
+				te += Data.Bots[i].Energy;
+			}
+
+			if (cnt2 != 0) throw new Exception("fdge34sd34gg");
+
+			//if(te != Data.TotalEnergy) throw new Exception("fdgdfgsdfd34f435345g");
+
+			var cnt = 0;
+			var dct = new Dictionary<long, int>();
+			long cont;
+
+			for (var x = 0; x < Data.WorldWidth; x++)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+					cont = Data.World[x, y];
+					if (cont < 0) throw new Exception("fgfrgreg45645sdfds7");
+					if (cont > 0 && (cont < 65000 || cont > 65504))
+					{
+						if (cont > Data.CurrentNumberOfBots)
+						{
+							//var st = Data.CurrentStep;
+							//var t = Data.BotDeath;
+							//var log222 = Data.Wlog.GetLogString();
+							throw new Exception("fgfrgreg456457");
+						}
+						cnt++;
+
+						if (dct.ContainsKey(cont))
+						{
+							dct[cont]++;
+						}
+						else
+						{
+							dct.Add(cont, 1);
+						}
+					}
+				}
+			}
+
+			if (cnt != Data.CurrentNumberOfBots)
+			{
+				throw new Exception("fdfdgfdgd");
+			}
+			if (dct.Any(d => d.Value > 1)) throw new Exception("fdfdgf654dgd");
+		}
+
+		public static void CHECK5()
+		{
+			//for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+			//{
+			//    var bot = Data.Bots[i];
+			//    var x = bot.Xi;
+			//    var y = bot.Yi;
+			//    var color = _DRAWER.GetPixel(x, y);
+			//    var lllll = bot.Log.GetLog();
+			//    var lllll2 = Data.ClWorld[x, y].GetLog();
+
+
+			//    if (color != bot.Color)
+			//    {
+			//        //throw new Exception("fger675");
+			//    }
+			//}
+
+			var st = Data.CurrentStep;
+			if (st != 0)
+			{
+				var cnt0 = 0;
+				for (var x = 0; x < Data.WorldWidth; x++)
+				{
+					for (var y = 0; y < Data.WorldHeight; y++)
+					{
+						var cont = Data.ChWorld[x, y];
+						if (cont != 0)
+						{
+							cnt0++;
+							throw new Exception("fgs7565667657");
+						}
+					}
+				}
+
+				if (cnt0 != 0)
+				{
+					throw new Exception("fgs75656676574");
+				}
+			}
+		}
+
+		public static (int, Dictionary<long, int>) GetAllBotsEnergy()
+		{
+			var te = 0;
+			var dct = new Dictionary<long, int>();
+			int en;
+
+			for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+			{
+				en = Data.Bots[botIndex].Energy;
+				te += en;
+				dct.Add(botIndex, en);
+			}
+
+			return (te, dct);
+		}
+
+
+		public static void CheckBotsEnergy(Dictionary<long, int> dct, int te1)
+		{
+			var te2 = 0;
+			int en;
+			var dct2 = new Dictionary<long, (int, int)>();
+
+			for (long botIndex = 1; botIndex <= Data.CurrentNumberOfBots; botIndex++)
+			{
+				en = Data.Bots[botIndex].Energy;
+				te2 += en;
+				if (dct.ContainsKey(botIndex))
+				{
+					if (dct[botIndex] != en)
+					{
+						dct2.Add(botIndex, (dct[botIndex], en));
+					}
+				}
+				else
+				{
+					dct2.Add(botIndex, (0, en));
+				}
+			}
+
+			if (te1 != te2 && dct2.Count > 0)
+			{
+				var bts = Data.Bots;
+				var st = Data.CurrentStep;
+				var bc2 = Data.CurrentNumberOfBots;
+				var indttt = dct2.First().Key;
+				var bttt = Data.Bots[indttt];
+				//var log = bttt.Log.GetLog();
+			}
+		}
+	}
 }
 
 //              ███─███─████─███─█───█

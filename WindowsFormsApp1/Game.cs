@@ -54,7 +54,6 @@ namespace WindowsFormsApp1
 				Data.Worked = true;
 
 				await Steps();
-
 			}
 			finally
 			{
@@ -83,7 +82,6 @@ namespace WindowsFormsApp1
 			await Task.Run(() => _WORLD.Step());
 
 			Test.NextInterval(2, "add food");
-
 
 			if (Data.DrawMode == DrawMode.EachStep ||
 				(Data.DrawMode == DrawMode.Periodical && Data.CurrentStep % Data.FrequencyOfPeriodicalDraw == 0))
