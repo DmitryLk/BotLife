@@ -181,11 +181,13 @@ namespace WindowsFormsApp1.GameLogic
 			var sb = new StringBuilder();
 			sb.AppendLine($"Count: {BEGINCOUNTER}");
 
-			var activeGemons = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
-			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}:{activeGemons}");
+			var activeGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
+			var activeBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).Count();
+			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}:{activeGenoms}  Big:{activeBigGenoms}");
 
-			var activePraGemons = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
-			sb.AppendLine($"PraActive: {activePraGemons}");
+			var activePraGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
+			var activePraBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).DistinctBy(g => g.PraNum).Count();
+			sb.AppendLine($"PraActive: {activePraGenoms}  Big:{activePraBigGenoms}");
 
 			sb.AppendLine("");
 

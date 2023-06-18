@@ -157,7 +157,7 @@ namespace WindowsFormsApp1.Static
 			ChangedCells = new ChangedCell[MaxBotsNumber + 10];
 			GrColors = new Color[361];
 
-			BotDeath = new Bot1[5_000];
+			BotDeath = new Bot1[10_000];
 			BotReproduction = new Bot1[10_000];
 			QtyAllBotDeathMinusOne = -1;
 			QtyFactBotDeath = 0;
@@ -202,10 +202,11 @@ namespace WindowsFormsApp1.Static
 
 			// Attack-Shield
 			AttackMax = 1;
-			AttackTypeCount = 5;
-			ShieldSum = 3;
+			AttackTypeCount = 1;
+			
+			ShieldSum = 2;
 			ShieldMax = 1;
-			ShieldTypeCount = 5;
+			ShieldTypeCount = 3;
 			ShieldTypeCountMax = 20;
 		}
 
