@@ -474,10 +474,10 @@ namespace WindowsFormsApp1.GameLogic
 			}
 
 			// Не может есть родственника
-			if (G.GenomHash == eatedBot.G.GenomHash)
-			{
-				return;
-			}
+			//if (G.GenomHash == eatedBot.G.GenomHash)
+			//{
+			//	return;
+			//}
 
 
 			//var olden = Energy;

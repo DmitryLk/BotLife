@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -30,12 +31,16 @@ namespace WindowsFormsApp1
 
 		private readonly object _sync = new object();
 		private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+        private int _cnt1;
+        private int _cnt2;
 
 		public Game(Presenter presenter, Printer printer)
 		{
 			_WORLD = new World();
 			_DRAWER = new Drawer(presenter, printer);
 			_PRINTER = printer;
+            _cnt1 = 0;
+            _cnt2 = 0;
 		}
 
 		public async Task Init()
@@ -94,7 +99,22 @@ namespace WindowsFormsApp1
 				Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
 				Test.NextInterval(5, "PaintFrame();");
 			}
-			_PRINTER.Print015();
+
+            if (++_cnt1 % Data.ReportFrequencyCurrent == 0)
+            {
+                _PRINTER.Print015();
+            }
+
+            if (Data.GenomInfo == GenomInfoMode.OneTime)
+            {
+                _PRINTER.Print2();
+                Data.GenomInfo = GenomInfoMode.None;
+            }
+
+            if (Data.GenomInfo == GenomInfoMode.Periodical && ++_cnt2 % Data.GenomInfoPeriodPrint == 0)
+            {
+                _PRINTER.Print2();
+            }
 
 			Test.NextInterval(1, "PrintInfo();");
 		}
@@ -178,8 +198,8 @@ namespace WindowsFormsApp1
         }
 
 		public void GenomInfo(GenomInfoMode mode)
-		{
-			_PRINTER.Print2(mode);
+        {
+            Data.GenomInfo = mode;
 		}
 
 

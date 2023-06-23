@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -25,55 +27,82 @@ namespace WindowsFormsApp1.Graphic
 {
     public class Printer
     {
-		private int _cnt;
-		private TextBox[] _textBoxes;
-		private Form _form;
-		private DateTime _dt;
+        private TextBox[] _textBoxes;
+        private DataGridView _dgv;
+        private Form _form;
+        private DateTime _dt;
 
 
-		public Printer(TextBox[] textBoxes, Form form)
+        public Printer(TextBox[] textBoxes, DataGridView dgv, Form form)
         {
-			_textBoxes = textBoxes;
-			_form = form;
-			_cnt = 0;
-			_dt = DateTime.Now;
-		}
-
-		// 0 - на главной форме посередине
-		// 1 - на главной форме сверху
-		// 2 - на главной форме снизу
-		// 3 - на второй форме сверху               только на паузе
-		// 4 - на второй форме снизу                только на паузе
-		// 5 - на главной форме различные режимы
-		public void Print015()
-        {
-            if (++_cnt % Data.ReportFrequencyCurrent == 0)
-            {
-                var tms = (DateTime.Now - _dt).TotalSeconds;
-                if (tms == 0) throw new Exception("tms == 0");
-                var fps = Data.ReportFrequencyCurrent / tms;
-                _dt = DateTime.Now;
-
-                _textBoxes[0].Text = Test.GetText();
-                _textBoxes[0].Update();
-
-                _textBoxes[1].Text = Data.GetText(fps);
-                _textBoxes[1].Update();
-
-                _form.Text = Data.GetTextForCaption(fps);
-
-
-				Print5();
-			}
+            _textBoxes = textBoxes;
+            _dgv = dgv;
+            _form = form;
+            _dt = DateTime.Now;
         }
 
-		public void Print2(GenomInfoMode mode)
-		{
-            _textBoxes[2].Text = Genom.GetText(mode);
+        // 0 - на главной форме посередине
+        // 1 - на главной форме сверху
+        // 2 - на главной форме снизу
+        // 3 - на второй форме сверху               только на паузе
+        // 4 - на второй форме снизу                только на паузе
+        // 5 - на главной форме различные режимы
+        public void Print015()
+        {
+            var tms = (DateTime.Now - _dt).TotalSeconds;
+            if (tms == 0) throw new Exception("tms == 0");
+            var fps = Data.ReportFrequencyCurrent / tms;
+            _dt = DateTime.Now;
+
+            _textBoxes[0].Text = Test.GetText();
+            _textBoxes[0].Update();
+
+            _textBoxes[1].Text = Data.GetText(fps);
+            _textBoxes[1].Update();
+
+            _form.Text = Data.GetTextForCaption(fps);
+
+
+            Print5();
+        }
+
+
+        public void Print2()
+        {
+            _textBoxes[2].Text = Genom.GetText();
             _textBoxes[2].Update();
+
+
+            var sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys.Select(g => new GenomStr
+            {
+                GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
+                GenomColor = g.Color,
+                Live = g.CurBots,
+                Total = g.AllBots,
+                Age = g.CurBots > 0 ? Data.CurrentStep : g.EndStep - g.BeginStep,
+                AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
+            }).ToList());
+            
+            _dgv.DataSource = sortableBindingList;
+
+            foreach (DataGridViewColumn column in _dgv.Columns)
+            {
+
+                column.SortMode = DataGridViewColumnSortMode.Programmatic;
+            }
+
+            _dgv.Sort(_dgv.Columns[Data.DataGridViewColumnIndex], Data.Direction);
+
+
+            for (var i = 0; i < 10; i++)
+            {
+                var cv = (Color)_dgv.Rows[i].Cells[1].Value;
+                _dgv.Rows[i].Cells[1].Style.BackColor = Color.FromArgb(cv.A, cv.R, cv.G, cv.B);
+                _dgv.Rows[i].Cells[1].Style.ForeColor = Color.FromArgb(cv.A, cv.R, cv.G, cv.B);
+            }
         }
 
-		public void Print3(Bot1 bot)
+        public void Print3(Bot1 bot)
         {
             _textBoxes[3].Text = bot != null ? bot.GetText1() : "";
             _textBoxes[3].Update();
@@ -98,10 +127,10 @@ namespace WindowsFormsApp1.Graphic
         }
 
 
-		public void Print5()
-		{
-			_textBoxes[5].Text = Data.GetText2();
-			_textBoxes[5].Update();
-		}
-	}
+        public void Print5()
+        {
+            _textBoxes[5].Text = Data.GetText2();
+            _textBoxes[5].Update();
+        }
+    }
 }

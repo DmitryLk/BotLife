@@ -38,7 +38,8 @@ namespace WindowsFormsApp1.GameLogic
 		public long Num;
 		public uint BeginStep;
 		public uint EndStep;
-		//private Genom _parent;
+		public string Test = "owdiheiofhweoif";
+        //private Genom _parent;
 
 		private long _curBots = 0;
 		private long _allBots = 0;
@@ -176,7 +177,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 
-		public static string GetText(GenomInfoMode mode)
+		public static string GetText()
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine($"Count: {BEGINCOUNTER}");
@@ -189,48 +190,18 @@ namespace WindowsFormsApp1.GameLogic
 			var activePraBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).DistinctBy(g => g.PraNum).Count();
 			sb.AppendLine($"PraActive: {activePraGenoms}  Big:{activePraBigGenoms}");
 
-			sb.AppendLine("");
-
-			IEnumerable<Genom> genoms;
-			switch (mode)
-			{
-				case GenomInfoMode.LiveBotsNumber:
-					sb.AppendLine("ПО КОЛ-ВУ ЖИВЫХ БОТОВ");
-					genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderByDescending(g => g.CurBots).Take(10);
-					break;
-
-				case GenomInfoMode.GenomLifetime:
-					sb.AppendLine("ПО ВРЕМЕНИ ЖИЗНИ ГЕНОМА");
-					genoms = GENOMS.Keys.Where(g => g.CurBots > 0).OrderBy(g => g.BeginStep).Take(10);
-					break;
-
-				case GenomInfoMode.AllBotsNumber:
-					sb.AppendLine("ПО ОБЩЕМУ КОЛ-ВУ БОТОВ");
-					genoms = GENOMS.Keys.OrderByDescending(g => g.AllBots).Take(10);
-					break;
-
-				case GenomInfoMode.AverageBotsLifetime:
-					sb.AppendLine("По СР.ВОЗРАСТУ БОТОВ");
-					genoms = GENOMS.Keys.Where(g => g.RemovedBots > 10).OrderByDescending(g => g.AgeBots / g.RemovedBots).Take(10);
-					break;
-
-				default: throw new Exception("fgfdgfdg");
-
-			}
-
-			sb.AppendLine("Живых|Всего |Первый|Текущий|Поколение |Возраст |Ср.возраст|");
-			sb.AppendLine("ботов  |ботов  |геном   |геном    |генома        |генома   |ботов        |");
-
-			foreach (var g in genoms)
-			{
-				var genomAge = g._curBots == 0 ? $"{g.EndStep - g.BeginStep}N" : $"{Data.CurrentStep - g.BeginStep}L";
-
-				sb.AppendLine($"|  {g.CurBots,-8}|  {g.AllBots,-8}|  {g.PraNum,-10}|  {g.Num,-11}|  {g.Level,-15}|  {genomAge,-11}|  {(g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0),-14}|");
-			}
-
-
 			return sb.ToString();
 		}
+	}
+
+	public class GenomStr
+    {
+        public string GenomName { get; set; }
+        public Color GenomColor { get; set; }
+        public long Live { get; set; }
+        public long Total { get; set; }
+		public uint Age { get; set; }
+        public float AvBotAge { get; set; }
 	}
 }
 
