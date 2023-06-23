@@ -326,7 +326,7 @@ namespace WindowsFormsApp1
             }
             else
             {
-                Data.Direction = ListSortDirection.Ascending;
+                Data.Direction = ListSortDirection.Descending;
                 oldColumn.HeaderCell.SortGlyphDirection = SortOrder.None;
             }
 

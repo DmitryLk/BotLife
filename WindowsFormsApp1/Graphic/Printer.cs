@@ -73,7 +73,9 @@ namespace WindowsFormsApp1.Graphic
             _textBoxes[2].Update();
 
 
-            var sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys.Select(g => new GenomStr
+            var sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+                .Where(g => g.AllBots > 1)
+                .Select(g => new GenomStr
             {
                 GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
                 GenomColor = g.Color,

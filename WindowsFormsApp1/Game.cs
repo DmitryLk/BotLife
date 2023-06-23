@@ -195,6 +195,7 @@ namespace WindowsFormsApp1
             Data.Parallel = true;
             Data.NextDrawMode = DrawMode.NoDraw;
             Data.NextDrawType = DrawType.OnlyChangedCells;
+            Data.GenomInfo = GenomInfoMode.None;
         }
 
 		public void GenomInfo(GenomInfoMode mode)

@@ -210,7 +210,7 @@ namespace WindowsFormsApp1.GameLogic
 
             Data.CurrentStep++;
 
-            while (Data.SeedFood && Data.TotalEnergy < 15_000_000)
+            while (Data.SeedFood && Data.TotalEnergy < 20_000_000)
             {
                 if (Func.TryGetRandomFreeCell(out var x, out var y))
                 {
