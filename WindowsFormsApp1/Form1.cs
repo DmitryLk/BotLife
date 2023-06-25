@@ -35,7 +35,7 @@ namespace WindowsFormsApp1
             Data.Initialize();
 
             var pictureBoxes = new[] { pictureBox1, lensPictureBox, cursorPictureBox };
-            var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2, textBox4 };
+            var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2, textBox4, textBox5 };
 
             var presenter = new Presenter(pictureBoxes);
             var printer = new Printer(textBoxes, dataGridView1, this);
@@ -127,6 +127,15 @@ namespace WindowsFormsApp1
                 CellTemplate = new DataGridViewTextBoxCell()
             });
 
+			dataGridView1.Columns.Add(new DataGridViewColumn
+			{
+				DataPropertyName = "ActGen",
+				Width = 60,
+				HeaderText = "Активных",
+				Name = "actGen",
+				CellTemplate = new DataGridViewTextBoxCell()
+			});
+			
             dataGridView1.RowHeadersVisible = false;
 
         }
@@ -315,30 +324,41 @@ namespace WindowsFormsApp1
             //public static ListSortDirection Direction = ListSortDirection.Ascending;
 
 
-            DataGridViewColumn oldColumn = dataGridView1.Columns[Data.DataGridViewColumnIndex];
-            Data.DataGridViewColumnIndex = e.ColumnIndex;
-            DataGridViewColumn newColumn = dataGridView1.Columns[Data.DataGridViewColumnIndex];
+            DataGridViewColumn oldColumn = dataGridView1.Columns[Data.DgvColumnIndex];
+            Data.DgvColumnIndex = e.ColumnIndex;
+            DataGridViewColumn newColumn = dataGridView1.Columns[Data.DgvColumnIndex];
 
             
             if (oldColumn == newColumn)
             {
-                Data.Direction = Data.Direction == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+                Data.DgvDirection = Data.DgvDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
             }
             else
             {
-                Data.Direction = ListSortDirection.Descending;
+                Data.DgvDirection = ListSortDirection.Descending;
                 oldColumn.HeaderCell.SortGlyphDirection = SortOrder.None;
             }
 
             // Sort the selected column.
-            dataGridView1.Sort(newColumn, Data.Direction);
-            newColumn.HeaderCell.SortGlyphDirection = Data.Direction == ListSortDirection.Ascending ? SortOrder.Ascending : SortOrder.Descending;
+            dataGridView1.Sort(newColumn, Data.DgvDirection);
+            newColumn.HeaderCell.SortGlyphDirection = Data.DgvDirection == ListSortDirection.Ascending ? SortOrder.Ascending : SortOrder.Descending;
 
-            for (var i = 0; i < 10; i++)
-            {
-                var cv = (Color)dataGridView1.Rows[i].Cells[1].Value;
-                dataGridView1.Rows[i].Cells[1].Style.BackColor = Color.FromArgb(cv.A, cv.R, cv.G, cv.B);
-            }
+			Game.ColorDataGridView();
         }
-    }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            Game.ToggleLiveDataGridView();
+		}
+
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+			Game.TogglePraDataGridView();
+		}
+	}
 }

@@ -204,10 +204,12 @@ namespace WindowsFormsApp1.Graphic
 						_ => Color.Black
 					};
 
-					_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
-					_PRESENTER.DrawSmallTextOnCursorFrame1(x, y, i.ToString(), textColor);
 					var absDirStr = Dir.GetDirectionStringFromCode(code);
-					_PRESENTER.DrawSmallTextOnCursorFrame2(x, y, absDirStr, textColor);
+					_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
+
+					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 30, 7, i.ToString(), textColor);
+					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 26, 28, absDirStr, textColor);
+					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 10, 28, bot.G.Act[i].ToString(), textColor);
 				}
 
 				_PRESENTER.DrawOtherTextOnCursorFrame(6, 2, Data.DeltaHistory.ToString());

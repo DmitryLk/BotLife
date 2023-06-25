@@ -242,7 +242,7 @@ namespace WindowsFormsApp1.GameLogic
 			do
 			{
 				// 1. Определяем команду которую будет делать бот
-				var cmdCode = G.GetCurrentCommand(Pointer);
+				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer);
 				if (Data.Hist) Hist.SavePtr(Pointer);
 
 				// 2. Выполняем команду
@@ -784,7 +784,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			sb.AppendLine("");
 			sb.AppendLine($"Genom {G.PraNum} {(G.Num != 0 ? $"({G.Num})" : "")}Lev{G.Level}");
-			sb.AppendLine($"Bots: {G.CurBots}");
+			sb.AppendLine($"ActGen: {G.Act.Count(g => g > 0)}");
 
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Color.R} G{Color.G} B{Color.B}");

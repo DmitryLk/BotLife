@@ -230,19 +230,13 @@ namespace WindowsFormsApp1.Graphic
             //_cursorGraphics.Flush();
         }
 
-        public void DrawSmallTextOnCursorFrame1(int x, int y, string code, Color color)
+        public void DrawSmallTextOnCursorFrame(int x, int y, int dx, int dy, string code, Color color)
         {
-            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + 30, y * _codeCellHeight + 7, _stringFormat);
+            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + dx, y * _codeCellHeight + dy, _stringFormat);
             //_cursorGraphics.Flush();
         }
 
-        public void DrawSmallTextOnCursorFrame2(int x, int y, string code, Color color)
-        {
-            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + 19, y * _codeCellHeight + 28, _stringFormat);
-            //_cursorGraphics.Flush();
-        }
-
-        public void DrawOtherTextOnCursorFrame(int x, int y, string code)
+		public void DrawOtherTextOnCursorFrame(int x, int y, string code)
         {
             _cursorGraphics.DrawString(code, _font2, _smallTextBrush, x, y);
             //_cursorGraphics.Flush();

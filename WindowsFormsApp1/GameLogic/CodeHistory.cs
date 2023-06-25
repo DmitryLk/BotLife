@@ -38,10 +38,12 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void SavePtr(int ptr)
 		{
+			if (historyPointerY == -1) return;
 			if (ptrs[historyPointerY] == maxx) throw new Exception("PutPtr(byte ptr) ");
 			codeHistory[historyPointerY][ptrs[historyPointerY]] = (byte)ptr;
 			ptrs[historyPointerY]++;
 		}
+		
 		public void BeginNewStep()
 		{
 			historyPointerY++;

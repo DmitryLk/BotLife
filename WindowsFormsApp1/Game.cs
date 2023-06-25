@@ -165,7 +165,6 @@ namespace WindowsFormsApp1
 			}
 		}
 
-
 		#region for Form
 		public void MutationToggle()
 		{
@@ -321,6 +320,21 @@ namespace WindowsFormsApp1
 		{
 			Data.DeltaHistory--;
 			if (Data.PausedMode) _DRAWER.DrawCursor();
+		}
+
+		public void ColorDataGridView()
+		{
+			_PRINTER.ColorDataGridView();
+		}
+
+		public void ToggleLiveDataGridView()
+		{
+			Data.DgvOnlyLive = !Data.DgvOnlyLive;
+		}
+
+		public void TogglePraDataGridView()
+		{
+			Data.DgvPra = !Data.DgvPra;
 		}
 		#endregion
 	}

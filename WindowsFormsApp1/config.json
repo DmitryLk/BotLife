@@ -1,66 +1,75 @@
 {
-    // Настройки экрана
-    "MaxPictureBoxWidth": 1000,
-    "MaxPictureBoxHeight": 1000,
-    "CellWidth": 2,
-    "CellHeight": 2,
-    "ReportFrequencyDrawed": 100,
-    "ReportFrequencyNoDrawed": 100,
-    "FrequencyOfPeriodicalDraw": 25,
+  // Настройки экрана
+  "MaxPictureBoxWidth": 1000,
+  "MaxPictureBoxHeight": 1000,
+  "CellWidth": 2,
+  "CellHeight": 2,
+  "ReportFrequencyDrawed": 100,
+  "ReportFrequencyNoDrawed": 100,
+  "FrequencyOfPeriodicalDraw": 25,
 
-    // Настройки мира
-    "StartBotsNumber": 10000,
-    "MaxBotsNumber": 250000,
-    "WorldWidth": 500,
-    "WorldHeight": 500,
-    "UpDownEdge": false,
-    "LeftRightEdge": false,
-
-
-    // Настройки Seeder
-    "SeedFood": true,
-    "SeedOrganic": false,
-    "SeedMinerals": false,
-    "SeedWalls": false,
-    "SeedPoison": false,
-    "SeedFoodNumber": 1000,
-    "SeedOrganicNumber": 0,
-    "SeedMineralsNumber": 0,
-    "SeedWallsNumber": 0,
-    "SeedPoisonNumber": 0,
-
-    // Настройки генома ботов
-    "GenomLength": 64,
-    "MaxCode": 63,
-    "MaxUncompleteJump": 10,
-    "MutationProbabilityPercent": 10,
-    "MutationLenght": 1,
+  // Настройки мира
+  "StartBotsNumber": 10000,
+  "MaxBotsNumber": 250000,
+  "WorldWidth": 500,
+  "WorldHeight": 500,
+  "UpDownEdge": false,
+  "LeftRightEdge": false,
 
 
-    //Energy
-    "FoodEnergy": 20000,
-    "SeedBotEnergy": 1000,
-    "InitialBotEnergy": 1000,
-    "ReproductionBotEnergy": 3000,
-    "BiteEnergy": -1000,
-    "DeltaEnergyOnStep": 0,
+  // Настройки Seeder
+  "SeedFood": true,
+  "SeedOrganic": false,
+  "SeedMinerals": false,
+  "SeedWalls": false,
+  "SeedPoison": false,
+  "SeedFoodNumber": 1000,
+  "SeedOrganicNumber": 0,
+  "SeedMineralsNumber": 0,
+  "SeedWallsNumber": 0,
+  "SeedPoisonNumber": 0,
 
-    //Photosynthesis
-    "PhotosynthesisEnergy": 30,
-    "PhotosynthesisLayerHeight": 0,
+  // Настройки генома ботов
+  "GenomLength": 64,
+  "MaxCode": 63,
+  "MaxUncompleteJump": 10,
+  "MutationProbabilityPercent": 10,
+  "MutationLenght": 1,
 
-    //Size
-    "MinSize": 300,
-    "MaxSize": 10000,
-    "ReproductionBotEnergyOnSize": 3,
-    "BiteEnergyOnSize": 1,
 
-    //Lens
-    "LensWidth": 20,
-    "LensHeight": 20,
-    "LensCellWidth": 20,
-    "LensCellHeight": 20,
+  //Energy
+  "FoodEnergy": 20000,
+  "SeedBotEnergy": 1000,
+  "InitialBotEnergy": 1000,
+  "ReproductionBotEnergy": 3000,
+  "BiteEnergy": -1000,
+  "DeltaEnergyOnStep": -1,
 
-    "HoldReproductionTime": 20,
-    "GenomInfoPeriodPrint": 100 
+  //Photosynthesis
+  "PhotosynthesisEnergy": 30,
+  "PhotosynthesisLayerHeight": 0,
+
+  //Size
+  "MinSize": 300,
+  "MaxSize": 10000,
+  "ReproductionBotEnergyOnSize": 3,
+  "BiteEnergyOnSize": 1,
+
+  //Lens
+  "LensWidth": 20,
+  "LensHeight": 20,
+  "LensCellWidth": 20,
+  "LensCellHeight": 20,
+
+  // Attack-Shield
+  "AttackMax": 1,
+  "AttackTypeCount": 1,
+  "ShieldSum": 0,
+  "ShieldMax": 0,
+  "ShieldTypeCount": 0,
+  "ShieldTypeCountMax": 20,
+
+  "HoldReproductionTime": 20,
+  "GenomInfoPeriodPrint": 100,
+  "KeptTotalEnergy": 20000000
 }

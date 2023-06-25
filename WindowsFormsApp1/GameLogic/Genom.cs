@@ -27,6 +27,8 @@ namespace WindowsFormsApp1.GameLogic
 		public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
 
 		public byte[] Code;
+		public int[] Act;
+		public bool ActCnt;
 		public Guid GenomHash;
 		public Guid ParentHash;
 		public Guid GrandHash;
@@ -39,7 +41,7 @@ namespace WindowsFormsApp1.GameLogic
 		public uint BeginStep;
 		public uint EndStep;
 		public string Test = "owdiheiofhweoif";
-        //private Genom _parent;
+		//private Genom _parent;
 
 		private long _curBots = 0;
 		private long _allBots = 0;
@@ -100,6 +102,8 @@ namespace WindowsFormsApp1.GameLogic
 			var g = new Genom();
 
 			g.Code = new byte[Data.GenomLength];
+			g.Act = new int[Data.GenomLength];
+			g.ActCnt = true;
 			g.GenomHash = Guid.NewGuid();
 			//g.Color = Color.Red;
 			g.Color = Func.GetRandomColor();
@@ -112,6 +116,7 @@ namespace WindowsFormsApp1.GameLogic
 				for (var i = 0; i < Data.GenomLength; i++)
 				{
 					g.Code[i] = Func.GetRandomBotCode();
+					g.Act[i] = 0;
 					//g.Code[i] = 25;
 				}
 				g.ParentHash = Guid.Empty;
@@ -157,8 +162,13 @@ namespace WindowsFormsApp1.GameLogic
 			return g;
 		}
 
-		public byte GetCurrentCommand(int pointer)
+		public byte GetCurrentCommandAndSetActGen(int pointer)
 		{
+			if (ActCnt)
+			{
+				Interlocked.Increment(ref Act[pointer]);
+				if (Act[pointer] > 230) ActCnt = false;
+			}
 			return Code[pointer];
 		}
 
@@ -187,7 +197,8 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}:{activeGenoms}  Big:{activeBigGenoms}");
 
 			var activePraGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
-			var activePraBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).DistinctBy(g => g.PraNum).Count();
+			var activePraBigGenoms = GENOMS.Keys.GroupBy(k => k.PraNum).Select(g => g.Sum(s => s.CurBots)).Count(d => d > 50);
+
 			sb.AppendLine($"PraActive: {activePraGenoms}  Big:{activePraBigGenoms}");
 
 			return sb.ToString();
@@ -195,13 +206,14 @@ namespace WindowsFormsApp1.GameLogic
 	}
 
 	public class GenomStr
-    {
-        public string GenomName { get; set; }
-        public Color GenomColor { get; set; }
-        public long Live { get; set; }
-        public long Total { get; set; }
+	{
+		public string GenomName { get; set; }
+		public Color GenomColor { get; set; }
+		public long Live { get; set; }
+		public long Total { get; set; }
 		public uint Age { get; set; }
-        public float AvBotAge { get; set; }
+		public float AvBotAge { get; set; }
+		public int ActGen { get; set; }
 	}
 }
 
