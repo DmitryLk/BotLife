@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.Static;
@@ -127,8 +128,16 @@ namespace WindowsFormsApp1.GameLogic
 
 				// Attack-Shield
 				g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
-				g.AttackType = Func.GetRandomAttackType(Data.AttackTypeCount);
-				g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
+
+                byte attackType;
+                do
+                {
+                    attackType = Func.GetRandomAttackType(Data.AttackTypeCount);
+                } 
+                while (g.Shield[attackType] == 0);
+
+                g.AttackType = attackType;
+                g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
 			}
 			else
 			{
@@ -149,14 +158,14 @@ namespace WindowsFormsApp1.GameLogic
 				g.Level = parent.Level + 1;
 				Interlocked.Increment(ref Data.MutationCnt);
 
-				// Attack-Shield
-				//g.Shield = parent.Shield;
-				//g.AttackType = parent.AttackType;
-				//g.AttackLevel = parent.AttackLevel;
-				g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
-				g.AttackType = Func.GetRandomAttackType(Data.AttackTypeCount);
-				g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
-			}
+                // Attack-Shield
+                g.Shield = parent.Shield;
+                g.AttackType = parent.AttackType;
+                g.AttackLevel = parent.AttackLevel;
+                //g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
+                //g.AttackType = Func.GetRandomAttackType(Data.AttackTypeCount);
+                //g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
+            }
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
 			return g;
@@ -203,6 +212,65 @@ namespace WindowsFormsApp1.GameLogic
 
 			return sb.ToString();
 		}
+
+        public static SortableBindingList<GenomStr> GetSortableBindingList(int minCurBots)
+        {
+            SortableBindingList<GenomStr> sortableBindingList;
+
+			if (!Data.DgvPra)
+            {
+                sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+                    .Where(g => Data.DgvOnlyLive ? g.CurBots > minCurBots : g.AllBots > 1)
+                    .Select(g => new GenomStr
+                    {
+                        GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
+                        GenomColor = g.Color,
+                        Live = g.CurBots,
+                        Total = g.AllBots,
+                        Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+                        AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
+                        ActGen = g.Act.Count(g => g > 0),
+						Shield = $"{string.Join("/",g.Shield.Take(3))} = {g.AttackType}"
+                    }).ToList());
+            }
+            else
+            {
+                sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+                    .GroupBy(k => k.PraNum)
+                    .Select(g =>
+                    {
+                        var f = g.First();
+                        var removed = g.Sum(s => s.RemovedBots);
+                        var live = g.Where(s => s.CurBots > 0);
+                        var minl = 0;
+                        var maxl = 0;
+                        long botminl = 0;
+                        long botmaxl = 0;
+                        if (live.Any())
+                        {
+                            minl = live.Min(s => s.Level);
+                            maxl = live.Max(s => s.Level);
+                            botminl = live.Where(s => s.Level == minl).Sum(s => s.CurBots);
+                            botmaxl = live.Where(s => s.Level == maxl).Sum(s => s.CurBots);
+                        }
+
+                        return new GenomStr
+                        {
+                            GenomName = $"{f.PraNum} ({minl}({botminl})-{maxl}({botmaxl}))",
+                            GenomColor = f.PraColor,
+                            Live = g.Sum(s => s.CurBots),
+                            Total = g.Sum(s => s.AllBots),
+                            //Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+                            AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
+                            ActGen = 0
+                        };
+                    })
+                    .Where(g => Data.DgvOnlyLive ? g.Live > minCurBots : g.Total > 1)
+                    .ToList());
+            }
+
+            return sortableBindingList;
+        }
 	}
 
 	public class GenomStr
@@ -213,7 +281,8 @@ namespace WindowsFormsApp1.GameLogic
 		public long Total { get; set; }
 		public uint Age { get; set; }
 		public float AvBotAge { get; set; }
-		public int ActGen { get; set; }
+        public int ActGen { get; set; }
+        public string Shield { get; set; }
 	}
 }
 

@@ -16,6 +16,7 @@ using WindowsFormsApp1.Static;
 using WindowsFormsApp1.Enums;
 using DrawMode = WindowsFormsApp1.Enums.DrawMode;
 using WindowsFormsApp1.Graphic;
+using WindowsFormsApp1.GameLogic;
 
 namespace WindowsFormsApp1
 {

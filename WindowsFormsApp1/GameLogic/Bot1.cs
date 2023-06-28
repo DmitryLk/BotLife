@@ -473,15 +473,15 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-			// Не может есть родственника
-			//if (G.GenomHash == eatedBot.G.GenomHash)
-			//{
-			//	return;
-			//}
+            // Не может есть родственника
+            if (G.GenomHash == eatedBot.G.GenomHash)
+            {
+                return;
+            }
 
 
-			//var olden = Energy;
-			Fight(eatedBot);
+            //var olden = Energy;
+            Fight(eatedBot);
 		}
 
 		private void Fight(Bot1 eatedBot)
