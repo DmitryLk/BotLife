@@ -63,10 +63,10 @@
 
     // Attack-Shield
     "AttackMax": 1, //####################
-    "AttackTypeCount": 3, //####################
-    "ShieldSum": 2, //####################
+    "AttackTypeCount": 5, //####################
+    "ShieldSum": 3, //####################
     "ShieldMax": 1, //####################
-    "ShieldTypeCount": 3, //####################
+    "ShieldTypeCount": 5, //####################
     "ShieldTypeCountMax": 20, //####################
 
     "HoldReproductionTime": 20, //####

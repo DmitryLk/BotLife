@@ -229,8 +229,8 @@ namespace WindowsFormsApp1.GameLogic
                         Total = g.AllBots,
                         Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
                         AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
-                        ActGen = g.Act.Count(g => g > 0),
-						Shield = $"{string.Join("/",g.Shield.Take(3))} = {g.AttackType}"
+                        ActGen = g.Act.Count(g => g > 100),
+						Shield = $"{string.Join("/",g.Shield.Take(Data.ShieldTypeCount))} = {g.AttackType}"
                     }).ToList());
             }
             else
