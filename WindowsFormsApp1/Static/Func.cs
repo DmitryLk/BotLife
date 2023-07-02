@@ -425,31 +425,54 @@ namespace WindowsFormsApp1.Static
 			return (nXi, nYi);
 		}
 
-		public static byte[] GetRandomShield(int ShieldSum, int ShieldMax, int ShieldTypeCount, int ShieldTypeCountMax)
+		public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield()
 		{
-			int num;
-			var res = new byte[ShieldTypeCountMax];
-			for (var i = 0; i < ShieldSum; i++)
+			var fail = false;
+			var shield = new byte[Data.AttackShieldTypeCountMax];
+			var attack = new byte[Data.AttackShieldTypeCountMax];
+			var attackTypes = new List<(byte, byte)>();
+
+			for (var i = 0; i < Data.AttackShieldSum; i++)
 			{
-				do
+				do 
 				{
-					num = ThreadSafeRandom.Next(ShieldTypeCount);
+					var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+
+					if (ThreadSafeRandom.NextDouble() > .5)
+					{
+						if (shield[type] >= Data.ShieldMax)
+						{
+							fail = true;
+						}
+						else
+						{
+							shield[type]++;
+						}
+					}
+					else
+					{
+						if (attack[type] >= Data.AttackMax)
+						{
+							fail = true;
+						}
+						else
+						{
+							attack[type]++;
+						}
+					}
 				}
-				while (res[num]>= ShieldMax);
-				res[num]++;
+				while (fail);
 			}
 
-			return res;
-		}
-
-		public static byte GetRandomAttackType(int AttackTypeCount)
-		{
-			return (byte)ThreadSafeRandom.Next(AttackTypeCount);
-		}
-
-		public static byte GetRandomAttackLevel(int AttackMax)
-		{
-			return (byte)(ThreadSafeRandom.Next(AttackMax) + 1);
+			for (var i = 0; i < Data.AttackShieldTypeCount; i++)
+			{
+				if (attack[i] > 0)
+				{
+					attackTypes.Add(((byte)i, attack[i]));
+				}
+			}
+				
+			return (shield, attack, attackTypes.ToArray());
 		}
 
 		public static int GetRandomDirection()

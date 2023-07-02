@@ -70,12 +70,12 @@ namespace WindowsFormsApp1.Static
 		public static int LensCellHeight;
 
 		// Attack-Shield
+		public static int AttackShieldSum;
+		public static int AttackShieldTypeCount;
+		public static int AttackShieldTypeCountMax;
 		public static int AttackMax;
-		public static int AttackTypeCount;
-		public static int ShieldSum;
 		public static int ShieldMax;
-		public static int ShieldTypeCount;
-		public static int ShieldTypeCountMax;
+
 
 
 		public static int HoldReproductionTime;
@@ -343,12 +343,11 @@ namespace WindowsFormsApp1.Static
 			LensCellWidth = options.LensCellWidth;
 			LensCellHeight = options.LensCellHeight;
 
+			AttackShieldSum = options.AttackShieldSum;
+			AttackShieldTypeCount = options.AttackShieldTypeCount;
+			AttackShieldTypeCountMax = options.AttackShieldTypeCountMax;
 			AttackMax = options.AttackMax;
-			AttackTypeCount = options.AttackTypeCount;
-			ShieldSum = options.ShieldSum;
 			ShieldMax = options.ShieldMax;
-			ShieldTypeCount = options.ShieldTypeCount;
-			ShieldTypeCountMax = options.ShieldTypeCountMax;
 
 			HoldReproductionTime = options.HoldReproductionTime;
 			GenomInfoPeriodPrint = options.GenomInfoPeriodPrint;

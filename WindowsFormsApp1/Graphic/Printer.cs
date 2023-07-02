@@ -83,6 +83,7 @@ namespace WindowsFormsApp1.Graphic
 				{
 					column.SortMode = DataGridViewColumnSortMode.Programmatic;
 				}
+				_dgv.Columns[1].Width = 20;
 
 				_dgv.Sort(_dgv.Columns[Data.DgvColumnIndex], Data.DgvDirection);
 

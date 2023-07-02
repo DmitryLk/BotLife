@@ -29,6 +29,9 @@ namespace WindowsFormsApp1.GameLogic
 
 		public byte[] Code;
 		public int[] Act;
+		public List<(int, int)> Sorted1;
+		public HashSet<int> Sorted2;
+
 		public bool ActCnt;
 		public Guid GenomHash;
 		public Guid ParentHash;
@@ -58,8 +61,9 @@ namespace WindowsFormsApp1.GameLogic
 
 		// Attack-Shield
 		public byte[] Shield;
-		public byte AttackType;
-		public byte AttackLevel;
+		public byte[] Attack;
+		public (byte Type, byte Level)[] AttackTypes;
+		public int AttackTypesCnt;
 
 		private Genom()
 		{
@@ -104,6 +108,9 @@ namespace WindowsFormsApp1.GameLogic
 
 			g.Code = new byte[Data.GenomLength];
 			g.Act = new int[Data.GenomLength];
+			g.Sorted1 = new List<(int, int)>();
+			g.Sorted2 = new HashSet<int>();
+
 			g.ActCnt = true;
 			g.GenomHash = Guid.NewGuid();
 			//g.Color = Color.Red;
@@ -127,17 +134,8 @@ namespace WindowsFormsApp1.GameLogic
 				g.Level = 1;
 
 				// Attack-Shield
-				g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
-
-                byte attackType;
-                do
-                {
-                    attackType = Func.GetRandomAttackType(Data.AttackTypeCount);
-                } 
-                while (g.Shield[attackType] == 0);
-
-                g.AttackType = attackType;
-                g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
+				(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
+				g.AttackTypesCnt = g.AttackTypes.Length;
 			}
 			else
 			{
@@ -158,14 +156,14 @@ namespace WindowsFormsApp1.GameLogic
 				g.Level = parent.Level + 1;
 				Interlocked.Increment(ref Data.MutationCnt);
 
-                // Attack-Shield
-                g.Shield = parent.Shield;
-                g.AttackType = parent.AttackType;
-                g.AttackLevel = parent.AttackLevel;
-                //g.Shield = Func.GetRandomShield(Data.ShieldSum, Data.ShieldMax, Data.ShieldTypeCount, Data.ShieldTypeCountMax);
-                //g.AttackType = Func.GetRandomAttackType(Data.AttackTypeCount);
-                //g.AttackLevel = Func.GetRandomAttackLevel(Data.AttackMax);
-            }
+				// Attack-Shield
+				g.Shield = parent.Shield;
+				g.Attack = parent.Attack;
+				g.AttackTypes = parent.AttackTypes;
+				g.AttackTypesCnt = parent.AttackTypesCnt;
+				//(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
+				//g.AttackTypesCnt = g.AttackTypes.Length;
+			}
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
 			return g;
@@ -176,7 +174,17 @@ namespace WindowsFormsApp1.GameLogic
 			if (ActCnt)
 			{
 				Interlocked.Increment(ref Act[pointer]);
-				if (Act[pointer] > 230) ActCnt = false;
+
+				Sorted2.Add(pointer);
+
+				if (Act[pointer] > 230) 
+				{
+					ActCnt = false;
+					Sorted1 = Act
+						.Select((x, i) => (Value: x, OriginalIndex: i))
+						.OrderByDescending(x => x.Value)
+						.ToList();
+				}
 			}
 			return Code[pointer];
 		}
@@ -213,64 +221,64 @@ namespace WindowsFormsApp1.GameLogic
 			return sb.ToString();
 		}
 
-        public static SortableBindingList<GenomStr> GetSortableBindingList(int minCurBots)
-        {
-            SortableBindingList<GenomStr> sortableBindingList;
+		public static SortableBindingList<GenomStr> GetSortableBindingList(int minCurBots)
+		{
+			SortableBindingList<GenomStr> sortableBindingList;
 
 			if (!Data.DgvPra)
-            {
-                sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
-                    .Where(g => Data.DgvOnlyLive ? g.CurBots > minCurBots : g.AllBots > 1)
-                    .Select(g => new GenomStr
-                    {
-                        GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
-                        GenomColor = g.Color,
-                        Live = g.CurBots,
-                        Total = g.AllBots,
-                        Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
-                        AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
-                        ActGen = g.Act.Count(g => g > 100),
-						Shield = $"{string.Join("/",g.Shield.Take(Data.ShieldTypeCount))} = {g.AttackType}"
-                    }).ToList());
-            }
-            else
-            {
-                sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
-                    .GroupBy(k => k.PraNum)
-                    .Select(g =>
-                    {
-                        var f = g.First();
-                        var removed = g.Sum(s => s.RemovedBots);
-                        var live = g.Where(s => s.CurBots > 0);
-                        var minl = 0;
-                        var maxl = 0;
-                        long botminl = 0;
-                        long botmaxl = 0;
-                        if (live.Any())
-                        {
-                            minl = live.Min(s => s.Level);
-                            maxl = live.Max(s => s.Level);
-                            botminl = live.Where(s => s.Level == minl).Sum(s => s.CurBots);
-                            botmaxl = live.Where(s => s.Level == maxl).Sum(s => s.CurBots);
-                        }
+			{
+				sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+					.Where(g => Data.DgvOnlyLive ? g.CurBots > minCurBots : g.AllBots > 1)
+					.Select(g => new GenomStr
+					{
+						GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
+						GenomColor = g.Color,
+						Live = g.CurBots,
+						Total = g.AllBots,
+						Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+						AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
+						ActGen = g.Act.Count(g => g > 100),
+						Sh_Atc = $"{string.Join("/", g.Shield.Take(Data.AttackShieldTypeCount))} = {string.Join("/", g.Attack.Take(Data.AttackShieldTypeCount))}"
+					}).ToList());
+			}
+			else
+			{
+				sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+					.GroupBy(k => k.PraNum)
+					.Select(g =>
+					{
+						var f = g.First();
+						var removed = g.Sum(s => s.RemovedBots);
+						var live = g.Where(s => s.CurBots > 0);
+						var minl = 0;
+						var maxl = 0;
+						long botminl = 0;
+						long botmaxl = 0;
+						if (live.Any())
+						{
+							minl = live.Min(s => s.Level);
+							maxl = live.Max(s => s.Level);
+							botminl = live.Where(s => s.Level == minl).Sum(s => s.CurBots);
+							botmaxl = live.Where(s => s.Level == maxl).Sum(s => s.CurBots);
+						}
 
-                        return new GenomStr
-                        {
-                            GenomName = $"{f.PraNum} ({minl}({botminl})-{maxl}({botmaxl}))",
-                            GenomColor = f.PraColor,
-                            Live = g.Sum(s => s.CurBots),
-                            Total = g.Sum(s => s.AllBots),
-                            //Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
-                            AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
-                            ActGen = 0
-                        };
-                    })
-                    .Where(g => Data.DgvOnlyLive ? g.Live > minCurBots : g.Total > 1)
-                    .ToList());
-            }
+						return new GenomStr
+						{
+							GenomName = $"{f.PraNum} ({minl}({botminl})-{maxl}({botmaxl}))",
+							GenomColor = f.PraColor,
+							Live = g.Sum(s => s.CurBots),
+							Total = g.Sum(s => s.AllBots),
+							//Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+							AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
+							ActGen = 0
+						};
+					})
+					.Where(g => Data.DgvOnlyLive ? g.Live > minCurBots : g.Total > 1)
+					.ToList());
+			}
 
-            return sortableBindingList;
-        }
+			return sortableBindingList;
+		}
 	}
 
 	public class GenomStr
@@ -281,8 +289,8 @@ namespace WindowsFormsApp1.GameLogic
 		public long Total { get; set; }
 		public uint Age { get; set; }
 		public float AvBotAge { get; set; }
-        public int ActGen { get; set; }
-        public string Shield { get; set; }
+		public int ActGen { get; set; }
+		public string Sh_Atc { get; set; }
 	}
 }
 

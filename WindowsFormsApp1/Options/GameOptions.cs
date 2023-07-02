@@ -50,13 +50,13 @@ namespace WindowsFormsApp1.Options
         public int LensCellWidth;
         public int LensCellHeight;
 
+		// Attack-Shield
+		public int AttackShieldSum;
+		public int AttackShieldTypeCount;
+		public int AttackShieldTypeCountMax;
 		public int AttackMax;
-		public int AttackTypeCount;
-		public int ShieldSum;
 		public int ShieldMax;
-		public int ShieldTypeCount;
-		public int ShieldTypeCountMax;
-
+        
         public int HoldReproductionTime;
 		public int GenomInfoPeriodPrint;
 		public int KeptTotalEnergy;

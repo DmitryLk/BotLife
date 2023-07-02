@@ -74,70 +74,70 @@ namespace WindowsFormsApp1
 								Y - Genom info periodical
 			";
 
-            dataGridView1.Columns.Add(new DataGridViewColumn
-            {
-                DataPropertyName = "GenomName",
-                Width = 120,
-                HeaderText = "Геном",
-                Name = "genom",
-                CellTemplate = new DataGridViewTextBoxCell()
-            });
+			//         dataGridView1.Columns.Add(new DataGridViewColumn
+			//         {
+			//             DataPropertyName = "GenomName",
+			//             Width = 120,
+			//             HeaderText = "Геном",
+			//             Name = "genom",
+			//             CellTemplate = new DataGridViewTextBoxCell()
+			//         });
 
-            dataGridView1.Columns.Add(new DataGridViewColumn
-            {
-                DataPropertyName = "GenomColor",
-                Width = 20,
-                HeaderText = "",
-                Name = "color",
-                CellTemplate = new DataGridViewTextBoxCell()
-            });
+			//         dataGridView1.Columns.Add(new DataGridViewColumn
+			//         {
+			//             DataPropertyName = "GenomColor",
+			//             Width = 20,
+			//             HeaderText = "",
+			//             Name = "color",
+			//             CellTemplate = new DataGridViewTextBoxCell()
+			//         });
 
-            dataGridView1.Columns.Add(new DataGridViewColumn
-            {
-                DataPropertyName = "Live",
-                Width = 60,
-                HeaderText = "Живых",
-                Name = "live",
-                CellTemplate = new DataGridViewTextBoxCell()
-            });
+			//         dataGridView1.Columns.Add(new DataGridViewColumn
+			//         {
+			//             DataPropertyName = "Live",
+			//             Width = 60,
+			//             HeaderText = "Живых",
+			//             Name = "live",
+			//             CellTemplate = new DataGridViewTextBoxCell()
+			//         });
 
-            dataGridView1.Columns.Add(new DataGridViewColumn
-            {
-                DataPropertyName = "Total",
-                Width = 60,
-                HeaderText = "Всего",
-                Name = "total",
-                CellTemplate = new DataGridViewTextBoxCell()
-            });
+			//         dataGridView1.Columns.Add(new DataGridViewColumn
+			//         {
+			//             DataPropertyName = "Total",
+			//             Width = 60,
+			//             HeaderText = "Всего",
+			//             Name = "total",
+			//             CellTemplate = new DataGridViewTextBoxCell()
+			//         });
 
-            dataGridView1.Columns.Add(new DataGridViewColumn
-            {
-                DataPropertyName = "Age",
-                Width = 60,
-                HeaderText = "Возраст",
-                Name = "age",
-                CellTemplate = new DataGridViewTextBoxCell()
-            });
+			//         dataGridView1.Columns.Add(new DataGridViewColumn
+			//         {
+			//             DataPropertyName = "Age",
+			//             Width = 60,
+			//             HeaderText = "Возраст",
+			//             Name = "age",
+			//             CellTemplate = new DataGridViewTextBoxCell()
+			//         });
 
-            dataGridView1.Columns.Add(new DataGridViewColumn
-            {
-                DataPropertyName = "AvBotAge",
-                Width = 80,
-                HeaderText = "Ср. возр. ботов",
-                Name = "avBotAge",
-                CellTemplate = new DataGridViewTextBoxCell()
-            });
+			//         dataGridView1.Columns.Add(new DataGridViewColumn
+			//         {
+			//             DataPropertyName = "AvBotAge",
+			//             Width = 80,
+			//             HeaderText = "Ср. возр. ботов",
+			//             Name = "avBotAge",
+			//             CellTemplate = new DataGridViewTextBoxCell()
+			//         });
 
-			dataGridView1.Columns.Add(new DataGridViewColumn
-			{
-				DataPropertyName = "ActGen",
-				Width = 60,
-				HeaderText = "Активных",
-				Name = "actGen",
-				CellTemplate = new DataGridViewTextBoxCell()
-			});
-			
-            dataGridView1.RowHeadersVisible = false;
+			//dataGridView1.Columns.Add(new DataGridViewColumn
+			//{
+			//	DataPropertyName = "ActGen",
+			//	Width = 60,
+			//	HeaderText = "Активных",
+			//	Name = "actGen",
+			//	CellTemplate = new DataGridViewTextBoxCell()
+			//});
+
+			dataGridView1.RowHeadersVisible = false;
 
         }
 

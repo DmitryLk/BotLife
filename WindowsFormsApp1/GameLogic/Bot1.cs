@@ -486,16 +486,24 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void Fight(Bot1 eatedBot)
 		{
-			var shield = eatedBot.G.Shield[G.AttackType];
-			var attack = G.AttackLevel;
+			var atc = 0;
+			for (var i = 0; i < G.AttackTypesCnt; i++)
+			{
+				if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+				{
+					atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+				}
+			}
 
-			if (shield >= attack) return;
+			if (atc>0)
+			{
+				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy / 5 * atc);
+				var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+				EnergyChange(gotEnergyByEating);
+				return;
+			}
 
-			var biteEnergy = Data.BiteEnergy * (attack - shield);
-
-			var gotEnergyByEating = eatedBot.EnergyChange(biteEnergy);
-			if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
-			EnergyChange(gotEnergyByEating);
 
 			//eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
 			//Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
