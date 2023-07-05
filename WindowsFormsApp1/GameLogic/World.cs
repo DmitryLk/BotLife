@@ -216,8 +216,13 @@ namespace WindowsFormsApp1.GameLogic
                 {
                     Data.World[x, y] = (long)CellContent.Grass;
                     Func.FixChangeCell(x, y, Color.Green);
-
                     Data.TotalEnergy += Data.FoodEnergy;
+
+                    //var genom = Genom.CreateGenom();
+                    //Data.TotalEnergy += Data.SeedBotEnergy;
+                    //var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
+                    //Func.CreateNewBot(x, y, newBotIndex, Data.SeedBotEnergy, genom);
+                    //Data.CurrentNumberOfBots++;
                 }
                 else
                 {

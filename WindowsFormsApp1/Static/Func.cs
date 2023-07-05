@@ -495,6 +495,11 @@ namespace WindowsFormsApp1.Static
 			return ThreadSafeRandom.Next(Data.GenomLength);
 		}
 
+		public static int GetRandomNext(int max)
+		{
+			return ThreadSafeRandom.Next(max);
+		}
+
 		public static bool Mutation()
 		{
 			return Data.Mutation && ThreadSafeRandom.NextDouble() * 100 < Data.MutationProbabilityPercent;

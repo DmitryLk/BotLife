@@ -83,7 +83,23 @@ namespace WindowsFormsApp1.Graphic
 				{
 					column.SortMode = DataGridViewColumnSortMode.Programmatic;
 				}
+				_dgv.Columns[0].Width = 120;	//Геном
 				_dgv.Columns[1].Width = 20;
+				_dgv.Columns[2].Width = 60;     //Живых
+				_dgv.Columns[3].Width = 60;     //Всего
+				_dgv.Columns[4].Width = 40;     //Возраст
+				_dgv.Columns[5].Width = 40;     //Ср. возр. ботов
+				_dgv.Columns[6].Width = 40;     //Активных
+				_dgv.Columns[7].Width = 80;
+
+				//             HeaderText = "Геном",
+				//             HeaderText = "",
+				//             HeaderText = "Живых",
+				//             HeaderText = "Всего",
+				//             HeaderText = "Возраст",
+				//             HeaderText = "Ср. возр. ботов",
+				//	HeaderText = "Активных",
+
 
 				_dgv.Sort(_dgv.Columns[Data.DgvColumnIndex], Data.DgvDirection);
 

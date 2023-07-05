@@ -491,14 +491,15 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
 				{
-					atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					//atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					atc++;
 				}
 			}
 
-			if (atc>0)
+			if (atc > 0)
 			{
-				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy / 5 * atc);
-				var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+				var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy / 2 * atc);
+				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
 				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
 				EnergyChange(gotEnergyByEating);
 				return;

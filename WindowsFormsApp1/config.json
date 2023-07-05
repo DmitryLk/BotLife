@@ -18,7 +18,7 @@
 
 
   // Настройки Seeder
-  "SeedFood": false, //####
+  "SeedFood": true, //####
   "SeedOrganic": false,
   "SeedMinerals": false,
   "SeedWalls": false,
@@ -34,7 +34,7 @@
   "MaxCode": 63,
   "MaxUncompleteJump": 10,
   "MutationProbabilityPercent": 10, //####
-  "MutationLenght": 1, //####
+  "MutationLenght": 3, //####
 
 
   //Energy
@@ -43,7 +43,7 @@
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": -1000,
-  "DeltaEnergyOnStep": 0, //####################
+  "DeltaEnergyOnStep": -1, //####################
 
   //Photosynthesis
   "PhotosynthesisEnergy": 30,
@@ -70,5 +70,5 @@
 
   "HoldReproductionTime": 20, //####
   "GenomInfoPeriodPrint": 100,
-  "KeptTotalEnergy": 0 //####################
+  "KeptTotalEnergy": 40000000 //####################
 }
