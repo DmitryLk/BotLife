@@ -33,6 +33,8 @@
   "GenomLength": 64,
   "MaxCode": 63,
   "MaxUncompleteJump": 10,
+
+  // Настройки мутаций
   "MutationProbabilityPercent": 10, //####
   "MutationLenght": 3, //####
 
