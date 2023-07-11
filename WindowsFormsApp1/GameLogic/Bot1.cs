@@ -108,6 +108,12 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 		}
 
+		/// <summary>
+		/// delta - энергия которая будет добавлена к энергии бота
+		/// </summary>
+		/// <param name="delta"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
 		public int EnergyChange(int delta)
 		{
 			lock (_busyBotEnergy)
@@ -498,10 +504,12 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (atc > 0)
 			{
+				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
 				var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy / 2 * atc);
+				EnergyChange(gotEnergyByEating);
+
 				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
 				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
-				EnergyChange(gotEnergyByEating);
 				return;
 			}
 

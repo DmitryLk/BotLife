@@ -123,6 +123,7 @@ namespace WindowsFormsApp1.Static
 				else
 				{
 					throw new Exception("странно");
+					//Data.IndexEnclusiveBeforeReplacesBots = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
 				}
 			}
 
@@ -186,6 +187,40 @@ namespace WindowsFormsApp1.Static
 			{
 				Interlocked.Increment(ref Data.Check_QtyFailedReproduction);
 				reproductedBot.HoldReproduction();
+
+				// Передать энергию окружающим ботам
+				var n = ThreadSafeRandom.Next(8);
+				int nXi, nYi;
+				long cont;
+				int i = 0;
+				var ent = (reproductedBot.Energy - Data.ReproductionBotEnergy) / 4;
+				do
+				{
+					(nXi, nYi) = GetCoordinatesByDelta(reproductedBot.Xi, reproductedBot.Yi, n);
+
+					if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+					{
+						cont = Data.World[nXi, nYi];
+
+						if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
+						{
+							var targetBot = Data.Bots[cont];
+
+							if (reproductedBot.Energy > targetBot.Energy && targetBot.Energy > 0)
+							{
+
+								// ent - отрицательное число. возвращается положительное число.
+								var transferedEnergy = reproductedBot.EnergyChange(-ent);
+								targetBot.EnergyChange(transferedEnergy);
+								if (transferedEnergy < 0) throw new Exception("dfgdfg");
+							}
+						}
+					}
+					if (++n >= 8) n -= 8;
+					i++;
+				}
+				while (reproductedBot.CanReproduct() && i <= 20);
+
 				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 				return;
 			}
@@ -434,7 +469,7 @@ namespace WindowsFormsApp1.Static
 
 			for (var i = 0; i < Data.AttackShieldSum; i++)
 			{
-				do 
+				do
 				{
 					var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
 
@@ -471,7 +506,7 @@ namespace WindowsFormsApp1.Static
 					attackTypes.Add(((byte)i, attack[i]));
 				}
 			}
-				
+
 			return (shield, attack, attackTypes.ToArray());
 		}
 

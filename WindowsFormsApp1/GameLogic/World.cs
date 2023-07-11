@@ -210,25 +210,26 @@ namespace WindowsFormsApp1.GameLogic
 
             Data.CurrentStep++;
 
-            while (Data.SeedFood && Data.TotalEnergy < Data.KeptTotalEnergy)
-            {
-                if (Func.TryGetRandomFreeCell(out var x, out var y))
-                {
-                    Data.World[x, y] = (long)CellContent.Grass;
-                    Func.FixChangeCell(x, y, Color.Green);
-                    Data.TotalEnergy += Data.FoodEnergy;
+    //        while (Data.SeedFood && Data.TotalEnergy < Data.KeptTotalEnergy)
+    //        {
+    //            if (Func.TryGetRandomFreeCell(out var x, out var y))
+    //            {
+    //                Data.World[x, y] = (long)CellContent.Grass;
+    //                Func.FixChangeCell(x, y, Color.Green);
+    //                Data.TotalEnergy += Data.FoodEnergy;
 
-                    //var genom = Genom.CreateGenom();
-                    //Data.TotalEnergy += Data.SeedBotEnergy;
-                    //var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-                    //Func.CreateNewBot(x, y, newBotIndex, Data.SeedBotEnergy, genom);
-                    //Data.CurrentNumberOfBots++;
-                }
-                else
-                {
-                    break;
-                }
-            }
+    //                //var genom = Genom.CreateGenom();
+    //                //Data.TotalEnergy += Data.InitialBotEnergy * 10;
+    //                //var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
+    //                //Func.CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy * 10, genom);
+
+
+    //            }
+				//else
+    //            {
+    //                break;
+    //            }
+    //        }
 
 
             //Func.CheckWorld3();
