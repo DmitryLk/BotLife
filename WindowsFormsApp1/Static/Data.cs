@@ -91,14 +91,15 @@ namespace WindowsFormsApp1.Static
 		public static Bot1[] BotDeath;
 		public static Bot1[] BotReproduction;
 		public static long QtyAllBotDeathMinusOne;  // Количество собирающихся и собиравшихся умереть ботов
-		public static long QtyFactBotDeath;         // Фактическое количество умирающих ботов
+		public static long QtyFactBotDeath;         // Фактическое количество умерших ботов на этом шаге
 		public static long QtyFactBotDeathUsedForReproduction;
 		public static int IndexOfLastBotDeathArrayUsedForReproduction;
 		public static int IndexOfLastBotReproduction;  // В массиве Data.BotReproduction последний индекс бота который хочет размножиться
 		public static long TotalQtyBotDeath;
 		public static long TotalQtyBotReproduction;
-		public static long IndexEnclusiveBeforeReplacesBots;
+		public static long IndexEnclusiveBeforeReplacesBots;  //Последний индекс в массиве Bots не используемый для перемещения
 		public static long Check_QtyFailedReproduction;
+		public static long Check_QtyFailedDeath;
 		public static int QtyRemovedBotsOnStep;
 		public static long IndexOfLastBotPlusOne;
 		//private static int removedbots2;
