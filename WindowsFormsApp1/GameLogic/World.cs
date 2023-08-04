@@ -182,6 +182,16 @@ namespace WindowsFormsApp1.GameLogic
                 
                 }
 
+                var r1_2 = 0;
+                for (var i = (int)Data.IndexOfLastBotDeathArrayUsedForReproduction + 1; i < (int)Data.QtyAllBotDeathMinusOne + 1; i++)
+                {
+                    if (Data.BotDeath[i].Energy == 0) r1_2++;
+                }
+
+                if (r1 != r1_2)
+                {
+
+                }
 
                 // МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
                 if (Data.Parallel)

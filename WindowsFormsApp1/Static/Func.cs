@@ -177,6 +177,22 @@ namespace WindowsFormsApp1.Static
 
 					}
 
+                    var te = 0;
+                    var cnt2 = 0;
+                    for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+                    {
+                        if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+
+                        if (!Data.Bots[i].Alive)
+                        {
+                            cnt2++;
+                        }
+
+                        if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
+
+                        te += Data.Bots[i].Energy;
+                    }
+
 					//CHECK1();
 					//CHECK2();
 					//CHECK3();
@@ -270,7 +286,7 @@ namespace WindowsFormsApp1.Static
 							{
 								var targetBot = Data.Bots[cont];
 
-								if (reproductedBot.Energy > targetBot.Energy && targetBot.Energy > 0)
+								if (reproductedBot.Energy > targetBot.Energy && targetBot.Energy > 0 && !targetBot.InsertedToDeathList)
 								{
 									if (ent <= 0)
 									{
@@ -379,15 +395,14 @@ namespace WindowsFormsApp1.Static
 			updBot.Yd = y;
 			updBot.Direction = dir;
 			updBot.Num = botNumber;
-			updBot.EnergySet(en);
 			updBot.G = genom;
 			updBot.Pointer = pointer;
 			updBot.OldPointer = pointer;
 			updBot.Age = 0;
-			updBot.InsertedToDeathList = false;
-			updBot.InsertedToReproductionList = false;
 			updBot.Alive = true;
 			updBot.Hist = new CodeHistory();
+            updBot.InsertedToReproductionList = false;
+            updBot.EnergySet(en);
 
 			updBot.RefreshColor();
 
@@ -403,6 +418,8 @@ namespace WindowsFormsApp1.Static
 				FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
 				FixChangeCell(x, y, updBot.Color);
 			}
+
+            updBot.InsertedToDeathList = false;
 		}
 
 		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
@@ -443,15 +460,16 @@ namespace WindowsFormsApp1.Static
 
 			bot.RefreshColor();
 
-			lock (_busyWorld)
-			{
-				Data.World[x, y] = botIndex;
-			}
 
 			if (Data.DrawType == DrawType.OnlyChangedCells)
 			{
 				FixChangeCell(x, y, bot.Color);
 			}
+
+            lock (_busyWorld)
+            {
+                Data.World[x, y] = botIndex;
+            }
 		}
 
 
