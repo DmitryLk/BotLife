@@ -141,7 +141,6 @@ namespace WindowsFormsApp1.GameLogic
             //Data.Wlog.LogInfo($"Data.QtyRemovedBotsOnStep: {Data.QtyRemovedBotsOnStep}");
             //Data.Wlog.LogInfo($"Data.QtyFactBotDeath: {Data.QtyFactBotDeath}");
             
-            Func.T123 = 0;
             
             if (Data.IndexOfLastBotDeathArrayUsedForReproduction < Data.QtyAllBotDeathMinusOne) // еще есть в запасе умирающие боты
             {
@@ -154,44 +153,44 @@ namespace WindowsFormsApp1.GameLogic
                 Data.QtyRemovedBotsOnStep = 0;
                 Data.IndexOfLastBotPlusOne = Data.CurrentNumberOfBots + 1;
 
-				var r1 = Data.QtyFactBotDeath - Data.QtyFactBotDeathUsedForReproduction; // сколько реальных смертей осталось после размножения
-				var r2 = Data.QtyAllBotDeathMinusOne - Data.IndexOfLastBotDeathArrayUsedForReproduction; // сколько элементов массива BotDeath осталось после размножения
-				var r3 = Data.CurrentStep;
-				var r4 = Data.Check_QtyFailedReproduction;
-				var r5 = Data.Check_QtyFailedDeath;
-				var r6 = Data.QtyFactBotDeath;
-				var r7 = Data.QtyAllBotDeathMinusOne;
-				var r8 = Data.QtyAllBotDeathMinusOne + 1 - Data.QtyFactBotDeath; // всего неуспешных смертей
-				var r9 = Data.IndexOfLastBotDeathArrayUsedForReproduction + 1 - Data.QtyFactBotDeathUsedForReproduction; // всего неуспешных смертей при размножении 
-																														 // должно быть равно Check_QtyFailedDeath
-				var r10 = Data.CurrentNumberOfBots;
-				var r11 = Data.IndexOfLastBotDeathArrayUsedForReproduction;
-				var r12 = Data.IndexEnclusiveBeforeReplacesBots;
-				var r13 = Data.IndexOfLastBotPlusOne;
-				var r14 = Data.QtyFactBotDeathUsedForReproduction;
-				var r15 = Data.QtyRemovedBotsOnStep;
-				var r16 = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
+				//var r1 = Data.QtyFactBotDeath - Data.QtyFactBotDeathUsedForReproduction; // сколько реальных смертей осталось после размножения
+				//var r2 = Data.QtyAllBotDeathMinusOne - Data.IndexOfLastBotDeathArrayUsedForReproduction; // сколько элементов массива BotDeath осталось после размножения
+				//var r3 = Data.CurrentStep;
+				//var r4 = Data.Check_QtyFailedReproduction;
+				//var r5 = Data.Check_QtyFailedDeath;
+				//var r6 = Data.QtyFactBotDeath;
+				//var r7 = Data.QtyAllBotDeathMinusOne;
+				//var r8 = Data.QtyAllBotDeathMinusOne + 1 - Data.QtyFactBotDeath; // всего неуспешных смертей
+				//var r9 = Data.IndexOfLastBotDeathArrayUsedForReproduction + 1 - Data.QtyFactBotDeathUsedForReproduction; // всего неуспешных смертей при размножении 
+				//																										 // должно быть равно Check_QtyFailedDeath
+				//var r10 = Data.CurrentNumberOfBots;
+				//var r11 = Data.IndexOfLastBotDeathArrayUsedForReproduction;
+				//var r12 = Data.IndexEnclusiveBeforeReplacesBots;
+				//var r13 = Data.IndexOfLastBotPlusOne;
+				//var r14 = Data.QtyFactBotDeathUsedForReproduction;
+				//var r15 = Data.QtyRemovedBotsOnStep;
+				//var r16 = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
 
-				if (r9 != Data.Check_QtyFailedDeath)
-                { 
+				//if (r9 != Data.Check_QtyFailedDeath)
+    //            { 
 
-                }
+    //            }
 				
-                if (r1 != r2 - (r8 - r9))
-                { 
+    //            if (r1 != r2 - (r8 - r9))
+    //            { 
                 
-                }
+    //            }
 
-                var r1_2 = 0;
-                for (var i = (int)Data.IndexOfLastBotDeathArrayUsedForReproduction + 1; i < (int)Data.QtyAllBotDeathMinusOne + 1; i++)
-                {
-                    if (Data.BotDeath[i].Energy == 0) r1_2++;
-                }
+    //            var r1_2 = 0;
+    //            for (var i = (int)Data.IndexOfLastBotDeathArrayUsedForReproduction + 1; i < (int)Data.QtyAllBotDeathMinusOne + 1; i++)
+    //            {
+    //                if (Data.BotDeath[i].Energy == 0) r1_2++;
+    //            }
 
-                if (r1 != r1_2)
-                {
+    //            if (r1 != r1_2)
+    //            {
 
-                }
+    //            }
 
                 // МОГУТ МЕНЯТЬСЯ ИНДЕКСЫ БОТОВ ЗДЕСЬ !!!!!!!!!!!!!!!!!
                 if (Data.Parallel)

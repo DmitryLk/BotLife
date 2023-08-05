@@ -139,9 +139,11 @@ namespace WindowsFormsApp1
 
 			dataGridView1.RowHeadersVisible = false;
 
-        }
+            Game.Init().Wait();
+			Game.Work();
+		}
 
-        public async void Form1_KeyDown(object sender, KeyEventArgs e)
+		public async void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (!Game.Started)
             {
@@ -360,6 +362,12 @@ namespace WindowsFormsApp1
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
 			Game.TogglePraDataGridView();
+		}
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+			Application.Restart();
+			Environment.Exit(0); 
 		}
 	}
 }

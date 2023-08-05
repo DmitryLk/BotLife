@@ -1,8 +1,8 @@
 ﻿using System;
 public static  class ThreadSafeRandom
 {
-	private static readonly Random _global = new Random(4951965);
-	//private static readonly Random _global = new Random(Guid.NewGuid().GetHashCode());
+	//private static readonly Random _global = new Random(4951965);
+	private static readonly Random _global = new Random(Guid.NewGuid().GetHashCode());
 	[ThreadStatic] private static Random _local;
     private static readonly object _busy = new object();
 

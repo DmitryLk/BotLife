@@ -366,7 +366,13 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void ToReproductionList()
 		{
+			if (_reproductionCycle == Data.HoldReproductionTime)
+			{
+				ShareEnergy();
+			}
+
 			if (_reproductionCycle-- > 0) return;
+
 
 			if (!InsertedToReproductionList)
 			{
@@ -379,6 +385,44 @@ namespace WindowsFormsApp1.GameLogic
 						Data.BotReproduction[Interlocked.Increment(ref Data.IndexOfLastBotReproduction)] = this;
 					}
 				}
+			}
+		}
+
+		private void ShareEnergy() 
+		{
+			// Передать энергию окружающим ботам
+			var n = ThreadSafeRandom.Next(8);
+			int nXi, nYi;
+			long cont;
+			int i = 0;
+			var ent = (Energy - Data.ReproductionBotEnergy) / 4;
+
+			if (ent > 200)
+			{
+				do
+				{
+					(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n);
+
+					if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+					{
+						cont = Data.World[nXi, nYi];
+
+						if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
+						{
+							var targetBot = Data.Bots[cont];
+
+							if (Energy > targetBot.Energy /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
+							{
+								var transferedEnergy = EnergyChange(-ent);
+								targetBot.EnergyChange(transferedEnergy);
+								if (transferedEnergy < 0) throw new Exception("dfgdfg");
+							}
+						}
+					}
+					if (++n >= 8) n -= 8;
+					i++;
+				}
+				while (CanReproduct() && i <= 8);
 			}
 		}
 

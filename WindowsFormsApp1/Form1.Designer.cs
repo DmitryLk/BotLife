@@ -39,6 +39,7 @@
 			this.checkBox1 = new System.Windows.Forms.CheckBox();
 			this.checkBox2 = new System.Windows.Forms.CheckBox();
 			this.textBox5 = new System.Windows.Forms.TextBox();
+			this.button1 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -72,11 +73,11 @@
 			// textBox2
 			// 
 			this.textBox2.Enabled = false;
-			this.textBox2.Location = new System.Drawing.Point(1022, 12);
+			this.textBox2.Location = new System.Drawing.Point(1022, 8);
 			this.textBox2.Multiline = true;
 			this.textBox2.Name = "textBox2";
 			this.textBox2.ReadOnly = true;
-			this.textBox2.Size = new System.Drawing.Size(186, 144);
+			this.textBox2.Size = new System.Drawing.Size(186, 148);
 			this.textBox2.TabIndex = 5;
 			this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
 			// 
@@ -165,11 +166,23 @@
 			this.textBox5.TabIndex = 17;
 			this.textBox5.TextChanged += new System.EventHandler(this.textBox5_TextChanged);
 			// 
+			// button1
+			// 
+			this.button1.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.button1.Location = new System.Drawing.Point(1458, 12);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(80, 43);
+			this.button1.TabIndex = 18;
+			this.button1.Text = "RESTART";
+			this.button1.UseVisualStyleBackColor = true;
+			this.button1.Click += new System.EventHandler(this.button1_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1774, 1061);
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.textBox5);
 			this.Controls.Add(this.checkBox2);
 			this.Controls.Add(this.checkBox1);
@@ -212,6 +225,7 @@
         private System.Windows.Forms.CheckBox checkBox1;
 		private System.Windows.Forms.CheckBox checkBox2;
 		private System.Windows.Forms.TextBox textBox5;
+		private System.Windows.Forms.Button button1;
 	}
 }
 

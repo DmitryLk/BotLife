@@ -14,7 +14,6 @@ namespace WindowsFormsApp1.Static
 	{
 		private static readonly object _busyWorld = new object();
 		private static readonly object _busyChWorld = new object();
-		public static long T123;
 
 
 		// Список измененных ячеек для последующей отрисовки
@@ -83,7 +82,6 @@ namespace WindowsFormsApp1.Static
 
 		public static void DeathBot(int index)
 		{
-			Interlocked.Increment(ref T123);
 			var dBot = Data.BotDeath[index];
 
 			//Func.CheckWorld2();
@@ -149,49 +147,49 @@ namespace WindowsFormsApp1.Static
 					//	}
 					//}
 
-					var r1 = Data.QtyFactBotDeath - Data.QtyFactBotDeathUsedForReproduction; // сколько реальных смертей осталось после размножения
-					var r2 = Data.QtyAllBotDeathMinusOne - Data.IndexOfLastBotDeathArrayUsedForReproduction; // сколько элементов массива BotDeath осталось после размножения
-					var r3 = Data.CurrentStep;
-					var r4 = Data.Check_QtyFailedReproduction;
-					var r5 = Data.Check_QtyFailedDeath;
-					var r6 = Data.QtyFactBotDeath;
-					var r7 = Data.QtyAllBotDeathMinusOne;
-					var r8 = Data.QtyAllBotDeathMinusOne + 1 - Data.QtyFactBotDeath; // всего неуспешных смертей
-					var r9 = Data.IndexOfLastBotDeathArrayUsedForReproduction + 1 - Data.QtyFactBotDeathUsedForReproduction; // всего неуспешных смертей при размножении 
-																															 // должно быть равно Check_QtyFailedDeath
-					var r10 = Data.CurrentNumberOfBots;
-					var r11 = Data.IndexOfLastBotDeathArrayUsedForReproduction;
-					var r12 = Data.IndexEnclusiveBeforeReplacesBots;
-					var r13 = Data.IndexOfLastBotPlusOne;
-					var r14 = Data.QtyFactBotDeathUsedForReproduction;
-					var r15 = Data.QtyRemovedBotsOnStep;
-					var r16 = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
+					//var r1 = Data.QtyFactBotDeath - Data.QtyFactBotDeathUsedForReproduction; // сколько реальных смертей осталось после размножения
+					//var r2 = Data.QtyAllBotDeathMinusOne - Data.IndexOfLastBotDeathArrayUsedForReproduction; // сколько элементов массива BotDeath осталось после размножения
+					//var r3 = Data.CurrentStep;
+					//var r4 = Data.Check_QtyFailedReproduction;
+					//var r5 = Data.Check_QtyFailedDeath;
+					//var r6 = Data.QtyFactBotDeath;
+					//var r7 = Data.QtyAllBotDeathMinusOne;
+					//var r8 = Data.QtyAllBotDeathMinusOne + 1 - Data.QtyFactBotDeath; // всего неуспешных смертей
+					//var r9 = Data.IndexOfLastBotDeathArrayUsedForReproduction + 1 - Data.QtyFactBotDeathUsedForReproduction; // всего неуспешных смертей при размножении 
+					//																										 // должно быть равно Check_QtyFailedDeath
+					//var r10 = Data.CurrentNumberOfBots;
+					//var r11 = Data.IndexOfLastBotDeathArrayUsedForReproduction;
+					//var r12 = Data.IndexEnclusiveBeforeReplacesBots;
+					//var r13 = Data.IndexOfLastBotPlusOne;
+					//var r14 = Data.QtyFactBotDeathUsedForReproduction;
+					//var r15 = Data.QtyRemovedBotsOnStep;
+					//var r16 = Data.CurrentNumberOfBots - Data.QtyFactBotDeath + Data.QtyFactBotDeathUsedForReproduction;
 
-					if (r9 != Data.Check_QtyFailedDeath)
-					{
+					//if (r9 != Data.Check_QtyFailedDeath)
+					//{
 
-					}
+					//}
 
-					if (r1 != r2 - (r8 - r9))
-					{
+					//if (r1 != r2 - (r8 - r9))
+					//{
 
-					}
+					//}
 
-                    var te = 0;
-                    var cnt2 = 0;
-                    for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-                    {
-                        if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+     //               var te = 0;
+     //               var cnt2 = 0;
+     //               for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+     //               {
+     //                   if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
 
-                        if (!Data.Bots[i].Alive)
-                        {
-                            cnt2++;
-                        }
+     //                   if (!Data.Bots[i].Alive)
+     //                   {
+     //                       cnt2++;
+     //                   }
 
-                        if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
+     //                   if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
 
-                        te += Data.Bots[i].Energy;
-                    }
+     //                   te += Data.Bots[i].Energy;
+     //               }
 
 					//CHECK1();
 					//CHECK2();
@@ -266,43 +264,43 @@ namespace WindowsFormsApp1.Static
 				reproductedBot.HoldReproduction();
 
 				// Передать энергию окружающим ботам
-				var n = ThreadSafeRandom.Next(8);
-				int nXi, nYi;
-				long cont;
-				int i = 0;
-				var ent = (reproductedBot.Energy - Data.ReproductionBotEnergy) / 4;
+				//var n = ThreadSafeRandom.Next(8);
+				//int nXi, nYi;
+				//long cont;
+				//int i = 0;
+				//var ent = (reproductedBot.Energy - Data.ReproductionBotEnergy) / 4;
 
-				if (ent > 0)
-				{
-					do
-					{
-						(nXi, nYi) = GetCoordinatesByDelta(reproductedBot.Xi, reproductedBot.Yi, n);
+				//if (ent > 0)
+				//{
+				//	do
+				//	{
+				//		(nXi, nYi) = GetCoordinatesByDelta(reproductedBot.Xi, reproductedBot.Yi, n);
 
-						if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
-						{
-							cont = Data.World[nXi, nYi];
+				//		if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+				//		{
+				//			cont = Data.World[nXi, nYi];
 
-							if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
-							{
-								var targetBot = Data.Bots[cont];
+				//			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
+				//			{
+				//				var targetBot = Data.Bots[cont];
 
-								if (reproductedBot.Energy > targetBot.Energy && targetBot.Energy > 0 && !targetBot.InsertedToDeathList)
-								{
-									if (ent <= 0)
-									{
-										throw new Exception("if (ent <= 0)");
-									}
-									var transferedEnergy = reproductedBot.EnergyChange(-ent);
-									targetBot.EnergyChange(transferedEnergy);
-									if (transferedEnergy < 0) throw new Exception("dfgdfg");
-								}
-							}
-						}
-						if (++n >= 8) n -= 8;
-						i++;
-					}
-					while (reproductedBot.CanReproduct() && i <= 20);
-				}
+				//				if (reproductedBot.Energy > targetBot.Energy && targetBot.Energy > 0 && !targetBot.InsertedToDeathList)
+				//				{
+				//					if (ent <= 0)
+				//					{
+				//						throw new Exception("if (ent <= 0)");
+				//					}
+				//					var transferedEnergy = reproductedBot.EnergyChange(-ent);
+				//					targetBot.EnergyChange(transferedEnergy);
+				//					if (transferedEnergy < 0) throw new Exception("dfgdfg");
+				//				}
+				//			}
+				//		}
+				//		if (++n >= 8) n -= 8;
+				//		i++;
+				//	}
+				//	while (reproductedBot.CanReproduct() && i <= 20);
+				//}
 
 				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} Failed 2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 				return;
@@ -508,7 +506,7 @@ namespace WindowsFormsApp1.Static
 			return result;
 		}
 
-		private static (int nXi, int nYi) GetCoordinatesByDelta(int Xi, int Yi, int nDelta)
+		public static (int nXi, int nYi) GetCoordinatesByDelta(int Xi, int Yi, int nDelta)
 		{
 			var (nXid, nYid) = Dir.NearbyCells[nDelta];
 
