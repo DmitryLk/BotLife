@@ -397,7 +397,7 @@ namespace WindowsFormsApp1.GameLogic
 			int i = 0;
 			var ent = (Energy - Data.ReproductionBotEnergy) / 4;
 
-			if (ent > 200)
+			if (ent > 0)
 			{
 				do
 				{
