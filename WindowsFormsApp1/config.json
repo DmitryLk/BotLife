@@ -45,7 +45,8 @@
   "InitialBotEnergy": 1000,
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": -1000,
-  "DeltaEnergyOnStep": 0, //####################
+  "DeltaEnergyOnStep":  0, //####################
+  "KeptTotalEnergy": 70000000, //####################
 
   //Photosynthesis
   "PhotosynthesisEnergy": 30,
@@ -71,6 +72,5 @@
   "ShieldMax": 10, //####################
 
   "HoldReproductionTime": 20, //####
-  "GenomInfoPeriodPrint": 100,
-  "KeptTotalEnergy": 50000000 //####################
+  "GenomInfoPeriodPrint": 100
 }

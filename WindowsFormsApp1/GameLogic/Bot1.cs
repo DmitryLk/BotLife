@@ -116,6 +116,8 @@ namespace WindowsFormsApp1.GameLogic
 		/// <exception cref="Exception"></exception>
 		public int EnergyChange(int delta)
 		{
+			if (delta == 0) return 0;
+
 			lock (_busyBotEnergy)
 			{
 				if (_en + delta < 0) delta = -_en;
@@ -150,7 +152,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (Data.BotColorMode == BotColorMode.Energy)
 			{
-				Color = GetGraduatedColor(Energy, 0, 6000);
+				RefreshColor();
 				if (Data.DrawType == DrawType.OnlyChangedCells)
 				{
 					Func.FixChangeCell(Xi, Yi, Color);
@@ -206,8 +208,8 @@ namespace WindowsFormsApp1.GameLogic
 				BotColorMode.PraGenomColor => G.PraColor,
 				BotColorMode.PlantPredator => G.Plant ? Color.Green : Color.Red,
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
-				BotColorMode.Age => GetGraduatedColor(Age, 0, 500),
-				BotColorMode.GenomAge => GetGraduatedColor((int)(Data.CurrentStep - G.BeginStep), 0, 10000),
+				BotColorMode.Age => GetGraduatedColor(500 - Age, 0, 500),
+				BotColorMode.GenomAge => GetGraduatedColor(3000 - (int)(Data.CurrentStep - G.BeginStep), 0, 3000),
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
 		}
@@ -248,16 +250,15 @@ namespace WindowsFormsApp1.GameLogic
 			do
 			{
 				// 1. Определяем команду которую будет делать бот
-				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer);
+				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer, true);
 				if (Data.Hist) Hist.SavePtr(Pointer);
 
 				// 2. Выполняем команду
 				switch (cmdCode)
 				{
-
-					case 23: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно								2,               false
+					case 23: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно							2,               false
 					case 24: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
-					case 25: (shift, stepComplete) = Photosynthesis(); break;               // ФОТОСИНТЕЗ                                       1,               true
+					case 25: (shift, stepComplete) = Photosynthesis(); break;            // ФОТОСИНТЕЗ                                      1,               true
 					case 26: (shift, stepComplete) = Step(GetDirRelative()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
 					case 27: (shift, stepComplete) = Step(GetDirAbsolute()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
 					case 28: (shift, stepComplete) = Eat(GetDirRelative()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
@@ -302,6 +303,16 @@ namespace WindowsFormsApp1.GameLogic
 			Age++;
 
 			EnergyChange(Data.DeltaEnergyOnStep);
+
+			if (Data.BotColorMode == BotColorMode.GenomAge || Data.BotColorMode == BotColorMode.Age)
+			{
+				RefreshColor();
+				if (Data.DrawType == DrawType.OnlyChangedCells)
+				{
+					Func.FixChangeCell(Xi, Yi, Color);
+				}
+			}
+
 
 			Interlocked.Add(ref Data.TotalEnergy, Data.DeltaEnergyOnStep);
 
@@ -388,7 +399,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		private void ShareEnergy() 
+		private void ShareEnergy()
 		{
 			// Передать энергию окружающим ботам
 			var n = ThreadSafeRandom.Next(8);
@@ -523,15 +534,15 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-            // Не может есть родственника
-            if (G.GenomHash == eatedBot.G.GenomHash)
-            {
-                return;
-            }
+			// Не может есть родственника
+			if (G.GenomHash == eatedBot.G.GenomHash)
+			{
+				return;
+			}
 
 
-            //var olden = Energy;
-            Fight(eatedBot);
+			//var olden = Energy;
+			Fight(eatedBot);
 		}
 
 		private void Fight(Bot1 eatedBot)
@@ -821,12 +832,12 @@ namespace WindowsFormsApp1.GameLogic
 		#region Direction
 		private int GetDirAbsolute()
 		{
-			return Dir.GetDirectionFromCodeAbsolute(G.GetNextCommand(Pointer));
+			return Dir.GetDirectionFromCodeAbsolute(G.GetNextCommand(Pointer, true));
 		}
 
 		private int GetDirRelative()
 		{
-			return Dir.GetDirectionFromCodeRelative(Direction, G.GetNextCommand(Pointer));
+			return Dir.GetDirectionFromCodeRelative(Direction, G.GetNextCommand(Pointer, true));
 		}
 		#endregion
 
@@ -890,7 +901,7 @@ namespace WindowsFormsApp1.GameLogic
 						_ => ""
 					};
 
-					var dirStr = Dir.GetDirectionStringFromCode(G.GetNextCommand(hist[i]));
+					var dirStr = Dir.GetDirectionStringFromCode(G.GetNextCommand(hist[i], false));
 					if (cmdTxt != "")
 					{
 						sb.AppendLine($"{cmdTxt} {dirStr}");

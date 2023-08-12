@@ -185,40 +185,48 @@ namespace WindowsFormsApp1.GameLogic
             return g;
         }
 
-        public byte GetCurrentCommandAndSetActGen(int pointer)
+		
+        public byte GetCurrentCommandAndSetActGen(int pointer, bool act)
         {
-            if (ActCnt)
-            {
-                Interlocked.Increment(ref Act[pointer]);
-
-                //Sorted2.Add(pointer);
-                if (Act[pointer] > 230)
-                {
-                    ActCnt = false;
-                    //Sorted1 = Act
-                    //    .Select((x, i) => (Value: x, OriginalIndex: i))
-                    //    .OrderByDescending(x => x.Value)
-                    //    .ToList();
-                }
-
-                if (ActListCnt < ActListSize)
-                {
-                    var indActList = Interlocked.Increment(ref ActListCnt);
-
-                    if (indActList < ActListSize)
-                    {
-                        ActList[indActList] = pointer;
-                    }
-                }
-            }
+            if (act) SetActCommand(pointer);
             return Code[pointer];
         }
 
-        public byte GetNextCommand(int pointer)
+        public byte GetNextCommand(int pointer, bool act)
         {
-            return Code[pointer + 1 >= Data.GenomLength ? 0 : pointer + 1];
+            var nextpointer = pointer + 1 >= Data.GenomLength ? 0 : pointer + 1;
+			if (act) SetActCommand(nextpointer);
+			return Code[nextpointer];
         }
 
+		private void SetActCommand(int pointer)
+		{
+			if (ActCnt)
+			{
+				Interlocked.Increment(ref Act[pointer]);
+
+				//Sorted2.Add(pointer);
+				if (Act[pointer] > 230)
+				{
+					ActCnt = false;
+					//Sorted1 = Act
+					//    .Select((x, i) => (Value: x, OriginalIndex: i))
+					//    .OrderByDescending(x => x.Value)
+					//    .ToList();
+				}
+
+				if (ActListCnt < ActListSize)
+				{
+					var indActList = Interlocked.Increment(ref ActListCnt);
+
+					if (indActList < ActListSize)
+					{
+						ActList[indActList] = pointer;
+					}
+				}
+			}
+		}
+		
         public bool IsRelative(Genom genom2)
         {
             if (GenomHash == genom2.GenomHash || GenomHash == genom2.ParentHash || GenomHash == genom2.GrandHash) return true;
