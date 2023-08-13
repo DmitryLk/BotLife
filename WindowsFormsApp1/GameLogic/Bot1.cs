@@ -209,7 +209,7 @@ namespace WindowsFormsApp1.GameLogic
 				BotColorMode.PlantPredator => G.Plant ? Color.Green : Color.Red,
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
 				BotColorMode.Age => GetGraduatedColor(500 - Age, 0, 500),
-				BotColorMode.GenomAge => GetGraduatedColor(3000 - (int)(Data.CurrentStep - G.BeginStep), 0, 3000),
+				BotColorMode.GenomAge => GetGraduatedColor(6000 - (int)(Data.CurrentStep - G.BeginStep), 0, 6000),
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
 		}

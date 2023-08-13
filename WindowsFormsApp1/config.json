@@ -36,7 +36,7 @@
 
   // Настройки мутаций
   "MutationProbabilityPercent": 10, //####
-  "MutationLenght": 3, //####
+  "MutationLenght": 1, //####
 
 
   //Energy
