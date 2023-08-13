@@ -43,8 +43,6 @@ namespace WindowsFormsApp1.Static
 			}
 		}
 
-
-
 		public static (double, double) GetDeltaDirection(int dir)
 		{
 			return Directions1[dir];
@@ -54,24 +52,6 @@ namespace WindowsFormsApp1.Static
 		{
 			return Directions2[dir];
 		}
-
-		public static int GetDirectionFromCodeRelative(int curdir, byte code)
-		{
-			//if (code >= 28 && code <= 30)
-			//{
-			//	return GetRandomDirection();
-			//}
-			return (curdir + code) % NumberOfDirections;
-		}
-
-        public static int GetDirectionFromCodeAbsolute(byte code)
-        {
-            //if (code >= 28 && code <= 30)
-            //{
-            //	return GetRandomDirection();
-            //}
-            return code % NumberOfDirections;
-        }
 
 		public static int Round(double val)
 		{

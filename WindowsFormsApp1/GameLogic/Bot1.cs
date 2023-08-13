@@ -256,11 +256,11 @@ namespace WindowsFormsApp1.GameLogic
 				// 2. Выполняем команду
 				switch (cmdCode)
 				{
-					case 23: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно							2,               false
-					case 24: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
+					case 23: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
+					case 24: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно							2,               false
 					case 25: (shift, stepComplete) = Photosynthesis(); break;            // ФОТОСИНТЕЗ                                      1,               true
-					case 26: (shift, stepComplete) = Step(GetDirRelative()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
-					case 27: (shift, stepComplete) = Step(GetDirAbsolute()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
+					case 26: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
+					case 27: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
 					case 28: (shift, stepComplete) = Eat(GetDirRelative()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
 					case 29: (shift, stepComplete) = Eat(GetDirAbsolute()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
 					case 30: (shift, stepComplete) = Look(GetDirRelative()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
@@ -832,12 +832,32 @@ namespace WindowsFormsApp1.GameLogic
 		#region Direction
 		private int GetDirAbsolute()
 		{
-			return Dir.GetDirectionFromCodeAbsolute(G.GetNextCommand(Pointer, true));
+			return G.GetNextCommand(Pointer, true) % Dir.NumberOfDirections;
 		}
 
 		private int GetDirRelative()
 		{
-			return Dir.GetDirectionFromCodeRelative(Direction, G.GetNextCommand(Pointer, true));
+			return (Direction + G.GetNextCommand(Pointer, true)) % Dir.NumberOfDirections;
+		}
+
+		private int GetDirStraight()
+		{
+			return Direction;
+		}
+
+		private int GetDirRelativeWithRandom()
+		{
+			var rand = ThreadSafeRandom.Next(100);
+
+			var shift = rand switch
+			{
+				99 => ThreadSafeRandom.Next(256),
+				98 => ThreadSafeRandom.Next(11) - 5,
+				_ => 0
+			};
+
+			if (shift < 0) shift += Dir.NumberOfDirections;
+			return (Direction + G.GetNextCommand(Pointer, true) + shift) % Dir.NumberOfDirections;
 		}
 		#endregion
 
