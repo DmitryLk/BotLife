@@ -261,8 +261,8 @@ namespace WindowsFormsApp1.GameLogic
 					case 25: (shift, stepComplete) = Photosynthesis(); break;            // ФОТОСИНТЕЗ                                      1,               true
 					case 26: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
 					case 27: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
-					case 28: (shift, stepComplete) = Eat(GetDirRelative()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
-					case 29: (shift, stepComplete) = Eat(GetDirAbsolute()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
+					case 28: (shift, stepComplete) = Eat(GetDirStraight()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
+					case 29: (shift, stepComplete) = Eat(GetDirStraight()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
 					case 30: (shift, stepComplete) = Look(GetDirRelative()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
 					case 31: (shift, stepComplete) = Look(GetDirAbsolute()); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
 																						 //case 32: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
