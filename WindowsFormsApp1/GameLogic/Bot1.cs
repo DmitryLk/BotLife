@@ -276,8 +276,8 @@ namespace WindowsFormsApp1.GameLogic
 					case 27: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
 					case 28: (shift, stepComplete) = Eat(GetDirStraight()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
 					case 29: (shift, stepComplete) = Eat(GetDirStraight()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
-					case 30: (shift, stepComplete) = Look(GetDirRelative()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-					case 31: (shift, stepComplete) = Look(GetDirAbsolute()); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+					case 30: (shift, stepComplete) = Look(GetDirStraight()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+					case 31: (shift, stepComplete) = Look(GetDirStraight()); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
 																						 //case 32: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
 																						 //case 33: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
 																						 //case 34: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
@@ -593,10 +593,10 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
 
-				var k = 2;
-				if (!Moved && eatedBot.Moved) k = 3;
+				var k = 20;
+				if (!Moved && eatedBot.Moved) k = 27;
 
-				var requestedEnergy = Data.BiteEnergy / k * atc ;
+				var requestedEnergy = Data.BiteEnergy * 10 / k * atc ;
 
 
 				var gotEnergyByEating = eatedBot.EnergyChange(requestedEnergy);
