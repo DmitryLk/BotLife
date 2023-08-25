@@ -65,8 +65,8 @@
   "LensCellHeight": 20,
 
   // Attack-Shield
-  "AttackShieldSum": 7, //####################
-  "AttackShieldTypeCount": 5, //####################
+  "AttackShieldSum": 5, //####################
+  "AttackShieldTypeCount": 3, //####################
   "AttackShieldTypeCountMax": 20, //####################
   "AttackMax": 10, //####################
   "ShieldMax": 10, //####################

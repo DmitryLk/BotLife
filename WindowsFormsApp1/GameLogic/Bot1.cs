@@ -593,10 +593,10 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
 
-				var k = 1;
-				if (!Moved && eatedBot.Moved) k = 2;
+				var k = 2;
+				if (!Moved && eatedBot.Moved) k = 3;
 
-				var requestedEnergy = Data.BiteEnergy / 2 * atc / k;
+				var requestedEnergy = Data.BiteEnergy / k * atc ;
 
 
 				var gotEnergyByEating = eatedBot.EnergyChange(requestedEnergy);
