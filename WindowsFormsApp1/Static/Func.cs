@@ -401,6 +401,7 @@ namespace WindowsFormsApp1.Static
 			updBot.Hist = new CodeHistory();
             updBot.InsertedToReproductionList = false;
             updBot.EnergySet(en);
+			updBot.ResetMoved();
 
 			updBot.RefreshColor();
 

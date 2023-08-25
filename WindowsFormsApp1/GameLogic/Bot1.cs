@@ -72,6 +72,18 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int df = 0;
 
+		private long _moved = 0;
+		public bool Moved 
+		{
+			get 
+			{ 
+				return _moved > 10; 
+			}
+		}
+		public void ResetMoved()
+		{ 
+			_moved = 0;
+		}
 		public int Energy
 		{
 			get
@@ -254,6 +266,7 @@ namespace WindowsFormsApp1.GameLogic
 				if (Data.Hist) Hist.SavePtr(Pointer);
 
 				// 2. Выполняем команду
+				bool realCmd = true;
 				switch (cmdCode)
 				{
 					case 23: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
@@ -291,8 +304,27 @@ namespace WindowsFormsApp1.GameLogic
 																						 //case 55: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
 																						 //case 56: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
 																						 //case 57: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-					default: shift = cmdCode; stepComplete = false; break;
+					
+					default: shift = cmdCode; stepComplete = false; realCmd = false;  break;
 				};
+
+				if (realCmd)
+				{
+					if (cmdCode == 26 || cmdCode == 27)
+					{
+						if (_moved < 50)
+						{
+							_moved += 5;
+						}
+					}
+					else
+					{
+						if (_moved >0)
+						{
+							_moved--;
+						}
+					}
+				}
 
 				cntJump++;
 				// Прибавляем к указателю текущей команды значение команды
@@ -560,7 +592,14 @@ namespace WindowsFormsApp1.GameLogic
 			if (atc > 0)
 			{
 				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
-				var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy / 2 * atc);
+
+				var k = 1;
+				if (!Moved && eatedBot.Moved) k = 2;
+
+				var requestedEnergy = Data.BiteEnergy / 2 * atc / k;
+
+
+				var gotEnergyByEating = eatedBot.EnergyChange(requestedEnergy);
 				EnergyChange(gotEnergyByEating);
 
 				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
