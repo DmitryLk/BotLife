@@ -80,8 +80,10 @@ namespace WindowsFormsApp1.Static
 
 		public static int HoldReproductionTime;
 		public static int GenomInfoPeriodPrint;
-		public static int KeptTotalEnergy;
-		//=================VARIABLE CURRENT PARAMETERS==============================
+        public static int KeptTotalEnergy;
+        public static int MovedBiteStrength;
+
+        //=================VARIABLE CURRENT PARAMETERS==============================
 		public static long[,] World; // чтобы можно было узнать по координатам что там находится
 		public static Bot1[] Bots;
 		public static long TotalEnergy;
@@ -353,6 +355,7 @@ namespace WindowsFormsApp1.Static
 			HoldReproductionTime = options.HoldReproductionTime;
 			GenomInfoPeriodPrint = options.GenomInfoPeriodPrint;
 			KeptTotalEnergy = options.KeptTotalEnergy;
+            MovedBiteStrength = options.MovedBiteStrength;
 		}
 	}
 }

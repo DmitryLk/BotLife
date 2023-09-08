@@ -60,5 +60,6 @@ namespace WindowsFormsApp1.Options
         public int HoldReproductionTime;
 		public int GenomInfoPeriodPrint;
 		public int KeptTotalEnergy;
-	}
+        public int MovedBiteStrength;
+    }
 }

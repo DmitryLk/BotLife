@@ -44,6 +44,7 @@ namespace WindowsFormsApp1
             Game = new Game(presenter, printer);
 
             trackBar1.Value = Data.PhotosynthesisEnergy;
+            trackBar2.Value = Data.MovedBiteStrength;
 
             label2.Text = $@"	Enter - pause mode
 								Space - start/step
@@ -369,5 +370,10 @@ namespace WindowsFormsApp1
 			Application.Restart();
 			Environment.Exit(0); 
 		}
-	}
+
+        private void trackBar2_Scroll(object sender, EventArgs e)
+        {
+            Data.MovedBiteStrength = trackBar2.Value;
+        }
+    }
 }
