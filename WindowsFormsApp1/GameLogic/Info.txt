@@ -72,8 +72,6 @@
 
 
 ИГРОВЫЕ ИЗМЕНЕНИЯ
-if (!Moved && eatedBot.Moved) k = 27;
-
 PhotosynthesisLayerHeight
 не уменьшать энергию при шаге
 не 1000 ботов первоначально а 10000
@@ -102,8 +100,9 @@ SeedBotEnergy 1000>50000
 SeedFoodNumber 
 FoodEnergy
 HoldReproductionTime
+ghb venfwbb attack-shield заново генерируются случайно
 GetDirStraight везде настаувил
-неподвижные слабо кусают подвижных
+неподвижные слабо кусают подвижных (if (!Moved && eatedBot.Moved) k = 27;)
 
 
 СДЕЛАТЬ
