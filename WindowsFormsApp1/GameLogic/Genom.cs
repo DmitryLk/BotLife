@@ -173,12 +173,12 @@ namespace WindowsFormsApp1.GameLogic
                 Interlocked.Increment(ref Data.MutationCnt);
 
                 // Attack-Shield
-                //g.Shield = parent.Shield;
-                //g.Attack = parent.Attack;
-                //g.AttackTypes = parent.AttackTypes;
-                //g.AttackTypesCnt = parent.AttackTypesCnt;
-                (g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
-                g.AttackTypesCnt = g.AttackTypes.Length;
+                g.Shield = parent.Shield;
+                g.Attack = parent.Attack;
+                g.AttackTypes = parent.AttackTypes;
+                g.AttackTypesCnt = parent.AttackTypesCnt;
+                //(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
+                //g.AttackTypesCnt = g.AttackTypes.Length;
             }
 
             if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
