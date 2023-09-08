@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Globalization;
@@ -25,17 +26,17 @@ namespace WindowsFormsApp1.GameLogic
 	public class Bot1
 	{
 		//private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-		//private static readonly object _busy = new object();
+		//private static readonly object _busy = new();
 
 		const int hueFrom = 200;
 
-		private static readonly object _busyWorld1 = new object();
-		private static readonly object _busyWorld2 = new object();
-		private readonly object _busyBotEnergy = new object();
-		private readonly object _busyInsertedToReproductionList = new object();
-		//private static readonly object _busyTotalEnergy = new object();
-		//private readonly object _busyBite = new object();
-		//private readonly object _busyInsertedToDeathList = new object();
+		private static readonly object _busyWorld1 = new();
+		private static readonly object _busyWorld2 = new();
+		private readonly object _busyBotEnergy = new();
+		private readonly object _busyInsertedToReproductionList = new();
+		//private static readonly object _busyTotalEnergy = new();
+		//private readonly object _busyBite = new();
+		//private readonly object _busyInsertedToDeathList = new();
 
 
 
@@ -73,6 +74,7 @@ namespace WindowsFormsApp1.GameLogic
 		private int df = 0;
 
 		private long _moved = 0;
+		private bool _imbited = false;
 		public bool Moved 
 		{
 			get 
@@ -120,7 +122,13 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 		}
 
-		/// <summary>
+        public int Bite(int delta)
+        {
+            _imbited = true;
+    		return EnergyChange(delta);
+        }
+
+        /// <summary>
 		/// delta - энергия которая будет добавлена к энергии бота
 		/// </summary>
 		/// <param name="delta"></param>
@@ -262,6 +270,17 @@ namespace WindowsFormsApp1.GameLogic
 			do
 			{
 				// 1. Определяем команду которую будет делать бот
+
+				// Если ли сигнал от рецепторов ?
+				// меня укусили?
+                // увидел рядом чтото?
+                if (_imbited)
+                {
+                    _imbited = false;
+                    Pointer = 50;
+                }
+
+
 				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer, true);
 				if (Data.Hist) Hist.SavePtr(Pointer);
 
@@ -540,14 +559,14 @@ namespace WindowsFormsApp1.GameLogic
 			// Bot || Relative
 			if (refContent == RefContent.Bot || refContent == RefContent.Relative)
 			{
-				EatBot(cont);
+				BiteBot(cont);
 			}
 
 			return ((int)refContent, true);
 		}
 
 
-		private void EatBot(long cont)
+		private void BiteBot(long cont)
 		{
 			var eatedBot = Data.Bots[cont];
 
@@ -574,42 +593,36 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			//var olden = Energy;
-			Fight(eatedBot);
-		}
+            var atc = 0;
+            for (var i = 0; i < G.AttackTypesCnt; i++)
+            {
+                if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+                {
+                    //atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+                    atc++;
+                }
+            }
 
-		private void Fight(Bot1 eatedBot)
-		{
-			var atc = 0;
-			for (var i = 0; i < G.AttackTypesCnt; i++)
-			{
-				if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-				{
-					//atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-					atc++;
-				}
-			}
+            if (atc > 0)
+            {
+                // Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
 
-			if (atc > 0)
-			{
-				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
+                var k = 20;
+                if (!Moved && eatedBot.Moved) k = Data.MovedBiteStrength;
 
-				var k = 20;
-				if (!Moved && eatedBot.Moved) k = Data.MovedBiteStrength;
-
-				var requestedEnergy = Data.BiteEnergy * 10 / k * atc ;
+                var requestedEnergy = Data.BiteEnergy * 10 / k * atc;
 
 
-				var gotEnergyByEating = eatedBot.EnergyChange(requestedEnergy);
-				EnergyChange(gotEnergyByEating);
+                var gotEnergyByEating = eatedBot.Bite(requestedEnergy);
+                EnergyChange(gotEnergyByEating);
 
-				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
-				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
-				return;
-			}
+                //var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+                if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+            }
 
 
-			//eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
-			//Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
+            //eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
+            //Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
 		}
 
 		private (int shift, bool stepComplete) Look(int dir)
