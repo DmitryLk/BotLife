@@ -38,6 +38,8 @@ namespace WindowsFormsApp1.GameLogic
 		//private readonly object _busyBite = new();
 		//private readonly object _busyInsertedToDeathList = new();
 
+        private bool _rec_bite = false;
+		private bool _rec_barrier = false;
 
 
 		//private static long COUNTER1 = 0;
@@ -74,7 +76,6 @@ namespace WindowsFormsApp1.GameLogic
 		private int df = 0;
 
 		private long _moved = 0;
-		private bool _imbited = false;
 		public bool Moved 
 		{
 			get 
@@ -124,7 +125,7 @@ namespace WindowsFormsApp1.GameLogic
 
         public int Bite(int delta)
         {
-            _imbited = true;
+            _rec_bite = true;
     		return EnergyChange(delta);
         }
 
@@ -273,11 +274,17 @@ namespace WindowsFormsApp1.GameLogic
 
 				// Если ли сигнал от рецепторов ?
 				// меня укусили?
-                // увидел рядом чтото?
-                if (_imbited)
+				// увидел рядом чтото?
+				if (_rec_bite)
                 {
-                    _imbited = false;
+                    _rec_bite = false;
                     Pointer = 50;
+                }
+
+                if (_rec_barrier)
+                {
+                    _rec_barrier = false;
+                    Pointer = 40;
                 }
 
 
@@ -591,15 +598,20 @@ namespace WindowsFormsApp1.GameLogic
 				return;
 			}
 
+            // Не может есть нового
+            if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 100)
+            {
+                return;
+            }
 
-			//var olden = Energy;
+            //var olden = Energy;
             var atc = 0;
             for (var i = 0; i < G.AttackTypesCnt; i++)
             {
                 if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
                 {
-                    //atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-                    atc++;
+                    atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+                    //atc++;
                 }
             }
 
@@ -738,6 +750,10 @@ namespace WindowsFormsApp1.GameLogic
 
 				return ((int)RefContent.Free, true);
 			}
+            else
+            {
+                _rec_barrier = true;
+            }
 
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 

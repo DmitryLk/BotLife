@@ -45,6 +45,7 @@ namespace WindowsFormsApp1
 
             trackBar1.Value = Data.PhotosynthesisEnergy;
             trackBar2.Value = Data.MovedBiteStrength;
+            checkBox3.Checked = Data.DelayForNewbie;
 
             label2.Text = $@"	Enter - pause mode
 								Space - start/step
@@ -374,6 +375,11 @@ namespace WindowsFormsApp1
         private void trackBar2_Scroll(object sender, EventArgs e)
         {
             Data.MovedBiteStrength = trackBar2.Value;
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            Game.ToggleDelayForNewbie();
         }
     }
 }

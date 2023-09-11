@@ -595,15 +595,74 @@ namespace WindowsFormsApp1.Static
 			return (shield, attack, attackTypes.ToArray());
 		}
 
-		public static int GetRandomDirection()
+        public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield2()
+        {
+            var fail = false;
+            var shield = new byte[Data.AttackShieldTypeCountMax];
+            var attack = new byte[Data.AttackShieldTypeCountMax];
+            var attackTypes = new List<(byte, byte)>();
+
+            for (var i = 0; i < Data.AttackShieldSum/2; i++)
+            {
+                do
+                {
+                    var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+
+                    if (shield[type] >= Data.ShieldMax)
+                    {
+                        fail = true;
+                    }
+                    else
+                    {
+                        shield[type]++;
+                    }
+                }
+				while (fail);
+            }
+
+            for (var i = 0; i < Data.AttackShieldSum/2; i++)
+            {
+                do
+                {
+                    var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+
+                    if (attack[type] >= Data.AttackMax)
+                    {
+                        fail = true;
+                    }
+                    else
+                    {
+                        attack[type]++;
+                    }
+                }
+				while (fail);
+            }
+            
+            for (var i = 0; i < Data.AttackShieldTypeCount; i++)
+            {
+                if (attack[i] > 0)
+                {
+                    attackTypes.Add(((byte)i, attack[i]));
+                }
+            }
+
+            return (shield, attack, attackTypes.ToArray());
+        }
+
+        public static int GetRandomDirection()
 		{
 			return ThreadSafeRandom.Next(Dir.NumberOfDirections);
 		}
 
-		public static byte GetRandomBotCode()
-		{
-			return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
-		}
+        public static byte GetRandomBotCode()
+        {
+            return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
+        }
+
+        public static byte GetRandomUsefulBotCode()
+        {
+            return (byte)(23 + ThreadSafeRandom.Next(10));
+        }
 
 		public static Color GetRandomColor()
 		{

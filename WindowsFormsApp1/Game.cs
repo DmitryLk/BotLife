@@ -335,6 +335,11 @@ namespace WindowsFormsApp1.GameLogic
         {
             Data.DgvPra = !Data.DgvPra;
         }
+
+        public void ToggleDelayForNewbie()
+        {
+            Data.DelayForNewbie = !Data.DelayForNewbie;
+        }
         #endregion
     }
 }

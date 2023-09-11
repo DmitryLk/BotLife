@@ -41,6 +41,7 @@
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.trackBar2 = new System.Windows.Forms.TrackBar();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -68,7 +69,7 @@
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(190, 220);
+            this.textBox1.Size = new System.Drawing.Size(190, 190);
             this.textBox1.TabIndex = 4;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -95,7 +96,7 @@
             // 
             // trackBar1
             // 
-            this.trackBar1.Location = new System.Drawing.Point(1022, 388);
+            this.trackBar1.Location = new System.Drawing.Point(1022, 358);
             this.trackBar1.Maximum = 30;
             this.trackBar1.Name = "trackBar1";
             this.trackBar1.Size = new System.Drawing.Size(162, 45);
@@ -182,7 +183,7 @@
             // trackBar2
             // 
             this.trackBar2.LargeChange = 1;
-            this.trackBar2.Location = new System.Drawing.Point(1022, 417);
+            this.trackBar2.Location = new System.Drawing.Point(1022, 387);
             this.trackBar2.Maximum = 50;
             this.trackBar2.Minimum = 20;
             this.trackBar2.Name = "trackBar2";
@@ -191,11 +192,23 @@
             this.trackBar2.Value = 20;
             this.trackBar2.Scroll += new System.EventHandler(this.trackBar2_Scroll);
             // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(1026, 437);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(114, 19);
+            this.checkBox3.TabIndex = 20;
+            this.checkBox3.Text = "Delay for newbie";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1774, 1061);
+            this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.trackBar2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox5);
@@ -243,6 +256,7 @@
 		private System.Windows.Forms.TextBox textBox5;
 		private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TrackBar trackBar2;
+        private System.Windows.Forms.CheckBox checkBox3;
     }
 }
 

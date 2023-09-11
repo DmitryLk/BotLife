@@ -61,5 +61,6 @@ namespace WindowsFormsApp1.Options
 		public int GenomInfoPeriodPrint;
 		public int KeptTotalEnergy;
         public int MovedBiteStrength;
+        public bool DelayForNewbie;
     }
 }

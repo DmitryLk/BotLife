@@ -156,11 +156,11 @@ namespace WindowsFormsApp1.GameLogic
                     {
                         var lim = parent.ActListCnt + 1;
                         var indActList = Func.GetRandomNext(lim > 1000 ? 1000 : lim);
-                        g.Code[parent.ActList[indActList]] = Func.GetRandomBotCode();
+                        g.Code[parent.ActList[indActList]] = Func.GetRandomUsefulBotCode();
                     }
                     else
                     {
-                        g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomBotCode();
+                        g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
                     }
                 }
 
