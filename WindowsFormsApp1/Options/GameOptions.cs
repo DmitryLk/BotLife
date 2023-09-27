@@ -31,7 +31,9 @@ namespace WindowsFormsApp1.Options
         public int SeedPoisonNumber;
 
         public int GenomLength;
-        public int MaxCode;
+		public int MaxCode;
+		public int GenomEvents;
+		public int GenomEventsLenght;
         public int MaxUncompleteJump;
         public float MutationProbabilityPercent;
         public int MutationLenght;

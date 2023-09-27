@@ -185,7 +185,7 @@ namespace WindowsFormsApp1.Graphic
 				_PRESENTER.ClearGraphicsOnCursorFrame();
 				for (var i = 0; i < Data.GenomLength; i++)
 				{
-					var code = bot.G.Code[i];
+					var code = bot.G.CodeCommon[i];
 					var x = i % 8;
 					var y = i / 8;
 

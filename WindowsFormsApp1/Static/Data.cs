@@ -51,6 +51,8 @@ namespace WindowsFormsApp1.Static
 
 		public static int GenomLength;
 		public static int MaxCode;
+		public static int GenomEvents;
+		public static int GenomEventsLenght;
 		public static int MaxUncompleteJump;
 		public static float MutationProbabilityPercent;
 		public static int MutationLenght;
@@ -329,6 +331,8 @@ namespace WindowsFormsApp1.Static
 
 			GenomLength = options.GenomLength;
 			MaxCode = options.MaxCode;
+			GenomEvents = options.GenomEvents;
+			GenomEventsLenght = options.GenomEventsLenght;
 			MaxUncompleteJump = options.MaxUncompleteJump;
 			MutationProbabilityPercent = options.MutationProbabilityPercent;
 			MutationLenght = options.MutationLenght;

@@ -32,6 +32,8 @@
     // Настройки генома ботов
     "GenomLength": 64,
     "MaxCode": 63,
+    "GenomEvents": 20,
+    "GenomEventsLenght": 5,
     "MaxUncompleteJump": 10,
 
     // Настройки мутаций

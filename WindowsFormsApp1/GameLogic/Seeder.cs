@@ -24,7 +24,7 @@ namespace WindowsFormsApp1.GameLogic
 				if (Func.TryGetRandomFreeCell(out var x, out var y))
 				{
 					// Создание кода бота
-					var genom = Genom.CreateGenom();
+					var genom = Genom.CreateNewGenom();
 
 					Data.TotalEnergy += Data.SeedBotEnergy;
 					Func.CreateNewBot(x, y, botIndex, Data.SeedBotEnergy, genom);

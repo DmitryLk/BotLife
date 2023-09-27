@@ -21,21 +21,28 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class Genom
+	public class Genom
     {
-        private const int ActListSize = 1000;
-        private static long BEGINCOUNTER = 0;
-        private static long ENDCOUNTER = 0;
+		private const int ActListSize = 1000;
+		
+        // static
+        private static long CreateGenomCounter = 0;
+        private static long DeleteGenomCounter = 0;
         public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
 
-        public byte[] Code;
-        public int[] Act;
-        public bool ActCnt;
-        public int[] ActList;
-        public int ActListCnt;
-        //public List<(int, int)> Sorted1;
-        //public HashSet<int> Sorted2;
 
+		// 
+		public byte[] CodeCommon;
+		public byte[,,] CodeForEvents;
+		public int[] Act; //сколько раз использовалась та или другая команда
+        public bool ActCnt; //ведется ли подсчет количества использования команд. завершается если счетчик одной из команд дошел до 230.
+        public int[] ActList;  //список где подряд записываются использованные команды
+        public int ActListCnt;  //количество команд в списке ActList
+								//public List<(int, int)> Sorted1;
+								//public HashSet<int> Sorted2;
+
+		public bool Plant = false;
+		
         public Guid GenomHash;
         public Guid ParentHash;
         public Guid GrandHash;
@@ -47,20 +54,13 @@ namespace WindowsFormsApp1.GameLogic
         public long Num;
         public uint BeginStep;
         public uint EndStep;
-        public string Test = "owdiheiofhweoif";
         //private Genom _parent;
 
         private long _curBots = 0;
         private long _allBots = 0;
-
         private long _removedBots = 0;
         private int _ageBots = 0;
-        public bool Plant = false;
 
-        public long CurBots { get => _curBots; }
-        public long AllBots { get => _allBots; }
-        public long RemovedBots { get => _removedBots; }
-        public int AgeBots { get => _ageBots; }
 
         // Attack-Shield
         public byte[] Shield;
@@ -68,6 +68,11 @@ namespace WindowsFormsApp1.GameLogic
         public (byte Type, byte Level)[] AttackTypes;
         public int AttackTypesCnt;
 
+		public long CurBots { get => _curBots; }
+		public long AllBots { get => _allBots; }
+		public long RemovedBots { get => _removedBots; }
+		public int AgeBots { get => _ageBots; }
+		
         private Genom()
         {
             //_parent = parent;
@@ -98,105 +103,134 @@ namespace WindowsFormsApp1.GameLogic
             if (curBots == 0)
             {
                 EndStep = Data.CurrentStep;
-                Interlocked.Increment(ref ENDCOUNTER);
+                Interlocked.Increment(ref DeleteGenomCounter);
             }
 
             _ageBots += age;
         }
 
         // Создание генома
-        public static Genom CreateGenom(Genom parent = null)
+        public static Genom CreateNewGenom()
         {
             var g = new Genom();
-
-            g.Code = new byte[Data.GenomLength];
-            g.Act = new int[Data.GenomLength];
-            //g.Sorted1 = new List<(int, int)>();
-            //g.Sorted2 = new HashSet<int>();
+			g.CodeCommon = new byte[Data.GenomLength];
+			g.CodeForEvents = new byte[Data.GenomEvents, Data.GenomEventsLenght, 2];
+			g.Act = new int[Data.GenomLength];
             g.ActList = new int[ActListSize];
             g.ActListCnt = -1;
-
             g.ActCnt = true;
             g.GenomHash = Guid.NewGuid();
-            //g.Color = Color.Red;
             g.Color = Func.GetRandomColor();
             g.PraColor = g.Color;
-            g.Num = Interlocked.Increment(ref BEGINCOUNTER);
+            g.Num = Interlocked.Increment(ref CreateGenomCounter);
             g.BeginStep = Data.CurrentStep;
 
-            if (parent == null)
-            {
-                for (var i = 0; i < Data.GenomLength; i++)
-                {
-                    g.Code[i] = Func.GetRandomBotCode();
-                    g.Act[i] = 0;
-                    //g.Code[i] = 25;
-                }
-                g.ParentHash = Guid.Empty;
-                g.GrandHash = Guid.Empty;
-                g.PraHash = g.GenomHash;
-                g.PraNum = g.Num;
-                g.Level = 1;
+			g.ParentHash = Guid.Empty;
+			g.GrandHash = Guid.Empty;
+			g.PraHash = g.GenomHash;
+			g.PraNum = g.Num;
+			g.Level = 1;
 
-                // Attack-Shield
-                (g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
-                g.AttackTypesCnt = g.AttackTypes.Length;
-            }
-            else
-            {
-                for (var i = 0; i < Data.GenomLength; i++)
-                {
-                    g.Code[i] = parent.Code[i];
-                }
+			// Наполнение кода генома
+			for (var i = 0; i < Data.GenomLength; i++)
+			{
+				g.CodeCommon[i] = Func.GetRandomBotCode();
+				g.Act[i] = 0;
+			}
 
-                // Data.MutationLenght байт в геноме подменяем
-                for (var i = 0; i < Data.MutationLenght; i++)
-                {
-                    if (parent.ActListCnt > -1)
-                    {
-                        var lim = parent.ActListCnt + 1;
-                        var indActList = Func.GetRandomNext(lim > 1000 ? 1000 : lim);
-                        g.Code[parent.ActList[indActList]] = Func.GetRandomUsefulBotCode();
-                    }
-                    else
-                    {
-                        g.Code[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
-                    }
-                }
+			for (var i = 0; i < Data.GenomEvents; i++)
+			{
+				for (var j = 0; j < Data.GenomEventsLenght; j++)
+				{
+					g.CodeForEvents[i, j, 0] = Func.GetRandomUsefulBotCode();
+					g.CodeForEvents[i, j, 1] = Func.GetRandomBotCode();
+				}
+			}
 
-                g.ParentHash = parent.GenomHash;
-                g.GrandHash = parent.ParentHash;
-                g.PraHash = parent.PraHash;
-                g.PraNum = parent.PraNum;
-                g.PraColor = parent.PraColor;
-                g.Level = parent.Level + 1;
-                Interlocked.Increment(ref Data.MutationCnt);
+			// Attack-Shield
+			(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
+			g.AttackTypesCnt = g.AttackTypes.Length;
 
-                // Attack-Shield
-                g.Shield = parent.Shield;
-                g.Attack = parent.Attack;
-                g.AttackTypes = parent.AttackTypes;
-                g.AttackTypesCnt = parent.AttackTypesCnt;
-                //(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
-                //g.AttackTypesCnt = g.AttackTypes.Length;
-            }
-
-            if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
+			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
             return g;
         }
 
-		
-        public byte GetCurrentCommandAndSetActGen(int pointer, bool act)
+		public static Genom CreateChildGenom(Genom parent)
+		{
+			var g = new Genom();
+			g.CodeCommon = new byte[Data.GenomLength];
+			g.Act = new int[Data.GenomLength];
+			g.ActList = new int[ActListSize];
+			g.ActListCnt = -1;
+			g.ActCnt = true;
+			g.GenomHash = Guid.NewGuid();
+			g.Color = Func.GetRandomColor();
+			g.PraColor = g.Color;
+			g.Num = Interlocked.Increment(ref CreateGenomCounter);
+			g.BeginStep = Data.CurrentStep;
+
+			g.ParentHash = parent.GenomHash;
+			g.GrandHash = parent.ParentHash;
+			g.PraHash = parent.PraHash;
+			g.PraNum = parent.PraNum;
+			g.PraColor = parent.PraColor;
+			g.Level = parent.Level + 1;
+			Interlocked.Increment(ref Data.MutationCnt);
+
+			// Наполнение кода генома
+			for (var i = 0; i < Data.GenomLength; i++)
+			{
+				g.CodeCommon[i] = parent.CodeCommon[i];
+			}
+
+			for (var i = 0; i < Data.GenomEvents; i++)
+			{
+				for (var j = 0; j < Data.GenomEventsLenght; j++)
+				{
+					g.CodeForEvents[i, j, 0] = parent.CodeForEvents[i, j, 0];
+					g.CodeForEvents[i, j, 1] = parent.CodeForEvents[i, j, 1];
+				}
+			}
+
+			// Data.MutationLenght байт в геноме подменяем
+			for (var i = 0; i < Data.MutationLenght; i++)
+			{
+				if (parent.ActListCnt > -1)
+				{
+					var lim = parent.ActListCnt + 1;
+					var indActList = Func.GetRandomNext(lim > 1000 ? 1000 : lim);
+					g.CodeCommon[parent.ActList[indActList]] = Func.GetRandomUsefulBotCode();
+				}
+				else
+				{
+					g.CodeCommon[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
+				}
+			}
+
+
+			// Attack-Shield
+			g.Shield = parent.Shield;
+			g.Attack = parent.Attack;
+			g.AttackTypes = parent.AttackTypes;
+			g.AttackTypesCnt = parent.AttackTypesCnt;
+			//(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
+			//g.AttackTypesCnt = g.AttackTypes.Length;
+
+			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
+			return g;
+		}
+
+		public byte GetCurrentCommandAndSetActGen(int pointer, bool act)
         {
             if (act) SetActCommand(pointer);
-            return Code[pointer];
+            return CodeCommon[pointer];
         }
 
-        public byte GetNextCommand(int pointer, bool act)
+        public byte GetDirectionFromNextCommand(int pointer, bool act)
         {
             var nextpointer = pointer + 1 >= Data.GenomLength ? 0 : pointer + 1;
 			if (act) SetActCommand(nextpointer);
-			return Code[nextpointer];
+			return CodeCommon[nextpointer];
         }
 
 		private void SetActCommand(int pointer)
@@ -235,16 +269,16 @@ namespace WindowsFormsApp1.GameLogic
             return false;
         }
 
-
+        //=========================================================
 
         public static string GetText()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Count: {BEGINCOUNTER}");
+            sb.AppendLine($"Count: {CreateGenomCounter}");
 
             var activeGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
             var activeBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).Count();
-            sb.AppendLine($"Active: {BEGINCOUNTER - ENDCOUNTER}:{activeGenoms}  Big:{activeBigGenoms}");
+            sb.AppendLine($"Active: {CreateGenomCounter - DeleteGenomCounter}:{activeGenoms}  Big:{activeBigGenoms}");
 
             var activePraGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
             var activePraBigGenoms = GENOMS.Keys.GroupBy(k => k.PraNum).Select(g => g.Sum(s => s.CurBots)).Count(d => d > 50);
@@ -314,8 +348,8 @@ namespace WindowsFormsApp1.GameLogic
         }
     }
 
-    public class GenomStr
-    {
+    public class GenomStr  // used only in GetSortableBindingList
+	{
         public string GenomName { get; set; }
         public Color GenomColor { get; set; }
         public long Live { get; set; }

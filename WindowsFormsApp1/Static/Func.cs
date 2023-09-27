@@ -308,7 +308,7 @@ namespace WindowsFormsApp1.Static
 
 			//reproductedBot.Log.LogInfo($"{reproductedBot.Index} will reproduct");
 
-			var genom = Mutation() ? Genom.CreateGenom(reproductedBot.G) : reproductedBot.G;
+			var genom = Mutation() ? Genom.CreateChildGenom(reproductedBot.G) : reproductedBot.G;
 
 
 

@@ -599,7 +599,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 
             // Не может есть нового
-            if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 100)
+            if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
             {
                 return;
             }
@@ -900,12 +900,12 @@ namespace WindowsFormsApp1.GameLogic
 		#region Direction
 		private int GetDirAbsolute()
 		{
-			return G.GetNextCommand(Pointer, true) % Dir.NumberOfDirections;
+			return G.GetDirectionFromNextCommand(Pointer, true) % Dir.NumberOfDirections;
 		}
 
 		private int GetDirRelative()
 		{
-			return (Direction + G.GetNextCommand(Pointer, true)) % Dir.NumberOfDirections;
+			return (Direction + G.GetDirectionFromNextCommand(Pointer, true)) % Dir.NumberOfDirections;
 		}
 
 		private int GetDirStraight()
@@ -925,7 +925,7 @@ namespace WindowsFormsApp1.GameLogic
 			};
 
 			if (shift < 0) shift += Dir.NumberOfDirections;
-			return (Direction + G.GetNextCommand(Pointer, true) + shift) % Dir.NumberOfDirections;
+			return (Direction + G.GetDirectionFromNextCommand(Pointer, true) + shift) % Dir.NumberOfDirections;
 		}
 		#endregion
 
@@ -975,7 +975,7 @@ namespace WindowsFormsApp1.GameLogic
 
 				for (var i = 0; i < histPtrCnt; i++)
 				{
-					var cmdTxt = G.Code[hist[i]] switch
+					var cmdTxt = G.CodeCommon[hist[i]] switch
 					{
 						23 => "Поворот относительно",
 						24 => "Поворот абсолютно",
@@ -989,7 +989,7 @@ namespace WindowsFormsApp1.GameLogic
 						_ => ""
 					};
 
-					var dirStr = Dir.GetDirectionStringFromCode(G.GetNextCommand(hist[i], false));
+					var dirStr = Dir.GetDirectionStringFromCode(G.GetDirectionFromNextCommand(hist[i], false));
 					if (cmdTxt != "")
 					{
 						sb.AppendLine($"{cmdTxt} {dirStr}");
