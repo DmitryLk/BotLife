@@ -154,7 +154,13 @@ namespace WindowsFormsApp1.Static
 		public static bool DgvOnlyLive;
 		public static bool DgvPra;
 
-		//public static Log.Log Wlog;
+		// Commands
+		public static byte[] CGenValues;
+		public static int CGenValuesLength;
+		public static byte[] CEvValues;
+		public static int CEvValuesLength;
+
+		// public static Log.Log Wlog;
 
 		public static void Initialize()
 		{
@@ -220,6 +226,33 @@ namespace WindowsFormsApp1.Static
 			for (var hue = 0; hue <= 360; hue++)
 			{
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
+			}
+
+
+			FieldInfo[] fields = typeof(CGen).GetFields(BindingFlags.Static | BindingFlags.Public);
+			CGenValuesLength = fields.Length;
+			var i = 0;
+			CGenValues = new byte[CGenValuesLength];
+			foreach (FieldInfo fi in fields)
+			{
+				var val = fi.GetValue(null);
+				if (val is byte)
+				{
+					CGenValues[i++] = (byte)val;
+				}
+			}
+
+			fields = typeof(CEv).GetFields(BindingFlags.Static | BindingFlags.Public);
+			CEvValuesLength = fields.Length;
+			i = 0;
+			CEvValues = new byte[CEvValuesLength];
+			foreach (FieldInfo fi in fields)
+			{
+				var val = fi.GetValue(null);
+				if (val is byte)
+				{
+					CGenValues[i++] = (byte)val;
+				}
 			}
 		}
 

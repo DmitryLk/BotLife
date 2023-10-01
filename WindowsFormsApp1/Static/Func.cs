@@ -659,10 +659,20 @@ namespace WindowsFormsApp1.Static
             return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
         }
 
-        public static byte GetRandomUsefulBotCode()
-        {
-            return (byte)(23 + ThreadSafeRandom.Next(10));
-        }
+		public static byte GetRandomUsefulBotCode()
+		{
+			return Data.CGenValues[ThreadSafeRandom.Next(Data.CGenValuesLength)];
+		}
+
+		public static byte GetRandomEventBotCode()
+		{
+			return Data.CEvValues[ThreadSafeRandom.Next(Data.CEvValuesLength)];
+		}
+
+		public static int GetRandomEventNumber()
+		{
+			return ThreadSafeRandom.Next(Data.GenomEvents);
+		}
 
 		public static Color GetRandomColor()
 		{

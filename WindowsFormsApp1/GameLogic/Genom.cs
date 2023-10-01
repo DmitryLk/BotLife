@@ -18,112 +18,117 @@ using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.Static;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Numerics;
 
 namespace WindowsFormsApp1.GameLogic
 {
 	public class Genom
-    {
+	{
 		private const int ActListSize = 1000;
-		
-        // static
-        private static long CreateGenomCounter = 0;
-        private static long DeleteGenomCounter = 0;
-        public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
+
+		// static
+		private static long CreateGenomCounter = 0;
+		private static long DeleteGenomCounter = 0;
+		public static ConcurrentDictionary<Genom, int> GENOMS = new ConcurrentDictionary<Genom, int>();
 
 
-		// 
+		// Genom Code
 		public byte[] CodeCommon;
 		public byte[,,] CodeForEvents;
+		public byte[] CodeForEventsLenght;
+
+
 		public int[] Act; //сколько раз использовалась та или другая команда
-        public bool ActCnt; //ведется ли подсчет количества использования команд. завершается если счетчик одной из команд дошел до 230.
-        public int[] ActList;  //список где подряд записываются использованные команды
-        public int ActListCnt;  //количество команд в списке ActList
+		public bool ActCnt; //ведется ли подсчет количества использования команд. завершается если счетчик одной из команд дошел до 230.
+		public int[] ActList;  //список где подряд записываются использованные команды (номер команды в геноме)
+		public int ActListCnt;  //количество команд в списке ActList
 								//public List<(int, int)> Sorted1;
 								//public HashSet<int> Sorted2;
 
 		public bool Plant = false;
-		
-        public Guid GenomHash;
-        public Guid ParentHash;
-        public Guid GrandHash;
-        public Guid PraHash;
-        public Color Color;
-        public Color PraColor;
-        public int Level;
-        public long PraNum;
-        public long Num;
-        public uint BeginStep;
-        public uint EndStep;
-        //private Genom _parent;
 
-        private long _curBots = 0;
-        private long _allBots = 0;
-        private long _removedBots = 0;
-        private int _ageBots = 0;
+		public Guid GenomHash;
+		public Guid ParentHash;
+		public Guid GrandHash;
+		public Guid PraHash;
+		public Color Color;
+		public Color PraColor;
+		public int Level;
+		public long PraNum;
+		public long Num;
+		public uint BeginStep;
+		public uint EndStep;
+		//private Genom _parent;
+
+		private long _curBots = 0;
+		private long _allBots = 0;
+		private long _removedBots = 0;
+		private int _ageBots = 0;
 
 
-        // Attack-Shield
-        public byte[] Shield;
-        public byte[] Attack;
-        public (byte Type, byte Level)[] AttackTypes;
-        public int AttackTypesCnt;
+		// Attack-Shield
+		public byte[] Shield;
+		public byte[] Attack;
+		public (byte Type, byte Level)[] AttackTypes;
+		public int AttackTypesCnt;
 
 		public long CurBots { get => _curBots; }
 		public long AllBots { get => _allBots; }
 		public long RemovedBots { get => _removedBots; }
 		public int AgeBots { get => _ageBots; }
-		
-        private Genom()
-        {
-            //_parent = parent;
-        }
 
-        public void IncBot()
-        {
-            Interlocked.Increment(ref _curBots);
-            Interlocked.Increment(ref _allBots);
-        }
-        public void DecBot(int age)
-        {
-            if (_curBots == 0)
-            {
-                throw new Exception("if (_curBots == 0)");
-            }
+		private Genom()
+		{
+			//_parent = parent;
+		}
+
+		public void IncBot()
+		{
+			Interlocked.Increment(ref _curBots);
+			Interlocked.Increment(ref _allBots);
+		}
+		public void DecBot(int age)
+		{
+			if (_curBots == 0)
+			{
+				throw new Exception("if (_curBots == 0)");
+			}
 
 
-            var curBots = Interlocked.Decrement(ref _curBots);
-            Interlocked.Increment(ref _removedBots);
+			var curBots = Interlocked.Decrement(ref _curBots);
+			Interlocked.Increment(ref _removedBots);
 
-            if (_curBots < 0 || curBots < 0)
-            {
-                throw new Exception("if (_curBots < 0)");
-            }
+			if (_curBots < 0 || curBots < 0)
+			{
+				throw new Exception("if (_curBots < 0)");
+			}
 
-            // Исчезновение генома
-            if (curBots == 0)
-            {
-                EndStep = Data.CurrentStep;
-                Interlocked.Increment(ref DeleteGenomCounter);
-            }
+			// Исчезновение генома
+			if (curBots == 0)
+			{
+				EndStep = Data.CurrentStep;
+				Interlocked.Increment(ref DeleteGenomCounter);
+			}
 
-            _ageBots += age;
-        }
+			_ageBots += age;
+		}
 
-        // Создание генома
-        public static Genom CreateNewGenom()
-        {
-            var g = new Genom();
+		// Создание нового генома
+		public static Genom CreateNewGenom()
+		{
+			var g = new Genom();
 			g.CodeCommon = new byte[Data.GenomLength];
 			g.CodeForEvents = new byte[Data.GenomEvents, Data.GenomEventsLenght, 2];
+			g.CodeForEventsLenght = new byte[Data.GenomEvents];
 			g.Act = new int[Data.GenomLength];
-            g.ActList = new int[ActListSize];
-            g.ActListCnt = -1;
-            g.ActCnt = true;
-            g.GenomHash = Guid.NewGuid();
-            g.Color = Func.GetRandomColor();
-            g.PraColor = g.Color;
-            g.Num = Interlocked.Increment(ref CreateGenomCounter);
-            g.BeginStep = Data.CurrentStep;
+			g.ActList = new int[ActListSize];
+			g.ActListCnt = -1;
+			g.ActCnt = true;
+			g.GenomHash = Guid.NewGuid();
+			g.Color = Func.GetRandomColor();
+			g.PraColor = g.Color;
+			g.Num = Interlocked.Increment(ref CreateGenomCounter);
+			g.BeginStep = Data.CurrentStep;
 
 			g.ParentHash = Guid.Empty;
 			g.GrandHash = Guid.Empty;
@@ -138,13 +143,18 @@ namespace WindowsFormsApp1.GameLogic
 				g.Act[i] = 0;
 			}
 
+			byte ev;
+			byte j;
 			for (var i = 0; i < Data.GenomEvents; i++)
 			{
-				for (var j = 0; j < Data.GenomEventsLenght; j++)
+				for (j = 0; j < Data.GenomEventsLenght; j++)
 				{
-					g.CodeForEvents[i, j, 0] = Func.GetRandomUsefulBotCode();
+					ev = Func.GetRandomEventBotCode();
+					g.CodeForEvents[i, j, 0] = ev;
 					g.CodeForEvents[i, j, 1] = Func.GetRandomBotCode();
+					if (CEv.CompleteCommands.Contains(ev)) { j++; break; }
 				}
+				g.CodeForEventsLenght[i] = j;
 			}
 
 			// Attack-Shield
@@ -152,13 +162,16 @@ namespace WindowsFormsApp1.GameLogic
 			g.AttackTypesCnt = g.AttackTypes.Length;
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
-            return g;
-        }
+			return g;
+		}
 
+		// Создание генома-потомка
 		public static Genom CreateChildGenom(Genom parent)
 		{
 			var g = new Genom();
 			g.CodeCommon = new byte[Data.GenomLength];
+			g.CodeForEvents = new byte[Data.GenomEvents, Data.GenomEventsLenght, 2];
+			g.CodeForEventsLenght = new byte[Data.GenomEvents];
 			g.Act = new int[Data.GenomLength];
 			g.ActList = new int[ActListSize];
 			g.ActListCnt = -1;
@@ -190,20 +203,45 @@ namespace WindowsFormsApp1.GameLogic
 					g.CodeForEvents[i, j, 0] = parent.CodeForEvents[i, j, 0];
 					g.CodeForEvents[i, j, 1] = parent.CodeForEvents[i, j, 1];
 				}
+				g.CodeForEventsLenght[i] = parent.CodeForEventsLenght[i];
 			}
 
 			// Data.MutationLenght байт в геноме подменяем
 			for (var i = 0; i < Data.MutationLenght; i++)
 			{
-				if (parent.ActListCnt > -1)
+				if (Func.GetRandomNext(2) == 0)  // мутация в основном коде
 				{
-					var lim = parent.ActListCnt + 1;
-					var indActList = Func.GetRandomNext(lim > 1000 ? 1000 : lim);
-					g.CodeCommon[parent.ActList[indActList]] = Func.GetRandomUsefulBotCode();
+					if (parent.ActListCnt > -1)
+					{
+						var lim = parent.ActListCnt + 1;
+						var indActList = Func.GetRandomNext(lim > 1000 ? 1000 : lim);
+						g.CodeCommon[parent.ActList[indActList]] = Func.GetRandomUsefulBotCode();
+					}
+					else
+					{
+						g.CodeCommon[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
+					}
 				}
-				else
+				else							// мутация в событиях
 				{
-					g.CodeCommon[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
+					var evNum = Func.GetRandomEventNumber();
+					var btNum = Func.GetRandomNext(g.CodeForEventsLenght[evNum]);
+
+					if (CEv.DirectionCommands.Contains(g.CodeForEvents[evNum, btNum, 0]) && Func.GetRandomNext(2) == 1)
+					{
+						g.CodeForEvents[evNum, btNum, 1] = Func.GetRandomBotCode();
+					}
+					else 
+					{
+						g.CodeForEvents[evNum, btNum, 0] = Func.GetRandomEventBotCode();
+					}
+
+					byte j;
+					for (j = 0; j < Data.GenomEventsLenght; j++)
+					{
+						if (CEv.CompleteCommands.Contains(g.CodeForEvents[evNum, j, 0])) { j++; break; }
+					}
+					g.CodeForEventsLenght[i] = j;
 				}
 			}
 
@@ -221,17 +259,17 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		public byte GetCurrentCommandAndSetActGen(int pointer, bool act)
-        {
-            if (act) SetActCommand(pointer);
-            return CodeCommon[pointer];
-        }
+		{
+			if (act) SetActCommand(pointer);
+			return CodeCommon[pointer];
+		}
 
-        public byte GetDirectionFromNextCommand(int pointer, bool act)
-        {
-            var nextpointer = pointer + 1 >= Data.GenomLength ? 0 : pointer + 1;
+		public byte GetDirectionFromNextCommand(int pointer, bool act)
+		{
+			var nextpointer = pointer + 1 >= Data.GenomLength ? 0 : pointer + 1;
 			if (act) SetActCommand(nextpointer);
 			return CodeCommon[nextpointer];
-        }
+		}
 
 		private void SetActCommand(int pointer)
 		{
@@ -260,104 +298,104 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 		}
-		
-        public bool IsRelative(Genom genom2)
-        {
-            if (GenomHash == genom2.GenomHash || GenomHash == genom2.ParentHash || GenomHash == genom2.GrandHash) return true;
-            if (ParentHash == genom2.GenomHash || ParentHash == genom2.ParentHash || ParentHash == genom2.GrandHash) return true;
-            if (GrandHash == genom2.GenomHash || GrandHash == genom2.ParentHash || GrandHash == genom2.GrandHash) return true;
-            return false;
-        }
 
-        //=========================================================
+		public bool IsRelative(Genom genom2)
+		{
+			if (GenomHash == genom2.GenomHash || GenomHash == genom2.ParentHash || GenomHash == genom2.GrandHash) return true;
+			if (ParentHash == genom2.GenomHash || ParentHash == genom2.ParentHash || ParentHash == genom2.GrandHash) return true;
+			if (GrandHash == genom2.GenomHash || GrandHash == genom2.ParentHash || GrandHash == genom2.GrandHash) return true;
+			return false;
+		}
 
-        public static string GetText()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"Count: {CreateGenomCounter}");
+		//=========================================================
 
-            var activeGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
-            var activeBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).Count();
-            sb.AppendLine($"Active: {CreateGenomCounter - DeleteGenomCounter}:{activeGenoms}  Big:{activeBigGenoms}");
+		public static string GetText()
+		{
+			var sb = new StringBuilder();
+			sb.AppendLine($"Count: {CreateGenomCounter}");
 
-            var activePraGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
-            var activePraBigGenoms = GENOMS.Keys.GroupBy(k => k.PraNum).Select(g => g.Sum(s => s.CurBots)).Count(d => d > 50);
+			var activeGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).Count();
+			var activeBigGenoms = GENOMS.Keys.Where(g => g.CurBots > 50).Count();
+			sb.AppendLine($"Active: {CreateGenomCounter - DeleteGenomCounter}:{activeGenoms}  Big:{activeBigGenoms}");
 
-            sb.AppendLine($"PraActive: {activePraGenoms}  Big:{activePraBigGenoms}");
+			var activePraGenoms = GENOMS.Keys.Where(g => g.CurBots > 0).DistinctBy(g => g.PraNum).Count();
+			var activePraBigGenoms = GENOMS.Keys.GroupBy(k => k.PraNum).Select(g => g.Sum(s => s.CurBots)).Count(d => d > 50);
 
-            return sb.ToString();
-        }
+			sb.AppendLine($"PraActive: {activePraGenoms}  Big:{activePraBigGenoms}");
 
-        public static SortableBindingList<GenomStr> GetSortableBindingList(int minCurBots)
-        {
-            SortableBindingList<GenomStr> sortableBindingList;
+			return sb.ToString();
+		}
 
-            if (!Data.DgvPra)
-            {
-                sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
-                    .Where(g => Data.DgvOnlyLive ? g.CurBots > minCurBots : g.AllBots > 1)
-                    .Select(g => new GenomStr
-                    {
-                        GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
-                        GenomColor = g.Color,
-                        Live = g.CurBots,
-                        Total = g.AllBots,
-                        Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
-                        AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
-                        ActGen = g.Act.Count(g => g > 0),
-                        Sh_Atc = $"{string.Join("/", g.Shield.Take(Data.AttackShieldTypeCount))} = {string.Join("/", g.Attack.Take(Data.AttackShieldTypeCount))}"
-                    }).ToList());
-            }
-            else
-            {
-                sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
-                    .GroupBy(k => k.PraNum)
-                    .Select(g =>
-                    {
-                        var f = g.First();
-                        var removed = g.Sum(s => s.RemovedBots);
-                        var live = g.Where(s => s.CurBots > 0);
-                        var minl = 0;
-                        var maxl = 0;
-                        long botminl = 0;
-                        long botmaxl = 0;
-                        if (live.Any())
-                        {
-                            minl = live.Min(s => s.Level);
-                            maxl = live.Max(s => s.Level);
-                            botminl = live.Where(s => s.Level == minl).Sum(s => s.CurBots);
-                            botmaxl = live.Where(s => s.Level == maxl).Sum(s => s.CurBots);
-                        }
+		public static SortableBindingList<GenomStr> GetSortableBindingList(int minCurBots)
+		{
+			SortableBindingList<GenomStr> sortableBindingList;
 
-                        return new GenomStr
-                        {
-                            GenomName = $"{f.PraNum} ({minl}({botminl})-{maxl}({botmaxl}))",
-                            GenomColor = f.PraColor,
-                            Live = g.Sum(s => s.CurBots),
-                            Total = g.Sum(s => s.AllBots),
-                            //Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
-                            AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
-                            ActGen = 0
-                        };
-                    })
-                    .Where(g => Data.DgvOnlyLive ? g.Live > minCurBots : g.Total > 1)
-                    .ToList());
-            }
+			if (!Data.DgvPra)
+			{
+				sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+					.Where(g => Data.DgvOnlyLive ? g.CurBots > minCurBots : g.AllBots > 1)
+					.Select(g => new GenomStr
+					{
+						GenomName = $"{g.PraNum} - {g.Num} - {g.Level}",
+						GenomColor = g.Color,
+						Live = g.CurBots,
+						Total = g.AllBots,
+						Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+						AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
+						ActGen = g.Act.Count(g => g > 0),
+						Sh_Atc = $"{string.Join("/", g.Shield.Take(Data.AttackShieldTypeCount))} = {string.Join("/", g.Attack.Take(Data.AttackShieldTypeCount))}"
+					}).ToList());
+			}
+			else
+			{
+				sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+					.GroupBy(k => k.PraNum)
+					.Select(g =>
+					{
+						var f = g.First();
+						var removed = g.Sum(s => s.RemovedBots);
+						var live = g.Where(s => s.CurBots > 0);
+						var minl = 0;
+						var maxl = 0;
+						long botminl = 0;
+						long botmaxl = 0;
+						if (live.Any())
+						{
+							minl = live.Min(s => s.Level);
+							maxl = live.Max(s => s.Level);
+							botminl = live.Where(s => s.Level == minl).Sum(s => s.CurBots);
+							botmaxl = live.Where(s => s.Level == maxl).Sum(s => s.CurBots);
+						}
 
-            return sortableBindingList;
-        }
-    }
+						return new GenomStr
+						{
+							GenomName = $"{f.PraNum} ({minl}({botminl})-{maxl}({botmaxl}))",
+							GenomColor = f.PraColor,
+							Live = g.Sum(s => s.CurBots),
+							Total = g.Sum(s => s.AllBots),
+							//Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+							AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
+							ActGen = 0
+						};
+					})
+					.Where(g => Data.DgvOnlyLive ? g.Live > minCurBots : g.Total > 1)
+					.ToList());
+			}
 
-    public class GenomStr  // used only in GetSortableBindingList
+			return sortableBindingList;
+		}
+	}
+
+	public class GenomStr  // used only in GetSortableBindingList
 	{
-        public string GenomName { get; set; }
-        public Color GenomColor { get; set; }
-        public long Live { get; set; }
-        public long Total { get; set; }
-        public uint Age { get; set; }
-        public float AvBotAge { get; set; }
-        public int ActGen { get; set; }
-        public string Sh_Atc { get; set; }
-    }
+		public string GenomName { get; set; }
+		public Color GenomColor { get; set; }
+		public long Live { get; set; }
+		public long Total { get; set; }
+		public uint Age { get; set; }
+		public float AvBotAge { get; set; }
+		public int ActGen { get; set; }
+		public string Sh_Atc { get; set; }
+	}
 }
 

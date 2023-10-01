@@ -38,7 +38,23 @@ namespace WindowsFormsApp1.GameLogic
 		//private readonly object _busyBite = new();
 		//private readonly object _busyInsertedToDeathList = new();
 
-        private bool _rec_bite = false;
+		// РЕЦЕПТОРЫ
+		// меня укусили?
+		// увидел рядом чтото?
+		private bool _recCommon;
+		private int _recNum;
+		// 0 - укус
+		// 1 - препятствие движению бот не родня
+		// 2 - препятствие движению бот родня
+		// 3 - препятствие движению еда
+		// 4 - препятствие движению минерал
+		// 5 - препятствие движению стена
+		// 6 - впереди увиден бот не родня
+		// 7 - впереди увиден бот родня
+		// 8 - впереди увиден еда
+		// 9 - впереди увиден минерал
+		// 10 - впереди увиден стена
+		private bool _rec_bite = false;
 		private bool _rec_barrier = false;
 
 
@@ -76,15 +92,15 @@ namespace WindowsFormsApp1.GameLogic
 		private int df = 0;
 
 		private long _moved = 0;
-		public bool Moved 
+		public bool Moved
 		{
-			get 
-			{ 
-				return _moved > 10; 
+			get
+			{
+				return _moved > 10;
 			}
 		}
 		public void ResetMoved()
-		{ 
+		{
 			_moved = 0;
 		}
 		public int Energy
@@ -123,13 +139,13 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 		}
 
-        public int Bite(int delta)
-        {
-            _rec_bite = true;
-    		return EnergyChange(delta);
-        }
+		public int Bite(int delta)
+		{
+			_rec_bite = true;
+			return EnergyChange(delta);
+		}
 
-        /// <summary>
+		/// <summary>
 		/// delta - энергия которая будет добавлена к энергии бота
 		/// </summary>
 		/// <param name="delta"></param>
@@ -259,104 +275,21 @@ namespace WindowsFormsApp1.GameLogic
 			// изменит свое состояние (координаты, геном, энергия, здоровье, возраст, направление, цвет, минералы, ...)
 			// Также может размножиться
 
-			//Direction dir;
-			int shift = 0;
-			bool stepComplete = false;
-			int cntJump = 0;
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			if (Data.Hist) Hist.BeginNewStep();
 
-			do
+			if (_recCommon)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
 			{
-				// 1. Определяем команду которую будет делать бот
-
-				// Если ли сигнал от рецепторов ?
-				// меня укусили?
-				// увидел рядом чтото?
-				if (_rec_bite)
-                {
-                    _rec_bite = false;
-                    Pointer = 50;
-                }
-
-                if (_rec_barrier)
-                {
-                    _rec_barrier = false;
-                    Pointer = 40;
-                }
-
-
-				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer, true);
-				if (Data.Hist) Hist.SavePtr(Pointer);
-
-				// 2. Выполняем команду
-				bool realCmd = true;
-				switch (cmdCode)
-				{
-					case 23: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
-					case 24: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно							2,               false
-					case 25: (shift, stepComplete) = Photosynthesis(); break;            // ФОТОСИНТЕЗ                                      1,               true
-					case 26: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
-					case 27: (shift, stepComplete) = Step(GetDirStraight()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
-					case 28: (shift, stepComplete) = Eat(GetDirStraight()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
-					case 29: (shift, stepComplete) = Eat(GetDirStraight()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
-					case 30: (shift, stepComplete) = Look(GetDirStraight()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-					case 31: (shift, stepComplete) = Look(GetDirStraight()); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 32: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 33: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 34: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 35: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 36: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 37: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 38: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 39: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 40: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 41: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 42: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 43: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 44: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 45: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 46: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 47: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 48: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 49: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 50: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 51: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 52: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 53: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 54: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 55: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-																						 //case 56: (shift, stepComplete) = LookAtRelativeDirection(); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
-																						 //case 57: (shift, stepComplete) = LookAtAbsoluteDirection(); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
-					
-					default: shift = cmdCode; stepComplete = false; realCmd = false;  break;
-				};
-
-				if (realCmd)
-				{
-					if (cmdCode == 26 || cmdCode == 27)
-					{
-						if (_moved < 50)
-						{
-							_moved += 5;
-						}
-					}
-					else
-					{
-						if (_moved >0)
-						{
-							_moved--;
-						}
-					}
-				}
-
-				cntJump++;
-				// Прибавляем к указателю текущей команды значение команды
-				ShiftCodePointer(shift);
+				_recCommon = false;
+				EventCommand();
 			}
-			while (!stepComplete && cntJump < Data.MaxUncompleteJump);
+			else // Нет сигнала от рецепторов. цикл по обычным командам
+			{
+				CommonCommand();
+			}
+
 
 			Age++;
 
@@ -371,57 +304,112 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-
-			Interlocked.Add(ref Data.TotalEnergy, Data.DeltaEnergyOnStep);
-
+			if (Data.DeltaEnergyOnStep != 0) Interlocked.Add(ref Data.TotalEnergy, Data.DeltaEnergyOnStep);
 
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
-			//Reproduction
 			if (CanReproduct())
 			{
 				ToReproductionList();
 			}
 
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
-
-			// 0-7		движение
-			// 8-15		схватить еду или нейтрализовать яд
-			// 16-23	посмотреть
-			// 24-31	поворот
-			// 32-63	безусловный переход
-			// 25       фотосинтез
-
-			//...............  сменить направление относительно   ....			if ($command == 23)
-			//...............  сменить направление абсолютно   ....			if ($command == 24)
-			//...............  фотосинтез ................			if ($command == 25)
-			//...............  шаг  в относительном напралении  .................    			if ($command == 26)
-			//...............  шаг   в абсолютном направлении     .................  			if ($command == 27)
-			//..............   съесть в относительном напралении       ..............			if ($command == 28)
-			//..............   съесть  в абсолютном направлении      ...............			if ($command == 29)
-			//.............   посмотреть  в относительном напралении ...................................			if ($command == 30) 
-			//.............   посмотреть в абсолютном направлении ...................................			if ($command == 31)// пусто - 2 стена - 3 органик - 4 бот -5 родня -  6
-			///////////////////////////////////////////
-			// делиться - если у бота больше энергии или минералов, чем у соседа, то они распределяются поровну          //.............   делится   в относительном напралении  ........................			if (($command == 32) || ($command == 42))    // здесь я увеличил шансы появления этой команды                   
-			//.............   делится  в абсолютном направлении ........................			if (($command == 33) || ($command == 51))     // здесь я увеличил шансы появления этой команды                    
-			// отдать - безвозмездно отдать часть энергии и минералов соседу			//.............   отдать   в относительном напралении  ........................			if (($command == 34) || ($command == 50) )     // здесь я увеличил шансы появления этой команды                    
-			//.............   отдать  в абсолютном направлении  ........................			if (($command == 35) || ($command == 52) )       // здесь я увеличил шансы появления этой команды                    
-			//...................   выравнится по горизонтали  ...............................			if ($command == 36)
-			//...................  какой мой уровень (на какой высоте бот)  .........			if ($command == 37)
-			//...................  какое моё здоровье  ..............................			if ($command == 38)
-			//...................сколько  минералов ...............................			if ($command == 39)
-			//...........  многоклеточность ( создание потомка, приклееного к боту )......			if ($command == 40)  
-			//...............  деление (создание свободноживущего потомка) ................			if ($command == 41)      
-			//...............  окружен ли бот    ................			if ($command == 43)   
-			//.............. приход энергии есть? ........................			if ($command == 44)  
-			//............... минералы прибавляются? ............................			if ($command == 45)  
-			//.............. многоклеточный ли я ? ........................ 			if ($command == 46)  
-			//.................. преобразовать минералы в энерию ...................			if ($command == 47) 
-			//................      мутировать   ................................... // спорная команда, во время её выполнения меняются случайным образом две случайные команды // читал, что микроорганизмы могут усилить вероятность мутации своего генома в неблагоприятных условиях       			if ($command == 48)
-			//................   генная атака  ...................................			if ($command == 49)
 		}
 
+
+		private void CommonCommand()
+		{
+			int cntJump = 0;
+			int shift = 0;
+			bool stepComplete = false;
+
+			do
+			{
+				if (_rec_bite)
+				{
+					_rec_bite = false;
+					Pointer = 50;
+				}
+
+				if (_rec_barrier)
+				{
+					_rec_barrier = false;
+					Pointer = 40;
+				}
+
+
+				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer, true);
+				if (Data.Hist) Hist.SavePtr(Pointer);
+
+				// 2. Выполняем команду
+				bool realCmd = true;
+				switch (cmdCode)
+				{
+					case CGen.RotateAbsolute: (shift, stepComplete) = Rotate(GetDirAbsolute()); break;    // ПОВОРОТ абсолютно								2,               false
+					case CGen.RotateRelative: (shift, stepComplete) = Rotate(GetDirRelative()); break;    // ПОВОРОТ относительно							2,               false
+					case CGen.Photosynthesis: (shift, stepComplete) = Photosynthesis(); break;            // ФОТОСИНТЕЗ                                      1,               true
+					case CGen.StepForward1: (shift, stepComplete) = Step(GetDirForward()); break;      // ДВИЖЕНИЕ шаг в относительном напралении			(int)refContent, true
+					case CGen.StepForward2: (shift, stepComplete) = Step(GetDirForward()); break;      // ДВИЖЕНИЕ шаг в абсолютном направлении			(int)refContent, true
+					case CGen.EatForward1: (shift, stepComplete) = Eat(GetDirForward()); break;       // СЪЕСТЬ в относительном напралении				(int)refContent, true
+					case CGen.EatForward2: (shift, stepComplete) = Eat(GetDirForward()); break;       // СЪЕСТЬ в абсолютном направлении					(int)refContent, true
+					case CGen.LookForward1: (shift, stepComplete) = Look(GetDirForward()); break;      // ПОСМОТРЕТЬ в относительном напралении			(int)refContent, false
+					case CGen.LookForward2: (shift, stepComplete) = Look(GetDirForward()); break;      // ПОСМОТРЕТЬ  в абсолютном напралении				(int)refContent, false
+					case CGen.LookAround: break;
+					case CGen.RotateRandom: break;
+					case CGen.AlignHorizontaly: break;
+
+					default: shift = cmdCode; stepComplete = false; realCmd = false; break;
+				};
+
+				if (realCmd)
+				{
+					if (cmdCode == CGen.StepForward1 || cmdCode == CGen.StepForward2)
+					{
+						if (_moved < 50)
+						{
+							_moved += 5;
+						}
+					}
+					else
+					{
+						if (_moved > 0)
+						{
+							_moved--;
+						}
+					}
+				}
+
+				cntJump++;
+				// Прибавляем к указателю текущей команды значение команды
+				ShiftCodePointer(shift);
+			}
+			while (!stepComplete && cntJump < Data.MaxUncompleteJump);
+		}
+
+		private void EventCommand()
+		{
+			for (var i = 0; i < G.CodeForEventsLenght[_recNum]; i++)
+			{
+				var cmdCode = G.CodeForEvents[_recNum, i,0 ];
+
+				switch (cmdCode)
+				{
+					case CEv.RotateRelative: break;
+					case CEv.RotateRelativeContact: break;
+					case CEv.RotateBackward: break;
+					case CEv.RotateBackwardContact: break;
+					case CEv.LookAround: break;
+					case CEv.StepRelative: break;
+					case CEv.StepRelativeContact: break;
+					case CEv.StepBackward: break;
+					case CEv.StepBackwardContact: break;
+					case CEv.EatForward: break;
+
+					default:  break;
+				};
+			}
+		}
 
 		public bool CanReproduct()
 		{
@@ -598,43 +586,43 @@ namespace WindowsFormsApp1.GameLogic
 				return;
 			}
 
-            // Не может есть нового
-            if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
-            {
-                return;
-            }
+			// Не может есть нового
+			if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
+			{
+				return;
+			}
 
-            //var olden = Energy;
-            var atc = 0;
-            for (var i = 0; i < G.AttackTypesCnt; i++)
-            {
-                if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-                {
-                    atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-                    //atc++;
-                }
-            }
+			//var olden = Energy;
+			var atc = 0;
+			for (var i = 0; i < G.AttackTypesCnt; i++)
+			{
+				if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+				{
+					atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					//atc++;
+				}
+			}
 
-            if (atc > 0)
-            {
-                // Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
+			if (atc > 0)
+			{
+				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
 
-                var k = 20;
-                if (!Moved && eatedBot.Moved) k = Data.MovedBiteStrength;
+				var k = 20;
+				if (!Moved && eatedBot.Moved) k = Data.MovedBiteStrength;
 
-                var requestedEnergy = Data.BiteEnergy * 10 / k * atc;
-
-
-                var gotEnergyByEating = eatedBot.Bite(requestedEnergy);
-                EnergyChange(gotEnergyByEating);
-
-                //var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
-                if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
-            }
+				var requestedEnergy = Data.BiteEnergy * 10 / k * atc;
 
 
-            //eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
-            //Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
+				var gotEnergyByEating = eatedBot.Bite(requestedEnergy);
+				EnergyChange(gotEnergyByEating);
+
+				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+			}
+
+
+			//eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
+			//Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
 		}
 
 		private (int shift, bool stepComplete) Look(int dir)
@@ -750,10 +738,10 @@ namespace WindowsFormsApp1.GameLogic
 
 				return ((int)RefContent.Free, true);
 			}
-            else
-            {
-                _rec_barrier = true;
-            }
+			else
+			{
+				_rec_barrier = true;
+			}
 
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
@@ -908,7 +896,7 @@ namespace WindowsFormsApp1.GameLogic
 			return (Direction + G.GetDirectionFromNextCommand(Pointer, true)) % Dir.NumberOfDirections;
 		}
 
-		private int GetDirStraight()
+		private int GetDirForward()
 		{
 			return Direction;
 		}

@@ -38,8 +38,8 @@ namespace WindowsFormsApp1.Graphic
 			DrawBotsWorld();
 
 			if (Data.Checks) Func.CHECK5();
-            
-            Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
+
+			Test.NextInterval(4, "DrawBotOnFrame(bots[botNumber]);");
 
 
 			if (Data.LensOn)
@@ -55,22 +55,22 @@ namespace WindowsFormsApp1.Graphic
 
 
 			//await Task.Delay(1);
-            Test.NextInterval(5, "PaintFrame();");
+			Test.NextInterval(5, "PaintFrame();");
 		}
 
-        private void DrawCell(int index)
-        {
-            var obj = Data.ChangedCells[index];
+		private void DrawCell(int index)
+		{
+			var obj = Data.ChangedCells[index];
 
-            _PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
-            Data.ChWorld[obj.X, obj.Y] = 0;
+			_PRESENTER.DrawObjectOnFrame(obj.X, obj.Y, obj.Color);
+			Data.ChWorld[obj.X, obj.Y] = 0;
 
 
-            //if (Data.ClWorld[obj.X, obj.Y] == null)
-            //{
-            //    Data.ClWorld[obj.X, obj.Y] = new BotLog();
-            //}
-            //Data.ClWorld[obj.X, obj.Y].LogInfo($"Color:{obj.Color}   Index:{obj.Index}");
+			//if (Data.ClWorld[obj.X, obj.Y] == null)
+			//{
+			//    Data.ClWorld[obj.X, obj.Y] = new BotLog();
+			//}
+			//Data.ClWorld[obj.X, obj.Y].LogInfo($"Color:{obj.Color}   Index:{obj.Index}");
 		}
 
 		// Рисование изменившихся ячеек на основном битмапе экрана (сразу не отображаются)
@@ -82,20 +82,20 @@ namespace WindowsFormsApp1.Graphic
 				case DrawType.OnlyChangedCells:
 					// Рисуем только изменившщиеся ячейки. Одновременно постепенно обнуляем массивы измененных ячеек
 					_PRESENTER.StartNewFrame(Data.LensOn ? BitmapCopyType.EditCopyScreenBitmapWithAdditionalArray : BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-                    
-                    Test.NextInterval(3, "RedrawWorld();");
 
-                    if (Data.Parallel)
-                    {
-                        Parallel.For(1, (int)Data.NumberOfChangedCells + 1, DrawCell);
-                    }
+					Test.NextInterval(3, "RedrawWorld();");
+
+					if (Data.Parallel)
+					{
+						Parallel.For(1, (int)Data.NumberOfChangedCells + 1, DrawCell);
+					}
 					else
-                    {
-                        for (var i = 1; i <= Data.NumberOfChangedCells; i++)
-                        {
-                            DrawCell(i);
-                        }
-                    }
+					{
+						for (var i = 1; i <= Data.NumberOfChangedCells; i++)
+						{
+							DrawCell(i);
+						}
+					}
 
 					Data.NumberOfChangedCellsForInfo = Data.NumberOfChangedCells;
 					Data.NumberOfChangedCells = 0;
@@ -106,7 +106,7 @@ namespace WindowsFormsApp1.Graphic
 					// Рисуем все ячейки.
 					_PRESENTER.StartNewFrame(BitmapCopyType.EditEmptyArray);
 
-                    Test.NextInterval(3, "RedrawWorld();");
+					Test.NextInterval(3, "RedrawWorld();");
 
 					for (var i = 1; i <= Data.CurrentNumberOfBots; i++)
 					{
@@ -121,12 +121,12 @@ namespace WindowsFormsApp1.Graphic
 			}
 		}
 
-        public Color GetPixel(int x, int y)
-        {
-            return _PRESENTER.GetPixel(x, y);
-        }
+		public Color GetPixel(int x, int y)
+		{
+			return _PRESENTER.GetPixel(x, y);
+		}
 
-        private void DrawLens()
+		private void DrawLens()
 		{
 			_PRESENTER.IntermediateFrameSave();  // сохранить в промежуточный массив экран без дополнительной графики
 
@@ -189,18 +189,17 @@ namespace WindowsFormsApp1.Graphic
 					var x = i % 8;
 					var y = i / 8;
 
-
 					var textColor = code switch
 					{
-						23 => Color.Blue,  //поворот
-						24 => Color.Blue,
-						25 => Color.Green,
-						26 => Color.Brown,  //шаг
-						27 => Color.Brown,
-						28 => Color.Red,    //съесть
-						29 => Color.Red,
-						30 => Color.Gray,  //посмотреть
-						31 => Color.Gray,
+						CGen.RotateAbsolute => Color.Blue,  //поворот
+						CGen.RotateRelative => Color.Blue,
+						CGen.Photosynthesis => Color.Green,
+						CGen.StepForward1 => Color.Brown,  //шаг
+						CGen.StepForward2 => Color.Brown,
+						CGen.EatForward1 => Color.Red,    //съесть
+						CGen.EatForward2 => Color.Red,
+						CGen.LookForward1 => Color.Gray,  //посмотреть
+						CGen.LookForward2 => Color.Gray,
 						_ => Color.Black
 					};
 
