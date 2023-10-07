@@ -143,16 +143,33 @@ namespace WindowsFormsApp1.GameLogic
         public int Bite(int delta)
         {
             _rec_bite = true;
-            return EnergyChange(delta);
+			ActivateReceptor(0);
+			return EnergyChange(delta);
         }
 
-        /// <summary>
-        /// delta - энергия которая будет добавлена к энергии бота
-        /// </summary>
-        /// <param name="delta"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public int EnergyChange(int delta)
+		private void ActivateReceptor(int rec)
+		{
+			if (_recCommon)
+			{
+				if (rec < _recNum)
+				{
+					_recNum = rec;
+				}
+			}
+			else
+			{
+				_recCommon = true;
+				_recNum = rec;
+			}
+		}
+
+		/// <summary>
+		/// delta - энергия которая будет добавлена к энергии бота
+		/// </summary>
+		/// <param name="delta"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
+		public int EnergyChange(int delta)
         {
             if (delta == 0) return 0;
 
@@ -715,7 +732,27 @@ namespace WindowsFormsApp1.GameLogic
             if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth) return (int)RefContent.Edge;
 
             var cont = Data.World[nXi, nYi];
-            var refContent = cont switch
+
+			// 6 - впереди увиден бот не родня
+			// 7 - впереди увиден бот родня
+			// 8 - впереди увиден еда
+			// 9 - впереди увиден минерал
+			// 10 - впереди увиден стена
+
+			ActivateReceptor(cont switch
+			{
+				65500 => 8,
+				65502 => 9,
+				65503 => 10,
+				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+					? G.IsRelative(Data.Bots[cont].G)
+						? 7
+						: 6
+					: throw new Exception("return cont switch")
+			}
+			);
+
+			var refContent = cont switch
             {
                 0 => RefContent.Free,
                 65500 => RefContent.Grass,
@@ -816,31 +853,49 @@ namespace WindowsFormsApp1.GameLogic
             }
             else
             {
-                _rec_barrier = true;
-            }
+				// 1 - препятствие движению бот не родня
+				// 2 - препятствие движению бот родня
+				// 3 - препятствие движению еда
+				// 4 - препятствие движению минерал
+				// 5 - препятствие движению стена
 
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
+                //Func.CheckWorld2(Index, Num, Xi, Yi);
 
+				_rec_barrier = true;
 
-            var cont = Data.World[nXi, nYi];
-            var refContent = cont switch
-            {
-                0 => RefContent.Free,
-                65500 => RefContent.Grass,
-                65501 => RefContent.Organic,
-                65502 => RefContent.Mineral,
-                65503 => RefContent.Wall,
-                65504 => RefContent.Poison,
-                _ => cont >= 1 && cont <= Data.CurrentNumberOfBots
-                    ? G.IsRelative(Data.Bots[cont].G)
-                        ? RefContent.Relative
-                        : RefContent.Bot
-                    : throw new Exception("return cont switch")
-            };
+				var cont = Data.World[nXi, nYi];
+				ActivateReceptor(cont switch
+				{
+					65500 => 3,
+					65502 => 4,
+					65503 => 5,
+					_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+						? G.IsRelative(Data.Bots[cont].G)
+							? 2
+							: 1
+						: throw new Exception("return cont switch")
+				}
+				);
 
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
-            return (int)refContent;
-        }
+				var refContent = cont switch
+				{
+					0 => RefContent.Free,
+					65500 => RefContent.Grass,
+					65501 => RefContent.Organic,
+					65502 => RefContent.Mineral,
+					65503 => RefContent.Wall,
+					65504 => RefContent.Poison,
+					_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+						? G.IsRelative(Data.Bots[cont].G)
+							? RefContent.Relative
+							: RefContent.Bot
+						: throw new Exception("return cont switch")
+				};
+
+				//Func.CheckWorld2(Index, Num, Xi, Yi);
+				return (int)refContent;
+			}
+		}
 
         private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirectionForMove(int dir)
         {
