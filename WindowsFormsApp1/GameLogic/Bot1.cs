@@ -41,7 +41,7 @@ namespace WindowsFormsApp1.GameLogic
         // РЕЦЕПТОРЫ
         // меня укусили?
         // увидел рядом чтото?
-        private bool _recCommon;
+        private bool _receptorsActivated;
         private int _recNum;
         private int _recContactDir;
         // 0 - укус
@@ -55,8 +55,6 @@ namespace WindowsFormsApp1.GameLogic
         // 8 - впереди увиден еда
         // 9 - впереди увиден минерал
         // 10 - впереди увиден стена
-        private bool _rec_bite = false;
-        private bool _rec_barrier = false;
 
 
         //private static long COUNTER1 = 0;
@@ -142,14 +140,13 @@ namespace WindowsFormsApp1.GameLogic
 
         public int Bite(int delta)
         {
-            _rec_bite = true;
 			ActivateReceptor(0);
 			return EnergyChange(delta);
         }
 
 		private void ActivateReceptor(int rec)
 		{
-			if (_recCommon)
+			if (_receptorsActivated)
 			{
 				if (rec < _recNum)
 				{
@@ -158,7 +155,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			else
 			{
-				_recCommon = true;
+				_receptorsActivated = true;
 				_recNum = rec;
 			}
 		}
@@ -288,28 +285,19 @@ namespace WindowsFormsApp1.GameLogic
 
         public void Step()
         {
-            // Некий алгоритм активности бота в рамках одного игорового шага.
-            // В результате которого он на основании данных от рецепторов или без них
-            // изменит свое состояние (координаты, геном, энергия, здоровье, возраст, направление, цвет, минералы, ...)
-            // Также может размножиться
+			// Некий алгоритм активности бота в рамках одного игорового шага.
+			// В результате которого он на основании данных от рецепторов или без них
+			// изменит свое состояние (координаты, геном, энергия, здоровье, возраст, направление, цвет, минералы, ...)
+			// Также может размножиться
 
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
-            //Func.CheckWorld2(Index, Num, Xi, Yi);
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
+			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
-            if (Data.HistoryOn) History.BeginNewStep();
+			if (Data.HistoryOn) History.BeginNewStep();
 
-            if (_recCommon)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
-            {
-                _recCommon = false;
-                EventCommand();
-            }
-            else // Нет сигнала от рецепторов. цикл по обычным командам
-            {
-                CommonCommand();
-            }
+			CommonCommand();
 
-
-            Age++;
+			Age++;
 
             EnergyChange(Data.DeltaEnergyOnStep);
 
@@ -344,18 +332,12 @@ namespace WindowsFormsApp1.GameLogic
 
             do
             {
-                if (_rec_bite)
-                {
-                    _rec_bite = false;
-                    Pointer = 50;
-                }
-
-                if (_rec_barrier)
-                {
-                    _rec_barrier = false;
-                    Pointer = 40;
-                }
-
+				if (_receptorsActivated)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
+				{
+					_receptorsActivated = false;
+					stepComplete = EventCommand();
+                    if (stepComplete) break;
+				}
 
                 var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer, true);
                 if (Data.HistoryOn) History.SavePtr(Pointer);
@@ -406,9 +388,11 @@ namespace WindowsFormsApp1.GameLogic
             while (!stepComplete && cntJump < Data.MaxUncompleteJump);
         }
 
-        private void EventCommand()
+        private bool EventCommand()
         {
-            for (var i = 0; i < G.CodeForEventsLenght[_recNum]; i++)
+			bool stepComplete = false;
+
+			for (var i = 0; i < G.CodeForEventsLenght[_recNum]; i++)
             {
                 var cmdCode = G.CodeForEvents[_recNum, i, 0];
 
@@ -427,8 +411,13 @@ namespace WindowsFormsApp1.GameLogic
 
                     default: break;
                 };
-            }
-        }
+			
+                stepComplete = Data.CompleteCommands[cmdCode];
+                if (stepComplete) break;
+			}
+
+            return stepComplete;
+		}
 
         //===================================================================================================
         //// Rotate
@@ -469,27 +458,41 @@ namespace WindowsFormsApp1.GameLogic
             return Rotate((Direction + dir) % Dir.NumberOfDirections);
         }
 
-        //3
-        //4
-        //5
-        //6
-        //7
+		//3
+		private int RotateRelativeContact(int dir)
+		{
+			return Rotate((Direction + dir) % Dir.NumberOfDirections);
+		}
 
-        //// Step
-        //10 11
-        private int StepForward()
+		//4
+		//5
+		//6
+		//7
+
+		//// Step
+		//10 11
+		private int StepForward()
         {
             return Step(GetDirForward());
         }
 
-        //12
-        //13
-        //14
-        //15
+		//12
+		private int StepRelative(int dir)
+		{
+			return Step(GetDirForward());
+		}
 
-        //// Eat
-        //20 21
-        private int EatForward()
+		//13
+		private int StepRelativeContact(int dir)
+		{
+			return Step(GetDirForward());
+		}
+		//14
+		//15
+
+		//// Eat
+		//20 21
+		private int EatForward()
         {
             return Eat(GetDirForward());
         }
@@ -860,8 +863,6 @@ namespace WindowsFormsApp1.GameLogic
 				// 5 - препятствие движению стена
 
                 //Func.CheckWorld2(Index, Num, Xi, Yi);
-
-				_rec_barrier = true;
 
 				var cont = Data.World[nXi, nYi];
 				ActivateReceptor(cont switch
