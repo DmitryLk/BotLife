@@ -142,7 +142,24 @@ namespace WindowsFormsApp1.GameLogic
 		public int Bite(int delta)
 		{
 			_rec_bite = true;
+			ActivateReceptor(0);
 			return EnergyChange(delta);
+		}
+
+		private void ActivateReceptor(int rec)
+		{
+			if (_recCommon)
+			{
+				if (rec < _recNum)
+				{
+					_recNum = rec;
+				}
+			}
+			else
+			{
+				_recCommon = true;
+				_recNum = rec;
+			}
 		}
 
 		/// <summary>
@@ -391,7 +408,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			for (var i = 0; i < G.CodeForEventsLenght[_recNum]; i++)
 			{
-				var cmdCode = G.CodeForEvents[_recNum, i,0 ];
+				var cmdCode = G.CodeForEvents[_recNum, i, 0];
 
 				switch (cmdCode)
 				{
@@ -406,7 +423,7 @@ namespace WindowsFormsApp1.GameLogic
 					case CEv.StepBackwardContact: break;
 					case CEv.EatForward: break;
 
-					default:  break;
+					default: break;
 				};
 			}
 		}
@@ -639,6 +656,26 @@ namespace WindowsFormsApp1.GameLogic
 			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth) return ((int)RefContent.Edge, true);
 
 			var cont = Data.World[nXi, nYi];
+
+			// 6 - впереди увиден бот не родня
+			// 7 - впереди увиден бот родня
+			// 8 - впереди увиден еда
+			// 9 - впереди увиден минерал
+			// 10 - впереди увиден стена
+
+			ActivateReceptor(cont switch
+			{
+				65500 => 8,
+				65502 => 9,
+				65503 => 10,
+				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+					? G.IsRelative(Data.Bots[cont].G)
+						? 7
+						: 6
+					: throw new Exception("return cont switch")
+			}
+			);
+
 			var refContent = cont switch
 			{
 				0 => RefContent.Free,
@@ -740,30 +777,49 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			else
 			{
+				// 1 - препятствие движению бот не родня
+				// 2 - препятствие движению бот родня
+				// 3 - препятствие движению еда
+				// 4 - препятствие движению минерал
+				// 5 - препятствие движению стена
+
+				//Func.CheckWorld2(Index, Num, Xi, Yi);
+
+				var cont = Data.World[nXi, nYi];
+
+
 				_rec_barrier = true;
+				ActivateReceptor(cont switch
+				{
+					65500 => 3,
+					65502 => 4,
+					65503 => 5,
+					_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+						? G.IsRelative(Data.Bots[cont].G)
+							? 2
+							: 1
+						: throw new Exception("return cont switch")
+				}
+				);
+
+				var refContent = cont switch
+				{
+					0 => RefContent.Free,
+					65500 => RefContent.Grass,
+					65501 => RefContent.Organic,
+					65502 => RefContent.Mineral,
+					65503 => RefContent.Wall,
+					65504 => RefContent.Poison,
+					_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
+						? G.IsRelative(Data.Bots[cont].G)
+							? RefContent.Relative
+							: RefContent.Bot
+						: throw new Exception("return cont switch")
+				};
+
+				//Func.CheckWorld2(Index, Num, Xi, Yi);
+				return ((int)refContent, true);
 			}
-
-			//Func.CheckWorld2(Index, Num, Xi, Yi);
-
-
-			var cont = Data.World[nXi, nYi];
-			var refContent = cont switch
-			{
-				0 => RefContent.Free,
-				65500 => RefContent.Grass,
-				65501 => RefContent.Organic,
-				65502 => RefContent.Mineral,
-				65503 => RefContent.Wall,
-				65504 => RefContent.Poison,
-				_ => cont >= 1 && cont <= Data.CurrentNumberOfBots
-					? G.IsRelative(Data.Bots[cont].G)
-						? RefContent.Relative
-						: RefContent.Bot
-					: throw new Exception("return cont switch")
-			};
-
-			//Func.CheckWorld2(Index, Num, Xi, Yi);
-			return ((int)refContent, true);
 		}
 
 		private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirectionForMove(int dir)
