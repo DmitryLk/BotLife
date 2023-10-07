@@ -191,15 +191,15 @@ namespace WindowsFormsApp1.Graphic
 
 					var textColor = code switch
 					{
-						CGen.RotateAbsolute => Color.Blue,  //поворот
-						CGen.RotateRelative => Color.Blue,
-						CGen.Photosynthesis => Color.Green,
-						CGen.StepForward1 => Color.Brown,  //шаг
-						CGen.StepForward2 => Color.Brown,
-						CGen.EatForward1 => Color.Red,    //съесть
-						CGen.EatForward2 => Color.Red,
-						CGen.LookForward1 => Color.Gray,  //посмотреть
-						CGen.LookForward2 => Color.Gray,
+						Cmd.RotateAbsolute => Color.Blue,  //поворот
+						Cmd.RotateRelative => Color.Blue,
+						Cmd.Photosynthesis => Color.Green,
+						Cmd.StepForward1 => Color.Brown,  //шаг
+						Cmd.StepForward2 => Color.Brown,
+						Cmd.EatForward1 => Color.Red,    //съесть
+						Cmd.EatForward2 => Color.Red,
+						Cmd.LookForward1 => Color.Gray,  //посмотреть
+						Cmd.LookForward2 => Color.Gray,
 						_ => Color.Black
 					};
 
@@ -230,7 +230,7 @@ namespace WindowsFormsApp1.Graphic
 					_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
 				}
 
-				var (hist, histPtrCnt) = bot.Hist.GetLastStepPtrs(Data.DeltaHistory);
+				var (hist, histPtrCnt) = bot.History.GetLastStepPtrs(Data.DeltaHistory);
 				if (histPtrCnt > 0)
 				{
 					byte ptr1 = hist[0];

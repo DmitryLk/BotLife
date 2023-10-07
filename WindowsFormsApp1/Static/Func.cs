@@ -398,7 +398,7 @@ namespace WindowsFormsApp1.Static
 			updBot.OldPointer = pointer;
 			updBot.Age = 0;
 			updBot.Alive = true;
-			updBot.Hist = new CodeHistory();
+			updBot.History = new CodeHistory();
             updBot.InsertedToReproductionList = false;
             updBot.EnergySet(en);
 			updBot.ResetMoved();
@@ -454,7 +454,7 @@ namespace WindowsFormsApp1.Static
 				bot.InsertedToDeathList = false;
 				bot.InsertedToReproductionList = false;
 				bot.Alive = true;
-				bot.Hist = new CodeHistory();
+				bot.History = new CodeHistory();
 			}
 
 			bot.RefreshColor();
@@ -661,12 +661,12 @@ namespace WindowsFormsApp1.Static
 
 		public static byte GetRandomUsefulBotCode()
 		{
-			return Data.CGenValues[ThreadSafeRandom.Next(Data.CGenValuesLength)];
+			return Data.GeneralCommandsValues[ThreadSafeRandom.Next(Data.GeneralCommandsValuesLength)];
 		}
 
 		public static byte GetRandomEventBotCode()
 		{
-			return Data.CEvValues[ThreadSafeRandom.Next(Data.CEvValuesLength)];
+			return Data.EventCommandsValues[ThreadSafeRandom.Next(Data.EventCommandsValuesLength)];
 		}
 
 		public static int GetRandomEventNumber()
