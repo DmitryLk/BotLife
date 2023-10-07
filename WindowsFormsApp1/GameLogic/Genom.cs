@@ -136,13 +136,14 @@ namespace WindowsFormsApp1.GameLogic
 			g.PraNum = g.Num;
 			g.Level = 1;
 
-			// Наполнение кода генома
+			// Наполнение кода генома (общие команды)
 			for (var i = 0; i < Data.GenomLength; i++)
 			{
 				g.CodeCommon[i] = Func.GetRandomBotCode();
 				g.Act[i] = 0;
 			}
 
+            // Наполнение кода генома (команды событий)
 			byte ev;
 			byte j;
 			for (var i = 0; i < Data.GenomEvents; i++)
@@ -152,7 +153,7 @@ namespace WindowsFormsApp1.GameLogic
 					ev = Func.GetRandomEventBotCode();
 					g.CodeForEvents[i, j, 0] = ev;
 					g.CodeForEvents[i, j, 1] = Func.GetRandomBotCode();
-					if (CEv.CompleteCommands.Contains(ev)) { j++; break; }
+					if (Cmd.CompleteCommands.Contains(ev)) { j++; break; }
 				}
 				g.CodeForEventsLenght[i] = j;
 			}
@@ -227,7 +228,7 @@ namespace WindowsFormsApp1.GameLogic
 					var evNum = Func.GetRandomEventNumber();
 					var btNum = Func.GetRandomNext(g.CodeForEventsLenght[evNum]);
 
-					if (CEv.DirectionCommands.Contains(g.CodeForEvents[evNum, btNum, 0]) && Func.GetRandomNext(2) == 1)
+					if (Cmd.DirectionCommands.Contains(g.CodeForEvents[evNum, btNum, 0]) && Func.GetRandomNext(2) == 1)
 					{
 						g.CodeForEvents[evNum, btNum, 1] = Func.GetRandomBotCode();
 					}
@@ -239,7 +240,7 @@ namespace WindowsFormsApp1.GameLogic
 					byte j;
 					for (j = 0; j < Data.GenomEventsLenght; j++)
 					{
-						if (CEv.CompleteCommands.Contains(g.CodeForEvents[evNum, j, 0])) { j++; break; }
+						if (Cmd.CompleteCommands.Contains(g.CodeForEvents[evNum, j, 0])) { j++; break; }
 					}
 					g.CodeForEventsLenght[i] = j;
 				}

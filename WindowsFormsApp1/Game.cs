@@ -182,12 +182,12 @@ namespace WindowsFormsApp1.GameLogic
 
         public void HistToggle()
         {
-            Data.Hist = !Data.Hist;
+            Data.HistoryOn = !Data.HistoryOn;
         }
 
         public void Fastest()
         {
-            Data.Hist = false;
+            Data.HistoryOn = false;
             //Data.Logs = false;
             Data.Checks = false;
             Data.Parallel = true;
