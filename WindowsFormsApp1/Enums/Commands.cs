@@ -52,21 +52,26 @@ namespace WindowsFormsApp1.Enums
             Cmd.AlignHorizontaly,
         };
 
-        public static HashSet<byte> EventCommands = new HashSet<byte>()
-        {
-            Cmd.RotateRelative,
-            Cmd.RotateRelativeContact,
-            Cmd.RotateBackward,
-            Cmd.RotateBackwardContact,
-            Cmd.LookAround,
-            Cmd.StepRelative,
-            Cmd.StepRelativeContact,
-            Cmd.StepBackward,
-            Cmd.StepBackwardContact,
-            Cmd.EatForward1,
-        };
+		public static HashSet<byte> EventCommands = new HashSet<byte>()
+		{
+			Cmd.RotateRelative,
+			Cmd.RotateRelativeContact,
+			Cmd.RotateBackward,
+			Cmd.RotateBackwardContact,
+			Cmd.LookAround,
+			Cmd.StepRelative,
+			Cmd.StepRelativeContact,
+			Cmd.StepBackward,
+			Cmd.StepBackwardContact,
+		};
 
-        public static HashSet<byte> CompleteCommands = new HashSet<byte>()
+		public static HashSet<byte> BothCommands = new HashSet<byte>()
+		{
+			Cmd.RotateRelative,
+			Cmd.LookAround,
+		};
+
+		public static HashSet<byte> CompleteCommands = new HashSet<byte>()
             {
             Cmd.Photosynthesis,
             Cmd.StepForward1,
@@ -88,41 +93,5 @@ namespace WindowsFormsApp1.Enums
             Cmd.StepRelative,
             Cmd.StepRelativeContact,
             };
-
-        //	КОМАНДЫ ДЕЙСТВИЙ ОБЫЧНЫХ
-        //+поворот абсолютно
-        //+поворот относительно
-        //+фотосинтез
-        //+шаг вперед
-        //+укусить впереди
-        //+посмотреть вперед
-        //посмотреть вокруг
-        //команда периодической смены направления при определенной вероятности направление менятеся случайно или нет
-        //выравнится по горизонтали
-        //случайное направление , допустим цифра 8 (0-7 это обычные направления)
-        //команда перехода на случайное количество шагов в программе
-
-        //EatBackward = 6,
-        //EatReverse = 7,
-        //StepBackward = 5,
-        //RotateRight = 4,
-        //RotateUp = 5,
-        //RotateDown = 6,
-        //RotateLeftUp = 7,
-        //RotateRightUp = 8,
-
-        //КОМАНДЫ ДЕЙСТВИЙ НА СОБЫТИЯ
-        //поворот относительно
-        //поворот относительно раздражителя
-        //? поворот на 180
-        //? поворт влево
-        //? поворот вправо
-        //посмотреть вокруг
-        //шаг относительно
-        //шаг относительно раздражителя
-        //? шаг влево
-        //? шаг вправо
-        //? шаг назад
-        //укусить впереди
     }
 }

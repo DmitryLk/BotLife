@@ -143,7 +143,7 @@ namespace WindowsFormsApp1.GameLogic
 				g.Act[i] = 0;
 			}
 
-            // Наполнение кода генома (команды событий)
+			// Наполнение кода генома (команды событий)
 			byte ev;
 			byte j;
 			for (var i = 0; i < Data.GenomEvents; i++)
@@ -223,7 +223,7 @@ namespace WindowsFormsApp1.GameLogic
 						g.CodeCommon[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
 					}
 				}
-				else							// мутация в событиях
+				else                            // мутация в событиях
 				{
 					var evNum = Func.GetRandomEventNumber();
 					var btNum = Func.GetRandomNext(g.CodeForEventsLenght[evNum]);
@@ -232,7 +232,7 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						g.CodeForEvents[evNum, btNum, 1] = Func.GetRandomBotCode();
 					}
-					else 
+					else
 					{
 						g.CodeForEvents[evNum, btNum, 0] = Func.GetRandomEventBotCode();
 					}
