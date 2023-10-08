@@ -191,7 +191,7 @@ namespace WindowsFormsApp1.GameLogic
 			g.Level = parent.Level + 1;
 			Interlocked.Increment(ref Data.MutationCnt);
 
-			// Наполнение кода генома
+			// Копирование кода генома
 			for (var i = 0; i < Data.GenomLength; i++)
 			{
 				g.CodeCommon[i] = parent.CodeCommon[i];
@@ -207,10 +207,10 @@ namespace WindowsFormsApp1.GameLogic
 				g.CodeForEventsLenght[i] = parent.CodeForEventsLenght[i];
 			}
 
-			// Data.MutationLenght байт в геноме подменяем
+			// Мутация (Data.MutationLenght байт в геноме подменяем)
 			for (var i = 0; i < Data.MutationLenght; i++)
 			{
-				if (Func.GetRandomNext(2) == 0)  // мутация в основном коде
+				if (Func.GetRandomNext(2) == 0)  // Мутация в основном коде
 				{
 					if (parent.ActListCnt > -1)
 					{
@@ -223,12 +223,12 @@ namespace WindowsFormsApp1.GameLogic
 						g.CodeCommon[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
 					}
 				}
-				else                            // мутация в событиях
+				else                            // Мутация в событиях
 				{
 					var evNum = Func.GetRandomEventNumber();
 					var btNum = Func.GetRandomNext(g.CodeForEventsLenght[evNum]);
 
-					if (Cmd.DirectionCommands.Contains(g.CodeForEvents[evNum, btNum, 0]) && Func.GetRandomNext(2) == 1)
+					if (Data.DirectionCommands[g.CodeForEvents[evNum, btNum, 0]] && Func.GetRandomNext(2) == 1)
 					{
 						g.CodeForEvents[evNum, btNum, 1] = Func.GetRandomBotCode();
 					}

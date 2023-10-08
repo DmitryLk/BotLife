@@ -34,6 +34,7 @@ namespace WindowsFormsApp1.GameLogic
 		private static readonly object _busyWorld2 = new();
 		private readonly object _busyBotEnergy = new();
 		private readonly object _busyInsertedToReproductionList = new();
+		private readonly object _busyReceptors = new();
 		//private static readonly object _busyTotalEnergy = new();
 		//private readonly object _busyBite = new();
 		//private readonly object _busyInsertedToDeathList = new();
@@ -136,21 +137,18 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void ActivateReceptor(int rec, int contactDir)
 		{
-			if (_receptorsActivated)
+			if (!_receptorsActivated || rec < _recNum)
 			{
-				if (rec < _recNum)
+				lock (_busyReceptors)
 				{
-					_recNum = rec;
-					_recContactDir = contactDir;
-					_recPointer = 0;
+					if (!_receptorsActivated || rec < _recNum)
+					{
+						_receptorsActivated = true;
+						_recNum = rec;
+						_recContactDir = contactDir;
+						_recPointer = 0;
+					}
 				}
-			}
-			else
-			{
-				_receptorsActivated = true;
-				_recNum = rec;
-				_recContactDir = contactDir;
-				_recPointer = 0;
 			}
 		}
 
@@ -317,20 +315,33 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 		}
 
-		private (byte, bool) GetCommand()
+		private (bool, byte, byte) GetCommand1()
+		{
+			var cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
+			if (Data.HistoryOn) History.SavePtr(Pointer);
+			return (false, cmd, 0);
+		}
+
+		private (bool, byte, byte) GetCommand2()
 		{
 			byte cmd;
+			byte par;
 			if (_receptorsActivated)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
 			{
-				cmd = G.CodeForEvents[_recNum, _recPointer, 0];
-				_recPointer++;
-				if (_recPointer >= G.CodeForEventsLenght[_recNum]) _receptorsActivated = false;
+				lock (_busyReceptors)
+				{
+					cmd = G.CodeForEvents[_recNum, _recPointer, 0];
+					par = G.CodeForEvents[_recNum, _recPointer, 1];
+					_recPointer++;
+					if (_recPointer >= G.CodeForEventsLenght[_recNum] || _recPointer == Data.GenomEventsLenght) _receptorsActivated = false;
+					return (true, cmd, par);
+				}
 			}
-			else 
+			else
 			{
 				cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
 				if (Data.HistoryOn) History.SavePtr(Pointer);
-				return (cmd, false);
+				return (false, cmd, 0);
 			}
 		}
 
@@ -339,48 +350,37 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			int cntJump = 0;
 			int shift = 0;
-			bool stepComplete = false;
 			byte cmd;
+			byte par;
 			bool ev;
 			bool realCmd;
 
 			do
 			{
-				(cmd, ev) = GetCommand();
-
-				if (_receptorsActivated)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
-				{
-					_receptorsActivated = false;
-					stepComplete = EventCommand();
-					if (stepComplete) break;
-				}
-
-				var cmdCode = G.GetCurrentCommandAndSetActGen(Pointer, true);
-				if (Data.HistoryOn) History.SavePtr(Pointer);
-
-				// 2. Выполняем команду
+				(ev, cmd, par) = GetCommand2();
 
 				if (ev)
 				{
-					switch (cmdCode)
+					switch (cmd)
 					{
-						case Cmd.RotateRelative: RotateRelative(G.CodeForEvents[_recNum, _recPointer, 1]); break;
-						case Cmd.RotateRelativeContact: RotateRelativeContact(G.CodeForEvents[_recNum, _recPointer, 1]); break;
+						case Cmd.RotateRelative: RotateRelative(par); break;
+						case Cmd.RotateRelativeContact: RotateRelativeContact(par); break;
 						case Cmd.RotateBackward: RotateBackward(); break;
 						case Cmd.RotateBackwardContact: RotateBackwardContact(); break;
 						case Cmd.LookAround: LookAround(); break;
-						case Cmd.StepRelative: StepRelative(G.CodeForEvents[_recNum, _recPointer, 1]); break;
-						case Cmd.StepRelativeContact: StepRelativeContact(G.CodeForEvents[_recNum, _recPointer, 1]); break;
+						case Cmd.StepRelative: StepRelative(par); break;
+						case Cmd.StepRelativeContact: StepRelativeContact(par); break;
 						case Cmd.StepBackward: StepBackward(); break;
 						case Cmd.StepBackwardContact: StepBackwardContact(); break;
 						case Cmd.EatForward1: EatForward(); break;
+						case Cmd.EatContact: EatContact(); break;
 						default: break;
 					};
 				}
 				else
 				{
 					realCmd = true;
-					switch (cmdCode)
+					switch (cmd)
 					{
 						case Cmd.RotateAbsolute: shift = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
 						case Cmd.RotateRelative: shift = RotateRelative(G.GetDirectionFromNextCommand(Pointer, true)); break;
@@ -394,13 +394,12 @@ namespace WindowsFormsApp1.GameLogic
 						//case Cmd.LookAround: shift = LookAround(); break;
 						//case Cmd.RotateRandom: shift = RotateRandom(); break;
 						//case Cmd.AlignHorizontaly: shift = AlignHorizontaly(); break;
-
-						default: shift = cmdCode; stepComplete = false; realCmd = false; break;
+						default: shift = cmd; break;
 					};
 
 					if (realCmd)
 					{
-						if (cmdCode == Cmd.StepForward1 || cmdCode == Cmd.StepForward2)
+						if (cmd == Cmd.StepForward1 || cmd == Cmd.StepForward2)
 						{
 							if (_moved < 50)
 							{
@@ -415,76 +414,15 @@ namespace WindowsFormsApp1.GameLogic
 							}
 						}
 					}
+					ShiftCodePointer(shift);
 				}
 
-
 				cntJump++;
-				// Прибавляем к указателю текущей команды значение команды
-				ShiftCodePointer(shift);
-				stepComplete = Data.CompleteCommands[cmdCode];
 			}
-			while (!stepComplete && cntJump < Data.MaxUncompleteJump);
-		}
-
-		private bool EventCommand()
-		{
-			bool stepComplete = false;
-
-			for (var i = 0; i < G.CodeForEventsLenght[_recNum]; i++)
-			{
-				var cmdCode = G.CodeForEvents[_recNum, i, 0];
-
-				switch (cmdCode)
-				{
-					case Cmd.RotateRelative: RotateRelative(G.CodeForEvents[_recNum, i, 1]); break;
-					case Cmd.RotateRelativeContact: RotateRelativeContact(G.CodeForEvents[_recNum, i, 1]); break;
-					case Cmd.RotateBackward: RotateBackward(); break;
-					case Cmd.RotateBackwardContact: RotateBackwardContact(); break;
-					case Cmd.LookAround: LookAround(); break;
-					case Cmd.StepRelative: StepRelative(G.CodeForEvents[_recNum, i, 1]); break;
-					case Cmd.StepRelativeContact: StepRelativeContact(G.CodeForEvents[_recNum, i, 1]); break;
-					case Cmd.StepBackward: StepBackward(); break;
-					case Cmd.StepBackwardContact: StepBackwardContact(); break;
-					case Cmd.EatForward1: EatForward(); break;
-
-
-					default: break;
-				};
-
-				stepComplete = Data.CompleteCommands[cmdCode];
-				if (stepComplete) break;
-			}
-
-			return stepComplete;
+			while (!Data.CompleteCommands[cmd] && cntJump < Data.MaxUncompleteJump);
 		}
 
 		//===================================================================================================
-		//// Rotate
-		//public const byte RotateAbsolute = 1;
-		//public const byte RotateRelative = 2;
-		//public const byte RotateRelativeContact = 3;
-		//public const byte RotateBackward = 4;
-		//public const byte RotateBackwardContact = 5;
-		//public const byte RotateRandom = 6;
-		//public const byte AlignHorizontaly = 7;
-		//// Step
-		//public const byte StepForward1 = 10;
-		//public const byte StepForward2 = 11;
-		//public const byte StepRelative = 12;
-		//public const byte StepRelativeContact = 13;
-		//public const byte StepBackward = 14;
-		//public const byte StepBackwardContact = 15;
-		//// Eat
-		//public const byte EatForward1 = 20;
-		//public const byte EatForward2 = 21;
-		//// Look
-		//public const byte LookForward1 = 30;
-		//public const byte LookForward2 = 31;
-		//public const byte LookAround = 32;
-		//// Other
-		//public const byte Photosynthesis = 40;
-
-
 		//// Rotate
 		//1 C
 		private int RotateAbsolute(int dir)
@@ -565,6 +503,12 @@ namespace WindowsFormsApp1.GameLogic
 		private int EatForward()
 		{
 			return Eat(GetDirForward());
+		}
+		
+		//22 E
+		private int EatContact()
+		{
+			return Eat(_recContactDir);
 		}
 
 		//// Look

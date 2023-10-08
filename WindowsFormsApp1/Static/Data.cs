@@ -161,6 +161,7 @@ namespace WindowsFormsApp1.Static
 		public static byte[] EventCommandsValues;
 		public static int EventCommandsValuesLength;
 		public static bool[] CompleteCommands;
+		public static bool[] DirectionCommands;
 
 		// public static Log.Log Wlog;
 
@@ -239,6 +240,20 @@ namespace WindowsFormsApp1.Static
 			EventCommandsValues = new byte[EventCommandsValuesLength];
 			EventCommandsValues = Cmd.EventCommands.ToArray();
 
+			CompleteCommands = new bool[Data.MaxCode + 1];
+			Array.Clear(CompleteCommands, 0, CompleteCommands.Length);
+			foreach (var c in Cmd.CompleteCommands)
+			{
+				CompleteCommands[c] = true;
+			}
+
+			DirectionCommands = new bool[Data.MaxCode + 1];
+			Array.Clear(DirectionCommands, 0, DirectionCommands.Length);
+			foreach (var c in Cmd.DirectionCommands)
+			{
+				DirectionCommands[c] = true;
+			}
+
 			//var maxcmd = 0;
 			//FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);
 			//foreach (FieldInfo fi in fields)
@@ -252,13 +267,6 @@ namespace WindowsFormsApp1.Static
 			//        }
 			//    }
 			//}
-
-			CompleteCommands = new bool[Data.MaxCode + 1];
-			Array.Clear(CompleteCommands, 0, CompleteCommands.Length);
-			foreach (var c in Cmd.CompleteCommands)
-			{
-				CompleteCommands[c] = true;
-			}
 		}
 
 		public static Color ColorFromHSV(double hue, double saturation, double value)
