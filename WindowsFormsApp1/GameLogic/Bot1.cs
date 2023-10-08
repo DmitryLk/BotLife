@@ -44,17 +44,7 @@ namespace WindowsFormsApp1.GameLogic
 		private bool _receptorsActivated;
 		private int _recNum;
 		private int _recContactDir;
-		// 0 - укус
-		// 1 - препятствие движению бот не родня
-		// 2 - препятствие движению бот родня
-		// 3 - препятствие движению еда
-		// 4 - препятствие движению минерал
-		// 5 - препятствие движению стена
-		// 6 - впереди увиден бот не родня
-		// 7 - впереди увиден бот родня
-		// 8 - впереди увиден еда
-		// 9 - впереди увиден минерал
-		// 10 - впереди увиден стена
+		private int _recPointer;
 
 
 		//private static long COUNTER1 = 0;
@@ -152,6 +142,7 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					_recNum = rec;
 					_recContactDir = contactDir;
+					_recPointer = 0;
 				}
 			}
 			else
@@ -159,6 +150,7 @@ namespace WindowsFormsApp1.GameLogic
 				_receptorsActivated = true;
 				_recNum = rec;
 				_recContactDir = contactDir;
+				_recPointer = 0;
 			}
 		}
 
@@ -297,7 +289,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (Data.HistoryOn) History.BeginNewStep();
 
-			CommonCommand();
+			CommandCycle();
 
 			Age++;
 
@@ -325,15 +317,37 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 		}
 
+		private (byte, bool) GetCommand()
+		{
+			byte cmd;
+			if (_receptorsActivated)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
+			{
+				cmd = G.CodeForEvents[_recNum, _recPointer, 0];
+				_recPointer++;
+				if (_recPointer >= G.CodeForEventsLenght[_recNum]) _receptorsActivated = false;
+			}
+			else 
+			{
+				cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
+				if (Data.HistoryOn) History.SavePtr(Pointer);
+				return (cmd, false);
+			}
+		}
 
-		private void CommonCommand()
+
+		private void CommandCycle()
 		{
 			int cntJump = 0;
 			int shift = 0;
 			bool stepComplete = false;
+			byte cmd;
+			bool ev;
+			bool realCmd;
 
 			do
 			{
+				(cmd, ev) = GetCommand();
+
 				if (_receptorsActivated)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
 				{
 					_receptorsActivated = false;
@@ -345,42 +359,64 @@ namespace WindowsFormsApp1.GameLogic
 				if (Data.HistoryOn) History.SavePtr(Pointer);
 
 				// 2. Выполняем команду
-				bool realCmd = true;
-				switch (cmdCode)
-				{
-					case Cmd.RotateAbsolute: shift = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-					case Cmd.RotateRelative: shift = RotateRelative(G.GetDirectionFromNextCommand(Pointer, true)); break;
-					case Cmd.StepForward1: shift = StepForward(); break;    // (int)refContent
-					case Cmd.StepForward2: shift = StepForward(); break;    // (int)refContent
-					case Cmd.EatForward1: shift = EatForward(); break;      // (int)refContent
-					case Cmd.EatForward2: shift = EatForward(); break;      // (int)refContent
-					case Cmd.LookForward1: shift = LookForward(); break;    // (int)refContent
-					case Cmd.LookForward2: shift = LookForward(); break;    // (int)refContent
-					case Cmd.Photosynthesis: shift = Photosynthesis(); break;
-					//case Cmd.LookAround: shift = LookAround(); break;
-					//case Cmd.RotateRandom: shift = RotateRandom(); break;
-					//case Cmd.AlignHorizontaly: shift = AlignHorizontaly(); break;
 
-					default: shift = cmdCode; stepComplete = false; realCmd = false; break;
-				};
-
-				if (realCmd)
+				if (ev)
 				{
-					if (cmdCode == Cmd.StepForward1 || cmdCode == Cmd.StepForward2)
+					switch (cmdCode)
 					{
-						if (_moved < 50)
+						case Cmd.RotateRelative: RotateRelative(G.CodeForEvents[_recNum, _recPointer, 1]); break;
+						case Cmd.RotateRelativeContact: RotateRelativeContact(G.CodeForEvents[_recNum, _recPointer, 1]); break;
+						case Cmd.RotateBackward: RotateBackward(); break;
+						case Cmd.RotateBackwardContact: RotateBackwardContact(); break;
+						case Cmd.LookAround: LookAround(); break;
+						case Cmd.StepRelative: StepRelative(G.CodeForEvents[_recNum, _recPointer, 1]); break;
+						case Cmd.StepRelativeContact: StepRelativeContact(G.CodeForEvents[_recNum, _recPointer, 1]); break;
+						case Cmd.StepBackward: StepBackward(); break;
+						case Cmd.StepBackwardContact: StepBackwardContact(); break;
+						case Cmd.EatForward1: EatForward(); break;
+						default: break;
+					};
+				}
+				else
+				{
+					realCmd = true;
+					switch (cmdCode)
+					{
+						case Cmd.RotateAbsolute: shift = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
+						case Cmd.RotateRelative: shift = RotateRelative(G.GetDirectionFromNextCommand(Pointer, true)); break;
+						case Cmd.StepForward1: shift = StepForward(); break;    // (int)refContent
+						case Cmd.StepForward2: shift = StepForward(); break;    // (int)refContent
+						case Cmd.EatForward1: shift = EatForward(); break;      // (int)refContent
+						case Cmd.EatForward2: shift = EatForward(); break;      // (int)refContent
+						case Cmd.LookForward1: shift = LookForward(); break;    // (int)refContent
+						case Cmd.LookForward2: shift = LookForward(); break;    // (int)refContent
+						case Cmd.Photosynthesis: shift = Photosynthesis(); break;
+						//case Cmd.LookAround: shift = LookAround(); break;
+						//case Cmd.RotateRandom: shift = RotateRandom(); break;
+						//case Cmd.AlignHorizontaly: shift = AlignHorizontaly(); break;
+
+						default: shift = cmdCode; stepComplete = false; realCmd = false; break;
+					};
+
+					if (realCmd)
+					{
+						if (cmdCode == Cmd.StepForward1 || cmdCode == Cmd.StepForward2)
 						{
-							_moved += 5;
+							if (_moved < 50)
+							{
+								_moved += 5;
+							}
 						}
-					}
-					else
-					{
-						if (_moved > 0)
+						else
 						{
-							_moved--;
+							if (_moved > 0)
+							{
+								_moved--;
+							}
 						}
 					}
 				}
+
 
 				cntJump++;
 				// Прибавляем к указателю текущей команды значение команды
@@ -408,7 +444,9 @@ namespace WindowsFormsApp1.GameLogic
 					case Cmd.StepRelative: StepRelative(G.CodeForEvents[_recNum, i, 1]); break;
 					case Cmd.StepRelativeContact: StepRelativeContact(G.CodeForEvents[_recNum, i, 1]); break;
 					case Cmd.StepBackward: StepBackward(); break;
-					case Cmd.StepBackwardContact: StepBackwardContact();break;
+					case Cmd.StepBackwardContact: StepBackwardContact(); break;
+					case Cmd.EatForward1: EatForward(); break;
+
 
 					default: break;
 				};
@@ -523,7 +561,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		//// Eat
-		//20 21 C
+		//20 21 CE
 		private int EatForward()
 		{
 			return Eat(GetDirForward());
