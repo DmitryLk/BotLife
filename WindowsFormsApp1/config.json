@@ -48,7 +48,7 @@
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": -1000,
   "DeltaEnergyOnStep": -1, //####################
-  "KeptTotalEnergy": 17000000, //####################
+  "KeptTotalEnergy": 20000000, //####################
 
   //Photosynthesis
   "PhotosynthesisEnergy": 30,
