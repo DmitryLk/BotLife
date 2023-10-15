@@ -29,7 +29,7 @@ namespace WindowsFormsApp1.Static
 		public static (int, int)[] NearbyCells = new (int, int)[8]
 			{ (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0) };
 
-		public static int[] NearbyCellsDirection = new int[8] { 56,0,8,16,24,32,40,48 };
+		public static int[] NearbyCellsDirection = new int[8] { 56, 0, 8, 16, 24, 32, 40, 48 };
 
 
 		//							y
@@ -64,6 +64,21 @@ namespace WindowsFormsApp1.Static
 				Directions2[i] = (1.42 * x, 1.42 * y);
 				DirectionsOpposite[i] = (i + NumberOfDirections / 2) % NumberOfDirections;
 			}
+		}
+
+		public static int GetDirDiff(int dir1, int dir2)
+		{
+			var diff = dir1 - dir2;
+
+			//while (dir1 < 0) dir1 += NumberOfDirections;
+			//while (dir1 >= NumberOfDirections) dir1 -= NumberOfDirections;
+			//while (dir2 < 0) dir2 += NumberOfDirections;
+			//while (dir2 >= NumberOfDirections) dir2 -= NumberOfDirections;
+			
+			if (diff < 0) diff = -diff;
+			while (diff >= NumberOfDirections) diff -= NumberOfDirections;
+			if (diff > 32) diff = NumberOfDirections - diff;
+			return diff;
 		}
 
 		public static int GetOppositeDirection(int dir)

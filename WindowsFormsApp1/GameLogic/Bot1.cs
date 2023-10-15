@@ -354,6 +354,7 @@ namespace WindowsFormsApp1.GameLogic
 			byte par;
 			bool ev;
 			bool realCmd;
+			bool bigrotate = false;
 
 			do
 			{
@@ -363,10 +364,10 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					switch (cmd)
 					{
-						case Cmd.RotateRelative: RotateRelative(par); break;
-						case Cmd.RotateRelativeContact: RotateRelativeContact(par); break;
-						case Cmd.RotateBackward: RotateBackward(); break;
-						case Cmd.RotateBackwardContact: RotateBackwardContact(); break;
+						case Cmd.RotateRelative: (_ , bigrotate) = RotateRelative(par); break;
+						case Cmd.RotateRelativeContact: (_, bigrotate) = RotateRelativeContact(par); break;
+						case Cmd.RotateBackward: (_, bigrotate) = RotateBackward(); break;
+						case Cmd.RotateBackwardContact: (_, bigrotate) = RotateBackwardContact(); break;
 						case Cmd.LookAround: LookAround(); break;
 						case Cmd.StepRelative: StepRelative(par); break;
 						case Cmd.StepRelativeContact: StepRelativeContact(par); break;
@@ -382,8 +383,8 @@ namespace WindowsFormsApp1.GameLogic
 					realCmd = true;
 					switch (cmd)
 					{
-						case Cmd.RotateAbsolute: shift = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-						case Cmd.RotateRelative: shift = RotateRelative(G.GetDirectionFromNextCommand(Pointer, true)); break;
+						case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
+						case Cmd.RotateRelative: (shift, bigrotate) = RotateRelative(G.GetDirectionFromNextCommand(Pointer, true)); break;
 						case Cmd.StepForward1: shift = StepForward(); break;    // (int)refContent
 						case Cmd.StepForward2: shift = StepForward(); break;    // (int)refContent
 						case Cmd.EatForward1: shift = EatForward(); break;      // (int)refContent
@@ -419,52 +420,67 @@ namespace WindowsFormsApp1.GameLogic
 
 				cntJump++;
 			}
-			while (!Data.CompleteCommands[cmd] && cntJump < Data.MaxUncompleteJump);
+			while (!Data.CompleteCommands[cmd] && !bigrotate && cntJump < Data.MaxUncompleteJump);
 		}
 
 		//===================================================================================================
 		//// Rotate
 		//1 C
-		private int RotateAbsolute(int dir)
+		private (int, bool) RotateAbsolute(int dir)
 		{
-			return Rotate(dir % Dir.NumberOfDirections);
+			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
+
+			return (Rotate(dir % Dir.NumberOfDirections), bigrotate);
 		}
 
 		//2 CE
-		private int RotateRelative(int dir)
+		private (int, bool) RotateRelative(int dir)
 		{
-			return Rotate((Direction + dir) % Dir.NumberOfDirections);
+			var bigrotate = Dir.GetDirDiff(0, dir) > Dir.NumberOfDirections / 4;
+			return (Rotate((Direction + dir) % Dir.NumberOfDirections), bigrotate);
 		}
 
 		//3 E
-		private int RotateRelativeContact(int dir)
+		private (int, bool) RotateRelativeContact(int dir)
 		{
-			return Rotate((_recContactDir + dir) % Dir.NumberOfDirections);
+			var bigrotate = Dir.GetDirDiff(Direction, _recContactDir + dir) > Dir.NumberOfDirections / 4;
+
+			return (Rotate((_recContactDir + dir) % Dir.NumberOfDirections), bigrotate);
 		}
 
 		//4 E
-		private int RotateBackward()
+		private (int, bool) RotateBackward()
 		{
-			return Rotate(Dir.GetOppositeDirection(Direction));
+			var bigrotate = true;
+
+			return (Rotate(Dir.GetOppositeDirection(Direction)), bigrotate);
 		}
 
 		//5 E
-		private int RotateBackwardContact()
+		private (int, bool) RotateBackwardContact()
 		{
-			return Rotate(Dir.GetOppositeDirection(_recContactDir));
+			var dir = Dir.GetOppositeDirection(_recContactDir);
+			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
+
+			return (Rotate(dir), bigrotate);
 		}
 
 		//6 C - может быть лучше для E ?
-		private int RotateRandom()
+		private (int, bool) RotateRandom()
 		{
-			return Func.GetRandomDirection();
+			var dir = Func.GetRandomDirection();
+			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
+
+			return (Rotate(Func.GetRandomDirection()), bigrotate);
 		}
 
 		//7 C
-		private int AlignHorizontaly()
+		private (int, bool) AlignHorizontaly()
 		{
-			Direction = 16;
-			return 1;
+			var dir = 16;
+			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
+
+			return (Rotate(Func.GetRandomDirection()), bigrotate);
 		}
 
 		//// Step
