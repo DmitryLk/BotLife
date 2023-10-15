@@ -398,7 +398,7 @@ namespace WindowsFormsApp1.Static
 			updBot.OldPointer = pointer;
 			updBot.Age = 0;
 			updBot.Alive = true;
-			updBot.History = new CodeHistory();
+			updBot.hist = new CodeHistory();
             updBot.InsertedToReproductionList = false;
             updBot.EnergySet(en);
 			updBot.ResetMoved();
@@ -454,7 +454,7 @@ namespace WindowsFormsApp1.Static
 				bot.InsertedToDeathList = false;
 				bot.InsertedToReproductionList = false;
 				bot.Alive = true;
-				bot.History = new CodeHistory();
+				bot.hist = new CodeHistory();
 			}
 
 			bot.RefreshColor();
@@ -470,8 +470,6 @@ namespace WindowsFormsApp1.Static
                 Data.World[x, y] = botIndex;
             }
 		}
-
-
 
 		private static bool TryOccupyRandomFreeCellNearby(int Xi, int Yi, long reprBotIndex, out int nXi, out int nYi)
 		{
@@ -551,11 +549,13 @@ namespace WindowsFormsApp1.Static
 			var shield = new byte[Data.AttackShieldTypeCountMax];
 			var attack = new byte[Data.AttackShieldTypeCountMax];
 			var attackTypes = new List<(byte, byte)>();
+			var attackTypesCount = 0;
 
 			for (var i = 0; i < Data.AttackShieldSum; i++)
 			{
 				do
 				{
+					fail = false;
 					var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
 
 					if (ThreadSafeRandom.NextDouble() > .5)
@@ -571,12 +571,13 @@ namespace WindowsFormsApp1.Static
 					}
 					else
 					{
-						if (attack[type] >= Data.AttackMax)
+						if (attack[type] >= Data.AttackMax || (attack[type] == 0 && attackTypesCount >= Data.AttackTypeCountMax))
 						{
 							fail = true;
 						}
 						else
 						{
+							if (attack[type] == 0) attackTypesCount++;
 							attack[type]++;
 						}
 					}

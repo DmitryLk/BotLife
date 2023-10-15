@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography.Pkcs;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -36,6 +37,33 @@ namespace WindowsFormsApp1.Enums
 		// Other
 		public const byte Photosynthesis = 40;
 
+		public static string CmdName(byte cmd)
+		{
+			return cmd switch 
+			{
+				Cmd.RotateAbsolute => "Поворот абсолютно",
+				Cmd.RotateRelative => "Поворот относительно",
+				Cmd.RotateRelativeContact => "Поворот относительно контакта",
+				Cmd.RotateBackward => "Поворот назад",
+				Cmd.RotateBackwardContact => "Поворот назад от контакта",
+				Cmd.RotateRandom => "Поворот случайно",
+				Cmd.AlignHorizontaly => "Выповняться по горизонтали",
+				Cmd.StepForward1 => "Шаг вперед 1",
+				Cmd.StepForward2 => "Шаг вперед 2",
+				Cmd.StepRelative => "Шаг относительно",
+				Cmd.StepRelativeContact => "Шаг относительно контакта",
+				Cmd.StepBackward => "Шаг назад",
+				Cmd.StepBackwardContact => "Шаг назад от контакта",
+				Cmd.EatForward1 => "Есть впереди 1",
+				Cmd.EatForward2 => "Есть впереди 2",
+				Cmd.EatContact => "Есть контакт",
+				Cmd.LookForward1 => "Смотерть вперед 1",
+				Cmd.LookForward2 => "Смотреть вперед 2",
+				Cmd.LookAround => "Смотреть вокруг",
+				Cmd.Photosynthesis => "Фотосинтез",
+				_ => $"Cmd_{cmd.ToString()}"
+			};
+		}
 
 		public static HashSet<byte> GeneralCommands = new HashSet<byte>()
 		{
@@ -87,7 +115,7 @@ namespace WindowsFormsApp1.Enums
 			Cmd.EatForward1,
 			Cmd.EatForward2,
 			Cmd.EatContact,
-			Cmd.LookAround
+			//Cmd.LookAround
 			};
 
 		public static HashSet<byte> DirectionCommands = new HashSet<byte>()

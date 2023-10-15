@@ -58,8 +58,9 @@ namespace WindowsFormsApp1.Options
 		public int AttackShieldTypeCountMax;
 		public int AttackMax;
 		public int ShieldMax;
-        
-        public int HoldReproductionTime;
+		public int AttackTypeCountMax;
+
+		public int HoldReproductionTime;
 		public int GenomInfoPeriodPrint;
 		public int KeptTotalEnergy;
         public int MovedBiteStrength;

@@ -83,8 +83,24 @@ namespace WindowsFormsApp1.GameLogic
             IsBotColorModeChanged();
             IsDrawModeChanged();
 
-            await Task.Run(() => _WORLD.Step());
+			//var tot = Data.TotalEnergy;
+			//var te = 0;
+			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			//{
+			//	te += Data.Bots[botNumber].Energy;
+			//}
+   //         var dif = te - tot;
 
+			await Task.Run(() => _WORLD.Step());
+
+   //         tot = Data.TotalEnergy;
+			//te = 0;
+			//for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
+			//{
+			//	te += Data.Bots[botNumber].Energy;
+			//}
+			//dif = te - tot;
+			
             Test.NextInterval(2, "add food");
 
             if (Data.DrawMode == DrawMode.EachStep ||

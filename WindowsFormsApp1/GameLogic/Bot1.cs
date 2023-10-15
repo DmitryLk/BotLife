@@ -57,7 +57,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int OldPointer;
 
 
-		public CodeHistory History;
+		public CodeHistory hist;
 		//public BotLog Log;
 
 		public double Xd;
@@ -223,7 +223,7 @@ namespace WindowsFormsApp1.GameLogic
 			Pointer = pointer;
 			OldPointer = pointer;
 			this.G = genom;
-			History = new CodeHistory();
+			hist = new CodeHistory();
 			//Log = new BotLog();
 
 			Direction = dir;
@@ -285,13 +285,14 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
-			if (Data.HistoryOn) History.BeginNewStep();
+			if (Data.HistoryOn) hist.BeginNewStep();
 
 			CommandCycle();
 
 			Age++;
 
-			EnergyChange(Data.DeltaEnergyOnStep);
+			var realchange = EnergyChange(Data.DeltaEnergyOnStep);
+			if (Data.DeltaEnergyOnStep != 0) Interlocked.Add(ref Data.TotalEnergy, -realchange);
 
 			if (Data.BotColorMode == BotColorMode.GenomAge || Data.BotColorMode == BotColorMode.Age)
 			{
@@ -302,7 +303,6 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-			if (Data.DeltaEnergyOnStep != 0) Interlocked.Add(ref Data.TotalEnergy, Data.DeltaEnergyOnStep);
 
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
@@ -318,7 +318,7 @@ namespace WindowsFormsApp1.GameLogic
 		private (bool, byte, byte) GetCommand1()
 		{
 			var cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
-			if (Data.HistoryOn) History.SavePtr(Pointer);
+			if (Data.HistoryOn) hist.SavePtr(Pointer);
 			return (false, cmd, 0);
 		}
 
@@ -340,7 +340,7 @@ namespace WindowsFormsApp1.GameLogic
 			else
 			{
 				cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
-				if (Data.HistoryOn) History.SavePtr(Pointer);
+				if (Data.HistoryOn) hist.SavePtr(Pointer);
 				return (false, cmd, 0);
 			}
 		}
@@ -391,7 +391,7 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.LookForward1: shift = LookForward(); break;    // (int)refContent
 						case Cmd.LookForward2: shift = LookForward(); break;    // (int)refContent
 						case Cmd.Photosynthesis: shift = Photosynthesis(); break;
-						//case Cmd.LookAround: shift = LookAround(); break;
+						case Cmd.LookAround: shift = LookAround(); break;
 						//case Cmd.RotateRandom: shift = RotateRandom(); break;
 						//case Cmd.AlignHorizontaly: shift = AlignHorizontaly(); break;
 						default: shift = cmd; break;
@@ -504,7 +504,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			return Eat(GetDirForward());
 		}
-		
+
 		//22 E
 		private int EatContact()
 		{
@@ -521,6 +521,7 @@ namespace WindowsFormsApp1.GameLogic
 		//32 CE
 		private int LookAround()
 		{
+			LookAroundForEnemy();
 			return 1;
 		}
 
@@ -582,7 +583,7 @@ namespace WindowsFormsApp1.GameLogic
 			int nXi, nYi;
 			long cont;
 			int i = 0;
-			var ent = (Energy - Data.ReproductionBotEnergy) / 4;
+			var ent = (Energy - Data.ReproductionBotEnergy) / 2;
 
 			if (ent > 0)
 			{
@@ -594,7 +595,7 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						cont = Data.World[nXi, nYi];
 
-						if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
+						if (cont >= 1 && cont <= Data.CurrentNumberOfBots && G.IsRelative(Data.Bots[cont].G))
 						{
 							var targetBot = Data.Bots[cont];
 
@@ -634,6 +635,7 @@ namespace WindowsFormsApp1.GameLogic
 					if (Data.World[nXi, nYi] == 65500)
 					{
 						Data.World[nXi, nYi] = 0;
+
 						grass = true;
 					}
 				}
@@ -642,6 +644,8 @@ namespace WindowsFormsApp1.GameLogic
 			if (grass)
 			{
 				EnergyChange(Data.FoodEnergy);
+				Interlocked.Add(ref Data.TotalEnergy, Data.FoodEnergy);
+				Interlocked.Decrement(ref Data.CurrentNumberOfFood);
 				if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
 				return (int)RefContent.Grass;
 			}
@@ -791,6 +795,33 @@ namespace WindowsFormsApp1.GameLogic
 			};
 
 			return (int)refContent;
+		}
+
+		private void LookAroundForEnemy()
+		{
+			int nXi, nYi, dir;
+			Bot1 b;
+
+
+			for (var n = 0; n < 8; n++)
+			{
+				(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n);
+
+				if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+				{
+					var cont = Data.World[nXi, nYi];
+
+					if (cont >= 1 && cont <= Data.CurrentNumberOfBots && !G.IsRelative(Data.Bots[cont].G))
+					{
+						b = Data.Bots[cont];
+						dir = Dir.Round(Math.Atan2(Xd - b.Xd, b.Yd - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+						if (dir == 64) dir = 0;
+						//var dir1 = Dir.NearbyCellsDirection[n];
+						ActivateReceptor(6, dir);
+						break;
+					}
+				}
+			}
 		}
 
 		private int Rotate(int dir)
@@ -1109,28 +1140,16 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"OldPointer: {OldPointer}");
 			sb.AppendLine($"Pointer: {Pointer}");
 
-			if (History.historyPointerY >= 0)
+			if (hist.historyPointerY >= 0)
 			{
-				var (hist, histPtrCnt) = History.GetLastStepPtrs(delta);
+				var (hist, histPtrCnt) = this.hist.GetLastStepPtrs(delta);
 
 				sb.AppendLine($"jumps cnt: {histPtrCnt - 1}");
 				sb.AppendLine($"jumps: {string.Join(", ", hist.Take(histPtrCnt))}");
 
 				for (var i = 0; i < histPtrCnt; i++)
 				{
-					var cmdTxt = G.CodeCommon[hist[i]] switch
-					{
-						23 => "Поворот относительно",
-						24 => "Поворот абсолютно",
-						25 => "Фотосинтез",
-						26 => "Шаг относительно",  //шаг
-						27 => "Шаг абсолютно",
-						28 => "Есть относительно",    //съесть
-						29 => "Есть абсолютно",
-						30 => "Посмотерть относительно",  //посмотреть
-						31 => "Посмотерть абсолютно",
-						_ => ""
-					};
+					var cmdTxt = Cmd.CmdName(G.CodeCommon[hist[i]]);
 
 					var dirStr = Dir.GetDirectionStringFromCode(G.GetDirectionFromNextCommand(hist[i], false));
 					if (cmdTxt != "")

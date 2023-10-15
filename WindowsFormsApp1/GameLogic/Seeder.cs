@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
+using System.Threading;
 using System.Xml.Linq;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
@@ -42,11 +43,10 @@ namespace WindowsFormsApp1.GameLogic
                 {
                     if (Func.TryGetRandomFreeCell(out var x, out var y))
                     {
-						Data.TotalEnergy += Data.FoodEnergy;
+						Interlocked.Increment(ref Data.CurrentNumberOfFood);
 
 						Data.World[x, y] = (long)CellContent.Grass;
 						Func.FixChangeCell(x, y, Color.Green);
-
 					}
                 }
             }

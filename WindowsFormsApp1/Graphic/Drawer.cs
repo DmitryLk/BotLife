@@ -230,7 +230,7 @@ namespace WindowsFormsApp1.Graphic
 					_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
 				}
 
-				var (hist, histPtrCnt) = bot.History.GetLastStepPtrs(Data.DeltaHistory);
+				var (hist, histPtrCnt) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
 				if (histPtrCnt > 0)
 				{
 					byte ptr1 = hist[0];

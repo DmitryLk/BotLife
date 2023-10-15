@@ -1,4 +1,8 @@
-﻿using System;
+﻿//			var curBots = Interlocked.Decrement(ref _curBots);
+// 		private long _curBots = 0;
+
+
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
@@ -78,7 +82,7 @@ namespace WindowsFormsApp1.Static
 		public static int AttackShieldTypeCountMax;
 		public static int AttackMax;
 		public static int ShieldMax;
-
+		public static int AttackTypeCountMax;
 
 
 		public static int HoldReproductionTime;
@@ -142,6 +146,7 @@ namespace WindowsFormsApp1.Static
 		public static long MaxBotNumber;
 		public static long MutationCnt;
 		public static int ReportFrequencyCurrent;
+		public static long CurrentNumberOfFood;
 
 		public static int LensX;
 		public static int LensY;
@@ -313,6 +318,7 @@ namespace WindowsFormsApp1.Static
 			sb.AppendLine($"reproductionCnt: {TotalQtyBotReproduction}");
 			sb.AppendLine($"mutationCnt: {MutationCnt}");
 			sb.AppendLine($"TotalEnergy: {TotalEnergy.ToString("n", f)}");
+			sb.AppendLine($"FoodCount: {CurrentNumberOfFood}");
 
 			var te = 0;
 			for (long botNumber = 1; botNumber <= Data.CurrentNumberOfBots; botNumber++)
@@ -321,6 +327,8 @@ namespace WindowsFormsApp1.Static
 			}
 
 			sb.AppendLine($"ActualEnergy:{te.ToString("n", f)}");
+			//sb.AppendLine($"{(te - TotalEnergy).ToString("n", f)}");
+			sb.AppendLine($"{(TotalEnergy + CurrentNumberOfFood * FoodEnergy).ToString("n", f)}");
 
 			return sb.ToString();
 		}
@@ -402,6 +410,7 @@ namespace WindowsFormsApp1.Static
 			AttackShieldTypeCountMax = options.AttackShieldTypeCountMax;
 			AttackMax = options.AttackMax;
 			ShieldMax = options.ShieldMax;
+			AttackTypeCountMax = options.AttackTypeCountMax;
 
 			HoldReproductionTime = options.HoldReproductionTime;
 			GenomInfoPeriodPrint = options.GenomInfoPeriodPrint;

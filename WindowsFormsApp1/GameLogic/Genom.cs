@@ -302,10 +302,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public bool IsRelative(Genom genom2)
 		{
-			if (GenomHash == genom2.GenomHash || GenomHash == genom2.ParentHash || GenomHash == genom2.GrandHash) return true;
-			if (ParentHash == genom2.GenomHash || ParentHash == genom2.ParentHash || ParentHash == genom2.GrandHash) return true;
-			if (GrandHash == genom2.GenomHash || GrandHash == genom2.ParentHash || GrandHash == genom2.GrandHash) return true;
-			return false;
+			return GenomHash == genom2.GenomHash;
 		}
 
 		//=========================================================

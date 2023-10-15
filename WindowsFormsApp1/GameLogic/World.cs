@@ -31,7 +31,7 @@ namespace WindowsFormsApp1.GameLogic
             _seeder.SeedBots();
 
 
-            Data.SeedTotalEnergy = Data.TotalEnergy;
+            Data.SeedTotalEnergy = Data.TotalEnergy + Data.CurrentNumberOfFood * Data.FoodEnergy;
         }
 
         static long cnt51 = 0;
@@ -251,22 +251,22 @@ namespace WindowsFormsApp1.GameLogic
 
             Data.CurrentStep++;
 
-            while (Data.SeedFood && Data.TotalEnergy < Data.KeptTotalEnergy)
+            while (Data.SeedFood && Data.TotalEnergy +  Data.CurrentNumberOfFood * Data.FoodEnergy < Data.KeptTotalEnergy)
             {
                 if (Func.TryGetRandomFreeCell(out var x, out var y))
                 {
                     Data.World[x, y] = (long)CellContent.Grass;
                     Func.FixChangeCell(x, y, Color.Green);
-                    Data.TotalEnergy += Data.FoodEnergy;
+					Interlocked.Increment(ref Data.CurrentNumberOfFood);
 
-                    //var genom = Genom.CreateGenom();
-                    //Data.TotalEnergy += Data.InitialBotEnergy * 10;
-                    //var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-                    //Func.CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy * 10, genom);
+					//var genom = Genom.CreateGenom();
+					//Data.TotalEnergy += Data.InitialBotEnergy * 10;
+					//var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
+					//Func.CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy * 10, genom);
 
 
-                }
-                else
+				}
+				else
                 {
                     break;
                 }

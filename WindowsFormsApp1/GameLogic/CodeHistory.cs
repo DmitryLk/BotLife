@@ -40,6 +40,11 @@ namespace WindowsFormsApp1.GameLogic
         {
             historyPointerY = historyPointerY == maxy ? historyPointerY = 0 : historyPointerY + 1;
 
+            if (historyPointerY == maxy)
+            {
+                historyPointerY = 0;
+
+			}
             ptrs[historyPointerY] = 0;
         }
 

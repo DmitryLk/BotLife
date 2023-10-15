@@ -29,7 +29,26 @@ namespace WindowsFormsApp1.Static
 		public static (int, int)[] NearbyCells = new (int, int)[8]
 			{ (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0) };
 
+		public static int[] NearbyCellsDirection = new int[8] { 56,0,8,16,24,32,40,48 };
 
+
+		//							y
+		//							^
+		//							|
+		//							|
+		//							32
+		//							|
+		//					40		|
+		//							|		24
+		//							|
+		//							|
+		//  ---------48-------------------------16------------> x
+		//							|
+		//							|
+		//					56		|       8
+		//							|
+		//							0
+		//							|
 
 		static Dir()
 		{
@@ -41,6 +60,7 @@ namespace WindowsFormsApp1.Static
 				var x = Math.Sin(angle);
 				var y = -Math.Cos(angle);
 				Directions1[i] = (x, y);
+				//var dir1 = Dir.Round(Math.Atan2(-x, y) * NumberOfDirections / 2 / Math.PI + NumberOfDirections / 2);
 				Directions2[i] = (1.42 * x, 1.42 * y);
 				DirectionsOpposite[i] = (i + NumberOfDirections / 2) % NumberOfDirections;
 			}
