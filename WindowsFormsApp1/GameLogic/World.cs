@@ -255,17 +255,19 @@ namespace WindowsFormsApp1.GameLogic
             {
                 if (Func.TryGetRandomFreeCell(out var x, out var y))
                 {
-                    Data.World[x, y] = (long)CellContent.Grass;
-                    Func.FixChangeCell(x, y, Color.Green);
-					Interlocked.Increment(ref Data.CurrentNumberOfFood);
+                    // Добавить траву
+     //               Data.World[x, y] = (long)CellContent.Grass;
+     //               Func.FixChangeCell(x, y, Color.Green);
+					//Interlocked.Increment(ref Data.CurrentNumberOfFood);
 
-					//var genom = Genom.CreateGenom();
-					//Data.TotalEnergy += Data.InitialBotEnergy * 10;
-					//var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-					//Func.CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy * 10, genom);
+                    // Добавить нового бота
+                    var genom = Genom.CreateNewGenom();
+                    Data.TotalEnergy += Data.InitialBotEnergy * 10;
+                    var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
+                    Func.CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy * 10, genom);
 
 
-				}
+                }
 				else
                 {
                     break;

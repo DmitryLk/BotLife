@@ -356,8 +356,23 @@ namespace WindowsFormsApp1.GameLogic
         {
             Data.DelayForNewbie = !Data.DelayForNewbie;
         }
-        #endregion
-    }
+
+		public void ToggleReduceEnergyAtStep()
+		{
+            if (Data.DeltaEnergyOnStep == 0)
+            {
+				Data.DeltaEnergyOnStep = -1;
+                return;
+			}
+
+            if (Data.DeltaEnergyOnStep == -1) 
+            {
+				Data.DeltaEnergyOnStep = 0;
+                return;
+			}
+		}
+		#endregion
+	}
 }
 
 //await Task.Factory.StartNew(() => WorldStep(), TaskCreationOptions.LongRunning);

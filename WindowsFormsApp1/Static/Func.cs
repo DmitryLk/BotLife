@@ -103,7 +103,7 @@ namespace WindowsFormsApp1.Static
 				FixChangeCell(dBot.Xi, dBot.Yi, null); // при следующей отрисовке бот стерется с экрана
 			}
 
-			dBot.G.DecBot(dBot.Age);
+			dBot.G.DecBot(dBot.Age, dBot.BiteMeCount, dBot.BiteImCount);
 
 			// Разобраться надо ли обменивать этого бота
 			bool replace = false;
@@ -379,7 +379,7 @@ namespace WindowsFormsApp1.Static
 
 			var updBot = Data.BotDeath[ind];
 			var index = Data.BotDeath[ind].Index;
-			updBot.G.DecBot(updBot.Age);
+			updBot.G.DecBot(updBot.Age, updBot.BiteMeCount, updBot.BiteImCount);
 			var xiold = updBot.Xi;
 			var yiold = updBot.Yi;
 			//Interlocked.Increment(ref Removedbots1);
@@ -397,6 +397,8 @@ namespace WindowsFormsApp1.Static
 			updBot.Pointer = pointer;
 			updBot.OldPointer = pointer;
 			updBot.Age = 0;
+			updBot.BiteMeCount = 0;
+			updBot.BiteImCount = 0;
 			updBot.Alive = true;
 			updBot.hist = new CodeHistory();
             updBot.InsertedToReproductionList = false;
@@ -451,6 +453,8 @@ namespace WindowsFormsApp1.Static
 				bot.Pointer = pointer;
 				bot.OldPointer = pointer;
 				bot.Age = 0;
+				bot.BiteMeCount = 0;
+				bot.BiteImCount = 0;
 				bot.InsertedToDeathList = false;
 				bot.InsertedToReproductionList = false;
 				bot.Alive = true;

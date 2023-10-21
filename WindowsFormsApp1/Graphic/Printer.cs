@@ -89,8 +89,10 @@ namespace WindowsFormsApp1.Graphic
 				_dgv.Columns[3].Width = 60;     //Всего
 				_dgv.Columns[4].Width = 40;     //Возраст
 				_dgv.Columns[5].Width = 40;     //Ср. возр. ботов
-				_dgv.Columns[6].Width = 40;     //Активных
-				_dgv.Columns[7].Width = 150;
+				_dgv.Columns[6].Width = 40;     //Ср. укус. me ботов
+				_dgv.Columns[7].Width = 40;     //Ср. укус. im ботов
+				_dgv.Columns[8].Width = 40;     //Активных
+				_dgv.Columns[9].Width = 150;
 
 				//             HeaderText = "Геном",
 				//             HeaderText = "",

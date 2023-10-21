@@ -241,9 +241,9 @@ namespace WindowsFormsApp1.Static
 			GeneralCommandsValues = new byte[GeneralCommandsValuesLength];
 			GeneralCommandsValues = Cmd.GeneralCommands.ToArray();
 
-			EventCommandsValuesLength = Cmd.EventCommands.Count;
+			EventCommandsValuesLength = Cmd.ReactionCommands.Count;
 			EventCommandsValues = new byte[EventCommandsValuesLength];
-			EventCommandsValues = Cmd.EventCommands.ToArray();
+			EventCommandsValues = Cmd.ReactionCommands.ToArray();
 
 			CompleteCommands = new bool[Data.MaxCode + 1];
 			Array.Clear(CompleteCommands, 0, CompleteCommands.Length);

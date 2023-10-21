@@ -42,6 +42,9 @@
 			this.button1 = new System.Windows.Forms.Button();
 			this.trackBar2 = new System.Windows.Forms.TrackBar();
 			this.checkBox3 = new System.Windows.Forms.CheckBox();
+			this.button2 = new System.Windows.Forms.Button();
+			this.button3 = new System.Windows.Forms.Button();
+			this.checkBox4 = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -195,7 +198,7 @@
 			// checkBox3
 			// 
 			this.checkBox3.AutoSize = true;
-			this.checkBox3.Location = new System.Drawing.Point(1046, 581);
+			this.checkBox3.Location = new System.Drawing.Point(1458, 468);
 			this.checkBox3.Name = "checkBox3";
 			this.checkBox3.Size = new System.Drawing.Size(114, 19);
 			this.checkBox3.TabIndex = 20;
@@ -203,11 +206,47 @@
 			this.checkBox3.UseVisualStyleBackColor = true;
 			this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
 			// 
+			// button2
+			// 
+			this.button2.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.button2.Location = new System.Drawing.Point(1458, 61);
+			this.button2.Name = "button2";
+			this.button2.Size = new System.Drawing.Size(28, 29);
+			this.button2.TabIndex = 21;
+			this.button2.Text = "G";
+			this.button2.UseVisualStyleBackColor = true;
+			this.button2.Click += new System.EventHandler(this.button2_Click);
+			// 
+			// button3
+			// 
+			this.button3.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.button3.Location = new System.Drawing.Point(1492, 61);
+			this.button3.Name = "button3";
+			this.button3.Size = new System.Drawing.Size(28, 29);
+			this.button3.TabIndex = 22;
+			this.button3.Text = "L";
+			this.button3.UseVisualStyleBackColor = true;
+			this.button3.Click += new System.EventHandler(this.button3_Click);
+			// 
+			// checkBox4
+			// 
+			this.checkBox4.AutoSize = true;
+			this.checkBox4.Location = new System.Drawing.Point(1458, 493);
+			this.checkBox4.Name = "checkBox4";
+			this.checkBox4.Size = new System.Drawing.Size(119, 19);
+			this.checkBox4.TabIndex = 23;
+			this.checkBox4.Text = "Reduce en at step";
+			this.checkBox4.UseVisualStyleBackColor = true;
+			this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1774, 1061);
+			this.Controls.Add(this.checkBox4);
+			this.Controls.Add(this.button3);
+			this.Controls.Add(this.button2);
 			this.Controls.Add(this.checkBox3);
 			this.Controls.Add(this.trackBar2);
 			this.Controls.Add(this.button1);
@@ -257,6 +296,9 @@
 		private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TrackBar trackBar2;
         private System.Windows.Forms.CheckBox checkBox3;
-    }
+		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Button button3;
+		private System.Windows.Forms.CheckBox checkBox4;
+	}
 }
 

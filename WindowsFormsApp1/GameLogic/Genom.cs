@@ -63,6 +63,8 @@ namespace WindowsFormsApp1.GameLogic
 		private long _curBots = 0;
 		private long _allBots = 0;
 		private long _removedBots = 0;
+		private long _biteMeCount = 0;
+		private long _biteImCount = 0;
 		private int _ageBots = 0;
 
 
@@ -76,6 +78,8 @@ namespace WindowsFormsApp1.GameLogic
 		public long AllBots { get => _allBots; }
 		public long RemovedBots { get => _removedBots; }
 		public int AgeBots { get => _ageBots; }
+		public long BiteMeBots { get => _biteMeCount; }
+		public long BiteImBots { get => _biteImCount; }
 
 		private Genom()
 		{
@@ -87,7 +91,7 @@ namespace WindowsFormsApp1.GameLogic
 			Interlocked.Increment(ref _curBots);
 			Interlocked.Increment(ref _allBots);
 		}
-		public void DecBot(int age)
+		public void DecBot(int age, int bitemecount, int biteimcount)
 		{
 			if (_curBots == 0)
 			{
@@ -97,6 +101,10 @@ namespace WindowsFormsApp1.GameLogic
 
 			var curBots = Interlocked.Decrement(ref _curBots);
 			Interlocked.Increment(ref _removedBots);
+			Interlocked.Increment(ref _removedBots);
+			Interlocked.Add(ref _biteMeCount, bitemecount);
+			Interlocked.Add(ref _biteImCount, biteimcount);
+
 
 			if (_curBots < 0 || curBots < 0)
 			{
@@ -110,7 +118,7 @@ namespace WindowsFormsApp1.GameLogic
 				Interlocked.Increment(ref DeleteGenomCounter);
 			}
 
-			_ageBots += age;
+			Interlocked.Add(ref _ageBots, age);
 		}
 
 		// Создание нового генома
@@ -330,7 +338,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (!Data.DgvPra)
 			{
-				sortableBindingList = new SortableBindingList<GenomStr>(Genom.GENOMS.Keys
+				sortableBindingList = new SortableBindingList<GenomStr>(GENOMS.Keys
 					.Where(g => Data.DgvOnlyLive ? g.CurBots > minCurBots : g.AllBots > 1)
 					.Select(g => new GenomStr
 					{
@@ -340,6 +348,8 @@ namespace WindowsFormsApp1.GameLogic
 						Total = g.AllBots,
 						Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
 						AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
+						Me = g.RemovedBots != 0 ? (float)g.BiteMeBots / g.RemovedBots : 0,
+						Im = g.RemovedBots != 0 ? (float)g.BiteImBots / g.RemovedBots : 0,
 						ActGen = g.Act.Count(g => g > 0),
 						Sh_Atc = $"{string.Join("/", g.Shield.Take(Data.AttackShieldTypeCount))} = {string.Join("/", g.Attack.Take(Data.AttackShieldTypeCount))}"
 					}).ToList());
@@ -373,6 +383,8 @@ namespace WindowsFormsApp1.GameLogic
 							Total = g.Sum(s => s.AllBots),
 							//Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
 							AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
+							Me = removed != 0 ? g.Sum(s => s.BiteMeBots) / removed : 0,
+							Im = removed != 0 ? g.Sum(s => s.BiteImBots) / removed : 0,
 							ActGen = 0
 						};
 					})
@@ -392,6 +404,8 @@ namespace WindowsFormsApp1.GameLogic
 		public long Total { get; set; }
 		public uint Age { get; set; }
 		public float AvBotAge { get; set; }
+		public float Im { get; set; }
+		public float Me { get; set; }
 		public int ActGen { get; set; }
 		public string Sh_Atc { get; set; }
 	}
