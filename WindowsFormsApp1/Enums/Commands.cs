@@ -87,20 +87,13 @@ namespace WindowsFormsApp1.Enums
 			Cmd.RotateRelativeContact,
 			Cmd.RotateBackward,
 			Cmd.RotateBackwardContact,
-			Cmd.LookAround,
+			//Cmd.LookAround,
 			//Cmd.StepRelative,
 			Cmd.StepRelativeContact,
 			Cmd.StepBackward,
 			Cmd.StepBackwardContact,
 			Cmd.EatForward1,
 			//Cmd.EatContact
-		};
-
-		public static HashSet<byte> BothCommands = new HashSet<byte>()
-		{
-			Cmd.RotateRelative,
-			Cmd.LookAround,
-			Cmd.EatForward1,
 		};
 
 		public static HashSet<byte> CompleteCommands = new HashSet<byte>()

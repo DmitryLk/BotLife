@@ -49,6 +49,7 @@ namespace WindowsFormsApp1.Graphic
 				{
 					Data.DeltaHistory = 0;
 					DrawCursor();
+					DrawReactions();
 				}
 			}
 			_PRESENTER.SendFrameToScreen();
@@ -268,6 +269,50 @@ namespace WindowsFormsApp1.Graphic
 				//INFO
 				_PRINTER.Print3(null);
 				_PRINTER.Print4(null, Data.DeltaHistory);
+			}
+		}
+
+		// информация по событиям/реакциям (работает только на паузе)
+		public void DrawReactions()
+		{
+			var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
+			if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
+			{
+				var bot = Data.Bots[cursorCont];
+
+				//TEXT
+				_PRESENTER.ClearGraphicsOnReactionsFrame();
+				for (var i = 0; i < Data.GenomEvents; i++)
+				{
+					for (var j = 0; j < Data.GenomEventsLenght; j++)
+					{
+						var code = bot.G.CodeForEvents[i, j, 0];
+						var par = bot.G.CodeForEvents[i, j, 1];
+						var absDirStr = Dir.GetDirectionStringFromCode(par);
+
+						_PRESENTER.DrawTextOnReactionsFrame(j, i, code.ToString(), Color.Black);
+						_PRESENTER.DrawSmallTextOnReactionsFrame(j, i, 20, 22, absDirStr, Color.Black);
+					}
+				}
+
+				//IMAGES
+				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+				Color color;
+				int x1, y1, x2, y2;
+				for (var i = 0; i < Data.GenomEvents; i++)
+				{
+					for (var j = 0; j < Data.GenomEventsLenght; j++)
+					{
+						_PRESENTER.DrawCodeCellOnReactionsFrame(j, i, Color.Black);
+					}
+				}
+
+				_PRESENTER.SendReactionsFrameToScreen();
+			}
+			else
+			{
+				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditEmptyArray);
+				_PRESENTER.SendReactionsFrameToScreen();
 			}
 		}
 	}

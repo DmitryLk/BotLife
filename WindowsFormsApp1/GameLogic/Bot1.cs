@@ -468,7 +468,7 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.RotateRelativeContact: (_, bigrotate) = RotateRelativeContact(par); break;
 						case Cmd.RotateBackward: (_, bigrotate) = RotateBackward(); break;
 						case Cmd.RotateBackwardContact: (_, bigrotate) = RotateBackwardContact(); break;
-						case Cmd.LookAround: LookAround(); break;
+						//case Cmd.LookAround: LookAround(); break;
 						//case Cmd.StepRelative: StepRelative(par); break;
 						case Cmd.StepRelativeContact: StepRelativeContact(par); break;
 						case Cmd.StepBackward: StepBackward(); break;

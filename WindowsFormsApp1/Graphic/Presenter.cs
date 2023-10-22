@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.GameLogic;
+using WindowsFormsApp1.Graphic;
 using WindowsFormsApp1.Static;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -47,10 +48,17 @@ namespace WindowsFormsApp1.Graphic
         private Font _font3;
         private StringFormat _stringFormat;
         private const float CursorPart = 0.95f;
+		private Graphics _cursorGraphics;
 
-        private Graphics _cursorGraphics;
+		private Bitmap _reactionsBitmap;
+		private ImageWrapper _reactionsImageWrapper;
+		private Graphics _reactionsGraphics;
+		private int _reactionCodeCellWidth;
+		private int _reactionCodeCellHeight;
 
-        private Color _fon;
+
+
+		private Color _fon;
         private PictureBox[] _pictureBoxes;
 
 
@@ -64,7 +72,7 @@ namespace WindowsFormsApp1.Graphic
 
             ConfigureMainBitmap();
             ConfigureLensBitmap();
-            ConfigureCursorBitmap();
+            ConfigureCursorReactionsBitmap();
         }
 
         public void ConfigureMainBitmap()
@@ -92,7 +100,7 @@ namespace WindowsFormsApp1.Graphic
         }
 
 
-        public void ConfigureCursorBitmap()
+        public void ConfigureCursorReactionsBitmap()
         {
             var cursorBitmapWidth = 350;
             var cursorBitmapHeight = 300;
@@ -125,10 +133,24 @@ namespace WindowsFormsApp1.Graphic
             _stringFormat = new StringFormat();
             _stringFormat.LineAlignment = StringAlignment.Center;
             _stringFormat.Alignment = StringAlignment.Center;
-        }
 
-        //MAIN////////////////////////////////////////////////////////////////////////////////////////////////////
-        public void StartNewFrame(BitmapCopyType type)
+
+			var reactionBitmapWidth = 160;
+			var reactionBitmapHeight = 300;
+			_reactionCodeCellWidth = 30;
+			_reactionCodeCellHeight = 30;
+			_pictureBoxes[3].Size = new Size(reactionBitmapWidth, reactionBitmapHeight);
+			_reactionsBitmap = new Bitmap(reactionBitmapWidth, reactionBitmapHeight);
+			_pictureBoxes[3].Image = _reactionsBitmap;
+			_reactionsImageWrapper = new ImageWrapper(_reactionsBitmap, true);
+			_reactionsGraphics = Graphics.FromImage(_reactionsBitmap);
+			_reactionsGraphics.SmoothingMode = SmoothingMode.AntiAlias;
+			_reactionsGraphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+			_reactionsGraphics.TextContrast = 0;
+		}
+
+		//MAIN////////////////////////////////////////////////////////////////////////////////////////////////////
+		public void StartNewFrame(BitmapCopyType type)
         {
             _mainImageWrapper.StartEditing(type);
         }
@@ -249,12 +271,46 @@ namespace WindowsFormsApp1.Graphic
         }
 
 
+		//REACTIONS////////////////////////////////////////////////////////////////////////////////////////////////////
+		public void StartNewReactionsFrame(BitmapCopyType type)
+		{
+			_reactionsImageWrapper.StartEditing(type);
+		}
 
-        public void Dispose()
+		public void ClearGraphicsOnReactionsFrame()
+		{
+			_reactionsImageWrapper.ClearBitmap();
+		}
+
+		public void DrawTextOnReactionsFrame(int x, int y, string code, Color color)
+		{
+			var textBrush = new SolidBrush(color);
+			_reactionsGraphics.DrawString(code, _font2, textBrush, x * _reactionCodeCellWidth + 15, y * _reactionCodeCellHeight + 12, _stringFormat);
+    	}
+
+		public void DrawSmallTextOnReactionsFrame(int x, int y, int dx, int dy, string code, Color color)
+		{
+			_reactionsGraphics.DrawString(code, _font3, _smallTextBrush, x * _reactionCodeCellWidth + dx, y * _reactionCodeCellHeight + dy, _stringFormat);
+		}
+
+		public void DrawCodeCellOnReactionsFrame(int x, int y, Color? color = null)
+		{
+			_reactionsImageWrapper.EmptySquare2(x * _reactionCodeCellWidth + 1, y * _reactionCodeCellHeight + 1, _reactionCodeCellWidth - 2, _reactionCodeCellHeight - 2, color ?? _fon);
+		}
+
+		public void SendReactionsFrameToScreen()
+		{
+			_reactionsImageWrapper.EndEditing();
+			_pictureBoxes[3].Refresh();
+		}
+
+
+		public void Dispose()
         {
             _mainBitmap.Dispose();
             _cursorGraphics.Dispose();
-            _mainImageWrapper.Dispose();
-        }
-    }
+			_mainImageWrapper.Dispose();
+			_reactionsImageWrapper.Dispose();
+		}
+	}
 }

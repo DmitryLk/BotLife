@@ -32,11 +32,11 @@ namespace WindowsFormsApp1
 
 
 			Form2 = new Form2(this);
-			var (lensPictureBox, cursorPictureBox, objTextBox1, objTextBox2) = Form2.GetControlsLensForm();
+			var (lensPictureBox, cursorPictureBox, reactionsPictureBox, objTextBox1, objTextBox2) = Form2.GetControlsLensForm();
 
 			Data.Initialize();
 
-			var pictureBoxes = new[] { pictureBox1, lensPictureBox, cursorPictureBox };
+			var pictureBoxes = new[] { pictureBox1, lensPictureBox, cursorPictureBox, reactionsPictureBox };
 			var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2, textBox4, textBox5 };
 
 			var presenter = new Presenter(pictureBoxes);

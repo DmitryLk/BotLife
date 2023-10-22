@@ -346,8 +346,8 @@ namespace WindowsFormsApp1.GameLogic
 						GenomColor = g.Color,
 						Live = g.CurBots,
 						Total = g.AllBots,
-						Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
-						AvBotAge = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
+						GAge = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
+						Age = g.RemovedBots != 0 ? g.AgeBots / g.RemovedBots : 0,
 						Me = g.RemovedBots != 0 ? (float)g.BiteMeBots / g.RemovedBots : 0,
 						Im = g.RemovedBots != 0 ? (float)g.BiteImBots / g.RemovedBots : 0,
 						ActGen = g.Act.Count(g => g > 0),
@@ -382,7 +382,7 @@ namespace WindowsFormsApp1.GameLogic
 							Live = g.Sum(s => s.CurBots),
 							Total = g.Sum(s => s.AllBots),
 							//Age = (g.CurBots > 0 ? Data.CurrentStep : g.EndStep) - g.BeginStep,
-							AvBotAge = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
+							Age = removed != 0 ? g.Sum(s => s.AgeBots) / removed : 0,
 							Me = removed != 0 ? g.Sum(s => s.BiteMeBots) / removed : 0,
 							Im = removed != 0 ? g.Sum(s => s.BiteImBots) / removed : 0,
 							ActGen = 0
@@ -402,8 +402,8 @@ namespace WindowsFormsApp1.GameLogic
 		public Color GenomColor { get; set; }
 		public long Live { get; set; }
 		public long Total { get; set; }
-		public uint Age { get; set; }
-		public float AvBotAge { get; set; }
+		public uint GAge { get; set; }
+		public float Age { get; set; }
 		public float Im { get; set; }
 		public float Me { get; set; }
 		public int ActGen { get; set; }
