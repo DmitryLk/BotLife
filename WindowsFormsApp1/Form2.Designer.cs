@@ -49,7 +49,7 @@
 			// 
 			// pictureBox2
 			// 
-			this.pictureBox2.Location = new System.Drawing.Point(167, 407);
+			this.pictureBox2.Location = new System.Drawing.Point(6, 406);
 			this.pictureBox2.Name = "pictureBox2";
 			this.pictureBox2.Size = new System.Drawing.Size(381, 314);
 			this.pictureBox2.TabIndex = 1;
@@ -59,22 +59,22 @@
 			// textBox1
 			// 
 			this.textBox1.Enabled = false;
-			this.textBox1.Location = new System.Drawing.Point(12, 407);
+			this.textBox1.Location = new System.Drawing.Point(409, 238);
 			this.textBox1.Multiline = true;
 			this.textBox1.Name = "textBox1";
 			this.textBox1.ReadOnly = true;
-			this.textBox1.Size = new System.Drawing.Size(154, 243);
+			this.textBox1.Size = new System.Drawing.Size(154, 252);
 			this.textBox1.TabIndex = 2;
 			this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
 			// textBox2
 			// 
 			this.textBox2.Enabled = false;
-			this.textBox2.Location = new System.Drawing.Point(7, 649);
+			this.textBox2.Location = new System.Drawing.Point(393, 496);
 			this.textBox2.Multiline = true;
 			this.textBox2.Name = "textBox2";
 			this.textBox2.ReadOnly = true;
-			this.textBox2.Size = new System.Drawing.Size(154, 180);
+			this.textBox2.Size = new System.Drawing.Size(302, 322);
 			this.textBox2.TabIndex = 3;
 			this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
 			// 
@@ -82,7 +82,7 @@
 			// 
 			this.pictureBox3.Location = new System.Drawing.Point(409, 4);
 			this.pictureBox3.Name = "pictureBox3";
-			this.pictureBox3.Size = new System.Drawing.Size(168, 396);
+			this.pictureBox3.Size = new System.Drawing.Size(348, 213);
 			this.pictureBox3.TabIndex = 4;
 			this.pictureBox3.TabStop = false;
 			this.pictureBox3.Click += new System.EventHandler(this.pictureBox3_Click);
@@ -91,7 +91,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1100, 830);
+			this.ClientSize = new System.Drawing.Size(769, 830);
 			this.Controls.Add(this.pictureBox3);
 			this.Controls.Add(this.textBox2);
 			this.Controls.Add(this.textBox1);

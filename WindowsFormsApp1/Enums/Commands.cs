@@ -48,20 +48,20 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateBackwardContact => "Поворот назад от контакта",
 				Cmd.RotateRandom => "Поворот случайно",
 				Cmd.AlignHorizontaly => "Выповняться по горизонтали",
-				Cmd.StepForward1 => "Шаг вперед 1",
-				Cmd.StepForward2 => "Шаг вперед 2",
+				Cmd.StepForward1 => "Шаг вперед",
+				Cmd.StepForward2 => "Шаг вперед",
 				Cmd.StepRelative => "Шаг относительно",
 				Cmd.StepRelativeContact => "Шаг относительно контакта",
 				Cmd.StepBackward => "Шаг назад",
 				Cmd.StepBackwardContact => "Шаг назад от контакта",
-				Cmd.EatForward1 => "Есть впереди 1",
-				Cmd.EatForward2 => "Есть впереди 2",
+				Cmd.EatForward1 => "Есть впереди",
+				Cmd.EatForward2 => "Есть впереди",
 				Cmd.EatContact => "Есть контакт",
-				Cmd.LookForward1 => "Смотерть вперед 1",
-				Cmd.LookForward2 => "Смотреть вперед 2",
+				Cmd.LookForward1 => "Смотерть вперед",
+				Cmd.LookForward2 => "Смотреть вперед",
 				Cmd.LookAround => "Смотреть вокруг",
 				Cmd.Photosynthesis => "Фотосинтез",
-				_ => $"Cmd_{cmd.ToString()}"
+				_ => $""
 			};
 		}
 

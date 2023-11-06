@@ -46,8 +46,8 @@ namespace WindowsFormsApp1.Graphic
         private Font _font1;
         private Font _font2;
         private Font _font3;
-        private StringFormat _stringFormat;
-        private const float CursorPart = 0.95f;
+		private StringFormat _stringFormat;
+		private const float CursorPart = 0.95f;
 		private Graphics _cursorGraphics;
 
 		private Bitmap _reactionsBitmap;
@@ -55,6 +55,7 @@ namespace WindowsFormsApp1.Graphic
 		private Graphics _reactionsGraphics;
 		private int _reactionCodeCellWidth;
 		private int _reactionCodeCellHeight;
+		private StringFormat _stringFormat2;
 
 
 
@@ -135,8 +136,8 @@ namespace WindowsFormsApp1.Graphic
             _stringFormat.Alignment = StringAlignment.Center;
 
 
-			var reactionBitmapWidth = 160;
-			var reactionBitmapHeight = 300;
+			var reactionBitmapWidth = 250;
+			var reactionBitmapHeight = 220;
 			_reactionCodeCellWidth = 30;
 			_reactionCodeCellHeight = 30;
 			_pictureBoxes[3].Size = new Size(reactionBitmapWidth, reactionBitmapHeight);
@@ -147,6 +148,9 @@ namespace WindowsFormsApp1.Graphic
 			_reactionsGraphics.SmoothingMode = SmoothingMode.AntiAlias;
 			_reactionsGraphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 			_reactionsGraphics.TextContrast = 0;
+			_stringFormat2 = new StringFormat();
+			_stringFormat2.LineAlignment = StringAlignment.Center;
+			_stringFormat2.Alignment = StringAlignment.Near;
 		}
 
 		//MAIN////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -286,7 +290,13 @@ namespace WindowsFormsApp1.Graphic
 		{
 			var textBrush = new SolidBrush(color);
 			_reactionsGraphics.DrawString(code, _font2, textBrush, x * _reactionCodeCellWidth + 15, y * _reactionCodeCellHeight + 12, _stringFormat);
-    	}
+		}
+
+		public void DrawTextOnReactionsFrame2(int x, int y, string code, Color color)
+		{
+			var textBrush = new SolidBrush(color);
+			_reactionsGraphics.DrawString(code, _font2, textBrush, x * _reactionCodeCellWidth, y * _reactionCodeCellHeight + 12, _stringFormat2);
+		}
 
 		public void DrawSmallTextOnReactionsFrame(int x, int y, int dx, int dy, string code, Color color)
 		{

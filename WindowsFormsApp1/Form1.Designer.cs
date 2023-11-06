@@ -45,6 +45,8 @@
 			this.button2 = new System.Windows.Forms.Button();
 			this.button3 = new System.Windows.Forms.Button();
 			this.checkBox4 = new System.Windows.Forms.CheckBox();
+			this.button4 = new System.Windows.Forms.Button();
+			this.button5 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -239,11 +241,35 @@
 			this.checkBox4.UseVisualStyleBackColor = true;
 			this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
 			// 
+			// button4
+			// 
+			this.button4.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.button4.Location = new System.Drawing.Point(1458, 96);
+			this.button4.Name = "button4";
+			this.button4.Size = new System.Drawing.Size(50, 45);
+			this.button4.TabIndex = 24;
+			this.button4.Text = "Enter";
+			this.button4.UseVisualStyleBackColor = true;
+			this.button4.Click += new System.EventHandler(this.button4_Click);
+			// 
+			// button5
+			// 
+			this.button5.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.button5.Location = new System.Drawing.Point(1458, 147);
+			this.button5.Name = "button5";
+			this.button5.Size = new System.Drawing.Size(80, 26);
+			this.button5.TabIndex = 25;
+			this.button5.Text = "Space";
+			this.button5.UseVisualStyleBackColor = true;
+			this.button5.Click += new System.EventHandler(this.button5_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1774, 1061);
+			this.Controls.Add(this.button5);
+			this.Controls.Add(this.button4);
 			this.Controls.Add(this.checkBox4);
 			this.Controls.Add(this.button3);
 			this.Controls.Add(this.button2);
@@ -299,6 +325,8 @@
 		private System.Windows.Forms.Button button2;
 		private System.Windows.Forms.Button button3;
 		private System.Windows.Forms.CheckBox checkBox4;
+		private System.Windows.Forms.Button button4;
+		private System.Windows.Forms.Button button5;
 	}
 }
 

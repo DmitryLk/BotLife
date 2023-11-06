@@ -218,37 +218,38 @@ namespace WindowsFormsApp1.Graphic
 				_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
 				Color color;
 				int x1, y1, x2, y2;
+				var (hist, histPtrCnt, pointer, oldpointer, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
 				for (var i = 0; i < Data.GenomLength; i++)
 				{
 					x1 = i % 8;
 					y1 = i / 8;
-					color = i == bot.Pointer
-						? Color.Aqua
-						: i == bot.OldPointer
-							? Color.Red
-							: Color.Gray;
+
+					color = Color.Gray;
+
+					if ((byte)i == oldpointer) color = Color.Orange;
+					if ((byte)i == pointer) color = Color.GreenYellow;
 
 					_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
 				}
 
-				var (hist, histPtrCnt) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
 				if (histPtrCnt > 0)
 				{
-					byte ptr1 = hist[0];
+					byte ptr1 = hist[0].ptr;
 					byte ptr2;
 					for (var i = 1; i < histPtrCnt; i++)
 					{
-						ptr2 = hist[i];
+						ptr2 = hist[i].ptr;
 
 						x1 = ptr1 % 8;
 						y1 = ptr1 / 8;
 						x2 = ptr2 % 8;
 						y2 = ptr2 / 8;
-						color = i == 1
-							? Color.Blue
-							: i == histPtrCnt - 1
-								? Color.Red
-								: Color.DarkOrchid;
+
+						color = Color.DarkOrchid;
+
+						if (i == 1) color = Color.Aqua;
+						if (i == histPtrCnt - 1) color = Color.Orange;
+
 						ptr1 = ptr2;
 
 						_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
@@ -292,7 +293,21 @@ namespace WindowsFormsApp1.Graphic
 
 						_PRESENTER.DrawTextOnReactionsFrame(j, i, code.ToString(), Color.Black);
 						_PRESENTER.DrawSmallTextOnReactionsFrame(j, i, 20, 22, absDirStr, Color.Black);
+
 					}
+
+					var rn = i switch
+					{
+						0 => "1 bite",
+						1 => "2 bot rel",
+						2 => "2 bot bigrot",
+						3 => "2 bot nobigrot",
+						4 => "3 food",
+						5 => "4 mineral",
+						6 => "5 wall",
+						_ => "xz"
+					};
+					_PRESENTER.DrawTextOnReactionsFrame2(Data.GenomEventsLenght , i, rn, Color.Green);
 				}
 
 				//IMAGES

@@ -404,5 +404,15 @@ namespace WindowsFormsApp1
 		{
 			Game.ToggleReduceEnergyAtStep();
 		}
+
+		private void button4_Click(object sender, EventArgs e)
+		{
+			PauseToggle();
+		}
+
+		private void button5_Click(object sender, EventArgs e)
+		{
+			StepPause();
+		}
 	}
 }
