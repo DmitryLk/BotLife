@@ -57,6 +57,7 @@ namespace WindowsFormsApp1.GameLogic
 		public byte bNew;
 		public byte cNew;
 		public bool reactionNew;
+		private int _tm = 0;
 
 
 		public CodeHistory hist;
@@ -470,7 +471,6 @@ namespace WindowsFormsApp1.GameLogic
 		private void CommandCycle()
 		{
 			byte cmd;
-			var tm = 0;
 			bool lastcmd;
 			int cntJmp = 0;
 
@@ -484,15 +484,15 @@ namespace WindowsFormsApp1.GameLogic
 					switch (cmd)
 					{
 						//case Cmd.RotateRelative: (_ , bigrotate) = RotateRelative(par); break;
-						case Cmd.RotateRelativeContact: tm += RotateRelativeContact(par); break;
-						case Cmd.RotateBackward: tm += RotateBackward(); break;
-						case Cmd.RotateBackwardContact: tm += RotateBackwardContact(); break;
+						case Cmd.RotateRelativeContact: _tm += RotateRelativeContact(par); break;
+						case Cmd.RotateBackward: _tm += RotateBackward(); break;
+						case Cmd.RotateBackwardContact: _tm += RotateBackwardContact(); break;
 						//case Cmd.LookAround: tm += LookAround(); break;
 						//case Cmd.StepRelative: tm += StepRelative(par); break;
-						case Cmd.StepRelativeContact: tm += StepRelativeContact(par); break;
-						case Cmd.StepBackward: tm += StepBackward(); break;
-						case Cmd.StepBackwardContact: tm += StepBackwardContact(); break;
-						case Cmd.EatForward1: tm += EatForward(); break;
+						case Cmd.StepRelativeContact: _tm += StepRelativeContact(par); break;
+						case Cmd.StepBackward: _tm += StepBackward(); break;
+						case Cmd.StepBackwardContact: _tm += StepBackwardContact(); break;
+						case Cmd.EatForward1: _tm += EatForward(); break;
 						//case Cmd.EatContact: tm += EatContact(); break;
 						default: break;
 					};
@@ -504,15 +504,15 @@ namespace WindowsFormsApp1.GameLogic
 					switch (cmd)
 					{
 						//case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-						case Cmd.RotateRelative: tm += RotateRelative(par); break;
-						case Cmd.StepForward1: tm += StepForward(); break;
-						case Cmd.StepForward2: tm += StepForward(); break;
-						case Cmd.EatForward1: tm += EatForward(); break;
-						case Cmd.EatForward2: tm += EatForward(); break;
-						case Cmd.LookForward1: tm += LookForward(); break;
-						case Cmd.LookForward2: tm += LookForward(); break;
-						case Cmd.Photosynthesis: tm += Photosynthesis(); break;
-						case Cmd.LookAround: tm += LookAround(); break;
+						case Cmd.RotateRelative: _tm += RotateRelative(par); break;
+						case Cmd.StepForward1: _tm += StepForward(); break;
+						case Cmd.StepForward2: _tm += StepForward(); break;
+						case Cmd.EatForward1: _tm += EatForward(); break;
+						case Cmd.EatForward2: _tm += EatForward(); break;
+						case Cmd.LookForward1: _tm += LookForward(); break;
+						case Cmd.LookForward2: _tm += LookForward(); break;
+						case Cmd.Photosynthesis: _tm += Photosynthesis(); break;
+						case Cmd.LookAround: _tm += LookAround(); break;
 						//case Cmd.RotateRandom: tm += RotateRandom(); break;
 						//case Cmd.AlignHorizontaly: tm += AlignHorizontaly(); break;
 						default: break;
@@ -534,7 +534,9 @@ namespace WindowsFormsApp1.GameLogic
 					if (Data.HistoryOn) hist.SaveCmdToHistory(p, cmd, par, false, string.Empty);
 				}
 			}
-			while (tm < 100 && !lastcmd && cntJmp<10);
+			while (_tm < 100 && !lastcmd && cntJmp<10);
+
+			_tm -= 100;
 
 			ShiftPointerGeneralToNextBranch();
 		}

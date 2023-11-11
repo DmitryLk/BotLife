@@ -399,7 +399,7 @@ namespace WindowsFormsApp1.Static
 			updBot.BiteMeCount = 0;
 			updBot.BiteImCount = 0;
 			updBot.Alive = true;
-			updBot.hist = new CodeHistory();
+			//updBot.hist = new CodeHistory();
             updBot.InsertedToReproductionList = false;
             updBot.EnergySet(en);
 			updBot.ResetMoved();
@@ -456,7 +456,7 @@ namespace WindowsFormsApp1.Static
 				bot.InsertedToDeathList = false;
 				bot.InsertedToReproductionList = false;
 				bot.Alive = true;
-				bot.hist = new CodeHistory();
+				//bot.hist = new CodeHistory();
 			}
 
 			bot.RefreshColor();
@@ -684,6 +684,7 @@ namespace WindowsFormsApp1.Static
 
 		public static bool Mutation()
 		{
+			//return false;
 			return Data.Mutation && ThreadSafeRandom.NextDouble() * 100 < Data.MutationProbabilityPercent;
 		}
 

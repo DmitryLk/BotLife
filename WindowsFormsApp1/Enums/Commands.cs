@@ -124,13 +124,13 @@ namespace WindowsFormsApp1.Enums
 			{
 				CmdType.Rotate => 3,
 				CmdType.StepSuccessful => 50,
-				CmdType.StepNotSuccessful => 10,
+				CmdType.StepNotSuccessful => 20,
 				CmdType.EatSuccessful => 50,
-				CmdType.EatNotSuccessful => 10,
-				CmdType.Look => 10,
+				CmdType.EatNotSuccessful => 20,
+				CmdType.Look => 20,
 				CmdType.LookAround => 60,
 				CmdType.PhotosynthesisSuccessful => 60,
-				CmdType.PhotosynthesisNotSuccessful => 10,
+				CmdType.PhotosynthesisNotSuccessful => 20,
 				_ => throw new Exception()
 			};
 		}
