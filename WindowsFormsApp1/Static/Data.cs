@@ -54,13 +54,14 @@ namespace WindowsFormsApp1.Static
 		public static int SeedWallsNumber;
 		public static int SeedPoisonNumber;
 
-		public static int GenomLength;
+		public static int GenomGeneralBranchCnt;
+		public static int GenomConditionBranchCnt;
+		public static int GenomReactionBranchCnt;
 		public static int MaxCode;
-		public static int GenomEvents;
-		public static int GenomEventsLenght;
-		public static int MaxUncompleteJump;
+		public static int MaxCmdInStep;
 		public static float MutationProbabilityPercent;
 		public static int MutationLenght;
+
 
 		public static int FoodEnergy;
 		public static int SeedBotEnergy;
@@ -165,8 +166,7 @@ namespace WindowsFormsApp1.Static
 		public static int GeneralCommandsValuesLength;
 		public static byte[] EventCommandsValues;
 		public static int EventCommandsValuesLength;
-		public static bool[] CompleteCommands;
-		public static bool[] DirectionCommands;
+		public static bool[] CommandsWithParameter;
 
 		// public static Log.Log Wlog;
 
@@ -245,18 +245,11 @@ namespace WindowsFormsApp1.Static
 			EventCommandsValues = new byte[EventCommandsValuesLength];
 			EventCommandsValues = Cmd.ReactionCommands.ToArray();
 
-			CompleteCommands = new bool[Data.MaxCode + 1];
-			Array.Clear(CompleteCommands, 0, CompleteCommands.Length);
-			foreach (var c in Cmd.CompleteCommands)
+			CommandsWithParameter = new bool[Data.MaxCode + 1];
+			Array.Clear(CommandsWithParameter, 0, CommandsWithParameter.Length);
+			foreach (var c in Cmd.CommandsWithParameter)
 			{
-				CompleteCommands[c] = true;
-			}
-
-			DirectionCommands = new bool[Data.MaxCode + 1];
-			Array.Clear(DirectionCommands, 0, DirectionCommands.Length);
-			foreach (var c in Cmd.DirectionCommands)
-			{
-				DirectionCommands[c] = true;
+				CommandsWithParameter[c] = true;
 			}
 
 			//var maxcmd = 0;
@@ -383,11 +376,11 @@ namespace WindowsFormsApp1.Static
 			SeedWallsNumber = options.SeedWallsNumber;
 			SeedPoisonNumber = options.SeedPoisonNumber;
 
-			GenomLength = options.GenomLength;
+			GenomGeneralBranchCnt = options.GenomGeneralBranchCnt;
+			GenomConditionBranchCnt = options.GenomConditionBranchCnt;
+			GenomReactionBranchCnt = options.GenomReactionBranchCnt;
 			MaxCode = options.MaxCode;
-			GenomEvents = options.GenomEvents;
-			GenomEventsLenght = options.GenomEventsLenght;
-			MaxUncompleteJump = options.MaxUncompleteJump;
+			MaxCmdInStep = options.MaxCmdInStep;
 			MutationProbabilityPercent = options.MutationProbabilityPercent;
 			MutationLenght = options.MutationLenght;
 

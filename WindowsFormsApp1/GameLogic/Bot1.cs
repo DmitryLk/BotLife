@@ -422,7 +422,7 @@ namespace WindowsFormsApp1.GameLogic
 			var cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
 			byte par;
 
-			if (Data.DirectionCommands[cmd])
+			if (Data.CommandsWithParameter[cmd])
 			{
 				par = G.GetDirectionFromNextCommand(Pointer, true);
 			}
@@ -456,7 +456,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
 
-				if (Data.DirectionCommands[cmd])
+				if (Data.CommandsWithParameter[cmd])
 				{
 					par = G.GetDirectionFromNextCommand(Pointer, true);
 				}
@@ -473,146 +473,53 @@ namespace WindowsFormsApp1.GameLogic
 		private void CommandCycle()
 		{
 			int cntJump = 0;
-			int cntRealCmd = 0;
 			byte cmd;
-			bool realCmd;
-			bool bigrotate = false;
-			bool look = false;
-			bool rotate = false;
+			var tm = 0;
 
 			do
 			{
 				(var ev, cmd, var par, var recprocnum) = GetCommand2();
-
-				realCmd = true;
 
 				if (ev)
 				{
 					switch (cmd)
 					{
 						//case Cmd.RotateRelative: (_ , bigrotate) = RotateRelative(par); break;
-						case Cmd.RotateRelativeContact:
-							if (!rotate)
-							{
-								bigrotate = RotateRelativeContact(par);
-								rotate = true;
-							}
-							else
-							{
-								realCmd = false;
-							}
-							break;
-
-						case Cmd.RotateBackward:
-							if (!rotate)
-							{
-								bigrotate = RotateBackward();
-								rotate = true;
-							}
-							else
-							{
-								realCmd = false;
-							}
-							break;
-
-
-						case Cmd.RotateBackwardContact:
-							if (!rotate)
-							{
-								bigrotate = RotateBackwardContact();
-								rotate = true;
-							}
-							else
-							{
-								realCmd = false;
-							}
-							break;
-
-						//case Cmd.LookAround: if (!look) LookAround(); else realCmd = false; look = true; break;
-						//case Cmd.StepRelative: StepRelative(par); break;
-						case Cmd.StepRelativeContact: StepRelativeContact(par); break;
-						case Cmd.StepBackward: StepBackward(); break;
-						case Cmd.StepBackwardContact: StepBackwardContact(); break;
-						case Cmd.EatForward1: EatForward(); break;
-						//case Cmd.EatContact: EatContact(); break;
-						default: realCmd = false; break;
+						case Cmd.RotateRelativeContact: tm += RotateRelativeContact(par); break;
+						case Cmd.RotateBackward: tm += RotateBackward(); break;
+						case Cmd.RotateBackwardContact: tm += RotateBackwardContact(); break;
+						//case Cmd.LookAround: tm += LookAround(); break;
+						//case Cmd.StepRelative: tm += StepRelative(par); break;
+						case Cmd.StepRelativeContact: tm += StepRelativeContact(par); break;
+						case Cmd.StepBackward: tm += StepBackward(); break;
+						case Cmd.StepBackwardContact: tm += StepBackwardContact(); break;
+						case Cmd.EatForward1: tm += EatForward(); break;
+						//case Cmd.EatContact: tm += EatContact(); break;
+						default: break;
 					};
 
 					if (Data.HistoryOn) hist.SaveCmdToHistory(0, cmd, par, true, realCmd, recprocnum);
 				}
 				else
 				{
-					int shift;
 					switch (cmd)
 					{
 						//case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-						case Cmd.RotateRelative:
-							if (!rotate)
-							{
-								bigrotate = RotateRelative(par);
-								rotate = true; 
-								shift = 2;
-							}
-							else
-							{
-								realCmd = false; 
-								shift = cmd;
-							}
-							break;
-
-						case Cmd.StepForward1: StepForward(); shift = 1; break;
-						case Cmd.StepForward2: StepForward(); shift = 1; break;
-						case Cmd.EatForward1: EatForward(); shift = 1; break;
-						case Cmd.EatForward2: EatForward(); shift = 1; break;
-						case Cmd.LookForward1:
-							if (!look) 
-							{ 
-								LookForward(); 
-								look = true; 
-								shift = 1; 
-							}
-							else 
-							{ 
-								realCmd = false; 
-								shift = cmd; 
-							}  
-							break;
-
-						case Cmd.LookForward2:
-							if (!look)
-							{
-								LookForward();
-								look = true;
-								shift = 1;
-							}
-							else
-							{
-								realCmd = false;
-								shift = cmd;
-							}
-							break;
-
-						case Cmd.Photosynthesis: Photosynthesis(); shift = 1; break;
-						case Cmd.LookAround:
-							if (!look)
-							{
-								LookAround();
-								look = true;
-								shift = 1;
-							}
-							else
-							{
-								realCmd = false;
-								shift = cmd;
-							}
-							break;
-
-						//case Cmd.RotateRandom: shift = RotateRandom(); break;
-						//case Cmd.AlignHorizontaly: shift = AlignHorizontaly(); break;
-						default: realCmd = false; shift = cmd; break;
+						case Cmd.RotateRelative: tm += RotateRelative(par);	break;
+						case Cmd.StepForward1: tm += StepForward(); break;
+						case Cmd.StepForward2: tm += StepForward(); break;
+						case Cmd.EatForward1: tm += EatForward(); break;
+						case Cmd.EatForward2: tm += EatForward(); break;
+						case Cmd.LookForward1: tm +=LookForward(); break;
+						case Cmd.LookForward2: tm += LookForward(); break;
+						case Cmd.Photosynthesis: tm += Photosynthesis(); break;
+						case Cmd.LookAround: tm += LookAround(); break;
+						//case Cmd.RotateRandom: tm += RotateRandom(); break;
+						//case Cmd.AlignHorizontaly: tm += AlignHorizontaly(); break;
+						default: break;
 					};
 
-					if (realCmd && (cmd == Cmd.StepForward1 || cmd == Cmd.StepForward2))
+					if (cmd == Cmd.StepForward1 || cmd == Cmd.StepForward2)
 					{
 						if (_moved < 50) _moved += 5;
 					}
@@ -627,135 +534,149 @@ namespace WindowsFormsApp1.GameLogic
 				}
 
 				cntJump++;
-				if (realCmd) cntRealCmd++;
 			}
-			while (!Data.CompleteCommands[cmd] && !bigrotate && cntJump < Data.MaxUncompleteJump && cntRealCmd < 3);
+			while (tm < 100 && cntJump < Data.MaxUncompleteJump);
 		}
 
 		//===================================================================================================
 		//// Rotate
 		//1 C
-		private bool RotateAbsolute(int dir)
+		private int RotateAbsolute(int dir)
 		{
-			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
 			Rotate(dir % Dir.NumberOfDirections);
-			return bigrotate;
+
+			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//2 CE
-		private bool RotateRelative(int dir)
+		private int RotateRelative(int dir)
 		{
-			var bigrotate = Dir.GetDirDiff(0, dir) > Dir.NumberOfDirections / 4;
 			Rotate((Direction + dir) % Dir.NumberOfDirections);
-			return bigrotate;
+
+			return Dir.GetDirDiff(0, dir) * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//3 E
-		private bool RotateRelativeContact(int dir)
+		private int RotateRelativeContact(int dir)
 		{
-			var bigrotate = Dir.GetDirDiff(Direction, _recContactDir + dir) > Dir.NumberOfDirections / 4;
 			Rotate((_recContactDir + dir) % Dir.NumberOfDirections);
-			return bigrotate;
+
+			return Dir.GetDirDiff(Direction, _recContactDir + dir) * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//4 E
-		private bool RotateBackward()
+		private int RotateBackward()
 		{
-			var bigrotate = true;
 			Rotate(Dir.GetOppositeDirection(Direction));
-			return bigrotate;
+
+			return Dir.NumberOfDirections/2 * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//5 E
-		private bool RotateBackwardContact()
+		private int RotateBackwardContact()
 		{
 			var dir = Dir.GetOppositeDirection(_recContactDir);
-			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
 			Rotate(dir);
 
-			return bigrotate;
+			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//6 C - может быть лучше для E ?
-		private bool RotateRandom()
+		private int RotateRandom()
 		{
 			var dir = Func.GetRandomDirection();
-			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
-			Rotate(Func.GetRandomDirection());
+			Rotate(dir);
 
-			return bigrotate;
+			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//7 C
-		private bool AlignHorizontaly()
+		private int AlignHorizontaly()
 		{
 			var dir = 16;
-			var bigrotate = Dir.GetDirDiff(Direction, dir) > Dir.NumberOfDirections / 4;
-			Rotate(Func.GetRandomDirection());
+			Rotate(dir);
 
-			return bigrotate;
+			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//// Step
 		//10 11 C
-		private void StepForward()
+		private int StepForward()
 		{
-			Step(GetDirForward());
+			var move = Step(GetDirForward());
+
+			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
 		}
 
 		//12 E
-		private void StepRelative(int dir)
+		private int StepRelative(int dir)
 		{
-			Step((Direction + dir) % Dir.NumberOfDirections);
+			var move = Step((Direction + dir) % Dir.NumberOfDirections);
+
+			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
 		}
 
 		//13 E
-		private void StepRelativeContact(int dir)
+		private int StepRelativeContact(int dir)
 		{
-			Step((_recContactDir + dir) % Dir.NumberOfDirections);
+			var move = Step((_recContactDir + dir) % Dir.NumberOfDirections);
+
+			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
 		}
 
 		//14 E
-		private void StepBackward()
+		private int StepBackward()
 		{
-			Step(Dir.GetOppositeDirection(Direction));
+			var move = Step(Dir.GetOppositeDirection(Direction));
+
+			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
 		}
 
 		//15 E
-		private void StepBackwardContact()
+		private int StepBackwardContact()
 		{
-			Step(Dir.GetOppositeDirection(_recContactDir));
+			var move = Step(Dir.GetOppositeDirection(_recContactDir));
+
+			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
 		}
 
 		//// Eat
 		//20 21 CE
-		private void EatForward()
+		private int EatForward()
 		{
-			Eat(GetDirForward());
+			var eat = Eat(GetDirForward());
+
+			return eat ? CmdType.CmdWeight(CmdType.EatSuccessful) : CmdType.CmdWeight(CmdType.EatNotSuccessful);
 		}
 
 		//22 E
-		private void EatContact()
+		private int EatContact()
 		{
-			Eat(_recContactDir);
+			var eat = Eat(_recContactDir);
+
+			return eat ? CmdType.CmdWeight(CmdType.EatSuccessful) : CmdType.CmdWeight(CmdType.EatNotSuccessful);
 		}
 
 		//// Look
 		//30 31 C
-		private void LookForward()
+		private int LookForward()
 		{
 			Look(GetDirForward());
+
+			return CmdType.CmdWeight(CmdType.Look);
 		}
 
 		//32 CE
-		private void LookAround()
+		private int LookAround()
 		{
 			LookAroundForEnemy();
+
+			return CmdType.CmdWeight(CmdType.LookAround);
 		}
 
 		//// Other
 		//40 C
-		private void Photosynthesis()
+		private int Photosynthesis()
 		{
 			if (Yi < Data.PhotosynthesisLayerHeight)
 			{
@@ -763,6 +684,12 @@ namespace WindowsFormsApp1.GameLogic
 				Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
 				G.Plant = true;
 				//genom.Color = Color.Green;
+
+				return CmdType.CmdWeight(CmdType.PhotosynthesisSuccessful);
+			}
+			else
+			{
+				return CmdType.CmdWeight(CmdType.PhotosynthesisNotSuccessful);
 			}
 		}
 
@@ -841,7 +768,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		private void Eat(int dir)
+		private bool Eat(int dir)
 		{
 			// Алгоритм:
 			// 1. Узнаем координаты клетки на которую надо посмотреть
@@ -852,7 +779,7 @@ namespace WindowsFormsApp1.GameLogic
 			(Data.LeftRightEdge && (nXi < 0 || nXi >= Data.WorldWidth)))
 			{
 				ActivateReceptor5(dir);
-				return;
+				return false;
 			}
 
 
@@ -877,7 +804,7 @@ namespace WindowsFormsApp1.GameLogic
 				Interlocked.Add(ref Data.TotalEnergy, Data.FoodEnergy);
 				Interlocked.Decrement(ref Data.CurrentNumberOfFood);
 				if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
-				return;
+				return true;
 			}
 
 
@@ -886,21 +813,23 @@ namespace WindowsFormsApp1.GameLogic
 			// Bot || Relative
 			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 			{
-				BiteBot(cont, dir);
+				return BiteBot(cont, dir);
 			}
-
-			return;
+			else
+			{
+				return false;
+			}
 		}
 
 
-		private void BiteBot(long cont, int dir)
+		private bool BiteBot(long cont, int dir)
 		{
 			var eatedBot = Data.Bots[cont];
 
 			// Растение не может есть животное
 			if (G.Plant && !eatedBot.G.Plant)
 			{
-				return;
+				return false;
 			}
 
 			// Животное может есть растение, но ни тогда когда его осталось мало
@@ -908,20 +837,20 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				if (eatedBot.G.CurBots < 2)
 				{
-					return;
+					return false;
 				}
 			}
 
 			// Не может есть родственника
 			if (G.GenomHash == eatedBot.G.GenomHash)
 			{
-				return;
+				return false;
 			}
 
 			// Не может есть нового
 			if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
 			{
-				return;
+				return false;
 			}
 
 			//var olden = Energy;
@@ -968,6 +897,11 @@ namespace WindowsFormsApp1.GameLogic
 
 				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
 				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 
 
@@ -1053,7 +987,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		#region Move
 
-		private void Step(int dir)
+		private bool Step(int dir)
 		{
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
@@ -1066,7 +1000,7 @@ namespace WindowsFormsApp1.GameLogic
 				// ПЕРЕМЕЩЕНИЕ
 				Xd = nXd;
 				Yd = nYd;
-				return;
+				return true;
 			}
 
 
@@ -1074,7 +1008,7 @@ namespace WindowsFormsApp1.GameLogic
 			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth)
 			{
 				ActivateReceptor5(dir);
-				return;
+				return false;
 			}
 
 
@@ -1116,7 +1050,7 @@ namespace WindowsFormsApp1.GameLogic
 				//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 
-				return;
+				return true;
 			}
 			else
 			{
@@ -1135,7 +1069,7 @@ namespace WindowsFormsApp1.GameLogic
 				}
 
 				//Func.CheckWorld2(Index, Num, Xi, Yi);
-				return;
+				return false;
 			}
 		}
 
@@ -1354,7 +1288,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 					string dirStr;
-					if (Data.DirectionCommands[hist[i].cmd])
+					if (Data.CommandsWithParameter[hist[i].cmd])
 					{
 						dirStr = Dir.GetDirectionStringFromCode(hist[i].par);
 					}

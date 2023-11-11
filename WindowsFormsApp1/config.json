@@ -30,11 +30,11 @@
   "SeedPoisonNumber": 0,
 
   // Настройки генома ботов
-  "GenomLength": 64,
+  "GenomGeneralBranchCnt": 5,
+  "GenomConditionBranchCnt": 5,
+  "GenomReactionBranchCnt": 7,
   "MaxCode": 63,
-  "GenomEvents": 7,
-  "GenomEventsLenght": 5,
-  "MaxUncompleteJump": 10,
+  "MaxCmdInStep": 10,
 
   // Настройки мутаций
   "MutationProbabilityPercent": 10, //####

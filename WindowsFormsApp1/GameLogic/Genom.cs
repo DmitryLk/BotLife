@@ -236,7 +236,7 @@ namespace WindowsFormsApp1.GameLogic
 					var evNum = Func.GetRandomEventNumber();
 					var btNum = Func.GetRandomNext(g.CodeForEventsLenght[evNum]);
 
-					if (Data.DirectionCommands[g.CodeForEvents[evNum, btNum, 0]] && Func.GetRandomNext(2) == 1)
+					if (Data.CommandsWithParameter[g.CodeForEvents[evNum, btNum, 0]] && Func.GetRandomNext(2) == 1)
 					{
 						g.CodeForEvents[evNum, btNum, 1] = Func.GetRandomBotCode();
 					}

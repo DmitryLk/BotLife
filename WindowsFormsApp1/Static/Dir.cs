@@ -77,7 +77,7 @@ namespace WindowsFormsApp1.Static
 			
 			if (diff < 0) diff = -diff;
 			while (diff >= NumberOfDirections) diff -= NumberOfDirections;
-			if (diff > 32) diff = NumberOfDirections - diff;
+			if (diff > NumberOfDirections/2) diff = NumberOfDirections - diff;
 			return diff;
 		}
 

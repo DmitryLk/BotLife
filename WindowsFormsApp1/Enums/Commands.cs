@@ -39,7 +39,7 @@ namespace WindowsFormsApp1.Enums
 
 		public static string CmdName(byte cmd)
 		{
-			return cmd switch 
+			return cmd switch
 			{
 				Cmd.RotateAbsolute => "Поворот абсолютно",
 				Cmd.RotateRelative => "Поворот относительно",
@@ -57,7 +57,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.EatForward1 => "Есть впереди",
 				Cmd.EatForward2 => "Есть впереди",
 				Cmd.EatContact => "Есть контакт",
-				Cmd.LookForward1 => "Смотерть вперед",
+				Cmd.LookForward1 => "Смотреть вперед",
 				Cmd.LookForward2 => "Смотреть вперед",
 				Cmd.LookAround => "Смотреть вокруг",
 				Cmd.Photosynthesis => "Фотосинтез",
@@ -96,22 +96,7 @@ namespace WindowsFormsApp1.Enums
 			//Cmd.EatContact
 		};
 
-		public static HashSet<byte> CompleteCommands = new HashSet<byte>()
-			{
-			Cmd.Photosynthesis,
-			Cmd.StepForward1,
-			Cmd.StepForward2,
-			Cmd.StepRelative,
-			Cmd.StepRelativeContact,
-			Cmd.StepBackward,
-			Cmd.StepBackwardContact,
-			Cmd.EatForward1,
-			Cmd.EatForward2,
-			Cmd.EatContact,
-			//Cmd.LookAround
-			};
-
-		public static HashSet<byte> DirectionCommands = new HashSet<byte>()
+		public static HashSet<byte> CommandsWithParameter = new HashSet<byte>()
 			{
 			Cmd.RotateAbsolute,
 			Cmd.RotateRelative,
@@ -119,5 +104,35 @@ namespace WindowsFormsApp1.Enums
 			Cmd.StepRelative,
 			Cmd.StepRelativeContact,
 			};
+	}
+
+	public static class CmdType
+	{
+		public const byte Rotate = 1;
+		public const byte StepSuccessful = 2;
+		public const byte StepNotSuccessful = 3;
+		public const byte EatSuccessful = 4;
+		public const byte EatNotSuccessful = 5;
+		public const byte Look = 6;
+		public const byte LookAround = 7;
+		public const byte PhotosynthesisSuccessful = 8;
+		public const byte PhotosynthesisNotSuccessful = 9;
+
+		public static int CmdWeight(byte cmd)
+		{
+			return cmd switch
+			{
+				CmdType.Rotate => 2,
+				CmdType.StepSuccessful => 50,
+				CmdType.StepNotSuccessful => 10,
+				CmdType.EatSuccessful => 50,
+				CmdType.EatNotSuccessful => 10,
+				CmdType.Look => 10,
+				CmdType.LookAround => 60,
+				CmdType.PhotosynthesisSuccessful => 60,
+				CmdType.PhotosynthesisNotSuccessful => 10,
+				_ => throw new Exception()
+			};
+		}
 	}
 }
