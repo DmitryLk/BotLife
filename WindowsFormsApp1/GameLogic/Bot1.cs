@@ -54,6 +54,9 @@ namespace WindowsFormsApp1.GameLogic
 		public Color Color;
 		public Pointer PointerGeneral;
 		public Pointer PointerReaction;
+		public byte bNew;
+		public byte cNew;
+		public bool reactionNew;
 
 
 		public CodeHistory hist;
@@ -149,8 +152,9 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 1;
 						_recContactDir = contactDir;
-						PointerReaction.b = 0;
-						PointerReaction.cmd = 0;
+						bNew = 0;
+						cNew = 0;
+						reactionNew = true;
 					}
 				}
 			}
@@ -167,26 +171,27 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 2;
 						_recContactDir = contactDir;
-						PointerReaction.cmd = 0;
+						cNew = 0;
 
 						var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
 
 
 						if (rel)
 						{
-							PointerReaction.b = 1;
+							bNew = 1;
 						}
 						else
 						{
 							if (needbigrotate)
 							{
-								PointerReaction.b = 2;
+								bNew = 2;
 							}
 							else
 							{
-								PointerReaction.b = 3;
+								bNew = 3;
 							}
 						}
+						reactionNew = true;
 					}
 				}
 			}
@@ -203,8 +208,9 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 3;
 						_recContactDir = contactDir;
-						PointerReaction.b = 4;
-						PointerReaction.cmd = 0;
+						bNew = 4;
+						cNew = 0;
+						reactionNew = true;
 					}
 				}
 			}
@@ -221,8 +227,9 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 4;
 						_recContactDir = contactDir;
-						PointerReaction.b = 5;
-						PointerReaction.cmd = 0;
+						bNew = 5;
+						cNew = 0;
+						reactionNew = true;
 					}
 				}
 			}
@@ -239,8 +246,9 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 5;
 						_recContactDir = contactDir;
-						PointerReaction.b = 6;
-						PointerReaction.cmd = 0;
+						bNew = 6;
+						cNew = 0;
+						reactionNew = true;
 					}
 				}
 			}
@@ -389,7 +397,6 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (Data.HistoryOn) hist.EndNewStep(PointerGeneral);
 
-
 			Age++;
 
 			var realchange = EnergyChange(Data.DeltaEnergyOnStep);
@@ -416,45 +423,61 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 		}
 
-		private (bool, byte, byte, string) GetCommand()
+		private (bool LastCmd, bool Ev, Pointer Pointer, byte Cmd, byte Par, string RecprocNum) GetCommand()
 		{
 			byte cmd;
 			byte par;
+			bool lastcmd = false;
 			string recprocnum;
 			if (_recNum > 0)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
 			{
-				lock (_busyReceptors)
+				if (reactionNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
 				{
-					(cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
-					PointerReaction.cmd++;
-					if (PointerReaction.cmd >= Data.MaxCmdInStep) _recNum = 0;
-					recprocnum = $"{_recNum}.{PointerReaction.b}";
+					lock (_busyReceptors)
+					{
+						PointerReaction.B = bNew;
+						PointerReaction.CmdNum = cNew;
+						reactionNew = false;
+					}
 				}
 
-				return (true, cmd, par, recprocnum);
+				(cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
+				PointerReaction.CmdNum++;
+				if (PointerReaction.CmdNum >= Data.MaxCmdInStep)
+				{
+					_recNum = 0;
+					lastcmd = true;
+				}
+				recprocnum = $"{_recNum}.{PointerReaction.B}";
+
+				return (lastcmd, true, PointerReaction, cmd, par, recprocnum);
 			}
 			else
 			{
 				(cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
 
-				PointerReaction.cmd++;
-				if (PointerGeneral.cmd >= Data.MaxCmdInStep) _recNum = 0;
+				PointerGeneral.CmdNum++;
+				if (PointerGeneral.CmdNum >= Data.MaxCmdInStep)
+				{
+					lastcmd = true;
+				}
 
-
-				return (false, cmd, par, string.Empty);
+				return (lastcmd, false, PointerGeneral, cmd, par, string.Empty);
 			}
 		}
 
 
 		private void CommandCycle()
 		{
-			int cntJump = 0;
 			byte cmd;
 			var tm = 0;
+			bool lastcmd;
+			int cntJmp = 0;
 
 			do
 			{
-				(var ev, cmd, var par, var recprocnum) = GetCommand();
+				(lastcmd, var ev, Pointer p, cmd, var par, var recprocnum) = GetCommand();
+				cntJmp++;
 
 				if (ev)
 				{
@@ -474,19 +497,19 @@ namespace WindowsFormsApp1.GameLogic
 						default: break;
 					};
 
-					if (Data.HistoryOn) hist.SaveCmdToHistory(0, cmd, par, true, realCmd, recprocnum);
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p, cmd, par, true, recprocnum);
 				}
 				else
 				{
 					switch (cmd)
 					{
 						//case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-						case Cmd.RotateRelative: tm += RotateRelative(par);	break;
+						case Cmd.RotateRelative: tm += RotateRelative(par); break;
 						case Cmd.StepForward1: tm += StepForward(); break;
 						case Cmd.StepForward2: tm += StepForward(); break;
 						case Cmd.EatForward1: tm += EatForward(); break;
 						case Cmd.EatForward2: tm += EatForward(); break;
-						case Cmd.LookForward1: tm +=LookForward(); break;
+						case Cmd.LookForward1: tm += LookForward(); break;
 						case Cmd.LookForward2: tm += LookForward(); break;
 						case Cmd.Photosynthesis: tm += Photosynthesis(); break;
 						case Cmd.LookAround: tm += LookAround(); break;
@@ -504,14 +527,16 @@ namespace WindowsFormsApp1.GameLogic
 						if (_moved > 0) _moved--;
 					}
 
-					if (Data.HistoryOn) hist.SaveCmdToHistory((byte)Pointer, cmd, par, false, realCmd, string.Empty);
+					if (cntJmp == 12)
+					{ 
+					}
 
-					ShiftCodePointer(shift);
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p, cmd, par, false, string.Empty);
 				}
-
-				cntJump++;
 			}
-			while (tm < 100 && cntJump < Data.MaxUncompleteJump);
+			while (tm < 100 && !lastcmd && cntJmp<10);
+
+			ShiftPointerGeneralToNextBranch();
 		}
 
 		//===================================================================================================
@@ -545,7 +570,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			Rotate(Dir.GetOppositeDirection(Direction));
 
-			return Dir.NumberOfDirections/2 * CmdType.CmdWeight(CmdType.Rotate);
+			return Dir.NumberOfDirections / 2 * CmdType.CmdWeight(CmdType.Rotate);
 		}
 
 		//5 E
@@ -1100,10 +1125,18 @@ namespace WindowsFormsApp1.GameLogic
 		//////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////
 
-		private void ShiftCodePointer(int shift)
+		private void ShiftPointerGeneralToNextBranch()
 		{
-			OldPointer = Pointer;
-			Pointer = (Pointer + shift) % Data.GenomLength;
+			if (PointerGeneral.B == G.ActiveGeneralBranchCnt - 1)
+			{
+				PointerGeneral.B = 0;
+			}
+			else
+			{
+				PointerGeneral.B++;
+			}
+
+			PointerGeneral.CmdNum = 0;
 		}
 
 		private (int newXint, int newYint) GetCoordinatesByDirectionOnlyDifferent(int dir)
@@ -1169,14 +1202,14 @@ namespace WindowsFormsApp1.GameLogic
 		//}
 
 		#region Direction
-		private int GetDirAbsolute()
+		private int GetDirAbsolute(byte par)
 		{
-			return G.GetDirectionFromNextCommand(Pointer, true) % Dir.NumberOfDirections;
+			return par % Dir.NumberOfDirections;
 		}
 
-		private int GetDirRelative()
+		private int GetDirRelative(byte par)
 		{
-			return (Direction + G.GetDirectionFromNextCommand(Pointer, true)) % Dir.NumberOfDirections;
+			return (Direction + par) % Dir.NumberOfDirections;
 		}
 
 		private int GetDirForward()
@@ -1184,7 +1217,7 @@ namespace WindowsFormsApp1.GameLogic
 			return Direction;
 		}
 
-		private int GetDirRelativeWithRandom()
+		private int GetDirRelativeWithRandom(byte par)
 		{
 			var rand = ThreadSafeRandom.Next(100);
 
@@ -1196,7 +1229,7 @@ namespace WindowsFormsApp1.GameLogic
 			};
 
 			if (shift < 0) shift += Dir.NumberOfDirections;
-			return (Direction + G.GetDirectionFromNextCommand(Pointer, true) + shift) % Dir.NumberOfDirections;
+			return (Direction + par + shift) % Dir.NumberOfDirections;
 		}
 		#endregion
 
@@ -1234,15 +1267,15 @@ namespace WindowsFormsApp1.GameLogic
 			//sb.AppendLine($"23r,24a - rotate; 26r,27a - step");
 			//sb.AppendLine($"28r,29a - eat; 30r,31a - look");
 
-			sb.AppendLine($"Current OldPointer: {OldPointer}");
-			sb.AppendLine($"Current Pointer: {Pointer}");
+			sb.AppendLine($"Current OldPointer: {PointerGeneral.BOld}.{PointerGeneral.CmdNumOld}");
+			sb.AppendLine($"Current Pointer: {PointerGeneral.B}.{PointerGeneral.CmdNum}");
 			sb.AppendLine("");
 
 			if (hist.historyPointerY >= 0)
 			{
-				var (hist, histPtrCnt, pointer, oldpointer, step) = this.hist.GetLastStepPtrs(delta);
-				sb.AppendLine($"OldPointer: {oldpointer}");
-				sb.AppendLine($"Pointer: {pointer}");
+				var (hist, histPtrCnt, pointer, step) = this.hist.GetLastStepPtrs(delta);
+				sb.AppendLine($"OldPointer: {pointer.BOld}.{pointer.CmdNumOld}");
+				sb.AppendLine($"Pointer: {pointer.B}.{pointer.CmdNum}");
 				sb.AppendLine($"Step: {step}");
 
 				sb.AppendLine($"cmds cnt: {histPtrCnt - 1}");
@@ -1252,16 +1285,8 @@ namespace WindowsFormsApp1.GameLogic
 				for (var i = 0; i < histPtrCnt; i++)
 				{
 					string cmdTxt;
-					if (hist[i].real)
-					{
-						cmdTxt = $"{Cmd.CmdName(hist[i].cmd)} {hist[i].cmd}({hist[i].ptr})";
-					}
-					else
-					{
-						cmdTxt = $"jmp {hist[i].cmd}({hist[i].ptr})";
-					}
 
-
+					cmdTxt = $"{Cmd.CmdName(hist[i].cmd)} {hist[i].cmd}({hist[i].b}.{hist[i].c})";
 
 					string dirStr;
 					if (Data.CommandsWithParameter[hist[i].cmd])

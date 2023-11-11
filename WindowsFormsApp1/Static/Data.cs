@@ -55,7 +55,6 @@ namespace WindowsFormsApp1.Static
 		public static int SeedPoisonNumber;
 
 		public static int GenomGeneralBranchCnt;
-		public static int GenomConditionBranchCnt;
 		public static int GenomReactionBranchCnt;
 		public static int MaxCode;
 		public static int MaxCmdInStep;
@@ -377,7 +376,6 @@ namespace WindowsFormsApp1.Static
 			SeedPoisonNumber = options.SeedPoisonNumber;
 
 			GenomGeneralBranchCnt = options.GenomGeneralBranchCnt;
-			GenomConditionBranchCnt = options.GenomConditionBranchCnt;
 			GenomReactionBranchCnt = options.GenomReactionBranchCnt;
 			MaxCode = options.MaxCode;
 			MaxCmdInStep = options.MaxCmdInStep;

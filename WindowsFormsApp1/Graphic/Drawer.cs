@@ -177,158 +177,158 @@ namespace WindowsFormsApp1.Graphic
 		// информация по курсору (работает только на паузе)
 		public void DrawCursor()
 		{
-			var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
-			if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
-			{
-				var bot = Data.Bots[cursorCont];
+			//var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
+			//if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
+			//{
+			//	var bot = Data.Bots[cursorCont];
 
-				//TEXT
-				_PRESENTER.ClearGraphicsOnCursorFrame();
-				for (var i = 0; i < Data.GenomLength; i++)
-				{
-					var code = bot.G.CodeCommon[i];
-					var x = i % 8;
-					var y = i / 8;
+			//	//TEXT
+			//	_PRESENTER.ClearGraphicsOnCursorFrame();
+			//	for (var i = 0; i < Data.GenomLength; i++)
+			//	{
+			//		var code = bot.G.CodeCommon[i];
+			//		var x = i % 8;
+			//		var y = i / 8;
 
-					var textColor = code switch
-					{
-						Cmd.RotateAbsolute => Color.Blue,  //поворот
-						Cmd.RotateRelative => Color.Blue,
-						Cmd.Photosynthesis => Color.Green,
-						Cmd.StepForward1 => Color.Brown,  //шаг
-						Cmd.StepForward2 => Color.Brown,
-						Cmd.EatForward1 => Color.Red,    //съесть
-						Cmd.EatForward2 => Color.Red,
-						Cmd.LookForward1 => Color.Gray,  //посмотреть
-						Cmd.LookForward2 => Color.Gray,
-						_ => Color.Black
-					};
+			//		var textColor = code switch
+			//		{
+			//			Cmd.RotateAbsolute => Color.Blue,  //поворот
+			//			Cmd.RotateRelative => Color.Blue,
+			//			Cmd.Photosynthesis => Color.Green,
+			//			Cmd.StepForward1 => Color.Brown,  //шаг
+			//			Cmd.StepForward2 => Color.Brown,
+			//			Cmd.EatForward1 => Color.Red,    //съесть
+			//			Cmd.EatForward2 => Color.Red,
+			//			Cmd.LookForward1 => Color.Gray,  //посмотреть
+			//			Cmd.LookForward2 => Color.Gray,
+			//			_ => Color.Black
+			//		};
 
-					var absDirStr = Dir.GetDirectionStringFromCode(code);
-					_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
+			//		var absDirStr = Dir.GetDirectionStringFromCode(code);
+			//		_PRESENTER.DrawTextOnCursorFrame(x, y, code.ToString(), textColor);
 
-					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 30, 7, i.ToString(), textColor);
-					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 26, 28, absDirStr, textColor);
-					_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 10, 28, bot.G.Act[i].ToString(), textColor);
-				}
+			//		_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 30, 7, i.ToString(), textColor);
+			//		_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 26, 28, absDirStr, textColor);
+			//		_PRESENTER.DrawSmallTextOnCursorFrame(x, y, 10, 28, bot.G.Act[i].ToString(), textColor);
+			//	}
 
-				_PRESENTER.DrawOtherTextOnCursorFrame(6, 2, Data.DeltaHistory.ToString());
+			//	_PRESENTER.DrawOtherTextOnCursorFrame(6, 2, Data.DeltaHistory.ToString());
 
-				//IMAGES
-				_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-				Color color;
-				int x1, y1, x2, y2;
-				var (hist, histPtrCnt, pointer, oldpointer, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
-				for (var i = 0; i < Data.GenomLength; i++)
-				{
-					x1 = i % 8;
-					y1 = i / 8;
+			//	//IMAGES
+			//	_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+			//	Color color;
+			//	int x1, y1, x2, y2;
+			//	var (hist, histPtrCnt, pointer, oldpointer, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
+			//	for (var i = 0; i < Data.GenomLength; i++)
+			//	{
+			//		x1 = i % 8;
+			//		y1 = i / 8;
 
-					color = Color.Gray;
+			//		color = Color.Gray;
 
-					if ((byte)i == oldpointer) color = Color.Orange;
-					if ((byte)i == pointer) color = Color.GreenYellow;
+			//		if ((byte)i == oldpointer) color = Color.Orange;
+			//		if ((byte)i == pointer) color = Color.GreenYellow;
 
-					_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
-				}
+			//		_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
+			//	}
 
-				if (histPtrCnt > 0)
-				{
-					byte ptr1 = hist[0].ptr;
-					byte ptr2;
-					for (var i = 1; i < histPtrCnt; i++)
-					{
-						ptr2 = hist[i].ptr;
+			//	if (histPtrCnt > 0)
+			//	{
+			//		byte ptr1 = hist[0].ptr;
+			//		byte ptr2;
+			//		for (var i = 1; i < histPtrCnt; i++)
+			//		{
+			//			ptr2 = hist[i].ptr;
 
-						x1 = ptr1 % 8;
-						y1 = ptr1 / 8;
-						x2 = ptr2 % 8;
-						y2 = ptr2 / 8;
+			//			x1 = ptr1 % 8;
+			//			y1 = ptr1 / 8;
+			//			x2 = ptr2 % 8;
+			//			y2 = ptr2 / 8;
 
-						color = Color.DarkOrchid;
+			//			color = Color.DarkOrchid;
 
-						if (i == 1) color = Color.Aqua;
-						if (i == histPtrCnt - 1) color = Color.Orange;
+			//			if (i == 1) color = Color.Aqua;
+			//			if (i == histPtrCnt - 1) color = Color.Orange;
 
-						ptr1 = ptr2;
+			//			ptr1 = ptr2;
 
-						_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
-					}
-				}
+			//			_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
+			//		}
+			//	}
 
-				_PRESENTER.SendCursorFrameToScreen();
+			//	_PRESENTER.SendCursorFrameToScreen();
 
-				//INFO
-				_PRINTER.Print3(bot);
-				_PRINTER.Print4(bot, Data.DeltaHistory);
-			}
-			else
-			{
-				_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
-				_PRESENTER.SendCursorFrameToScreen();
+			//	//INFO
+			//	_PRINTER.Print3(bot);
+			//	_PRINTER.Print4(bot, Data.DeltaHistory);
+			//}
+			//else
+			//{
+			//	_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditEmptyArray);
+			//	_PRESENTER.SendCursorFrameToScreen();
 
-				//INFO
-				_PRINTER.Print3(null);
-				_PRINTER.Print4(null, Data.DeltaHistory);
-			}
+			//	//INFO
+			//	_PRINTER.Print3(null);
+			//	_PRINTER.Print4(null, Data.DeltaHistory);
+			//}
 		}
 
 		// информация по событиям/реакциям (работает только на паузе)
 		public void DrawReactions()
 		{
-			var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
-			if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
-			{
-				var bot = Data.Bots[cursorCont];
+			//var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
+			//if (cursorCont >= 1 && cursorCont <= Data.CurrentNumberOfBots)
+			//{
+			//	var bot = Data.Bots[cursorCont];
 
-				//TEXT
-				_PRESENTER.ClearGraphicsOnReactionsFrame();
-				for (var i = 0; i < Data.GenomEvents; i++)
-				{
-					for (var j = 0; j < Data.GenomEventsLenght; j++)
-					{
-						var code = bot.G.CodeForEvents[i, j, 0];
-						var par = bot.G.CodeForEvents[i, j, 1];
-						var absDirStr = Dir.GetDirectionStringFromCode(par);
+			//	//TEXT
+			//	_PRESENTER.ClearGraphicsOnReactionsFrame();
+			//	for (var i = 0; i < Data.GenomEvents; i++)
+			//	{
+			//		for (var j = 0; j < Data.GenomEventsLenght; j++)
+			//		{
+			//			var code = bot.G.CodeForEvents[i, j, 0];
+			//			var par = bot.G.CodeForEvents[i, j, 1];
+			//			var absDirStr = Dir.GetDirectionStringFromCode(par);
 
-						_PRESENTER.DrawTextOnReactionsFrame(j, i, code.ToString(), Color.Black);
-						_PRESENTER.DrawSmallTextOnReactionsFrame(j, i, 20, 22, absDirStr, Color.Black);
+			//			_PRESENTER.DrawTextOnReactionsFrame(j, i, code.ToString(), Color.Black);
+			//			_PRESENTER.DrawSmallTextOnReactionsFrame(j, i, 20, 22, absDirStr, Color.Black);
 
-					}
+			//		}
 
-					var rn = i switch
-					{
-						0 => "1 bite",
-						1 => "2 bot rel",
-						2 => "2 bot bigrot",
-						3 => "2 bot nobigrot",
-						4 => "3 food",
-						5 => "4 mineral",
-						6 => "5 wall",
-						_ => "xz"
-					};
-					_PRESENTER.DrawTextOnReactionsFrame2(Data.GenomEventsLenght , i, rn, Color.Green);
-				}
+			//		var rn = i switch
+			//		{
+			//			0 => "1 bite",
+			//			1 => "2 bot rel",
+			//			2 => "2 bot bigrot",
+			//			3 => "2 bot nobigrot",
+			//			4 => "3 food",
+			//			5 => "4 mineral",
+			//			6 => "5 wall",
+			//			_ => "xz"
+			//		};
+			//		_PRESENTER.DrawTextOnReactionsFrame2(Data.GenomEventsLenght , i, rn, Color.Green);
+			//	}
 
-				//IMAGES
-				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-				Color color;
-				int x1, y1, x2, y2;
-				for (var i = 0; i < Data.GenomEvents; i++)
-				{
-					for (var j = 0; j < Data.GenomEventsLenght; j++)
-					{
-						_PRESENTER.DrawCodeCellOnReactionsFrame(j, i, Color.Black);
-					}
-				}
+			//	//IMAGES
+			//	_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+			//	Color color;
+			//	int x1, y1, x2, y2;
+			//	for (var i = 0; i < Data.GenomEvents; i++)
+			//	{
+			//		for (var j = 0; j < Data.GenomEventsLenght; j++)
+			//		{
+			//			_PRESENTER.DrawCodeCellOnReactionsFrame(j, i, Color.Black);
+			//		}
+			//	}
 
-				_PRESENTER.SendReactionsFrameToScreen();
-			}
-			else
-			{
-				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditEmptyArray);
-				_PRESENTER.SendReactionsFrameToScreen();
-			}
+			//	_PRESENTER.SendReactionsFrameToScreen();
+			//}
+			//else
+			//{
+			//	_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditEmptyArray);
+			//	_PRESENTER.SendReactionsFrameToScreen();
+			//}
 		}
 	}
 }

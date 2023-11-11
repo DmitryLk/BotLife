@@ -30,8 +30,7 @@
   "SeedPoisonNumber": 0,
 
   // Настройки генома ботов
-  "GenomGeneralBranchCnt": 5,
-  "GenomConditionBranchCnt": 5,
+  "GenomGeneralBranchCnt": 10,
   "GenomReactionBranchCnt": 7,
   "MaxCode": 63,
   "MaxCmdInStep": 10,

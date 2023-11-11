@@ -77,8 +77,8 @@ namespace WindowsFormsApp1.Enums
 			Cmd.LookForward1,
 			Cmd.LookForward2,
 			Cmd.LookAround,
-			Cmd.RotateRandom,
-			Cmd.AlignHorizontaly,
+			//Cmd.RotateRandom,
+			//Cmd.AlignHorizontaly,
 		};
 
 		public static HashSet<byte> ReactionCommands = new HashSet<byte>()
@@ -122,7 +122,7 @@ namespace WindowsFormsApp1.Enums
 		{
 			return cmd switch
 			{
-				CmdType.Rotate => 2,
+				CmdType.Rotate => 3,
 				CmdType.StepSuccessful => 50,
 				CmdType.StepNotSuccessful => 10,
 				CmdType.EatSuccessful => 50,
