@@ -19,12 +19,13 @@ using WindowsFormsApp1.Enums;
 using WindowsFormsApp1.Static;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Numerics;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TreeView;
 
 namespace WindowsFormsApp1.GameLogic
 {
 	public class Genom
 	{
-		private const int ActListSize = 1000;
+		private const int ActListSize = 300;
 
 		// static
 		private static long CreateGenomCounter = 0;
@@ -33,17 +34,18 @@ namespace WindowsFormsApp1.GameLogic
 
 
 		// Genom Code
-		public byte[] CodeCommon;
-		public byte[,,] CodeForEvents;
-		public byte[] CodeForEventsLenght;
-
+		public byte[,,] CodeForGeneralCmds;
+		public byte[,,] CodeForConditionCmds;
+		public byte[,,] CodeForReactionCmds;
 
 		public int[] Act; //сколько раз использовалась та или другая команда
 		public bool ActCnt; //ведется ли подсчет количества использования команд. завершается если счетчик одной из команд дошел до 230.
-		public int[] ActList;  //список где подряд записываются использованные команды (номер команды в геноме)
-		public int ActListCnt;  //количество команд в списке ActList
-								//public List<(int, int)> Sorted1;
-								//public HashSet<int> Sorted2;
+		public int[] GeneralCmdsList;  //список где подряд записываются использованные общие команды (номер команды в геноме)
+		public int[] ConditionCmdsList;  //список где подряд записываются использованные условные команды (номер команды в геноме)
+		public int[] ReactionCmdsList;  //список где подряд записываются использованные реакций команды (номер команды в геноме)
+		public int GeneralCmdsListCnt;  //количество команд в списке ActList
+		public int ConditionCmdsListCnt;  //количество команд в списке ActList
+		public int ReactionCmdsListCnt;  //количество команд в списке ActList
 
 		public bool Plant = false;
 
@@ -125,13 +127,17 @@ namespace WindowsFormsApp1.GameLogic
 		public static Genom CreateNewGenom()
 		{
 			var g = new Genom();
-			g.CodeCommon = new byte[Data.GenomLength];
-			g.CodeForEvents = new byte[Data.GenomEvents, Data.GenomEventsLenght, 2];
-			g.CodeForEventsLenght = new byte[Data.GenomEvents];
-			g.Act = new int[Data.GenomLength];
-			g.ActList = new int[ActListSize];
-			g.ActListCnt = -1;
+			g.CodeForGeneralCmds = new byte[Data.GenomGeneralBranchCnt, Data.MaxCmdInStep, 2];
+			g.CodeForConditionCmds = new byte[Data.GenomConditionBranchCnt, Data.MaxCmdInStep, 2];
+			g.CodeForReactionCmds = new byte[Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 2];
+
+			g.Act = new int[(Data.GenomGeneralBranchCnt + Data.GenomConditionBranchCnt + Data.GenomReactionBranchCnt) * Data.MaxCmdInStep];
+			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
+			g.ConditionCmdsList = new int[ActListSize]; g.ConditionCmdsListCnt = 0;
+			g.ReactionCmdsList = new int[ActListSize]; g.ReactionCmdsListCnt = 0;
 			g.ActCnt = true;
+			Array.Clear(g.Act);
+
 			g.GenomHash = Guid.NewGuid();
 			g.Color = Func.GetRandomColor();
 			g.PraColor = g.Color;
@@ -145,25 +151,33 @@ namespace WindowsFormsApp1.GameLogic
 			g.Level = 1;
 
 			// Наполнение кода генома (общие команды)
-			for (var i = 0; i < Data.GenomLength; i++)
+			for (var i = 0; i < Data.GenomGeneralBranchCnt; i++)
 			{
-				g.CodeCommon[i] = Func.GetRandomBotCode();
-				g.Act[i] = 0;
+				for (var j = 0; i < Data.MaxCmdInStep; j++)
+				{
+					g.CodeForGeneralCmds[i, j, 0] = Func.GetRandomGeneralCmd();
+					g.CodeForGeneralCmds[i, j, 1] = Func.GetRandomBotCode();
+				}
+			}
+
+			// Наполнение кода генома (условные команды)
+			for (var i = 0; i < Data.GenomConditionBranchCnt; i++)
+			{
+				for (var j = 0; i < Data.MaxCmdInStep; j++)
+				{
+					g.CodeForConditionCmds[i, j, 0] = Func.GetRandomGeneralCmd();
+					g.CodeForConditionCmds[i, j, 1] = Func.GetRandomBotCode();
+				}
 			}
 
 			// Наполнение кода генома (команды событий)
-			byte ev;
-			byte j;
-			for (var i = 0; i < Data.GenomEvents; i++)
+			for (var i = 0; i < Data.GenomReactionBranchCnt; i++)
 			{
-				for (j = 0; j < Data.GenomEventsLenght; j++)
+				for (var j = 0; j < Data.MaxCmdInStep; j++)
 				{
-					ev = Func.GetRandomEventBotCode();
-					g.CodeForEvents[i, j, 0] = ev;
-					g.CodeForEvents[i, j, 1] = Func.GetRandomBotCode();
-					if (Cmd.CompleteCommands.Contains(ev)) { j++; break; }
+					g.CodeForReactionCmds[i, j, 0] = Func.GetRandomReactionCmd();
+					g.CodeForReactionCmds[i, j, 1] = Func.GetRandomBotCode();
 				}
-				g.CodeForEventsLenght[i] = j;
 			}
 
 			// Attack-Shield
@@ -178,13 +192,17 @@ namespace WindowsFormsApp1.GameLogic
 		public static Genom CreateChildGenom(Genom parent)
 		{
 			var g = new Genom();
-			g.CodeCommon = new byte[Data.GenomLength];
-			g.CodeForEvents = new byte[Data.GenomEvents, Data.GenomEventsLenght, 2];
-			g.CodeForEventsLenght = new byte[Data.GenomEvents];
-			g.Act = new int[Data.GenomLength];
-			g.ActList = new int[ActListSize];
-			g.ActListCnt = -1;
+			g.CodeForGeneralCmds = new byte[Data.GenomGeneralBranchCnt, Data.MaxCmdInStep, 2];
+			g.CodeForConditionCmds = new byte[Data.GenomConditionBranchCnt, Data.MaxCmdInStep, 2];
+			g.CodeForReactionCmds = new byte[Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 2];
+
+			g.Act = new int[(Data.GenomGeneralBranchCnt + Data.GenomConditionBranchCnt + Data.GenomReactionBranchCnt) * Data.MaxCmdInStep];
+			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
+			g.ConditionCmdsList = new int[ActListSize]; g.ConditionCmdsListCnt = 0;
+			g.ReactionCmdsList = new int[ActListSize]; g.ReactionCmdsListCnt = 0;
 			g.ActCnt = true;
+			Array.Clear(g.Act);
+
 			g.GenomHash = Guid.NewGuid();
 			g.Color = Func.GetRandomColor();
 			g.PraColor = g.Color;
@@ -199,58 +217,99 @@ namespace WindowsFormsApp1.GameLogic
 			g.Level = parent.Level + 1;
 			Interlocked.Increment(ref Data.MutationCnt);
 
-			// Копирование кода генома
-			for (var i = 0; i < Data.GenomLength; i++)
+			// Копирование кода генома (общие команды)
+			for (var i = 0; i < Data.GenomGeneralBranchCnt; i++)
 			{
-				g.CodeCommon[i] = parent.CodeCommon[i];
+				for (var j = 0; i < Data.MaxCmdInStep; j++)
+				{
+					g.CodeForGeneralCmds[i, j, 0] = parent.CodeForGeneralCmds[i, j, 0];
+					g.CodeForGeneralCmds[i, j, 1] = parent.CodeForGeneralCmds[i, j, 1];
+				}
 			}
 
-			for (var i = 0; i < Data.GenomEvents; i++)
+			// Копирование кода генома (условные команды)
+			for (var i = 0; i < Data.GenomConditionBranchCnt; i++)
 			{
-				for (var j = 0; j < Data.GenomEventsLenght; j++)
+				for (var j = 0; i < Data.MaxCmdInStep; j++)
 				{
-					g.CodeForEvents[i, j, 0] = parent.CodeForEvents[i, j, 0];
-					g.CodeForEvents[i, j, 1] = parent.CodeForEvents[i, j, 1];
+					g.CodeForConditionCmds[i, j, 0] = parent.CodeForConditionCmds[i, j, 0];
+					g.CodeForConditionCmds[i, j, 1] = parent.CodeForConditionCmds[i, j, 1];
 				}
-				g.CodeForEventsLenght[i] = parent.CodeForEventsLenght[i];
 			}
+
+			// Копирование кода генома (команды событий)
+			for (var i = 0; i < Data.GenomReactionBranchCnt; i++)
+			{
+				for (var j = 0; i < Data.MaxCmdInStep; j++)
+				{
+					g.CodeForReactionCmds[i, j, 0] = parent.CodeForReactionCmds[i, j, 0];
+					g.CodeForReactionCmds[i, j, 1] = parent.CodeForReactionCmds[i, j, 1];
+				}
+			}
+
 
 			// Мутация (Data.MutationLenght байт в геноме подменяем)
 			for (var i = 0; i < Data.MutationLenght; i++)
 			{
-				if (Func.GetRandomNext(2) == 0)  // Мутация в основном коде
+				var rnd = Func.GetRandomNext(100);
+				var rndpar = Func.GetRandomNext(2);
+
+				// Мутация в основном коде
+				int branch;
+				int cmdnum;
+				if (rnd >= 0 && rnd < 70)
 				{
-					if (parent.ActListCnt > -1)
+					if (parent.GeneralCmdsListCnt > 0)
 					{
-						var lim = parent.ActListCnt + 1;
-						var indActList = Func.GetRandomNext(lim > 1000 ? 1000 : lim);
-						g.CodeCommon[parent.ActList[indActList]] = Func.GetRandomUsefulBotCode();
+						var lim = parent.GeneralCmdsListCnt;
+						var indGeneralCmdsList = Func.GetRandomNext(lim > 300 ? 300 : lim);
+						var cmd = parent.GeneralCmdsList[indGeneralCmdsList];
+
+						branch = cmd / Data.MaxCmdInStep;
+						cmdnum = cmd % Data.MaxCmdInStep;
 					}
 					else
 					{
-						g.CodeCommon[Func.GetRandomBotCodeIndex()] = Func.GetRandomUsefulBotCode();
+						branch = Func.GetRandomNext(Data.GenomGeneralBranchCnt);
+						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
+					}
+
+					if (Data.CommandsWithParameter[g.CodeForGeneralCmds[branch, cmdnum, 0]] && rndpar == 1)
+					{
+						g.CodeForGeneralCmds[branch, cmdnum, 1] = Func.GetRandomBotCode();
+					}
+					else
+					{
+						g.CodeForGeneralCmds[branch, cmdnum, 0] = Func.GetRandomGeneralCmd();
 					}
 				}
-				else                            // Мутация в событиях
-				{
-					var evNum = Func.GetRandomEventNumber();
-					var btNum = Func.GetRandomNext(g.CodeForEventsLenght[evNum]);
 
-					if (Data.CommandsWithParameter[g.CodeForEvents[evNum, btNum, 0]] && Func.GetRandomNext(2) == 1)
+				// Мутация в событиях
+				if (rnd >= 70 && rnd < 100)
+				{
+					if (parent.ReactionCmdsListCnt > 0)
 					{
-						g.CodeForEvents[evNum, btNum, 1] = Func.GetRandomBotCode();
+						var lim = parent.ReactionCmdsListCnt;
+						var indGeneralCmdsList = Func.GetRandomNext(lim);
+						var cmd = parent.ReactionCmdsList[indGeneralCmdsList];
+
+						branch = cmd / Data.MaxCmdInStep;
+						cmdnum = cmd % Data.MaxCmdInStep;
 					}
 					else
 					{
-						g.CodeForEvents[evNum, btNum, 0] = Func.GetRandomEventBotCode();
+						branch = Func.GetRandomNext(Data.GenomReactionBranchCnt);
+						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
 					}
 
-					byte j;
-					for (j = 0; j < Data.GenomEventsLenght; j++)
+					if (Data.CommandsWithParameter[g.CodeForReactionCmds[branch, cmdnum, 0]] && rndpar == 1)
 					{
-						if (Cmd.CompleteCommands.Contains(g.CodeForEvents[evNum, j, 0])) { j++; break; }
+						g.CodeForReactionCmds[branch, cmdnum, 1] = Func.GetRandomBotCode();
 					}
-					g.CodeForEventsLenght[i] = j;
+					else
+					{
+						g.CodeForReactionCmds[branch, cmdnum, 0] = Func.GetRandomReactionCmd();
+					}
 				}
 			}
 
@@ -267,43 +326,107 @@ namespace WindowsFormsApp1.GameLogic
 			return g;
 		}
 
-		public byte GetCurrentCommandAndSetActGen(int pointer, bool act)
+		public (byte, byte) GetGeneralCommandAndSetAct(Pointer p, bool act)
 		{
-			if (act) SetActCommand(pointer);
-			return CodeCommon[pointer];
+			if (act) SetActGeneralCommand(p);
+			return (CodeForGeneralCmds[p.b, p.cmd, 0], CodeForGeneralCmds[p.b, p.cmd, 1]);
 		}
 
-		public byte GetDirectionFromNextCommand(int pointer, bool act)
+		public (byte, byte) GetConditionCommandAndSetAct(Pointer p, bool act)
 		{
-			var nextpointer = pointer + 1 >= Data.GenomLength ? 0 : pointer + 1;
-			if (act) SetActCommand(nextpointer);
-			return CodeCommon[nextpointer];
+			if (act) SetActConditionCommand(p);
+			return (CodeForConditionCmds[p.b, p.cmd, 0], CodeForConditionCmds[p.b, p.cmd, 1]);
 		}
 
-		private void SetActCommand(int pointer)
+		public (byte, byte) GetReactionCommandAndSetAct(Pointer p, bool act)
+		{
+			if (act) SetActReactionCommand(p);
+			return (CodeForReactionCmds[p.b, p.cmd, 0], CodeForReactionCmds[p.b, p.cmd, 1]);
+		}
+
+		private void SetActGeneralCommand(Pointer p)
 		{
 			if (ActCnt)
 			{
-				Interlocked.Increment(ref Act[pointer]);
+				var num = p.b * Data.MaxCmdInStep + p.cmd;
 
-				//Sorted2.Add(pointer);
-				if (Act[pointer] > 230)
+				Interlocked.Increment(ref Act[num]);
+
+				if (Act[num] > 230)
 				{
 					ActCnt = false;
-					//Sorted1 = Act
-					//    .Select((x, i) => (Value: x, OriginalIndex: i))
-					//    .OrderByDescending(x => x.Value)
-					//    .ToList();
+				}
+			}
+
+			if (GeneralCmdsListCnt < ActListSize)
+			{
+				var curcnt = Interlocked.Increment(ref GeneralCmdsListCnt);
+				if (GeneralCmdsListCnt > ActListSize)
+				{
+					GeneralCmdsListCnt = ActListSize;
 				}
 
-				if (ActListCnt < ActListSize)
+				if (curcnt <= ActListSize)
 				{
-					var indActList = Interlocked.Increment(ref ActListCnt);
+					GeneralCmdsList[curcnt - 1] = p.b * Data.MaxCmdInStep + p.cmd;
+				}
+			}
+		}
 
-					if (indActList < ActListSize)
-					{
-						ActList[indActList] = pointer;
-					}
+		private void SetActConditionCommand(Pointer p)
+		{
+			if (ActCnt)
+			{
+				var num = (p.b + Data.GenomGeneralBranchCnt) * Data.MaxCmdInStep + p.cmd;
+
+				Interlocked.Increment(ref Act[num]);
+
+				if (Act[num] > 230)
+				{
+					ActCnt = false;
+				}
+			}
+
+			if (ConditionCmdsListCnt < ActListSize)
+			{
+				var curcnt = Interlocked.Increment(ref ConditionCmdsListCnt);
+				if (ConditionCmdsListCnt > ActListSize)
+				{
+					ConditionCmdsListCnt = ActListSize;
+				}
+
+				if (curcnt <= ActListSize)
+				{
+					ConditionCmdsList[curcnt - 1] = p.b * Data.MaxCmdInStep + p.cmd;
+				}
+			}
+		}
+
+		private void SetActReactionCommand(Pointer p)
+		{
+			if (ActCnt)
+			{
+				var num = (p.b + Data.GenomGeneralBranchCnt + Data.GenomConditionBranchCnt) * Data.MaxCmdInStep + p.cmd;
+
+				Interlocked.Increment(ref Act[num]);
+
+				if (Act[num] > 230)
+				{
+					ActCnt = false;
+				}
+			}
+
+			if (ReactionCmdsListCnt < ActListSize)
+			{
+				var curcnt = Interlocked.Increment(ref ReactionCmdsListCnt);
+				if (ReactionCmdsListCnt > ActListSize)
+				{
+					ReactionCmdsListCnt = ActListSize;
+				}
+
+				if (curcnt <= ActListSize)
+				{
+					ReactionCmdsList[curcnt - 1] = p.b * Data.MaxCmdInStep + p.cmd;
 				}
 			}
 		}

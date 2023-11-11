@@ -372,7 +372,6 @@ namespace WindowsFormsApp1.Static
 		public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
 		{
 			var dir = GetRandomDirection();
-			var pointer = 0;
 			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
 			genom.IncBot();
 
@@ -394,8 +393,8 @@ namespace WindowsFormsApp1.Static
 			updBot.Direction = dir;
 			updBot.Num = botNumber;
 			updBot.G = genom;
-			updBot.Pointer = pointer;
-			updBot.OldPointer = pointer;
+			updBot.PointerGeneral.Clear();
+			updBot.PointerReaction.Clear();
 			updBot.Age = 0;
 			updBot.BiteMeCount = 0;
 			updBot.BiteImCount = 0;
@@ -426,7 +425,6 @@ namespace WindowsFormsApp1.Static
 		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
 		{
 			var dir = GetRandomDirection();
-			var pointer = 0;
 			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
 			genom.IncBot();
 
@@ -434,7 +432,7 @@ namespace WindowsFormsApp1.Static
 			Bot1 bot;
 			if (Data.Bots[botIndex] == null)
 			{
-				bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom, pointer);
+				bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom);
 
 				Data.Bots[botIndex] = bot;
 			}
@@ -450,8 +448,8 @@ namespace WindowsFormsApp1.Static
 				bot.Num = botNumber;
 				bot.EnergySet(en);
 				bot.G = genom;
-				bot.Pointer = pointer;
-				bot.OldPointer = pointer;
+				bot.PointerGeneral.Clear();
+				bot.PointerReaction.Clear();
 				bot.Age = 0;
 				bot.BiteMeCount = 0;
 				bot.BiteImCount = 0;
@@ -664,29 +662,19 @@ namespace WindowsFormsApp1.Static
             return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
         }
 
-		public static byte GetRandomUsefulBotCode()
+		public static byte GetRandomGeneralCmd()
 		{
 			return Data.GeneralCommandsValues[ThreadSafeRandom.Next(Data.GeneralCommandsValuesLength)];
 		}
 
-		public static byte GetRandomEventBotCode()
+		public static byte GetRandomReactionCmd()
 		{
 			return Data.EventCommandsValues[ThreadSafeRandom.Next(Data.EventCommandsValuesLength)];
-		}
-
-		public static int GetRandomEventNumber()
-		{
-			return ThreadSafeRandom.Next(Data.GenomEvents);
 		}
 
 		public static Color GetRandomColor()
 		{
 			return Color.FromArgb(ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256));
-		}
-
-		public static int GetRandomBotCodeIndex()
-		{
-			return ThreadSafeRandom.Next(Data.GenomLength);
 		}
 
 		public static int GetRandomNext(int max)

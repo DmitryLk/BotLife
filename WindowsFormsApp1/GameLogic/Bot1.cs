@@ -44,8 +44,6 @@ namespace WindowsFormsApp1.GameLogic
 		// увидел рядом чтото?
 		private int _recNum;
 		private int _recContactDir;
-		private int _recPointer;
-		private int _procNum;
 
 
 
@@ -54,8 +52,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public Genom G;
 		public Color Color;
-		public int Pointer;
-		public int OldPointer;
+		public Pointer PointerGeneral;
+		public Pointer PointerReaction;
 
 
 		public CodeHistory hist;
@@ -151,8 +149,8 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 1;
 						_recContactDir = contactDir;
-						_recPointer = 0;
-						_procNum = 0;
+						PointerReaction.b = 0;
+						PointerReaction.cmd = 0;
 					}
 				}
 			}
@@ -169,24 +167,24 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 2;
 						_recContactDir = contactDir;
-						_recPointer = 0;
+						PointerReaction.cmd = 0;
 
 						var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
 
 
 						if (rel)
 						{
-							_procNum = 1;
+							PointerReaction.b = 1;
 						}
 						else
 						{
 							if (needbigrotate)
 							{
-								_procNum = 2;
+								PointerReaction.b = 2;
 							}
 							else
 							{
-								_procNum = 3;
+								PointerReaction.b = 3;
 							}
 						}
 					}
@@ -205,8 +203,8 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 3;
 						_recContactDir = contactDir;
-						_recPointer = 0;
-						_procNum = 4;
+						PointerReaction.b = 4;
+						PointerReaction.cmd = 0;
 					}
 				}
 			}
@@ -223,8 +221,8 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 4;
 						_recContactDir = contactDir;
-						_recPointer = 0;
-						_procNum = 5;
+						PointerReaction.b = 5;
+						PointerReaction.cmd = 0;
 					}
 				}
 			}
@@ -241,8 +239,8 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 5;
 						_recContactDir = contactDir;
-						_recPointer = 0;
-						_procNum = 6;
+						PointerReaction.b = 6;
+						PointerReaction.cmd = 0;
 					}
 				}
 			}
@@ -315,10 +313,11 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom, int pointer)
+		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom)
 		{
-			Pointer = pointer;
-			OldPointer = pointer;
+			PointerGeneral = new Pointer();
+			PointerReaction = new Pointer();
+
 			this.G = genom;
 			hist = new CodeHistory();
 			//Log = new BotLog();
@@ -388,7 +387,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			CommandCycle();
 
-			if (Data.HistoryOn) hist.EndNewStep(Pointer, OldPointer);
+			if (Data.HistoryOn) hist.EndNewStep(PointerGeneral);
 
 
 			Age++;
@@ -417,24 +416,7 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 		}
 
-		private (bool, byte, byte) GetCommand1()
-		{
-			var cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
-			byte par;
-
-			if (Data.CommandsWithParameter[cmd])
-			{
-				par = G.GetDirectionFromNextCommand(Pointer, true);
-			}
-			else
-			{
-				par = 0;
-			}
-
-			return (false, cmd, 0);
-		}
-
-		private (bool, byte, byte, string) GetCommand2()
+		private (bool, byte, byte, string) GetCommand()
 		{
 			byte cmd;
 			byte par;
@@ -443,27 +425,21 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				lock (_busyReceptors)
 				{
-					cmd = G.CodeForEvents[_procNum, _recPointer, 0];
-					par = G.CodeForEvents[_procNum, _recPointer, 1];
-					recprocnum = $"{_recNum}.{_procNum}";
-					_recPointer++;
-					if (_recPointer >= G.CodeForEventsLenght[_procNum] || _recPointer == Data.GenomEventsLenght) _recNum = 0;
+					(cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
+					PointerReaction.cmd++;
+					if (PointerReaction.cmd >= Data.MaxCmdInStep) _recNum = 0;
+					recprocnum = $"{_recNum}.{PointerReaction.b}";
 				}
 
 				return (true, cmd, par, recprocnum);
 			}
 			else
 			{
-				cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
+				(cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
 
-				if (Data.CommandsWithParameter[cmd])
-				{
-					par = G.GetDirectionFromNextCommand(Pointer, true);
-				}
-				else
-				{
-					par = 0;
-				}
+				PointerReaction.cmd++;
+				if (PointerGeneral.cmd >= Data.MaxCmdInStep) _recNum = 0;
+
 
 				return (false, cmd, par, string.Empty);
 			}
@@ -478,7 +454,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			do
 			{
-				(var ev, cmd, var par, var recprocnum) = GetCommand2();
+				(var ev, cmd, var par, var recprocnum) = GetCommand();
 
 				if (ev)
 				{
