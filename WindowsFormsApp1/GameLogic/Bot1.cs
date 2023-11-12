@@ -466,7 +466,7 @@ namespace WindowsFormsApp1.GameLogic
 			byte cmd;
 			bool lastcmd;
 			int cntJmp = 0;
-			long t, t2;
+			long t, t2, t3;
 
 			do
 			{
@@ -479,18 +479,19 @@ namespace WindowsFormsApp1.GameLogic
 
 				if (ev)
 				{
+					t3 = Stopwatch.GetTimestamp();
 					switch (cmd)
 					{
 						//case Cmd.RotateRelative: (_ , bigrotate) = RotateRelative(par); break;
-						case Cmd.RotateRelativeContact: _tm += RotateRelativeContact(par); break;
-						case Cmd.RotateBackward: _tm += RotateBackward(); break;
-						case Cmd.RotateBackwardContact: _tm += RotateBackwardContact(); break;
+						case Cmd.RotateRelativeContact: _tm += RotateRelativeContact(par); Test2.Mark(10, t); break;
+						case Cmd.RotateBackward: _tm += RotateBackward(); Test2.Mark(11, t); break;
+						case Cmd.RotateBackwardContact: _tm += RotateBackwardContact(); Test2.Mark(12, t); break;
 						//case Cmd.LookAround: tm += LookAround(); break;
 						//case Cmd.StepRelative: tm += StepRelative(par); break;
-						case Cmd.StepRelativeContact: _tm += StepRelativeContact(par); break;
-						case Cmd.StepBackward: _tm += StepBackward(); break;
-						case Cmd.StepBackwardContact: _tm += StepBackwardContact(); break;
-						case Cmd.EatForward1: _tm += EatForward(); break;
+						case Cmd.StepRelativeContact: _tm += StepRelativeContact(par); Test2.Mark(13, t); break;
+						case Cmd.StepBackward: _tm += StepBackward(); Test2.Mark(14, t); break;
+						case Cmd.StepBackwardContact: _tm += StepBackwardContact(); Test2.Mark(15, t); break;
+						case Cmd.EatForward1: _tm += EatForward(); Test2.Mark(16, t); break;
 						//case Cmd.EatContact: tm += EatContact(); break;
 						default: throw new Exception();
 					};
@@ -501,18 +502,19 @@ namespace WindowsFormsApp1.GameLogic
 				}
 				else
 				{
+					t3 = Stopwatch.GetTimestamp();
 					switch (cmd)
 					{
 						//case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-						case Cmd.RotateRelative: _tm += RotateRelative(par); break;
-						case Cmd.StepForward1: _tm += StepForward(); break;
-						case Cmd.StepForward2: _tm += StepForward(); break;
-						case Cmd.EatForward1: _tm += EatForward(); break;
-						case Cmd.EatForward2: _tm += EatForward(); break;
-						case Cmd.LookForward1: _tm += LookForward(); break;
-						case Cmd.LookForward2: _tm += LookForward(); break;
-						case Cmd.Photosynthesis: _tm += Photosynthesis(); break;
-						case Cmd.LookAround: _tm += LookAround(); break;
+						case Cmd.RotateRelative: _tm += RotateRelative(par); Test2.Mark(17, t); break;
+						case Cmd.StepForward1: _tm += StepForward(); Test2.Mark(18, t); break;
+						case Cmd.StepForward2: _tm += StepForward(); Test2.Mark(18, t); break;
+						case Cmd.EatForward1: _tm += EatForward(); Test2.Mark(19, t); break;
+						case Cmd.EatForward2: _tm += EatForward(); Test2.Mark(19, t); break;
+						case Cmd.LookForward1: _tm += LookForward(); Test2.Mark(20, t); break;
+						case Cmd.LookForward2: _tm += LookForward(); Test2.Mark(20, t); break;
+						case Cmd.Photosynthesis: _tm += Photosynthesis(); Test2.Mark(21, t); break;
+						case Cmd.LookAround: _tm += LookAround(); Test2.Mark(22, t); break;
 						//case Cmd.RotateRandom: tm += RotateRandom(); break;
 						//case Cmd.AlignHorizontaly: tm += AlignHorizontaly(); break;
 						default: throw new Exception();

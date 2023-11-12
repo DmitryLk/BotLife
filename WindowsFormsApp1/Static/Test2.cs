@@ -14,7 +14,7 @@ namespace WindowsFormsApp1.Static
 {
 	public static class Test2
 	{
-		private const int numberOfIntervals = 10;
+		private const int numberOfIntervals = 30;
 
 		private static readonly long _frequency = Stopwatch.Frequency;
 		private static readonly long[] Total = new long[numberOfIntervals];

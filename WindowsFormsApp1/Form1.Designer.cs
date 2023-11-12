@@ -201,7 +201,7 @@
 			// checkBox3
 			// 
 			this.checkBox3.AutoSize = true;
-			this.checkBox3.Location = new System.Drawing.Point(1458, 468);
+			this.checkBox3.Location = new System.Drawing.Point(1458, 531);
 			this.checkBox3.Name = "checkBox3";
 			this.checkBox3.Size = new System.Drawing.Size(114, 19);
 			this.checkBox3.TabIndex = 20;
@@ -234,7 +234,7 @@
 			// checkBox4
 			// 
 			this.checkBox4.AutoSize = true;
-			this.checkBox4.Location = new System.Drawing.Point(1458, 493);
+			this.checkBox4.Location = new System.Drawing.Point(1458, 556);
 			this.checkBox4.Name = "checkBox4";
 			this.checkBox4.Size = new System.Drawing.Size(119, 19);
 			this.checkBox4.TabIndex = 23;
@@ -267,12 +267,12 @@
 			// textBox6
 			// 
 			this.textBox6.Enabled = false;
-			this.textBox6.Location = new System.Drawing.Point(1424, 206);
+			this.textBox6.Location = new System.Drawing.Point(1429, 180);
 			this.textBox6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.textBox6.Multiline = true;
 			this.textBox6.Name = "textBox6";
 			this.textBox6.ReadOnly = true;
-			this.textBox6.Size = new System.Drawing.Size(148, 169);
+			this.textBox6.Size = new System.Drawing.Size(148, 345);
 			this.textBox6.TabIndex = 26;
 			this.textBox6.TextChanged += new System.EventHandler(this.textBox6_TextChanged);
 			// 
