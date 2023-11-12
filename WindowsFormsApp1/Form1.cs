@@ -37,7 +37,7 @@ namespace WindowsFormsApp1
 			Data.Initialize();
 
 			var pictureBoxes = new[] { pictureBox1, lensPictureBox, cursorPictureBox, reactionsPictureBox };
-			var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2, textBox4, textBox5 };
+			var textBoxes = new[] { textBox1, textBox2, textBox3, objTextBox1, objTextBox2, textBox4, textBox5, textBox6 };
 
 			var presenter = new Presenter(pictureBoxes);
 			var printer = new Printer(textBoxes, dataGridView1, this);
@@ -413,6 +413,11 @@ namespace WindowsFormsApp1
 		private void button5_Click(object sender, EventArgs e)
 		{
 			StepPause();
+		}
+
+		private void textBox6_TextChanged(object sender, EventArgs e)
+		{
+
 		}
 	}
 }

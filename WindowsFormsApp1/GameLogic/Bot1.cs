@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
@@ -42,7 +43,7 @@ namespace WindowsFormsApp1.GameLogic
 		// РЕЦЕПТОРЫ
 		// меня укусили?
 		// увидел рядом чтото?
-		private int _recNum;
+		private byte _recNum;
 		private int _recContactDir;
 
 
@@ -172,7 +173,6 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						_recNum = 2;
 						_recContactDir = contactDir;
-						cNew = 0;
 
 						var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
 
@@ -192,6 +192,7 @@ namespace WindowsFormsApp1.GameLogic
 								bNew = 3;
 							}
 						}
+						cNew = 0;
 						reactionNew = true;
 					}
 				}
@@ -384,6 +385,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void Step()
 		{
+			var t = Stopwatch.GetTimestamp();
+
 			// Некий алгоритм активности бота в рамках одного игорового шага.
 			// В результате которого он на основании данных от рецепторов или без них
 			// изменит свое состояние (координаты, геном, энергия, здоровье, возраст, направление, цвет, минералы, ...)
@@ -394,12 +397,16 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (Data.HistoryOn) hist.BeginNewStep();
 
+			t = Test2.Mark(1, t);
+
 			CommandCycle();
+
+			t = Test2.Mark(2, t);
 
 			if (Data.HistoryOn) hist.EndNewStep(PointerGeneral);
 
 			Age++;
-
+ 
 			var realchange = EnergyChange(Data.DeltaEnergyOnStep);
 			if (Data.DeltaEnergyOnStep != 0) Interlocked.Add(ref Data.TotalEnergy, -realchange);
 
@@ -422,9 +429,10 @@ namespace WindowsFormsApp1.GameLogic
 			}
 
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
+			Test2.Mark(3, t);
 		}
 
-		private (bool LastCmd, bool Ev, Pointer Pointer, byte Cmd, byte Par, string RecprocNum) GetCommand()
+		private (bool LastCmd, bool Ev, Pointer Pointer, byte Cmd, byte Par, byte RecNum) GetCommand()
 		{
 			byte cmd;
 			byte par;
@@ -444,14 +452,14 @@ namespace WindowsFormsApp1.GameLogic
 
 				(cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
 				PointerReaction.CmdNum++;
+
 				if (PointerReaction.CmdNum >= Data.MaxCmdInStep)
 				{
 					_recNum = 0;
 					lastcmd = true;
 				}
-				recprocnum = $"{_recNum}.{PointerReaction.B}";
 
-				return (lastcmd, true, PointerReaction, cmd, par, recprocnum);
+				return (lastcmd, true, PointerReaction, cmd, par, _recNum);
 			}
 			else
 			{
@@ -463,7 +471,7 @@ namespace WindowsFormsApp1.GameLogic
 					lastcmd = true;
 				}
 
-				return (lastcmd, false, PointerGeneral, cmd, par, string.Empty);
+				return (lastcmd, false, PointerGeneral, cmd, par, 0);
 			}
 		}
 
@@ -473,10 +481,15 @@ namespace WindowsFormsApp1.GameLogic
 			byte cmd;
 			bool lastcmd;
 			int cntJmp = 0;
+			long t, t2;
 
 			do
 			{
+				t = Stopwatch.GetTimestamp();
+
 				(lastcmd, var ev, Pointer p, cmd, var par, var recprocnum) = GetCommand();
+				t = Test2.Mark(4, t);
+
 				cntJmp++;
 
 				if (ev)
@@ -494,10 +507,12 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.StepBackwardContact: _tm += StepBackwardContact(); break;
 						case Cmd.EatForward1: _tm += EatForward(); break;
 						//case Cmd.EatContact: tm += EatContact(); break;
-						default: break;
+						default: throw new Exception();
 					};
 
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p, cmd, par, true, recprocnum);
+					t2 = Stopwatch.GetTimestamp();
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p, true, recprocnum);
+					Test2.Mark(7, t2);
 				}
 				else
 				{
@@ -515,7 +530,7 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.LookAround: _tm += LookAround(); break;
 						//case Cmd.RotateRandom: tm += RotateRandom(); break;
 						//case Cmd.AlignHorizontaly: tm += AlignHorizontaly(); break;
-						default: break;
+						default: throw new Exception();
 					};
 
 					if (cmd == Cmd.StepForward1 || cmd == Cmd.StepForward2)
@@ -527,18 +542,19 @@ namespace WindowsFormsApp1.GameLogic
 						if (_moved > 0) _moved--;
 					}
 
-					if (cntJmp == 12)
-					{ 
-					}
-
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p, cmd, par, false, string.Empty);
+					t2 = Stopwatch.GetTimestamp();
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p, false, 0);
+					Test2.Mark(7, t2);
 				}
+				t = Test2.Mark(5, t);
 			}
 			while (_tm < 100 && !lastcmd && cntJmp<10);
+			//St = Stopwatch.GetTimestamp();
 
 			_tm -= 100;
-
 			ShiftPointerGeneralToNextBranch();
+
+			Test2.Mark(6, t);
 		}
 
 		//===================================================================================================
@@ -1264,6 +1280,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		public string GetText2(int delta)
 		{
+			byte cmd;
+			byte par;
 			var sb = new StringBuilder();
 
 			//sb.AppendLine($"23r,24a - rotate; 26r,27a - step");
@@ -1288,12 +1306,22 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					string cmdTxt;
 
-					cmdTxt = $"{Cmd.CmdName(hist[i].cmd)} {hist[i].cmd}({hist[i].b}.{hist[i].c})";
+					if (hist[i].ev)
+					{
+						cmd = G.CodeForReactionCmds[hist[i].b, hist[i].c, 0];
+						par = G.CodeForReactionCmds[hist[i].b, hist[i].c, 1];
+					}
+					else
+					{
+						cmd = G.CodeForGeneralCmds[hist[i].b, hist[i].c, 0];
+						par = G.CodeForGeneralCmds[hist[i].b, hist[i].c, 1];
+					}
+					cmdTxt = $"{Cmd.CmdName(cmd)} {cmd}({hist[i].b}.{hist[i].c})";
 
 					string dirStr;
-					if (Data.CommandsWithParameter[hist[i].cmd])
+					if (Data.CommandsWithParameter[cmd])
 					{
-						dirStr = Dir.GetDirectionStringFromCode(hist[i].par);
+						dirStr = Dir.GetDirectionStringFromCode(par);
 					}
 					else
 					{
@@ -1303,7 +1331,7 @@ namespace WindowsFormsApp1.GameLogic
 					string ev;
 					if (hist[i].ev)
 					{
-						ev = $"EV{hist[i].recProcNum}";
+						ev = $"EV{hist[i].recNum}.{hist[i].b}";
 					}
 					else
 					{

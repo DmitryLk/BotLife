@@ -22,10 +22,8 @@ namespace WindowsFormsApp1.GameLogic
 	{
 		public byte b;
 		public byte c;
-		public byte cmd;
-		public byte par;
 		public bool ev;
-		public string recProcNum;
+		public byte recNum;
 	}
 
 	public class StepHistory
@@ -81,18 +79,18 @@ namespace WindowsFormsApp1.GameLogic
 			pointer.CopyTo(H[historyPointerY].pointer);
 		}
 
-		public void SaveCmdToHistory(Pointer p, byte cmd, byte par, bool ev, string recprocnum)
+		public void SaveCmdToHistory(Pointer p, bool ev, byte recnum)
 		{
 			if (historyPointerY == -1) return;
-			if (H[historyPointerY].cmdCnt == maxx) throw new Exception("PutPtr(byte ptr) ");
+			var cmdCnt = H[historyPointerY].cmdCnt;
+
+			if (cmdCnt == maxx) throw new Exception("PutPtr(byte ptr) ");
 
 
-			H[historyPointerY].CmdStep[H[historyPointerY].cmdCnt].cmd = cmd;
-			H[historyPointerY].CmdStep[H[historyPointerY].cmdCnt].b = p.B;
-			H[historyPointerY].CmdStep[H[historyPointerY].cmdCnt].c = p.CmdNum;
-			H[historyPointerY].CmdStep[H[historyPointerY].cmdCnt].par = par;
-			H[historyPointerY].CmdStep[H[historyPointerY].cmdCnt].ev = ev;
-			H[historyPointerY].CmdStep[H[historyPointerY].cmdCnt].recProcNum = recprocnum;
+			H[historyPointerY].CmdStep[cmdCnt].b = p.B;
+			H[historyPointerY].CmdStep[cmdCnt].c = p.CmdNum;
+			H[historyPointerY].CmdStep[cmdCnt].ev = ev;
+			H[historyPointerY].CmdStep[cmdCnt].recNum = recnum;
 
 			H[historyPointerY].cmdCnt++;
 		}

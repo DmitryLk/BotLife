@@ -47,6 +47,7 @@
 			this.checkBox4 = new System.Windows.Forms.CheckBox();
 			this.button4 = new System.Windows.Forms.Button();
 			this.button5 = new System.Windows.Forms.Button();
+			this.textBox6 = new System.Windows.Forms.TextBox();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -263,11 +264,24 @@
 			this.button5.UseVisualStyleBackColor = true;
 			this.button5.Click += new System.EventHandler(this.button5_Click);
 			// 
+			// textBox6
+			// 
+			this.textBox6.Enabled = false;
+			this.textBox6.Location = new System.Drawing.Point(1424, 206);
+			this.textBox6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.textBox6.Multiline = true;
+			this.textBox6.Name = "textBox6";
+			this.textBox6.ReadOnly = true;
+			this.textBox6.Size = new System.Drawing.Size(148, 169);
+			this.textBox6.TabIndex = 26;
+			this.textBox6.TextChanged += new System.EventHandler(this.textBox6_TextChanged);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1774, 1061);
+			this.Controls.Add(this.textBox6);
 			this.Controls.Add(this.button5);
 			this.Controls.Add(this.button4);
 			this.Controls.Add(this.checkBox4);
@@ -327,6 +341,7 @@
 		private System.Windows.Forms.CheckBox checkBox4;
 		private System.Windows.Forms.Button button4;
 		private System.Windows.Forms.Button button5;
+		private System.Windows.Forms.TextBox textBox6;
 	}
 }
 

@@ -58,6 +58,9 @@ namespace WindowsFormsApp1.Graphic
 			_textBoxes[0].Text = Test.GetText();
 			_textBoxes[0].Update();
 
+			_textBoxes[7].Text = Test2.GetText();
+			_textBoxes[7].Update();
+
 			_textBoxes[1].Text = Data.GetText(fps);
 			_textBoxes[1].Update();
 
