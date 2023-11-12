@@ -56,10 +56,8 @@ namespace WindowsFormsApp1.GameLogic
 		public Pointer PointerGeneral;
 		public Pointer PointerReaction;
 		public byte bNew;
-		public byte cNew;
 		public bool reactionNew;
 		private int _tm = 0;
-
 
 		public CodeHistory hist;
 		//public BotLog Log;
@@ -152,11 +150,10 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (_recNum != 1)
 					{
-						_recNum = 1;
 						_recContactDir = contactDir;
 						bNew = 0;
-						cNew = 0;
 						reactionNew = true;
+						_recNum = 1;
 					}
 				}
 			}
@@ -171,7 +168,6 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (_recNum == 0 || _recNum > 2)
 					{
-						_recNum = 2;
 						_recContactDir = contactDir;
 
 						var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
@@ -192,8 +188,8 @@ namespace WindowsFormsApp1.GameLogic
 								bNew = 3;
 							}
 						}
-						cNew = 0;
 						reactionNew = true;
+						_recNum = 2;
 					}
 				}
 			}
@@ -208,11 +204,10 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (_recNum == 0 || _recNum > 3)
 					{
-						_recNum = 3;
 						_recContactDir = contactDir;
 						bNew = 4;
-						cNew = 0;
 						reactionNew = true;
+						_recNum = 3;
 					}
 				}
 			}
@@ -227,11 +222,10 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (_recNum == 0 || _recNum > 4)
 					{
-						_recNum = 4;
 						_recContactDir = contactDir;
 						bNew = 5;
-						cNew = 0;
 						reactionNew = true;
+						_recNum = 4;
 					}
 				}
 			}
@@ -246,11 +240,10 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (_recNum == 0 || _recNum > 5)
 					{
-						_recNum = 5;
 						_recContactDir = contactDir;
 						bNew = 6;
-						cNew = 0;
 						reactionNew = true;
+						_recNum = 5;
 					}
 				}
 			}
@@ -437,7 +430,6 @@ namespace WindowsFormsApp1.GameLogic
 			byte cmd;
 			byte par;
 			bool lastcmd = false;
-			string recprocnum;
 			if (_recNum > 0)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
 			{
 				if (reactionNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
@@ -445,19 +437,15 @@ namespace WindowsFormsApp1.GameLogic
 					lock (_busyReceptors)
 					{
 						PointerReaction.B = bNew;
-						PointerReaction.CmdNum = cNew;
+						PointerReaction.CmdNum = 0;
 						reactionNew = false;
 					}
 				}
 
 				(cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
-				PointerReaction.CmdNum++;
 
-				if (PointerReaction.CmdNum >= Data.MaxCmdInStep)
-				{
-					_recNum = 0;
-					lastcmd = true;
-				}
+				PointerReaction.CmdNum++;
+				if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 
 				return (lastcmd, true, PointerReaction, cmd, par, _recNum);
 			}
@@ -466,10 +454,7 @@ namespace WindowsFormsApp1.GameLogic
 				(cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
 
 				PointerGeneral.CmdNum++;
-				if (PointerGeneral.CmdNum >= Data.MaxCmdInStep)
-				{
-					lastcmd = true;
-				}
+				if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 
 				return (lastcmd, false, PointerGeneral, cmd, par, 0);
 			}
@@ -551,6 +536,7 @@ namespace WindowsFormsApp1.GameLogic
 			while (_tm < 100 && !lastcmd && cntJmp<10);
 			//St = Stopwatch.GetTimestamp();
 
+			_recNum = 0;
 			_tm -= 100;
 			ShiftPointerGeneralToNextBranch();
 
