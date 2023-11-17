@@ -65,6 +65,34 @@ namespace WindowsFormsApp1.Enums
 			};
 		}
 
+        public static Color CmdColor(byte cmd)
+        {
+            return cmd switch
+            {
+                Cmd.RotateAbsolute => Color.Orange,
+                Cmd.RotateRelative => Color.Orange,
+                Cmd.RotateRelativeContact => Color.Orange,
+                Cmd.RotateBackward => Color.Orange,
+                Cmd.RotateBackwardContact => Color.Orange,
+                Cmd.RotateRandom => Color.Orange,
+                Cmd.AlignHorizontaly => Color.Orange,
+                Cmd.StepForward1 => Color.Red,
+                Cmd.StepForward2 => Color.Red,
+                Cmd.StepRelative => Color.Red,
+                Cmd.StepRelativeContact => Color.Red,
+                Cmd.StepBackward => Color.Red,
+                Cmd.StepBackwardContact => Color.Red,
+                Cmd.EatForward1 => Color.Green,
+                Cmd.EatForward2 => Color.Green,
+                Cmd.EatContact => Color.Green,
+                Cmd.LookForward1 => Color.Blue,
+                Cmd.LookForward2 => Color.Blue,
+                Cmd.LookAround => Color.Blue,
+                Cmd.Photosynthesis => Color.Green,
+                _ => Color.Black
+			};
+        }
+
 		public static HashSet<byte> GeneralCommands = new HashSet<byte>()
 		{
 			//Cmd.RotateAbsolute,

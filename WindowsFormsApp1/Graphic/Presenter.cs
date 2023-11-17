@@ -47,7 +47,7 @@ namespace WindowsFormsApp1.Graphic
         private Font _font2;
         private Font _font3;
 		private StringFormat _stringFormat;
-		private const float CursorPart = 0.95f;
+		private const float CursorPart = 0.999f;
 		private Graphics _cursorGraphics;
 
 		private Bitmap _reactionsBitmap;
@@ -103,11 +103,11 @@ namespace WindowsFormsApp1.Graphic
 
         public void ConfigureCursorReactionsBitmap()
         {
-            var cursorBitmapWidth = 350;
+            var cursorBitmapWidth = 450;
             var cursorBitmapHeight = 300;
 
-            _codeCellWidth = (int)(cursorBitmapWidth * CursorPart / 8);
-            _codeCellHeight = cursorBitmapHeight / 8;
+            _codeCellWidth = (int)(cursorBitmapWidth * CursorPart / 10);
+            _codeCellHeight = cursorBitmapHeight / 10;
             _xStartCodeCell = (int)(cursorBitmapWidth * (1 - CursorPart));
 
             _pictureBoxes[2].Size = new Size(cursorBitmapWidth, cursorBitmapHeight);
@@ -136,7 +136,7 @@ namespace WindowsFormsApp1.Graphic
             _stringFormat.Alignment = StringAlignment.Center;
 
 
-			var reactionBitmapWidth = 250;
+			var reactionBitmapWidth = 300;
 			var reactionBitmapHeight = 220;
 			_reactionCodeCellWidth = 30;
 			_reactionCodeCellHeight = 30;
@@ -252,7 +252,7 @@ namespace WindowsFormsApp1.Graphic
         public void DrawTextOnCursorFrame(int x, int y, string code, Color color)
         {
             var textBrush = new SolidBrush(color);
-            _cursorGraphics.DrawString(code, color == Color.Black ? _font2 : _font1, textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, _stringFormat);
+            _cursorGraphics.DrawString(code, _font1, textBrush, _xStartCodeCell + x * _codeCellWidth + 15, y * _codeCellHeight + 12, _stringFormat);
             //_cursorGraphics.Flush();
         }
 

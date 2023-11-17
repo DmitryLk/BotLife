@@ -183,53 +183,43 @@ namespace WindowsFormsApp1.Graphic
 				var bot = Data.Bots[cursorCont];
 
 				//TEXT
-				_PRESENTER.ClearGraphicsOnReactionsFrame();
-				for (var i = 0; i < Data.GenomEvents; i++)
+                _PRESENTER.ClearGraphicsOnCursorFrame();
+				for (var i = 0; i < 5; i++)
 				{
-					for (var j = 0; j < Data.GenomEventsLenght; j++)
+					for (var j = 0; j < Data.MaxCmdInStep; j++)
 					{
-						var code = bot.G.CodeForEvents[i, j, 0];
-						var par = bot.G.CodeForEvents[i, j, 1];
+						var code = bot.G.CodeForGeneralCmds[i, j, 0];
+                        var par = bot.G.CodeForGeneralCmds[i, j, 1];
 						var absDirStr = Dir.GetDirectionStringFromCode(par);
 
-						_PRESENTER.DrawTextOnReactionsFrame(j, i, code.ToString(), Color.Black);
-						_PRESENTER.DrawSmallTextOnReactionsFrame(j, i, 20, 22, absDirStr, Color.Black);
+                        var textColor = Cmd.CmdColor(code);
 
-					}
+                        _PRESENTER.DrawTextOnCursorFrame(j, i, code.ToString(), textColor);
 
-					var rn = i switch
-					{
-						0 => "1 bite",
-						1 => "2 bot rel",
-						2 => "2 bot bigrot",
-						3 => "2 bot nobigrot",
-						4 => "3 food",
-						5 => "4 mineral",
-						6 => "5 wall",
-						_ => "xz"
-					};
-					_PRESENTER.DrawTextOnReactionsFrame2(Data.GenomEventsLenght, i, rn, Color.Green);
+                        _PRESENTER.DrawSmallTextOnCursorFrame(j, i, 30, 7, i.ToString(), textColor);
+                        _PRESENTER.DrawSmallTextOnCursorFrame(j, i, 26, 28, absDirStr, textColor);
+						_PRESENTER.DrawSmallTextOnCursorFrame(j, i, 10, 28, bot.G.Act[i * Data.MaxCmdInStep + j].ToString(), textColor);
+
+                    }
 				}
 
-				//IMAGES
-				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-				Color color;
-				int x1, y1, x2, y2;
-				for (var i = 0; i < Data.GenomEvents; i++)
-				{
-					for (var j = 0; j < Data.GenomEventsLenght; j++)
-					{
-						_PRESENTER.DrawCodeCellOnReactionsFrame(j, i, Color.Black);
-					}
-				}
+                //IMAGES
+                _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+                _PRESENTER.SendCursorFrameToScreen();
 
-				_PRESENTER.SendReactionsFrameToScreen();
-			}
+                //INFO
+                _PRINTER.Print3(bot);
+                _PRINTER.Print4(bot, Data.DeltaHistory);
+            }
 			else
 			{
 				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditEmptyArray);
 				_PRESENTER.SendReactionsFrameToScreen();
-			}
+
+                //INFO
+                _PRINTER.Print3(null);
+                _PRINTER.Print4(null, Data.DeltaHistory);
+            }
 
 
 
