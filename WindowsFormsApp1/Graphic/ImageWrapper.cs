@@ -224,9 +224,9 @@ namespace WindowsFormsApp1.Graphic
         }
 
         /// <summary>
-        /// Рисует пустой квадрат c тонкой рамкой
+        /// Рисует пустой квадрат
         /// </summary>
-		public unsafe void EmptySquare1(int x, int y, int sizeX, int sizeY, Color color)
+        public unsafe void EmptySquare(int x, int y, int sizeX, int sizeY, Color color ,int borderWidth)
         {
             byte* curpos;
 
@@ -240,10 +240,10 @@ namespace WindowsFormsApp1.Graphic
                     {
                         for (var i = 0; i < sizeX; i++)
                         {
-                            if (j != 0 && j != sizeY - 1 && i == 1)
+                            if (j > 1 && j < sizeY - borderWidth && i == borderWidth)
                             {
-                                ind += (sizeX - 2) * 4;
-                                i = sizeX - 1;
+                                ind += (sizeX - borderWidth*2) * 4;
+                                i = sizeX - borderWidth;
                             }
                             _editArray[ind++] = color.B;
                             _editArray[ind++] = color.G;
@@ -261,64 +261,10 @@ namespace WindowsFormsApp1.Graphic
                     {
                         for (var i = 0; i < sizeX; i++)
                         {
-                            if (j != 0 && j != sizeY - 1 && i == 1)
+                            if (j > 1 && j < sizeY - borderWidth && i == borderWidth)
                             {
-                                curpos += (sizeX - 2) * 4;
-                                i = sizeX - 1;
-                            }
-                            *curpos++ = color.B;
-                            *curpos++ = color.G;
-                            *curpos++ = color.R;
-                            *curpos++ = 255;
-                        }
-                        curpos += _stride - sizeX * 4;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Рисует пустой квадрат c толстой рамкой
-        /// </summary>
-        public unsafe void EmptySquare2(int x, int y, int sizeX, int sizeY, Color color)
-        {
-            byte* curpos;
-
-            if (x >= 0 && x <= _width - sizeX && y >= 0 && y <= _height - sizeY)
-            {
-                var ind = x * 4 + y * _stride;
-
-                if (_useEditArray)
-                {
-                    for (var j = 0; j < sizeY; j++)
-                    {
-                        for (var i = 0; i < sizeX; i++)
-                        {
-                            if (j > 1 && j < sizeY - 2 && i == 2)
-                            {
-                                ind += (sizeX - 4) * 4;
-                                i = sizeX - 2;
-                            }
-                            _editArray[ind++] = color.B;
-                            _editArray[ind++] = color.G;
-                            _editArray[ind++] = color.R;
-                            _editArray[ind++] = 255;
-                        }
-                        ind += _stride - sizeX * 4;
-                    }
-                }
-                else
-                {
-                    curpos = (byte*)_bmpData.Scan0 + ind;
-
-                    for (var j = 0; j < sizeY; j++)
-                    {
-                        for (var i = 0; i < sizeX; i++)
-                        {
-                            if (j > 1 && j < sizeY - 2 && i == 2)
-                            {
-                                curpos += (sizeX - 4) * 4;
-                                i = sizeX - 2;
+                                curpos += (sizeX - borderWidth*2) * 4;
+                                i = sizeX - borderWidth;
                             }
                             *curpos++ = color.B;
                             *curpos++ = color.G;

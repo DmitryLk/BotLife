@@ -183,43 +183,105 @@ namespace WindowsFormsApp1.Graphic
 				var bot = Data.Bots[cursorCont];
 
 				//TEXT
-                _PRESENTER.ClearGraphicsOnCursorFrame();
-				for (var i = 0; i < 5; i++)
+				_PRESENTER.ClearGraphicsOnCursorFrame();
+				var k = 0;
+				for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
 				{
+					if (i >= bot.G.ActiveGeneralBranchCnt && i < Data.GenomGeneralBranchCnt) continue;
+
+					_PRESENTER.DrawMediumTextOnCursorFrame(0, k, -9, 23, i.ToString(), i >= Data.GenomGeneralBranchCnt ? Color.Red :  Color.Black);
 					for (var j = 0; j < Data.MaxCmdInStep; j++)
 					{
-						var code = bot.G.CodeForGeneralCmds[i, j, 0];
-                        var par = bot.G.CodeForGeneralCmds[i, j, 1];
+						var code = bot.G.Code[i, j, 0];
+						var par = bot.G.Code[i, j, 1];
 						var absDirStr = Dir.GetDirectionStringFromCode(par);
 
-                        var textColor = Cmd.CmdColor(code);
+						var textColor = Cmd.CmdColor(code);
 
-                        _PRESENTER.DrawTextOnCursorFrame(j, i, code.ToString(), textColor);
+						_PRESENTER.DrawTextOnCursorFrame(j, k, code.ToString(), textColor);
+						_PRESENTER.DrawSmallTextOnCursorFrame(j, k, 35, 20, absDirStr, Color.Blue);
+						if (bot.G.Act[i * Data.MaxCmdInStep + j] > 0) _PRESENTER.DrawMediumTextOnCursorFrame(j, k, 15, 35, bot.G.Act[i * Data.MaxCmdInStep + j].ToString(), Color.Red);
+					}
 
-                        _PRESENTER.DrawSmallTextOnCursorFrame(j, i, 30, 7, i.ToString(), textColor);
-                        _PRESENTER.DrawSmallTextOnCursorFrame(j, i, 26, 28, absDirStr, textColor);
-						_PRESENTER.DrawSmallTextOnCursorFrame(j, i, 10, 28, bot.G.Act[i * Data.MaxCmdInStep + j].ToString(), textColor);
+					var rn = (i - Data.GenomGeneralBranchCnt) switch
+					{
+						0 => "1 bite",
+						1 => "2 bot rel",
+						2 => "2 bot bigrot",
+						3 => "2 bot nobigrot",
+						4 => "3 food",
+						5 => "4 mineral",
+						6 => "5 wall",
+						_ => ""
+					};
+					_PRESENTER.DrawOtherTextOnCursorFrame(Data.MaxCmdInStep, k, rn, Color.Green);
 
-                    }
+					k++;
 				}
 
-                //IMAGES
-                _PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
-                _PRESENTER.SendCursorFrameToScreen();
+				//IMAGES
+				_PRESENTER.StartNewCursorFrame(BitmapCopyType.EditDirectlyScreenBitmap_Fastest);
+				Color color;
+				int x1, y1, x2, y2;
+				k = 0;
+				for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
+				{
+					if (i >= bot.G.ActiveGeneralBranchCnt && i < Data.GenomGeneralBranchCnt) continue;
+					for (var j = 0; j < Data.MaxCmdInStep; j++)
+					{
+						_PRESENTER.DrawCodeCellOnCursorFrame(j, k, bot.G.Code[i, j, 2] == 1 ? Color.Red : (bot.G.Act[i * Data.MaxCmdInStep + j] > 0 ? Color.Black : Color.LightGray));
+					}
+					k++;
+				}
 
-                //INFO
-                _PRINTER.Print3(bot);
-                _PRINTER.Print4(bot, Data.DeltaHistory);
-            }
+				if (bot.hist.historyPointerY >= 0)
+				{
+					var (hist_old, histPtrCnt_old, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory - 1);
+					var (hist, histPtrCnt, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
+
+
+					for (var i = 0; i < histPtrCnt; i++)
+					{
+						if (i == 0)
+						{
+							x1 = hist_old[histPtrCnt_old - 1].c;
+							y1 = hist_old[histPtrCnt_old - 1].b;
+						}
+						else
+						{
+							x1 = hist[i - 1].c;
+							y1 = hist[i - 1].b;
+						}
+
+						x2 = hist[i].c;
+						y2 = hist[i].b;
+
+						if (y1 >= Data.GenomGeneralBranchCnt) y1 -= Data.GenomGeneralBranchCnt - bot.G.ActiveGeneralBranchCnt;
+						if (y2 >= Data.GenomGeneralBranchCnt) y2 -= Data.GenomGeneralBranchCnt - bot.G.ActiveGeneralBranchCnt;
+
+
+						color = Color.DarkOrchid;
+						if (i == 0) color = Color.Aqua;
+						if (i == histPtrCnt - 1) color = Color.Orange;
+
+						_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
+					}
+				}
+				_PRESENTER.SendCursorFrameToScreen();
+
+				//INFO
+				_PRINTER.Print3(bot);
+				_PRINTER.Print4(bot, Data.DeltaHistory);
+			}
 			else
 			{
 				_PRESENTER.StartNewReactionsFrame(BitmapCopyType.EditEmptyArray);
 				_PRESENTER.SendReactionsFrameToScreen();
 
-                //INFO
-                _PRINTER.Print3(null);
-                _PRINTER.Print4(null, Data.DeltaHistory);
-            }
+				//INFO
+				_PRINTER.Print3(null);
+				_PRINTER.Print4(null, Data.DeltaHistory);
+			}
 
 
 

@@ -34,8 +34,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 		// Genom Code
-		public byte[,,] CodeForGeneralCmds;
-		public byte[,,] CodeForReactionCmds;
+		public byte[,,] Code;
 
 		public int[] Act; //сколько раз использовалась та или другая команда
 		public bool ActCnt; //ведется ли подсчет количества использования команд. завершается если счетчик одной из команд дошел до 230.
@@ -125,8 +124,7 @@ namespace WindowsFormsApp1.GameLogic
 		public static Genom CreateNewGenom()
 		{
 			var g = new Genom();
-			g.CodeForGeneralCmds = new byte[Data.GenomGeneralBranchCnt, Data.MaxCmdInStep, 2];
-			g.CodeForReactionCmds = new byte[Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 2];
+			g.Code = new byte[Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 3];
 
 			g.Act = new int[(Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt) * Data.MaxCmdInStep];
 			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
@@ -147,40 +145,30 @@ namespace WindowsFormsApp1.GameLogic
 			g.PraNum = g.Num;
 			g.Level = 1;
 
-			// Наполнение кода генома (общие команды)
-			for (var i = 0; i < Data.GenomGeneralBranchCnt; i++)
+			// Наполнение кода генома
+			for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
 			{
 				for (var j = 0; j < Data.MaxCmdInStep; j++)
 				{
-					g.CodeForGeneralCmds[i, j, 0] = Func.GetRandomGeneralCmd();
-					g.CodeForGeneralCmds[i, j, 1] = Func.GetRandomBotCode();
-				}
-			}
-
-			// Наполнение кода генома (команды событий)
-			for (var i = 0; i < Data.GenomReactionBranchCnt; i++)
-			{
-				for (var j = 0; j < Data.MaxCmdInStep; j++)
-				{
-					g.CodeForReactionCmds[i, j, 0] = Func.GetRandomReactionCmd();
-					g.CodeForReactionCmds[i, j, 1] = Func.GetRandomBotCode();
+					g.Code[i, j, 0] = i< Data.GenomGeneralBranchCnt ? Func.GetRandomGeneralCmd() : Func.GetRandomReactionCmd();
+					g.Code[i, j, 1] = Func.GetRandomBotCode();
+					g.Code[i, j, 2] = 0;
 				}
 			}
 
 			// Attack-Shield
-			(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
-			g.AttackTypesCnt = g.AttackTypes.Length;
+			CreateAttackShield(g);
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
 			return g;
 		}
 
+
 		// Создание генома-потомка
 		public static Genom CreateChildGenom(Genom parent)
 		{
 			var g = new Genom();
-			g.CodeForGeneralCmds = new byte[Data.GenomGeneralBranchCnt, Data.MaxCmdInStep, 2];
-			g.CodeForReactionCmds = new byte[Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 2];
+			g.Code = new byte[Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 3];
 
 			g.Act = new int[(Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt) * Data.MaxCmdInStep];
 			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
@@ -203,26 +191,16 @@ namespace WindowsFormsApp1.GameLogic
 			g.Level = parent.Level + 1;
 			Interlocked.Increment(ref Data.MutationCnt);
 
-			// Копирование кода генома (общие команды)
-			for (var i = 0; i < Data.GenomGeneralBranchCnt; i++)
+			// Копирование кода генома
+			for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
 			{
 				for (var j = 0; j < Data.MaxCmdInStep; j++)
 				{
-					g.CodeForGeneralCmds[i, j, 0] = parent.CodeForGeneralCmds[i, j, 0];
-					g.CodeForGeneralCmds[i, j, 1] = parent.CodeForGeneralCmds[i, j, 1];
+					g.Code[i, j, 0] = parent.Code[i, j, 0];
+					g.Code[i, j, 1] = parent.Code[i, j, 1];
+					g.Code[i, j, 2] = parent.Code[i, j, 2];
 				}
 			}
-
-			// Копирование кода генома (команды событий)
-			for (var i = 0; i < Data.GenomReactionBranchCnt; i++)
-			{
-				for (var j = 0; j < Data.MaxCmdInStep; j++)
-				{
-					g.CodeForReactionCmds[i, j, 0] = parent.CodeForReactionCmds[i, j, 0];
-					g.CodeForReactionCmds[i, j, 1] = parent.CodeForReactionCmds[i, j, 1];
-				}
-			}
-
 
 			// Мутация (Data.MutationLenght байт в геноме подменяем)
 			for (var i = 0; i < Data.MutationLenght; i++)
@@ -250,14 +228,15 @@ namespace WindowsFormsApp1.GameLogic
 						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
 					}
 
-					if (Data.CommandsWithParameter[g.CodeForGeneralCmds[branch, cmdnum, 0]] && rndpar == 1)
+					if (Data.CommandsWithParameter[g.Code[branch, cmdnum, 0]] && rndpar == 1)
 					{
-						g.CodeForGeneralCmds[branch, cmdnum, 1] = Func.GetRandomBotCode();
+						g.Code[branch, cmdnum, 1] = Func.GetRandomBotCode();
 					}
 					else
 					{
-						g.CodeForGeneralCmds[branch, cmdnum, 0] = Func.GetRandomGeneralCmd();
+						g.Code[branch, cmdnum, 0] = Func.GetRandomGeneralCmd();
 					}
+					g.Code[branch, cmdnum, 2] = 1;
 				}
 
 				// Мутация в событиях
@@ -274,44 +253,58 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					else
 					{
-						branch = Func.GetRandomNext(Data.GenomReactionBranchCnt);
+						branch = Func.GetRandomNext(Data.GenomReactionBranchCnt) + Data.GenomGeneralBranchCnt;
 						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
 					}
 
-					if (Data.CommandsWithParameter[g.CodeForReactionCmds[branch, cmdnum, 0]] && rndpar == 1)
+					//branch += Data.GenomGeneralBranchCnt;
+
+					if (Data.CommandsWithParameter[g.Code[branch, cmdnum, 0]] && rndpar == 1)
 					{
-						g.CodeForReactionCmds[branch, cmdnum, 1] = Func.GetRandomBotCode();
+						g.Code[branch, cmdnum, 1] = Func.GetRandomBotCode();
 					}
 					else
 					{
-						g.CodeForReactionCmds[branch, cmdnum, 0] = Func.GetRandomReactionCmd();
+						g.Code[branch, cmdnum, 0] = Func.GetRandomReactionCmd();
 					}
+					g.Code[branch, cmdnum, 2] = 1;
 				}
 			}
 
 
 			// Attack-Shield
+			CopyAttackShield(g, parent);
+
+			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
+			return g;
+		}
+
+		private static void CreateAttackShield(Genom g)
+		{
+			(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield(Func.AttackShieldType.FullRandom);
+			g.AttackTypesCnt = g.AttackTypes.Length;
+		}
+
+		private static void CopyAttackShield(Genom g, Genom parent)
+		{
 			g.Shield = parent.Shield;
 			g.Attack = parent.Attack;
 			g.AttackTypes = parent.AttackTypes;
 			g.AttackTypesCnt = parent.AttackTypesCnt;
 			//(g.Shield, g.Attack, g.AttackTypes) = Func.GetRandomAttackShield();
 			//g.AttackTypesCnt = g.AttackTypes.Length;
-
-			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
-			return g;
 		}
 
 		public (byte, byte) GetGeneralCommandAndSetAct(Pointer p, bool act)
 		{
 			if (act) SetActGeneralCommand(p);
-			return (CodeForGeneralCmds[p.B, p.CmdNum, 0], CodeForGeneralCmds[p.B, p.CmdNum, 1]);
+			return (Code[p.B, p.CmdNum, 0], Code[p.B, p.CmdNum, 1]);
 		}
 
 		public (byte, byte) GetReactionCommandAndSetAct(Pointer p, bool act)
 		{
 			if (act) SetActReactionCommand(p);
-			return (CodeForReactionCmds[p.B, p.CmdNum, 0], CodeForReactionCmds[p.B, p.CmdNum, 1]);
+			return (Code[p.B, p.CmdNum, 0], Code[p.B, p.CmdNum, 1]);
 		}
 
 		private void SetActGeneralCommand(Pointer p)
@@ -347,7 +340,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			if (ActCnt)
 			{
-				var num = (p.B + Data.GenomGeneralBranchCnt) * Data.MaxCmdInStep + p.CmdNum;
+				var num = p.B * Data.MaxCmdInStep + p.CmdNum;
 
 				Interlocked.Increment(ref Act[num]);
 

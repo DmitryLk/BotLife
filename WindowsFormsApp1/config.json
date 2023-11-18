@@ -29,7 +29,7 @@
   "SeedWallsNumber": 0,
   "SeedPoisonNumber": 0,
 
-  // Настройки генома ботов
+  //Genom
   "GenomGeneralBranchCnt": 10,
   "GenomReactionBranchCnt": 7,
   "MaxCode": 63,

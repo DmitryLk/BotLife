@@ -175,21 +175,21 @@ namespace WindowsFormsApp1.Static
 
 					//}
 
-     //               var te = 0;
-     //               var cnt2 = 0;
-     //               for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
-     //               {
-     //                   if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
+					//               var te = 0;
+					//               var cnt2 = 0;
+					//               for (long i = 1; i <= Data.CurrentNumberOfBots; i++)
+					//               {
+					//                   if (Data.Bots[i] == null) throw new Exception("rtfghrsfd45tssaddfsdfhrt");
 
-     //                   if (!Data.Bots[i].Alive)
-     //                   {
-     //                       cnt2++;
-     //                   }
+					//                   if (!Data.Bots[i].Alive)
+					//                   {
+					//                       cnt2++;
+					//                   }
 
-     //                   if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
+					//                   if (Data.Bots[i].InsertedToReproductionList) throw new Exception("fdgdfg2");
 
-     //                   te += Data.Bots[i].Energy;
-     //               }
+					//                   te += Data.Bots[i].Energy;
+					//               }
 
 					//CHECK1();
 					//CHECK2();
@@ -400,8 +400,8 @@ namespace WindowsFormsApp1.Static
 			updBot.BiteImCount = 0;
 			updBot.Alive = true;
 			//updBot.hist = new CodeHistory();
-            updBot.InsertedToReproductionList = false;
-            updBot.EnergySet(en);
+			updBot.InsertedToReproductionList = false;
+			updBot.EnergySet(en);
 			updBot.ResetMoved();
 
 			updBot.RefreshColor();
@@ -419,7 +419,7 @@ namespace WindowsFormsApp1.Static
 				FixChangeCell(x, y, updBot.Color);
 			}
 
-            updBot.InsertedToDeathList = false;
+			updBot.InsertedToDeathList = false;
 		}
 
 		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
@@ -467,10 +467,10 @@ namespace WindowsFormsApp1.Static
 				FixChangeCell(x, y, bot.Color);
 			}
 
-            lock (_busyWorld)
-            {
-                Data.World[x, y] = botIndex;
-            }
+			lock (_busyWorld)
+			{
+				Data.World[x, y] = botIndex;
+			}
 		}
 
 		private static bool TryOccupyRandomFreeCellNearby(int Xi, int Yi, long reprBotIndex, out int nXi, out int nYi)
@@ -545,42 +545,56 @@ namespace WindowsFormsApp1.Static
 			return (nXi, nYi);
 		}
 
-		public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield()
+		public enum AttackShieldType
 		{
+			AttackOnlyOne = 1,
+			FiftyFifty = 2,
+			FullRandom = 3,
+		}
+
+		public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield(AttackShieldType type)
+		{
+			
+
 			var fail = false;
 			var shield = new byte[Data.AttackShieldTypeCountMax];
 			var attack = new byte[Data.AttackShieldTypeCountMax];
 			var attackTypes = new List<(byte, byte)>();
 			var attackTypesCount = 0;
+			bool toShield;
 
 			for (var i = 0; i < Data.AttackShieldSum; i++)
 			{
 				do
 				{
 					fail = false;
-					var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+					toShield = ThreadSafeRandom.NextDouble() > .5;
 
-					if (ThreadSafeRandom.NextDouble() > .5)
+					var num = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+
+
+					if (toShield)
 					{
-						if (shield[type] >= Data.ShieldMax)
+						if (shield[num] >= Data.ShieldMax)
 						{
 							fail = true;
 						}
 						else
 						{
-							shield[type]++;
+							shield[num]++;
 						}
 					}
-					else
-					{
-						if (attack[type] >= Data.AttackMax || (attack[type] == 0 && attackTypesCount >= Data.AttackTypeCountMax))
+
+					if (!toShield)
+					{ 
+						if (attack[num] >= Data.AttackMax || (attack[num] == 0 && attackTypesCount >= Data.AttackTypeCountMax))
 						{
 							fail = true;
 						}
 						else
 						{
-							if (attack[type] == 0) attackTypesCount++;
-							attack[type]++;
+							if (attack[num] == 0) attackTypesCount++;
+							attack[num]++;
 						}
 					}
 				}

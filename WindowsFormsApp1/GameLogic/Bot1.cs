@@ -425,38 +425,27 @@ namespace WindowsFormsApp1.GameLogic
 			Test2.Mark(3, t);
 		}
 
-		private (bool LastCmd, bool Ev, Pointer Pointer, byte Cmd, byte Par, byte RecNum) GetCommand()
+		private (bool Ev, Pointer Pointer, byte Cmd, byte Par, byte RecNum) GetCommand()
 		{
-			byte cmd;
-			byte par;
-			bool lastcmd = false;
 			if (_recNum > 0)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
 			{
 				if (reactionNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
 				{
 					lock (_busyReceptors)
 					{
-						PointerReaction.B = bNew;
+						PointerReaction.B = (byte)(bNew + Data.GenomGeneralBranchCnt);
 						PointerReaction.CmdNum = 0;
 						reactionNew = false;
 					}
 				}
 
-				(cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
-
-				PointerReaction.CmdNum++;
-				if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
-
-				return (lastcmd, true, PointerReaction, cmd, par, _recNum);
+				var (cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
+				return (true, PointerReaction, cmd, par, _recNum);
 			}
-			else
+			else 
 			{
-				(cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
-
-				PointerGeneral.CmdNum++;
-				if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
-
-				return (lastcmd, false, PointerGeneral, cmd, par, 0);
+				var (cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
+				return (false, PointerGeneral, cmd, par, 0);
 			}
 		}
 
@@ -464,7 +453,7 @@ namespace WindowsFormsApp1.GameLogic
 		private void CommandCycle()
 		{
 			byte cmd;
-			bool lastcmd;
+			bool lastcmd = false;
 			int cntJmp = 0;
 			long t, t2, t3;
 
@@ -472,7 +461,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				t = Stopwatch.GetTimestamp();
 
-				(lastcmd, var ev, Pointer p, cmd, var par, var recprocnum) = GetCommand();
+				(var ev, Pointer p, cmd, var par, var recprocnum) = GetCommand();
 				t = Test2.Mark(4, t);
 
 				cntJmp++;
@@ -499,6 +488,9 @@ namespace WindowsFormsApp1.GameLogic
 					t2 = Stopwatch.GetTimestamp();
 					if (Data.HistoryOn) hist.SaveCmdToHistory(p, true, recprocnum);
 					Test2.Mark(7, t2);
+
+					PointerReaction.CmdNum++;
+					if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 				}
 				else
 				{
@@ -532,6 +524,9 @@ namespace WindowsFormsApp1.GameLogic
 					t2 = Stopwatch.GetTimestamp();
 					if (Data.HistoryOn) hist.SaveCmdToHistory(p, false, 0);
 					Test2.Mark(7, t2);
+
+					PointerGeneral.CmdNum++;
+					if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 				}
 				t = Test2.Mark(5, t);
 			}
@@ -1294,16 +1289,9 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					string cmdTxt;
 
-					if (hist[i].ev)
-					{
-						cmd = G.CodeForReactionCmds[hist[i].b, hist[i].c, 0];
-						par = G.CodeForReactionCmds[hist[i].b, hist[i].c, 1];
-					}
-					else
-					{
-						cmd = G.CodeForGeneralCmds[hist[i].b, hist[i].c, 0];
-						par = G.CodeForGeneralCmds[hist[i].b, hist[i].c, 1];
-					}
+					cmd = G.Code[hist[i].b, hist[i].c, 0];
+					par = G.Code[hist[i].b, hist[i].c, 1];
+
 					cmdTxt = $"{Cmd.CmdName(cmd)} {cmd}({hist[i].b}.{hist[i].c})";
 
 					string dirStr;

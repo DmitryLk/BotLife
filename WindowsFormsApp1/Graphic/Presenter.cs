@@ -47,7 +47,7 @@ namespace WindowsFormsApp1.Graphic
         private Font _font2;
         private Font _font3;
 		private StringFormat _stringFormat;
-		private const float CursorPart = 0.999f;
+		private const float CursorPart = 0.97f;
 		private Graphics _cursorGraphics;
 
 		private Bitmap _reactionsBitmap;
@@ -103,10 +103,10 @@ namespace WindowsFormsApp1.Graphic
 
         public void ConfigureCursorReactionsBitmap()
         {
-            var cursorBitmapWidth = 450;
-            var cursorBitmapHeight = 300;
+            var cursorBitmapWidth = 600;
+            var cursorBitmapHeight = 450;
 
-            _codeCellWidth = (int)(cursorBitmapWidth * CursorPart / 10);
+            _codeCellWidth = (int)(cursorBitmapWidth * CursorPart / 12);
             _codeCellHeight = cursorBitmapHeight / 10;
             _xStartCodeCell = (int)(cursorBitmapWidth * (1 - CursorPart));
 
@@ -129,15 +129,17 @@ namespace WindowsFormsApp1.Graphic
             //_font = new Font("Times", 10);
             //_font = new Font("Calibri", 10);
             _font1 = new Font(FontFamily.GenericSansSerif, 14, FontStyle.Bold);
-            _font2 = new Font("Calibri", 10, FontStyle.Regular);
-            _font3 = new Font("Arial", 6, FontStyle.Regular);
+            _font2 = new Font("Calibri", 10, FontStyle.Bold);
+            _font3 = new Font("Arial", 8, FontStyle.Regular);
             _stringFormat = new StringFormat();
             _stringFormat.LineAlignment = StringAlignment.Center;
             _stringFormat.Alignment = StringAlignment.Center;
 
 
-			var reactionBitmapWidth = 300;
-			var reactionBitmapHeight = 220;
+			//var reactionBitmapWidth = 300;
+			//var reactionBitmapHeight = 220;
+			var reactionBitmapWidth = 10;
+			var reactionBitmapHeight = 10;
 			_reactionCodeCellWidth = 30;
 			_reactionCodeCellHeight = 30;
 			_pictureBoxes[3].Size = new Size(reactionBitmapWidth, reactionBitmapHeight);
@@ -166,7 +168,7 @@ namespace WindowsFormsApp1.Graphic
 
         public void DrawLensOnFrame(int x, int y, int sizeX, int sizeY, Color color)
         {
-            _mainImageWrapper.EmptySquare1(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color);
+            _mainImageWrapper.EmptySquare(x * _cellWidth, y * _cellHeight, sizeX * _cellWidth, sizeY * _cellHeight, color, 1);
         }
 
         public Color GetPixel(int x, int y)
@@ -212,7 +214,7 @@ namespace WindowsFormsApp1.Graphic
 
         public void DrawCursorOnLens(int x, int y, Color? color = null)
         {
-            _lensImageWrapper.EmptySquare1(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon);
+            _lensImageWrapper.EmptySquare(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon, 1);
         }
 
         public void SendLensFrameToScreen()
@@ -236,16 +238,16 @@ namespace WindowsFormsApp1.Graphic
 
         public void DrawCodeCellOnCursorFrame(int x, int y, Color? color = null)
         {
-            _cursorImageWrapper.EmptySquare2(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon);
+            _cursorImageWrapper.EmptySquare(_xStartCodeCell + x * _codeCellWidth + 1, y * _codeCellHeight + 1, _codeCellWidth - 2, _codeCellHeight - 2, color ?? _fon, 2);
         }
 
         public void DrawCodeArrowOnCursorFrame(int x1, int y1, int x2, int y2, Color color)
         {
             _cursorImageWrapper.Line(
-                _xStartCodeCell + _codeCellWidth * x1 + 3,
-                _codeCellHeight * y1 + 3,
-                _xStartCodeCell + _codeCellWidth * x2 + 3,
-                _codeCellHeight * y2 + 3,
+                _xStartCodeCell + _codeCellWidth * x1 + 25,
+                _codeCellHeight * y1 + 25,
+                _xStartCodeCell + _codeCellWidth * x2 + 25,
+                _codeCellHeight * y2 + 25,
                 color);
         }
 
@@ -258,11 +260,26 @@ namespace WindowsFormsApp1.Graphic
 
         public void DrawSmallTextOnCursorFrame(int x, int y, int dx, int dy, string code, Color color)
         {
-            _cursorGraphics.DrawString(code, _font3, _smallTextBrush, _xStartCodeCell + x * _codeCellWidth + dx, y * _codeCellHeight + dy, _stringFormat);
+			var textBrush = new SolidBrush(color);
+			_cursorGraphics.DrawString(code, _font3, textBrush, _xStartCodeCell + x * _codeCellWidth + dx, y * _codeCellHeight + dy, _stringFormat);
             //_cursorGraphics.Flush();
         }
 
-		public void DrawOtherTextOnCursorFrame(int x, int y, string code)
+		public void DrawMediumTextOnCursorFrame(int x, int y, int dx, int dy, string code, Color color)
+		{
+			var textBrush = new SolidBrush(color);
+			_cursorGraphics.DrawString(code, _font2, textBrush, _xStartCodeCell + x * _codeCellWidth + dx, y * _codeCellHeight + dy, _stringFormat);
+			//_cursorGraphics.Flush();
+		}
+
+		public void DrawOtherTextOnCursorFrame(int x, int y, string code, Color color)
+		{
+			var textBrush = new SolidBrush(color);
+			_cursorGraphics.DrawString(code, _font2, textBrush, _xStartCodeCell + x * _codeCellWidth + 2, y * _codeCellHeight + 20, _stringFormat2);
+			//_cursorGraphics.Flush();
+		}
+
+		public void DrawOtherTextOnCursorFrame2(int x, int y, string code)
         {
             _cursorGraphics.DrawString(code, _font2, _smallTextBrush, x, y);
             //_cursorGraphics.Flush();
@@ -305,7 +322,7 @@ namespace WindowsFormsApp1.Graphic
 
 		public void DrawCodeCellOnReactionsFrame(int x, int y, Color? color = null)
 		{
-			_reactionsImageWrapper.EmptySquare2(x * _reactionCodeCellWidth + 1, y * _reactionCodeCellHeight + 1, _reactionCodeCellWidth - 2, _reactionCodeCellHeight - 2, color ?? _fon);
+			_reactionsImageWrapper.EmptySquare(x * _reactionCodeCellWidth + 1, y * _reactionCodeCellHeight + 1, _reactionCodeCellWidth - 2, _reactionCodeCellHeight - 2, color ?? _fon, 2);
 		}
 
 		public void SendReactionsFrameToScreen()
