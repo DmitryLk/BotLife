@@ -43,8 +43,12 @@ namespace WindowsFormsApp1.GameLogic
 		// РЕЦЕПТОРЫ
 		// меня укусили?
 		// увидел рядом чтото?
-		private byte _recNum;
+		//private byte _recNum;
+		private bool _recActive;
 		private int _recContactDir;
+		private byte _recWeight;
+		public bool _recNew;
+		public byte _recNewBranch;
 
 
 
@@ -55,8 +59,6 @@ namespace WindowsFormsApp1.GameLogic
 		public Color Color;
 		public Pointer PointerGeneral;
 		public Pointer PointerReaction;
-		public byte bNew;
-		public bool reactionNew;
 		private int _tm = 0;
 		private int _tmR = 0;
 
@@ -142,55 +144,53 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		#region Receptors
-		// 1 - укус
-		private void ActivateReceptor1(int contactDir)
+		private void ActivateReceptor(byte recWeight, byte bNew, int contactDir)
 		{
-			if (_recNum != 1)
+			if (!_recActive || _recWeight > recWeight)
 			{
 				lock (_busyReceptors)
 				{
-					if (_recNum != 1)
+					if (!_recActive || _recWeight > recWeight)
 					{
 						_recContactDir = contactDir;
-						bNew = 0;
-						reactionNew = true;
-						_recNum = 1;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
+						_recWeight = recWeight;
+						_recNewBranch = bNew;
+						_recNew = true;
+						_recActive = true;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
 					}
 				}
 			}
 		}
 
+
+		// 1 - укус
+		private void ActivateReceptor1(int contactDir)
+		{
+			ActivateReceptor(0, 0, contactDir);
+		}
+
+
 		// 2 - рядом бот
 		private void ActivateReceptor2(int contactDir, bool rel, int dir) //, bool block, int massa, byte[] Shield, byte[] Attack, int dir, bool mov)
 		{
-			if (_recNum == 0 || _recNum > 2)
+			byte weight = 3;
+
+			if (!_recActive || _recWeight > weight)
 			{
-				lock (_busyReceptors)
+				if (rel)
 				{
-					if (_recNum == 0 || _recNum > 2)
+					ActivateReceptor(3, 3, contactDir);
+				}
+				else
+				{
+					var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
+					if (needbigrotate)
 					{
-						_recContactDir = contactDir;
-
-						var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
-
-
-						if (rel)
-						{
-							bNew = 1;
-						}
-						else
-						{
-							if (needbigrotate)
-							{
-								bNew = 2;
-							}
-							else
-							{
-								bNew = 3;
-							}
-						}
-						reactionNew = true;
-						_recNum = 2;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
+						ActivateReceptor(2, 2, contactDir);
+					}
+					else
+					{
+						ActivateReceptor(1, 1, contactDir);
 					}
 				}
 			}
@@ -199,56 +199,19 @@ namespace WindowsFormsApp1.GameLogic
 		// 3 - рядом еда
 		private void ActivateReceptor3(int contactDir)
 		{
-			if (_recNum == 0 || _recNum > 3)
-			{
-				lock (_busyReceptors)
-				{
-					if (_recNum == 0 || _recNum > 3)
-					{
-						_recContactDir = contactDir;
-						bNew = 4;
-						reactionNew = true;
-						reactionNew = true;
-						_recNum = 3;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
-					}
-				}
-			}
+			ActivateReceptor(4, 4, contactDir);
 		}
 
 		// 4 - рядом минерал
 		private void ActivateReceptor4(int contactDir)
 		{
-			if (_recNum == 0 || _recNum > 4)
-			{
-				lock (_busyReceptors)
-				{
-					if (_recNum == 0 || _recNum > 4)
-					{
-						_recContactDir = contactDir;
-						bNew = 5;
-						reactionNew = true;
-						_recNum = 4;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
-					}
-				}
-			}
+			ActivateReceptor(5, 5, contactDir);
 		}
 
 		// 5 - рядом край/стена
 		private void ActivateReceptor5(int contactDir)
 		{
-			if (_recNum == 0 || _recNum > 5)
-			{
-				lock (_busyReceptors)
-				{
-					if (_recNum == 0 || _recNum > 5)
-					{
-						_recContactDir = contactDir;
-						bNew = 6;
-						reactionNew = true;
-						_recNum = 5;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
-					}
-				}
-			}
+			ActivateReceptor(6, 6, contactDir);
 		}
 		#endregion
 
@@ -319,7 +282,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		public void RecNumClear()
 		{
-			_recNum = 0;
+			_recActive = false;
 		}
 
 		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom)
@@ -402,7 +365,7 @@ namespace WindowsFormsApp1.GameLogic
 			t = Test2.Mark(2, t);
 
 			Age++;
- 
+
 			var realchange = EnergyChange(Data.DeltaEnergyOnStep);
 			if (Data.DeltaEnergyOnStep != 0) Interlocked.Add(ref Data.TotalEnergy, -realchange);
 
@@ -428,19 +391,19 @@ namespace WindowsFormsApp1.GameLogic
 			Test2.Mark(3, t);
 		}
 
-		private (bool Ev, Pointer Pointer, byte Cmd, byte Par, byte RecNum) GetCommand()
+		private (bool Ev, Pointer Pointer, byte Cmd, byte Par) GetCommand()
 		{
-			if (_recNum > 0)  // Есть сигнал от рецепторов. Цикл по командам конкретного event _recNum.
+			if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
 			{
-				if (reactionNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
+				if (_recNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
 				{
 					lock (_busyReceptors)
 					{
-						if (reactionNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
+						if (_recNew)
 						{
-							PointerReaction.B = (byte)(bNew + Data.GenomGeneralBranchCnt);
+							PointerReaction.B = (byte)(_recNewBranch + Data.GenomGeneralBranchCnt);
 							PointerReaction.CmdNum = 0;
-							reactionNew = false;
+							_recNew = false;
 							_tmR = 0;
 						}
 					}
@@ -448,12 +411,12 @@ namespace WindowsFormsApp1.GameLogic
 
 				var (cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
 
-				return (true, PointerReaction, cmd, par, _recNum);
+				return (true, PointerReaction, cmd, par);
 			}
-			else 
+			else
 			{
 				var (cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
-				return (false, PointerGeneral, cmd, par, 0);
+				return (false, PointerGeneral, cmd, par);
 			}
 		}
 
@@ -465,8 +428,6 @@ namespace WindowsFormsApp1.GameLogic
 			int cntJmp = 0;
 			long t, t2;
 			int tm;
-
-			byte recprocnum_H;
 			Pointer p_H;
 
 			if (Data.HistoryOn) hist.BeginNewStep(_tm);
@@ -474,7 +435,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				t = Stopwatch.GetTimestamp();
 
-				(ev, p_H, cmd, par, recprocnum_H) = GetCommand();
+				(ev, p_H, cmd, par) = GetCommand();
 
 				t = Test2.Mark(4, t);
 
@@ -499,7 +460,7 @@ namespace WindowsFormsApp1.GameLogic
 					};
 
 					t2 = Stopwatch.GetTimestamp();
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, recprocnum_H, tm);
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, tm);
 					Test2.Mark(7, t2);
 
 					PointerReaction.CmdNum++;
@@ -508,7 +469,7 @@ namespace WindowsFormsApp1.GameLogic
 					_tmR += tm;
 					if (_tmR >= 100 || lastcmd)
 					{
-						_recNum = 0; // завершаем команду реакции, переходим на обычные команды
+						_recActive = false; // завершаем команду реакции, переходим на обычные команды
 					}
 				}
 				else
@@ -540,7 +501,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 
 					t2 = Stopwatch.GetTimestamp();
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, recprocnum_H, tm);
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, tm);
 					Test2.Mark(7, t2);
 
 					PointerGeneral.CmdNum++;
@@ -552,7 +513,7 @@ namespace WindowsFormsApp1.GameLogic
 
 				_tm += tm;
 			}
-			while (_tm < 100 && !lastcmd && cntJmp<10);
+			while (_tm < 100 && !lastcmd && cntJmp < 10);
 
 			if (Data.HistoryOn) hist.EndNewStep(_tm);
 
@@ -610,7 +571,7 @@ namespace WindowsFormsApp1.GameLogic
 			var dir = Dir.GetOppositeDirection(_recContactDir);
 
 			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
-			
+
 			Rotate(dir);
 
 			return tm;
@@ -1350,7 +1311,7 @@ namespace WindowsFormsApp1.GameLogic
 					string ev;
 					if (hist[i].ev)
 					{
-						ev = $"EV{hist[i].recNum}.{hist[i].b}";
+						ev = $"EV{hist[i].b}";
 					}
 					else
 					{

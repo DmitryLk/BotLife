@@ -23,8 +23,7 @@ namespace WindowsFormsApp1.GameLogic
 		public byte b;
 		public byte c;
 		public bool ev;
-		public byte recNum;
-		public int tm;
+		public byte tm;
 	}
 
 	public class StepHistory
@@ -82,7 +81,7 @@ namespace WindowsFormsApp1.GameLogic
 			//pointer.CopyTo(H[historyPointerY].pointer);
 		}
 
-		public void SaveCmdToHistory(Pointer p, bool ev, byte recnum, int tm)
+		public void SaveCmdToHistory(Pointer p, bool ev, int tm)
 		{
 			if (historyPointerY == -1) return;
 			var cmdCnt = H[historyPointerY].cmdCnt;
@@ -93,8 +92,7 @@ namespace WindowsFormsApp1.GameLogic
 			H[historyPointerY].CmdStep[cmdCnt].b = p.B;
 			H[historyPointerY].CmdStep[cmdCnt].c = p.CmdNum;
 			H[historyPointerY].CmdStep[cmdCnt].ev = ev;
-			H[historyPointerY].CmdStep[cmdCnt].recNum = recnum;
-			H[historyPointerY].CmdStep[cmdCnt].tm = tm;
+			H[historyPointerY].CmdStep[cmdCnt].tm = (byte)tm;
 
 			H[historyPointerY].cmdCnt++;
 		}

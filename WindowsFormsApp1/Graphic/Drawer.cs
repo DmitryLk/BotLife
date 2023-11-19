@@ -205,13 +205,13 @@ namespace WindowsFormsApp1.Graphic
 
 					var rn = (i - Data.GenomGeneralBranchCnt) switch
 					{
-						0 => "1 bite",
-						1 => "2 bot rel",
+						0 => "0 bite",
+						1 => "1 bot nobigrot",
 						2 => "2 bot bigrot",
-						3 => "2 bot nobigrot",
-						4 => "3 food",
-						5 => "4 mineral",
-						6 => "5 wall",
+						3 => "3 bot rel",
+						4 => "4 food",
+						5 => "5 mineral",
+						6 => "6 wall",
 						_ => ""
 					};
 					_PRESENTER.DrawOtherTextOnCursorFrame(Data.MaxCmdInStep, k, rn, Color.Green);
