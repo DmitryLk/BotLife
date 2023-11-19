@@ -523,7 +523,7 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.EatForward2: tm = EatForward(); Test2.Mark(19, t); break;
 						case Cmd.LookForward1: tm = LookForward(); Test2.Mark(20, t); break;
 						case Cmd.LookForward2: tm = LookForward(); Test2.Mark(20, t); break;
-						case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
+						//case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
 						case Cmd.LookAround: tm = LookAround(); Test2.Mark(22, t); break;
 						//case Cmd.RotateRandom: tm = RotateRandom(); break;
 						//case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
@@ -567,60 +567,77 @@ namespace WindowsFormsApp1.GameLogic
 		//1 C
 		private int RotateAbsolute(int dir)
 		{
-			Rotate(dir % Dir.NumberOfDirections);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
 
-			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			Rotate(dir);
+
+			return tm;
 		}
 
 		//2 CE
 		private int RotateRelative(int dir)
 		{
-			Rotate((Direction + dir) % Dir.NumberOfDirections);
+			var tm = Dir.GetDirDiff(0, dir) * CmdType.CmdWeight(CmdType.Rotate);
 
-			return Dir.GetDirDiff(0, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			Rotate(Direction + dir);
+
+			return tm;
 		}
 
 		//3 E
 		private int RotateRelativeContact(int dir)
 		{
-			Rotate((_recContactDir + dir) % Dir.NumberOfDirections);
+			var tm = Dir.GetDirDiff(Direction, _recContactDir + dir) * CmdType.CmdWeight(CmdType.Rotate);
 
-			return Dir.GetDirDiff(Direction, _recContactDir + dir) * CmdType.CmdWeight(CmdType.Rotate);
+			Rotate(_recContactDir + dir);
+
+			return tm;
 		}
 
 		//4 E
 		private int RotateBackward()
 		{
+			var tm = Dir.NumberOfDirections / 2 * CmdType.CmdWeight(CmdType.Rotate);
+
 			Rotate(Dir.GetOppositeDirection(Direction));
 
-			return Dir.NumberOfDirections / 2 * CmdType.CmdWeight(CmdType.Rotate);
+			return tm;
 		}
 
 		//5 E
 		private int RotateBackwardContact()
 		{
 			var dir = Dir.GetOppositeDirection(_recContactDir);
+
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			
 			Rotate(dir);
 
-			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			return tm;
 		}
 
 		//6 C - может быть лучше для E ?
 		private int RotateRandom()
 		{
 			var dir = Func.GetRandomDirection();
+
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+
 			Rotate(dir);
 
-			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			return tm;
 		}
 
 		//7 C
 		private int AlignHorizontaly()
 		{
 			var dir = 16;
+
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+
 			Rotate(dir);
 
-			return Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			return tm;
 		}
 
 		//// Step
@@ -994,6 +1011,9 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void Rotate(int dir)
 		{
+			while (dir >= Dir.NumberOfDirections) dir -= Dir.NumberOfDirections;
+			while (dir < 0) dir += Dir.NumberOfDirections;
+
 			Direction = dir;
 		}
 

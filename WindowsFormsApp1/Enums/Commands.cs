@@ -97,7 +97,7 @@ namespace WindowsFormsApp1.Enums
 		{
 			//Cmd.RotateAbsolute,
 			Cmd.RotateRelative,
-			Cmd.Photosynthesis,
+			//Cmd.Photosynthesis,
 			Cmd.StepForward1,
 			Cmd.StepForward2,
 			Cmd.EatForward1,
