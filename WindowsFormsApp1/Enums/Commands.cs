@@ -61,7 +61,8 @@ namespace WindowsFormsApp1.Enums
 				Cmd.LookForward2 => "Смотреть вперед 2",
 				Cmd.LookAround => "Смотреть вокруг",
 				Cmd.Photosynthesis => "Фотосинтез",
-				_ => $"Cmd_{cmd.ToString()}"
+				//_ => $"cmd_{cmd.ToString()}"
+				_ => $""
 			};
 		}
 

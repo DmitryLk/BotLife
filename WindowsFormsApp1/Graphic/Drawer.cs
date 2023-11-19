@@ -230,29 +230,29 @@ namespace WindowsFormsApp1.Graphic
 					_PRESENTER.DrawCodeCellOnCursorFrame(x1, y1, color);
 				}
 
-				var (hist, histPtrCnt) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
-				if (histPtrCnt > 0)
-				{
-					byte ptr1 = hist[0];
-					byte ptr2;
-					for (var i = 1; i < histPtrCnt; i++)
-					{
-						ptr2 = hist[i];
+				//var (hist, histPtrCnt, stp) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
+				//if (histPtrCnt > 0)
+				//{
+				//	byte ptr1 = hist[0];
+				//	byte ptr2;
+				//	for (var i = 1; i < histPtrCnt; i++)
+				//	{
+				//		ptr2 = hist[i];
 
-						x1 = ptr1 % 8;
-						y1 = ptr1 / 8;
-						x2 = ptr2 % 8;
-						y2 = ptr2 / 8;
-						color = i == 1
-							? Color.Blue
-							: i == histPtrCnt - 1
-								? Color.Red
-								: Color.DarkOrchid;
-						ptr1 = ptr2;
+				//		x1 = ptr1 % 8;
+				//		y1 = ptr1 / 8;
+				//		x2 = ptr2 % 8;
+				//		y2 = ptr2 / 8;
+				//		color = i == 1
+				//			? Color.Blue
+				//			: i == histPtrCnt - 1
+				//				? Color.Red
+				//				: Color.DarkOrchid;
+				//		ptr1 = ptr2;
 
-						_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
-					}
-				}
+				//		_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
+				//	}
+				//}
 
 				_PRESENTER.SendCursorFrameToScreen();
 

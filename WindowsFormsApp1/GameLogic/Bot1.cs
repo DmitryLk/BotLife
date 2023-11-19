@@ -315,14 +315,14 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 		}
 
-		private (bool, byte, byte) GetCommand1()
-		{
-			var cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
-			if (Data.HistoryOn) hist.SavePtr(Pointer);
-			return (false, cmd, 0);
-		}
+		//private (bool, byte, byte) GetCommand1()
+		//{
+		//	var cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
+		//	if (Data.HistoryOn) hist.SavePtr(Pointer);
+		//	return (false, cmd, 0);
+		//}
 
-		private (bool, byte, byte) GetCommand2()
+		private (bool, byte, byte, byte) GetCommand2()
 		{
 			byte cmd;
 			byte par;
@@ -334,14 +334,13 @@ namespace WindowsFormsApp1.GameLogic
 					par = G.CodeForEvents[_recNum, _recPointer, 1];
 					_recPointer++;
 					if (_recPointer >= G.CodeForEventsLenght[_recNum] || _recPointer == Data.GenomEventsLenght) _receptorsActivated = false;
-					return (true, cmd, par);
+					return (true, cmd, par, (byte)_recNum);
 				}
 			}
 			else
 			{
 				cmd = G.GetCurrentCommandAndSetActGen(Pointer, true);
-				if (Data.HistoryOn) hist.SavePtr(Pointer);
-				return (false, cmd, 0);
+				return (false, cmd, 0, 0);
 			}
 		}
 
@@ -352,13 +351,15 @@ namespace WindowsFormsApp1.GameLogic
 			int shift = 0;
 			byte cmd;
 			byte par;
+			byte recNum;
 			bool ev;
 			bool realCmd;
 			bool bigrotate = false;
 
 			do
 			{
-				(ev, cmd, par) = GetCommand2();
+				(ev, cmd, par, recNum) = GetCommand2();
+				if (Data.HistoryOn) hist.SaveCmdToHistory(cmd, par, ev, recNum);
 
 				if (ev)
 				{
@@ -417,6 +418,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					ShiftCodePointer(shift);
 				}
+
 
 				cntJump++;
 			}
@@ -1155,22 +1157,25 @@ namespace WindowsFormsApp1.GameLogic
 
 			sb.AppendLine($"OldPointer: {OldPointer}");
 			sb.AppendLine($"Pointer: {Pointer}");
+			sb.AppendLine("");
 
 			if (hist.historyPointerY >= 0)
 			{
-				var (hist, histPtrCnt) = this.hist.GetLastStepPtrs(delta);
+				var (hist, histPtrCnt, stp) = this.hist.GetLastStepPtrs(delta);
 
+				sb.AppendLine($"Step: {stp}");
 				sb.AppendLine($"jumps cnt: {histPtrCnt - 1}");
-				sb.AppendLine($"jumps: {string.Join(", ", hist.Take(histPtrCnt))}");
+				sb.AppendLine("");
+				//sb.AppendLine($"jumps: {string.Join(", ", hist.Take(histPtrCnt))}");
 
 				for (var i = 0; i < histPtrCnt; i++)
 				{
-					var cmdTxt = Cmd.CmdName(G.CodeCommon[hist[i]]);
+					var cmdTxt = Cmd.CmdName(hist[i].cmd);
 
-					var dirStr = Dir.GetDirectionStringFromCode(G.GetDirectionFromNextCommand(hist[i], false));
+					var dirStr = Dir.GetDirectionStringFromCode(G.GetDirectionFromNextCommand(hist[i].par, false));
 					if (cmdTxt != "")
 					{
-						sb.AppendLine($"{cmdTxt} {dirStr}");
+						sb.AppendLine($"{cmdTxt} {dirStr}   {(hist[i].ev ? $"EV{hist[i].recNum}" : "")}");
 					}
 				}
 			}
