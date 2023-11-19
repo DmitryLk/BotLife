@@ -222,6 +222,11 @@ namespace WindowsFormsApp1
 			}
 		}
 
+		public void Form1CursorReplace()
+		{
+			Game.CursorJump();
+		}
+
 		private void PauseToggle()
 		{
 			Game.PausedToggle();
@@ -260,7 +265,15 @@ namespace WindowsFormsApp1
 
 		private void pictureBox1_Click(object sender, EventArgs e)
 		{
+			MouseEventArgs me = (MouseEventArgs)e;
+			Point coordinates = me.Location;
+			var x = coordinates.X;
+			var y = coordinates.Y;
 
+			Data.LensX = x / Data.CellWidth;
+			Data.LensY = y / Data.CellHeight;
+
+			Game.LensJump();
 		}
 
 		private void label1_Click(object sender, EventArgs e)

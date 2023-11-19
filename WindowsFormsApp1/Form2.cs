@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApp1.Graphic;
+using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1
 {
@@ -42,7 +44,15 @@ namespace WindowsFormsApp1
 
 		private void pictureBox1_Click(object sender, EventArgs e)
 		{
+			MouseEventArgs me = (MouseEventArgs)e;
+			Point coordinates = me.Location;
+			var x = coordinates.X;
+			var y = coordinates.Y;
 
+			Data.CursorX = x / Data.LensCellWidth;
+			Data.CursorY = y / Data.LensCellHeight;
+
+			form1.Form1CursorReplace();
 		}
 
 		private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)

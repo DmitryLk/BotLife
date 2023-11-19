@@ -292,6 +292,14 @@ namespace WindowsFormsApp1.GameLogic
             }
         }
 
+		public void LensJump()
+		{
+			if (Data.LensOn)
+			{
+				if (Data.PausedMode) _DRAWER.DrawGame();
+			}
+		}
+		
         public void CursorLeft()
         {
             if (Data.DrawMode != DrawMode.NoDraw && Data.LensOn && Data.CursorX > 0)
@@ -325,8 +333,15 @@ namespace WindowsFormsApp1.GameLogic
             }
         }
 
+		public void CursorJump()
+		{
+			if (Data.DrawMode != DrawMode.NoDraw && Data.LensOn)
+			{
+				if (Data.PausedMode) _DRAWER.DrawGame();
+			}
+		}
 
-        public void HistoryUp()
+		public void HistoryUp()
         {
             Data.DeltaHistory++;
             if (Data.PausedMode) _DRAWER.DrawCursor();
