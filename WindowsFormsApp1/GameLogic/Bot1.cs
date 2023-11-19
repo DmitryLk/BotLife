@@ -1173,9 +1173,10 @@ namespace WindowsFormsApp1.GameLogic
 					var cmdTxt = Cmd.CmdName(hist[i].cmd);
 
 					var dirStr = Dir.GetDirectionStringFromCode(G.GetDirectionFromNextCommand(hist[i].par, false));
+
 					if (cmdTxt != "")
 					{
-						sb.AppendLine($"{cmdTxt} {dirStr}   {(hist[i].ev ? $"EV{hist[i].recNum}" : "")}");
+						sb.AppendLine($"{cmdTxt} {(Data.DirectionCommands[hist[i].cmd] ? dirStr : "")}   {(hist[i].ev ? $"EV{hist[i].recNum}" : "")}");
 					}
 				}
 			}
