@@ -58,6 +58,7 @@ namespace WindowsFormsApp1.GameLogic
 		public byte bNew;
 		public bool reactionNew;
 		private int _tm = 0;
+		private int _tmR = 0;
 
 		public CodeHistory hist;
 		//public BotLog Log;
@@ -153,7 +154,7 @@ namespace WindowsFormsApp1.GameLogic
 						_recContactDir = contactDir;
 						bNew = 0;
 						reactionNew = true;
-						_recNum = 1;
+						_recNum = 1;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
 					}
 				}
 			}
@@ -189,7 +190,7 @@ namespace WindowsFormsApp1.GameLogic
 							}
 						}
 						reactionNew = true;
-						_recNum = 2;
+						_recNum = 2;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
 					}
 				}
 			}
@@ -207,7 +208,8 @@ namespace WindowsFormsApp1.GameLogic
 						_recContactDir = contactDir;
 						bNew = 4;
 						reactionNew = true;
-						_recNum = 3;
+						reactionNew = true;
+						_recNum = 3;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
 					}
 				}
 			}
@@ -225,7 +227,7 @@ namespace WindowsFormsApp1.GameLogic
 						_recContactDir = contactDir;
 						bNew = 5;
 						reactionNew = true;
-						_recNum = 4;
+						_recNum = 4;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
 					}
 				}
 			}
@@ -243,7 +245,7 @@ namespace WindowsFormsApp1.GameLogic
 						_recContactDir = contactDir;
 						bNew = 6;
 						reactionNew = true;
-						_recNum = 5;
+						_recNum = 5;  // надо делать в пследнюю очередь чтобы попало в GetCommand if (_recNum > 0) с полностью подготовленными данными
 					}
 				}
 			}
@@ -315,6 +317,10 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
+		public void RecNumClear()
+		{
+			_recNum = 0;
+		}
 
 		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom)
 		{
@@ -388,15 +394,12 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
-			if (Data.HistoryOn) hist.BeginNewStep();
 
 			t = Test2.Mark(1, t);
 
 			CommandCycle();
 
 			t = Test2.Mark(2, t);
-
-			if (Data.HistoryOn) hist.EndNewStep(PointerGeneral);
 
 			Age++;
  
@@ -433,13 +436,18 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					lock (_busyReceptors)
 					{
-						PointerReaction.B = (byte)(bNew + Data.GenomGeneralBranchCnt);
-						PointerReaction.CmdNum = 0;
-						reactionNew = false;
+						if (reactionNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
+						{
+							PointerReaction.B = (byte)(bNew + Data.GenomGeneralBranchCnt);
+							PointerReaction.CmdNum = 0;
+							reactionNew = false;
+							_tmR = 0;
+						}
 					}
 				}
 
 				var (cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
+
 				return (true, PointerReaction, cmd, par, _recNum);
 			}
 			else 
@@ -452,63 +460,73 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void CommandCycle()
 		{
-			byte cmd;
-			bool lastcmd = false;
+			byte cmd, par;
+			bool ev, lastcmd = false;
 			int cntJmp = 0;
-			long t, t2, t3;
+			long t, t2;
+			int tm;
 
+			byte recprocnum_H;
+			Pointer p_H;
+
+			if (Data.HistoryOn) hist.BeginNewStep(_tm);
 			do
 			{
 				t = Stopwatch.GetTimestamp();
 
-				(var ev, Pointer p, cmd, var par, var recprocnum) = GetCommand();
+				(ev, p_H, cmd, par, recprocnum_H) = GetCommand();
+
 				t = Test2.Mark(4, t);
 
 				cntJmp++;
-
+				tm = 0;
 				if (ev)
 				{
-					t3 = Stopwatch.GetTimestamp();
 					switch (cmd)
 					{
 						//case Cmd.RotateRelative: (_ , bigrotate) = RotateRelative(par); break;
-						case Cmd.RotateRelativeContact: _tm += RotateRelativeContact(par); Test2.Mark(10, t); break;
-						case Cmd.RotateBackward: _tm += RotateBackward(); Test2.Mark(11, t); break;
-						case Cmd.RotateBackwardContact: _tm += RotateBackwardContact(); Test2.Mark(12, t); break;
-						//case Cmd.LookAround: tm += LookAround(); break;
-						//case Cmd.StepRelative: tm += StepRelative(par); break;
-						case Cmd.StepRelativeContact: _tm += StepRelativeContact(par); Test2.Mark(13, t); break;
-						case Cmd.StepBackward: _tm += StepBackward(); Test2.Mark(14, t); break;
-						case Cmd.StepBackwardContact: _tm += StepBackwardContact(); Test2.Mark(15, t); break;
-						case Cmd.EatForward1: _tm += EatForward(); Test2.Mark(16, t); break;
-						//case Cmd.EatContact: tm += EatContact(); break;
+						case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(10, t); break;
+						case Cmd.RotateBackward: tm = RotateBackward(); Test2.Mark(11, t); break;
+						case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(12, t); break;
+						//case Cmd.LookAround: tm = LookAround(); break;
+						//case Cmd.StepRelative: tm = StepRelative(par); break;
+						case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(13, t); break;
+						case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(14, t); break;
+						case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(15, t); break;
+						case Cmd.EatForward1: tm = EatForward(); Test2.Mark(16, t); break;
+						//case Cmd.EatContact: tm = EatContact(); break;
 						default: throw new Exception();
 					};
 
 					t2 = Stopwatch.GetTimestamp();
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p, true, recprocnum);
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, recprocnum_H, tm);
 					Test2.Mark(7, t2);
 
 					PointerReaction.CmdNum++;
 					if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
+
+					_tmR += tm;
+					if (_tmR >= 100 || lastcmd)
+					{
+						_recNum = 0; // завершаем команду реакции, переходим на обычные команды
+					}
 				}
 				else
 				{
-					t3 = Stopwatch.GetTimestamp();
 					switch (cmd)
 					{
 						//case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
-						case Cmd.RotateRelative: _tm += RotateRelative(par); Test2.Mark(17, t); break;
-						case Cmd.StepForward1: _tm += StepForward(); Test2.Mark(18, t); break;
-						case Cmd.StepForward2: _tm += StepForward(); Test2.Mark(18, t); break;
-						case Cmd.EatForward1: _tm += EatForward(); Test2.Mark(19, t); break;
-						case Cmd.EatForward2: _tm += EatForward(); Test2.Mark(19, t); break;
-						case Cmd.LookForward1: _tm += LookForward(); Test2.Mark(20, t); break;
-						case Cmd.LookForward2: _tm += LookForward(); Test2.Mark(20, t); break;
-						case Cmd.Photosynthesis: _tm += Photosynthesis(); Test2.Mark(21, t); break;
-						case Cmd.LookAround: _tm += LookAround(); Test2.Mark(22, t); break;
-						//case Cmd.RotateRandom: tm += RotateRandom(); break;
-						//case Cmd.AlignHorizontaly: tm += AlignHorizontaly(); break;
+						case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(17, t); break;
+						case Cmd.StepForward1: tm = StepForward(); Test2.Mark(18, t); break;
+						case Cmd.StepForward2: tm = StepForward(); Test2.Mark(18, t); break;
+						case Cmd.EatForward1: tm = EatForward(); Test2.Mark(19, t); break;
+						case Cmd.EatForward2: tm = EatForward(); Test2.Mark(19, t); break;
+						case Cmd.LookForward1: tm = LookForward(); Test2.Mark(20, t); break;
+						case Cmd.LookForward2: tm = LookForward(); Test2.Mark(20, t); break;
+						case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
+						case Cmd.LookAround: tm = LookAround(); Test2.Mark(22, t); break;
+						//case Cmd.RotateRandom: tm = RotateRandom(); break;
+						//case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
 						default: throw new Exception();
 					};
 
@@ -522,18 +540,22 @@ namespace WindowsFormsApp1.GameLogic
 					}
 
 					t2 = Stopwatch.GetTimestamp();
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p, false, 0);
+					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, recprocnum_H, tm);
 					Test2.Mark(7, t2);
 
 					PointerGeneral.CmdNum++;
 					if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 				}
+
 				t = Test2.Mark(5, t);
+
+
+				_tm += tm;
 			}
 			while (_tm < 100 && !lastcmd && cntJmp<10);
-			//St = Stopwatch.GetTimestamp();
 
-			_recNum = 0;
+			if (Data.HistoryOn) hist.EndNewStep(_tm);
+
 			_tm -= 100;
 			ShiftPointerGeneralToNextBranch();
 
@@ -1253,18 +1275,18 @@ namespace WindowsFormsApp1.GameLogic
 
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Color.R} G{Color.G} B{Color.B}");
-			sb.AppendLine($"Pra: {G.PraHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Hash: {G.GenomHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Parent: {G.ParentHash.ToString().Substring(0, 8)}");
-			sb.AppendLine($"Grand: {G.GrandHash.ToString().Substring(0, 8)}");
+			sb.AppendLine($"Active branch: {G.ActiveGeneralBranchCnt}");
+			//sb.AppendLine($"Pra: {G.PraHash.ToString().Substring(0, 8)}");
+			//sb.AppendLine($"Hash: {G.GenomHash.ToString().Substring(0, 8)}");
+			//sb.AppendLine($"Parent: {G.ParentHash.ToString().Substring(0, 8)}");
+			//sb.AppendLine($"Grand: {G.GrandHash.ToString().Substring(0, 8)}");
 
 			return sb.ToString();
 		}
 
 		public string GetText2(int delta)
 		{
-			byte cmd;
-			byte par;
+			byte cmd, par;
 			var sb = new StringBuilder();
 
 			//sb.AppendLine($"23r,24a - rotate; 26r,27a - step");
@@ -1276,10 +1298,11 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (hist.historyPointerY >= 0)
 			{
-				var (hist, histPtrCnt, pointer, step) = this.hist.GetLastStepPtrs(delta);
-				sb.AppendLine($"OldPointer: {pointer.BOld}.{pointer.CmdNumOld}");
-				sb.AppendLine($"Pointer: {pointer.B}.{pointer.CmdNum}");
+				var (hist, histPtrCnt, tm1, tm2, step) = this.hist.GetLastStepPtrs(delta);
+				//sb.AppendLine($"OldPointer: {pointer.BOld}.{pointer.CmdNumOld}");
+				//sb.AppendLine($"Pointer: {pointer.B}.{pointer.CmdNum}");
 				sb.AppendLine($"Step: {step}");
+				sb.AppendLine($"tm1:{tm1}  tm2:{tm2}");
 
 				sb.AppendLine($"cmds cnt: {histPtrCnt - 1}");
 				//sb.AppendLine($"cmds: {string.Join(", ", hist.Take(histPtrCnt))}");
@@ -1318,7 +1341,7 @@ namespace WindowsFormsApp1.GameLogic
 					if (cmdTxt != "")
 					{
 
-						sb.AppendLine($"{cmdTxt} {dirStr} {(hist[i].ev ? ev : "")}");
+						sb.AppendLine($"{cmdTxt} {dirStr} {(hist[i].ev ? ev : "")}   ==tm:{hist[i].tm}");
 					}
 				}
 			}

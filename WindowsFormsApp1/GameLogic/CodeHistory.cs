@@ -24,6 +24,7 @@ namespace WindowsFormsApp1.GameLogic
 		public byte c;
 		public bool ev;
 		public byte recNum;
+		public int tm;
 	}
 
 	public class StepHistory
@@ -32,11 +33,11 @@ namespace WindowsFormsApp1.GameLogic
 		public CmdHistory[] CmdStep;
 		public uint Step;
 		public byte cmdCnt;
-		public Pointer pointer;
+		public int tm1;
+		public int tm2;
 
 		public StepHistory(int maxx)
 		{
-			pointer = new Pointer();
 			CmdStep = new CmdHistory[maxx];
 			for (var x = 0; x < maxx; x++)
 			{
@@ -64,22 +65,24 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		public void BeginNewStep()
+		public void BeginNewStep(int tm1)
 		{
 			historyPointerY = historyPointerY == maxy ? historyPointerY = 0 : historyPointerY + 1;
 			if (historyPointerY == maxy) historyPointerY = 0;
 
 			H[historyPointerY].cmdCnt = 0;
 			H[historyPointerY].Step = Data.CurrentStep;
-
+			H[historyPointerY].tm1 = tm1;
+			H[historyPointerY].tm2 = 0;
 		}
 
-		public void EndNewStep(Pointer pointer)
+		public void EndNewStep(int tm2)
 		{
-			pointer.CopyTo(H[historyPointerY].pointer);
+			H[historyPointerY].tm2 = tm2;
+			//pointer.CopyTo(H[historyPointerY].pointer);
 		}
 
-		public void SaveCmdToHistory(Pointer p, bool ev, byte recnum)
+		public void SaveCmdToHistory(Pointer p, bool ev, byte recnum, int tm)
 		{
 			if (historyPointerY == -1) return;
 			var cmdCnt = H[historyPointerY].cmdCnt;
@@ -91,16 +94,17 @@ namespace WindowsFormsApp1.GameLogic
 			H[historyPointerY].CmdStep[cmdCnt].c = p.CmdNum;
 			H[historyPointerY].CmdStep[cmdCnt].ev = ev;
 			H[historyPointerY].CmdStep[cmdCnt].recNum = recnum;
+			H[historyPointerY].CmdStep[cmdCnt].tm = tm;
 
 			H[historyPointerY].cmdCnt++;
 		}
 
 		//====Для отображения=======================================================
-		public (CmdHistory[], int, Pointer, uint) GetLastStepPtrs(int delta)
+		public (CmdHistory[], int, int, int, uint) GetLastStepPtrs(int delta)
 		{
 			if (historyPointerY < 0)
 			{
-				return (Array.Empty<CmdHistory>(), 0, null, 0);
+				return (Array.Empty<CmdHistory>(), 0, 0, 0, 0);
 			}
 
 			var ptr = historyPointerY + delta;
@@ -115,7 +119,7 @@ namespace WindowsFormsApp1.GameLogic
 				ptr -= maxy;
 			}
 
-			return (H[ptr].CmdStep, H[ptr].cmdCnt, H[ptr].pointer, H[ptr].Step);
+			return (H[ptr].CmdStep, H[ptr].cmdCnt, H[ptr].tm1, H[ptr].tm2, H[ptr].Step);
 		}
 
 		public void Clear()

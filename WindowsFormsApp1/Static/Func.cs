@@ -395,6 +395,7 @@ namespace WindowsFormsApp1.Static
 			updBot.G = genom;
 			updBot.PointerGeneral.Clear();
 			updBot.PointerReaction.Clear();
+			updBot.RecNumClear();
 			updBot.Age = 0;
 			updBot.BiteMeCount = 0;
 			updBot.BiteImCount = 0;
@@ -450,6 +451,7 @@ namespace WindowsFormsApp1.Static
 				bot.G = genom;
 				bot.PointerGeneral.Clear();
 				bot.PointerReaction.Clear();
+				bot.RecNumClear();
 				bot.Age = 0;
 				bot.BiteMeCount = 0;
 				bot.BiteImCount = 0;

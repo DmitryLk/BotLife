@@ -236,8 +236,8 @@ namespace WindowsFormsApp1.Graphic
 
 				if (bot.hist.historyPointerY >= 0)
 				{
-					var (hist_old, histPtrCnt_old, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory - 1);
-					var (hist, histPtrCnt, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
+					var (hist_old, histPtrCnt_old, _, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory - 1);
+					var (hist, histPtrCnt, _, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
 
 
 					for (var i = 0; i < histPtrCnt; i++)
@@ -261,8 +261,8 @@ namespace WindowsFormsApp1.Graphic
 
 
 						color = Color.DarkOrchid;
-						if (i == 0) color = Color.Aqua;
 						if (i == histPtrCnt - 1) color = Color.Orange;
+						if (i == 0) color = Color.Aqua;
 
 						_PRESENTER.DrawCodeArrowOnCursorFrame(x1, y1, x2, y2, color);
 					}
