@@ -18,7 +18,15 @@ using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1.GameLogic
 {
-    public class CodeHistory
+	public class CmdHistory
+	{
+		public byte b;
+		public byte c;
+		public bool ev;
+		public byte recNum;
+	}
+
+	public class CodeHistory
     {
         private const int maxx = 15;                    // максимальное количество команд в шаге
         private const int maxy = 10;                    // макимальное количетсов команд, которые могут быть записаны
