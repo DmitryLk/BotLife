@@ -235,7 +235,6 @@ namespace WindowsFormsApp1.Static
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
 			}
 
-
 			GeneralCommandsValuesLength = Cmd.GeneralCommands.Count;
 			GeneralCommandsValues = new byte[GeneralCommandsValuesLength];
 			GeneralCommandsValues = Cmd.GeneralCommands.ToArray();

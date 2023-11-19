@@ -680,12 +680,30 @@ namespace WindowsFormsApp1.Static
 
 		public static byte GetRandomGeneralCmd()
 		{
-			return Data.GeneralCommandsValues[ThreadSafeRandom.Next(Data.GeneralCommandsValuesLength)];
+			int prob;
+			byte cmd;
+			do
+			{
+				cmd = Data.GeneralCommandsValues[ThreadSafeRandom.Next(Data.GeneralCommandsValuesLength)];
+				prob = ThreadSafeRandom.Next(Cmd.MaxCmdWeight);
+			}
+			while (Cmd.CmdWeight(cmd) < prob);
+
+			return cmd;
 		}
 
 		public static byte GetRandomReactionCmd()
 		{
-			return Data.EventCommandsValues[ThreadSafeRandom.Next(Data.EventCommandsValuesLength)];
+			int prob;
+			byte cmd;
+			do
+			{
+				cmd = Data.EventCommandsValues[ThreadSafeRandom.Next(Data.EventCommandsValuesLength)];
+				prob = ThreadSafeRandom.Next(Cmd.MaxCmdWeight);
+			}
+			while (Cmd.CmdWeight(cmd) < prob);
+
+			return cmd;
 		}
 
 		public static Color GetRandomColor()

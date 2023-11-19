@@ -20,20 +20,17 @@ namespace WindowsFormsApp1.Enums
 		public const byte RotateRandom = 6;
 		public const byte AlignHorizontaly = 7;
 		// Step
-		public const byte StepForward1 = 10;
-		public const byte StepForward2 = 11;
-		public const byte StepRelative = 12;
-		public const byte StepRelativeContact = 13;
-		public const byte StepBackward = 14;
-		public const byte StepBackwardContact = 15;
+		public const byte StepForward = 10;
+		public const byte StepRelative = 11;
+		public const byte StepRelativeContact = 12;
+		public const byte StepBackward = 13;
+		public const byte StepBackwardContact = 14;
 		// Eat
-		public const byte EatForward1 = 20;
-		public const byte EatForward2 = 21;
-		public const byte EatContact = 22;
+		public const byte EatForward = 20;
+		public const byte EatContact = 21;
 		// Look
-		public const byte LookForward1 = 30;
-		public const byte LookForward2 = 31;
-		public const byte LookAround = 32;
+		public const byte LookForward = 30;
+		public const byte LookAround = 31;
 		// Other
 		public const byte Photosynthesis = 40;
 
@@ -48,17 +45,14 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateBackwardContact => "Поворот назад от контакта",
 				Cmd.RotateRandom => "Поворот случайно",
 				Cmd.AlignHorizontaly => "Выповняться по горизонтали",
-				Cmd.StepForward1 => "Шаг вперед",
-				Cmd.StepForward2 => "Шаг вперед",
+				Cmd.StepForward => "Шаг вперед",
 				Cmd.StepRelative => "Шаг относительно",
 				Cmd.StepRelativeContact => "Шаг относительно контакта",
 				Cmd.StepBackward => "Шаг назад",
 				Cmd.StepBackwardContact => "Шаг назад от контакта",
-				Cmd.EatForward1 => "Есть впереди",
-				Cmd.EatForward2 => "Есть впереди",
+				Cmd.EatForward => "Есть впереди",
 				Cmd.EatContact => "Есть контакт",
-				Cmd.LookForward1 => "Смотреть вперед",
-				Cmd.LookForward2 => "Смотреть вперед",
+				Cmd.LookForward => "Смотреть вперед",
 				Cmd.LookAround => "Смотреть вокруг",
 				Cmd.Photosynthesis => "Фотосинтез",
 				_ => $""
@@ -76,34 +70,54 @@ namespace WindowsFormsApp1.Enums
                 Cmd.RotateBackwardContact => Color.Orange,
                 Cmd.RotateRandom => Color.Orange,
                 Cmd.AlignHorizontaly => Color.Orange,
-                Cmd.StepForward1 => Color.Red,
-                Cmd.StepForward2 => Color.Red,
+                Cmd.StepForward => Color.Red,
                 Cmd.StepRelative => Color.Red,
                 Cmd.StepRelativeContact => Color.Red,
                 Cmd.StepBackward => Color.Red,
                 Cmd.StepBackwardContact => Color.Red,
-                Cmd.EatForward1 => Color.Green,
-                Cmd.EatForward2 => Color.Green,
+                Cmd.EatForward => Color.Green,
                 Cmd.EatContact => Color.Green,
-                Cmd.LookForward1 => Color.Blue,
-                Cmd.LookForward2 => Color.Blue,
+                Cmd.LookForward => Color.Blue,
                 Cmd.LookAround => Color.Blue,
                 Cmd.Photosynthesis => Color.Green,
                 _ => Color.Black
 			};
         }
 
+		public static int MaxCmdWeight = 50;
+		public static int CmdWeight(byte cmd)
+		{
+			return cmd switch
+			{
+				Cmd.RotateAbsolute => 2,
+				Cmd.RotateRelative => 10,
+				Cmd.RotateRelativeContact => 10,
+				Cmd.RotateBackward => 10,
+				Cmd.RotateBackwardContact => 10,
+				Cmd.RotateRandom => 0,
+				Cmd.AlignHorizontaly => 0,
+				Cmd.StepForward => 20,
+				Cmd.StepRelative => 10,
+				Cmd.StepRelativeContact => 10,
+				Cmd.StepBackward => 10,
+				Cmd.StepBackwardContact => 10,
+				Cmd.EatForward => 20,
+				Cmd.EatContact => 10,
+				Cmd.LookForward => 20,
+				Cmd.LookAround => 40,
+				Cmd.Photosynthesis => 0,
+				_ => throw new Exception()
+			};
+		}
+
 		public static HashSet<byte> GeneralCommands = new HashSet<byte>()
 		{
 			//Cmd.RotateAbsolute,
 			Cmd.RotateRelative,
 			//Cmd.Photosynthesis,
-			Cmd.StepForward1,
-			Cmd.StepForward2,
-			Cmd.EatForward1,
-			Cmd.EatForward2,
-			Cmd.LookForward1,
-			Cmd.LookForward2,
+			Cmd.StepForward,
+			Cmd.EatForward,
+			Cmd.LookForward,
 			Cmd.LookAround,
 			//Cmd.RotateRandom,
 			//Cmd.AlignHorizontaly,
@@ -115,12 +129,12 @@ namespace WindowsFormsApp1.Enums
 			Cmd.RotateRelativeContact,
 			Cmd.RotateBackward,
 			Cmd.RotateBackwardContact,
-			//Cmd.LookAround,
+			Cmd.LookAround,
 			//Cmd.StepRelative,
 			Cmd.StepRelativeContact,
 			Cmd.StepBackward,
 			Cmd.StepBackwardContact,
-			Cmd.EatForward1,
+			Cmd.EatForward,
 			Cmd.EatContact
 		};
 
@@ -146,14 +160,14 @@ namespace WindowsFormsApp1.Enums
 		public const byte PhotosynthesisSuccessful = 8;
 		public const byte PhotosynthesisNotSuccessful = 9;
 
-		public static int CmdWeight(byte cmd)
+		public static int CmdTime(byte cmd)
 		{
 			return cmd switch
 			{
 				CmdType.Rotate => 3,
-				CmdType.StepSuccessful => 50,
+				CmdType.StepSuccessful => 100,
 				CmdType.StepNotSuccessful => 20,
-				CmdType.EatSuccessful => 50,
+				CmdType.EatSuccessful => 100,
 				CmdType.EatNotSuccessful => 20,
 				CmdType.Look => 20,
 				CmdType.LookAround => 60,

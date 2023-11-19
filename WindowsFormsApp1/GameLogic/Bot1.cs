@@ -447,12 +447,12 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(10, t); break;
 						case Cmd.RotateBackward: tm = RotateBackward(); Test2.Mark(11, t); break;
 						case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(12, t); break;
-						//case Cmd.LookAround: tm = LookAround(); break;
+						case Cmd.LookAround: tm = LookAround(); break;
 						//case Cmd.StepRelative: tm = StepRelative(par); break;
 						case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(13, t); break;
 						case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(14, t); break;
 						case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(15, t); break;
-						case Cmd.EatForward1: tm = EatForward(); Test2.Mark(16, t); break;
+						case Cmd.EatForward: tm = EatForward(); Test2.Mark(16, t); break;
 						case Cmd.EatContact: tm = EatContact(); break;
 						default: throw new Exception();
 					};
@@ -476,12 +476,9 @@ namespace WindowsFormsApp1.GameLogic
 					{
 						case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
 						case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(17, t); break;
-						case Cmd.StepForward1: tm = StepForward(); Test2.Mark(18, t); break;
-						case Cmd.StepForward2: tm = StepForward(); Test2.Mark(18, t); break;
-						case Cmd.EatForward1: tm = EatForward(); Test2.Mark(19, t); break;
-						case Cmd.EatForward2: tm = EatForward(); Test2.Mark(19, t); break;
-						case Cmd.LookForward1: tm = LookForward(); Test2.Mark(20, t); break;
-						case Cmd.LookForward2: tm = LookForward(); Test2.Mark(20, t); break;
+						case Cmd.StepForward: tm = StepForward(); Test2.Mark(18, t); break;
+						case Cmd.EatForward: tm = EatForward(); Test2.Mark(19, t); break;
+						case Cmd.LookForward: tm = LookForward(); Test2.Mark(20, t); break;
 						//case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
 						case Cmd.LookAround: tm = LookAround(); Test2.Mark(22, t); break;
 						//case Cmd.RotateRandom: tm = RotateRandom(); break;
@@ -489,7 +486,7 @@ namespace WindowsFormsApp1.GameLogic
 						default: throw new Exception();
 					};
 
-					if (cmd == Cmd.StepForward1 || cmd == Cmd.StepForward2)
+					if (cmd == Cmd.StepForward)
 					{
 						if (_moved < 50) _moved += 5;
 					}
@@ -526,7 +523,7 @@ namespace WindowsFormsApp1.GameLogic
 		//1 C
 		private int RotateAbsolute(int dir)
 		{
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(dir);
 
@@ -536,7 +533,7 @@ namespace WindowsFormsApp1.GameLogic
 		//2 CE
 		private int RotateRelative(int dir)
 		{
-			var tm = Dir.GetDirDiff(0, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(0, dir) * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(Direction + dir);
 
@@ -546,7 +543,7 @@ namespace WindowsFormsApp1.GameLogic
 		//3 E
 		private int RotateRelativeContact(int dir)
 		{
-			var tm = Dir.GetDirDiff(Direction, _recContactDir + dir) * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, _recContactDir + dir) * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(_recContactDir + dir);
 
@@ -556,7 +553,7 @@ namespace WindowsFormsApp1.GameLogic
 		//4 E
 		private int RotateBackward()
 		{
-			var tm = Dir.NumberOfDirections / 2 * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.NumberOfDirections / 2 * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(Dir.GetOppositeDirection(Direction));
 
@@ -568,7 +565,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = Dir.GetOppositeDirection(_recContactDir);
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(dir);
 
@@ -580,7 +577,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = Func.GetRandomDirection();
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(dir);
 
@@ -592,7 +589,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = 16;
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdWeight(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
 
 			Rotate(dir);
 
@@ -605,7 +602,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var move = Step(GetDirForward());
 
-			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
 		//12 E
@@ -613,7 +610,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var move = Step((Direction + dir) % Dir.NumberOfDirections);
 
-			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
 		//13 E
@@ -621,7 +618,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var move = Step((_recContactDir + dir) % Dir.NumberOfDirections);
 
-			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
 		//14 E
@@ -629,7 +626,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var move = Step(Dir.GetOppositeDirection(Direction));
 
-			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
 		//15 E
@@ -637,7 +634,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var move = Step(Dir.GetOppositeDirection(_recContactDir));
 
-			return move ? CmdType.CmdWeight(CmdType.StepSuccessful) : CmdType.CmdWeight(CmdType.StepNotSuccessful);
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
 		//// Eat
@@ -646,7 +643,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var eat = Eat(GetDirForward());
 
-			return eat ? CmdType.CmdWeight(CmdType.EatSuccessful) : CmdType.CmdWeight(CmdType.EatNotSuccessful);
+			return eat ? CmdType.CmdTime(CmdType.EatSuccessful) : CmdType.CmdTime(CmdType.EatNotSuccessful);
 		}
 
 		//22 E
@@ -654,7 +651,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var eat = Eat(_recContactDir);
 
-			return eat ? CmdType.CmdWeight(CmdType.EatSuccessful) : CmdType.CmdWeight(CmdType.EatNotSuccessful);
+			return eat ? CmdType.CmdTime(CmdType.EatSuccessful) : CmdType.CmdTime(CmdType.EatNotSuccessful);
 		}
 
 		//// Look
@@ -663,7 +660,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			Look(GetDirForward());
 
-			return CmdType.CmdWeight(CmdType.Look);
+			return CmdType.CmdTime(CmdType.Look);
 		}
 
 		//32 CE
@@ -671,7 +668,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			LookAroundForEnemy();
 
-			return CmdType.CmdWeight(CmdType.LookAround);
+			return CmdType.CmdTime(CmdType.LookAround);
 		}
 
 		//// Other
@@ -685,11 +682,11 @@ namespace WindowsFormsApp1.GameLogic
 				G.Plant = true;
 				//genom.Color = Color.Green;
 
-				return CmdType.CmdWeight(CmdType.PhotosynthesisSuccessful);
+				return CmdType.CmdTime(CmdType.PhotosynthesisSuccessful);
 			}
 			else
 			{
-				return CmdType.CmdWeight(CmdType.PhotosynthesisNotSuccessful);
+				return CmdType.CmdTime(CmdType.PhotosynthesisNotSuccessful);
 			}
 		}
 
