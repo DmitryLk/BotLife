@@ -173,9 +173,7 @@ namespace WindowsFormsApp1.GameLogic
 		// 2 - рядом бот
 		private void ActivateReceptor2(int contactDir, bool rel, int dir) //, bool block, int massa, byte[] Shield, byte[] Attack, int dir, bool mov)
 		{
-			byte weight = 3;
-
-			if (!_recActive || _recWeight > weight)
+			if (!_recActive || _recWeight > 3)
 			{
 				if (rel)
 				{
