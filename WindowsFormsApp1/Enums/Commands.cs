@@ -121,7 +121,7 @@ namespace WindowsFormsApp1.Enums
 			Cmd.StepBackward,
 			Cmd.StepBackwardContact,
 			Cmd.EatForward1,
-			//Cmd.EatContact
+			Cmd.EatContact
 		};
 
 		public static HashSet<byte> CommandsWithParameter = new HashSet<byte>()

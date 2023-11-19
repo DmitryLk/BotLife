@@ -453,7 +453,7 @@ namespace WindowsFormsApp1.GameLogic
 						case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(14, t); break;
 						case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(15, t); break;
 						case Cmd.EatForward1: tm = EatForward(); Test2.Mark(16, t); break;
-						//case Cmd.EatContact: tm = EatContact(); break;
+						case Cmd.EatContact: tm = EatContact(); break;
 						default: throw new Exception();
 					};
 
@@ -474,7 +474,7 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					switch (cmd)
 					{
-						//case Cmd.RotateAbsolute: (shift, bigrotate) = RotateAbsolute(G.GetDirectionFromNextCommand(Pointer, true)); break;
+						case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
 						case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(17, t); break;
 						case Cmd.StepForward1: tm = StepForward(); Test2.Mark(18, t); break;
 						case Cmd.StepForward2: tm = StepForward(); Test2.Mark(18, t); break;
