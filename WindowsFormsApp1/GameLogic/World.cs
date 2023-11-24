@@ -37,7 +37,7 @@ namespace WindowsFormsApp1.GameLogic
         static long cnt51 = 0;
         static long cnt52 = 0;
 
-        public void Step()
+        public void OneStep()
         {
             //Func.CheckWorld3();
             //Func.CheckWorld2();

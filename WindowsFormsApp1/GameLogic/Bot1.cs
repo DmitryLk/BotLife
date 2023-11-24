@@ -439,30 +439,55 @@ namespace WindowsFormsApp1.GameLogic
 
 				cntJmp++;
 				tm = 0;
+
+				switch (cmd)
+				{
+					//// Rotate
+					case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
+					case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(17, t); break;
+					case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(10, t); break;
+					case Cmd.RotateBackward: tm = RotateBackward(); Test2.Mark(11, t); break;
+					case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(12, t); break;
+					case Cmd.RotateRandom: tm = RotateRandom(); break;
+					case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
+
+					//// Step
+					case Cmd.StepRelative: tm = StepRelative(par); break;
+					case Cmd.StepForward: tm = StepForward(); Test2.Mark(18, t); break;
+					case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(13, t); break;
+					case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(14, t); break;
+					case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(15, t); break;
+
+					//// Eat
+					case Cmd.EatForward: tm = EatForward(); Test2.Mark(16, t); break;
+					case Cmd.EatContact: tm = EatContact(); break;
+
+					//// Look
+					case Cmd.LookAround: tm = LookAround(); Test2.Mark(22, t); break;
+					case Cmd.LookForward: tm = LookForward(); Test2.Mark(20, t); break;
+
+
+					//// Other
+					case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
+					default: throw new Exception();
+				};
+
+				if (cmd == Cmd.StepForward)
+				{
+					if (_moved < 50) _moved += 5;
+				}
+				else
+				{
+					if (_moved > 0) _moved--;
+				}
+
+				t2 = Stopwatch.GetTimestamp();
+				if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, tm);
+				Test2.Mark(7, t2);
+
 				if (ev)
 				{
-					switch (cmd)
-					{
-						//case Cmd.RotateRelative: (_ , bigrotate) = RotateRelative(par); break;
-						case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(10, t); break;
-						case Cmd.RotateBackward: tm = RotateBackward(); Test2.Mark(11, t); break;
-						case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(12, t); break;
-						case Cmd.LookAround: tm = LookAround(); break;
-						//case Cmd.StepRelative: tm = StepRelative(par); break;
-						case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(13, t); break;
-						case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(14, t); break;
-						case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(15, t); break;
-						case Cmd.EatForward: tm = EatForward(); Test2.Mark(16, t); break;
-						case Cmd.EatContact: tm = EatContact(); break;
-						default: throw new Exception();
-					};
-
-					t2 = Stopwatch.GetTimestamp();
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, tm);
-					Test2.Mark(7, t2);
-
-					PointerReaction.CmdNum++;
-					if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
+					PointerReaction.CmdNum++; if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 
 					_tmR += tm;
 					if (_tmR >= 100 || lastcmd)
@@ -472,39 +497,10 @@ namespace WindowsFormsApp1.GameLogic
 				}
 				else
 				{
-					switch (cmd)
-					{
-						case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
-						case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(17, t); break;
-						case Cmd.StepForward: tm = StepForward(); Test2.Mark(18, t); break;
-						case Cmd.EatForward: tm = EatForward(); Test2.Mark(19, t); break;
-						case Cmd.LookForward: tm = LookForward(); Test2.Mark(20, t); break;
-						//case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
-						case Cmd.LookAround: tm = LookAround(); Test2.Mark(22, t); break;
-						//case Cmd.RotateRandom: tm = RotateRandom(); break;
-						//case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
-						default: throw new Exception();
-					};
-
-					if (cmd == Cmd.StepForward)
-					{
-						if (_moved < 50) _moved += 5;
-					}
-					else
-					{
-						if (_moved > 0) _moved--;
-					}
-
-					t2 = Stopwatch.GetTimestamp();
-					if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, tm);
-					Test2.Mark(7, t2);
-
-					PointerGeneral.CmdNum++;
-					if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
+					PointerGeneral.CmdNum++; if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 				}
 
 				t = Test2.Mark(5, t);
-
 
 				_tm += tm;
 			}
@@ -666,7 +662,7 @@ namespace WindowsFormsApp1.GameLogic
 		//32 CE
 		private int LookAround()
 		{
-			LookAroundForEnemy();
+			LookAroundForEnemyAndRelatives();
 
 			return CmdType.CmdTime(CmdType.LookAround);
 		}
@@ -692,88 +688,31 @@ namespace WindowsFormsApp1.GameLogic
 
 
 		//===================================================================================================
-		public bool CanReproduct()
-		{
-			return Energy >= Data.ReproductionBotEnergy;
-		}
 
-		public void HoldReproduction()
-		{
-			_reproductionCycle = Data.HoldReproductionTime;
-		}
-
-		private void ToReproductionList()
-		{
-			if (_reproductionCycle == Data.HoldReproductionTime)
-			{
-				ShareEnergy();
-			}
-
-			if (_reproductionCycle-- > 0) return;
-
-
-			if (!InsertedToReproductionList)
-			{
-				lock (_busyInsertedToReproductionList)
-				{
-					if (!InsertedToReproductionList)
-					{
-
-						InsertedToReproductionList = true;
-						Data.BotReproduction[Interlocked.Increment(ref Data.IndexOfLastBotReproduction)] = this;
-					}
-				}
-			}
-		}
-
-		private void ShareEnergy()
-		{
-			// Передать энергию окружающим ботам
-			var n = ThreadSafeRandom.Next(8);
-			int nXi, nYi;
-			long cont;
-			int i = 0;
-			var ent = (Energy - Data.ReproductionBotEnergy) / 2;
-
-			if (ent > 0)
-			{
-				do
-				{
-					(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n);
-
-					if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
-					{
-						cont = Data.World[nXi, nYi];
-
-						if (cont >= 1 && cont <= Data.CurrentNumberOfBots && G.IsRelative(Data.Bots[cont].G))
-						{
-							var targetBot = Data.Bots[cont];
-
-							if (Energy > targetBot.Energy /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
-							{
-								var transferedEnergy = EnergyChange(-ent);
-								targetBot.EnergyChange(transferedEnergy);
-								if (transferedEnergy < 0) throw new Exception("dfgdfg");
-							}
-						}
-					}
-					if (++n >= 8) n -= 8;
-					i++;
-				}
-				while (CanReproduct() && i <= 8);
-			}
-		}
-
-
+		/*
+								########    ###    ######## 
+								##         ## ##      ##    
+								##        ##   ##     ##    
+								######   ##     ##    ##    
+								##       #########    ##    
+								##       ##     ##    ##    
+								######## ##     ##    ##    
+		 */
 		private bool Eat(int dir)
 		{
 			// Алгоритм:
 			// 1. Узнаем координаты клетки на которую надо посмотреть
 			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
 
+
 			// 2. Узнаем что находится на этой клетке
-			if ((Data.UpDownEdge && (nYi < 0 || nYi >= Data.WorldHeight)) ||
-			(Data.LeftRightEdge && (nXi < 0 || nXi >= Data.WorldWidth)))
+			if (IsItEdge(nXi, nYi))
+			{
+				ActivateReceptor5(dir);
+				return false;
+			}
+
+			if (Data.World[nXi, nYi] == 65503)
 			{
 				ActivateReceptor5(dir);
 				return false;
@@ -906,6 +845,54 @@ namespace WindowsFormsApp1.GameLogic
 			//Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
 		}
 
+		private void ShareEnergy()
+		{
+			// Передать энергию окружающим ботам
+			var n = ThreadSafeRandom.Next(8);
+			int nXi, nYi;
+			long cont;
+			int i = 0;
+			var ent = (Energy - Data.ReproductionBotEnergy) / 2;
+
+			if (ent > 0)
+			{
+				do
+				{
+					(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n);
+
+					if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+					{
+						cont = Data.World[nXi, nYi];
+
+						if (cont >= 1 && cont <= Data.CurrentNumberOfBots && G.IsRelative(Data.Bots[cont].G))
+						{
+							var targetBot = Data.Bots[cont];
+
+							if (Energy > targetBot.Energy /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
+							{
+								var transferedEnergy = EnergyChange(-ent);
+								targetBot.EnergyChange(transferedEnergy);
+								if (transferedEnergy < 0) throw new Exception("dfgdfg");
+							}
+						}
+					}
+					if (++n >= 8) n -= 8;
+					i++;
+				}
+				while (CanReproduct() && i <= 8);
+			}
+		}
+
+
+		/*
+							##        #######   #######  ##    ## 
+							##       ##     ## ##     ## ##   ##  
+							##       ##     ## ##     ## ##  ##   
+							##       ##     ## ##     ## #####    
+							##       ##     ## ##     ## ##  ##   
+							##       ##     ## ##     ## ##   ##  
+							########  #######   #######  ##    ## 
+		 */
 		private void Look(int dir)
 		{
 			// Алгоритм:
@@ -917,7 +904,7 @@ namespace WindowsFormsApp1.GameLogic
 			//смещение условного перехода 2-пусто  3-стена  4-органика 5-бот 6-родня
 
 			// Если координаты попадают за экран то вернуть RefContent.Edge
-			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth)
+			if (IsItEdge(nXi, nYi))
 			{
 				ActivateReceptor5(dir);
 				return;
@@ -925,9 +912,16 @@ namespace WindowsFormsApp1.GameLogic
 
 			var cont = Data.World[nXi, nYi];
 
+			if (cont == 65503)
+			{
+				ActivateReceptor5(dir);
+				return;
+			}
+
 			if (cont == 65500)
 			{
 				ActivateReceptor3(dir);
+				return;
 			}
 
 			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
@@ -938,33 +932,99 @@ namespace WindowsFormsApp1.GameLogic
 			return;
 		}
 
-		private void LookAroundForEnemy()
+		private void LookAroundForEnemyAndRelatives()
 		{
 			int nXi, nYi, dir;
 			Bot1 b;
+			bool edge = false;
+			int xEdge = 0, yEdge = 0;
+			bool grass = false;
+			int xGrass = 0, yGrass = 0;
 
-
+			Bot1 rel = null;
 			for (var n = 0; n < 8; n++)
 			{
 				(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n);
 
-				if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+				if (!IsItEdge(nXi, nYi))
 				{
 					var cont = Data.World[nXi, nYi];
 
-					if (cont >= 1 && cont <= Data.CurrentNumberOfBots && !G.IsRelative(Data.Bots[cont].G))
+					if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 					{
-						b = Data.Bots[cont];
-						dir = Dir.Round(Math.Atan2(Xd - b.Xd, b.Yd - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
-						if (dir == 64) dir = 0;
-						//var dir1 = Dir.NearbyCellsDirection[n];
-						ActivateReceptor2(dir, false, b.Direction);
-						break;
+						if (!G.IsRelative(Data.Bots[cont].G))
+						{
+							b = Data.Bots[cont];
+							dir = Dir.Round(Math.Atan2(Xd - b.Xd, b.Yd - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+							if (dir == 64) dir = 0;
+							//var dir1 = Dir.NearbyCellsDirection[n];
+							ActivateReceptor2(dir, false, b.Direction);
+							return;
+						}
+						else
+						{
+							rel = Data.Bots[cont];
+						}
+					}
+
+					if (cont == 65503)
+					{
+						edge = true;
+						xEdge = nXi;
+						yEdge = nYi;
+					}
+
+					if (cont == 65500)
+					{
+						grass = true;
+						xGrass = nXi;
+						yGrass = nYi;
 					}
 				}
+				else
+				{
+					edge = true;
+					xEdge = nXi;
+					yEdge = nYi;
+				}
+			}
+
+			if (rel != null)
+			{
+				dir = Dir.Round(Math.Atan2(Xd - rel.Xd, rel.Yd - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+				if (dir == 64) dir = 0;
+				//var dir1 = Dir.NearbyCellsDirection[n];
+				ActivateReceptor2(dir, true, rel.Direction);
+				return;
+			}
+
+			if (edge)
+			{
+				dir = Dir.Round(Math.Atan2(Xd - xEdge, yEdge - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+				if (dir == 64) dir = 0;
+				ActivateReceptor5(dir);
+				return;
+			}
+
+			if (grass)
+			{
+				dir = Dir.Round(Math.Atan2(Xd - xGrass, yGrass - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+				if (dir == 64) dir = 0;
+				ActivateReceptor3(dir);
+				return;
 			}
 		}
 
+
+		/*
+							########   #######  ########    ###    ######## ######## 
+							##     ## ##     ##    ##      ## ##      ##    ##       
+							##     ## ##     ##    ##     ##   ##     ##    ##       
+							########  ##     ##    ##    ##     ##    ##    ######   
+							##   ##   ##     ##    ##    #########    ##    ##       
+							##    ##  ##     ##    ##    ##     ##    ##    ##       
+							##     ##  #######     ##    ##     ##    ##    ######## 
+		 */
 		private void Rotate(int dir)
 		{
 			while (dir >= Dir.NumberOfDirections) dir -= Dir.NumberOfDirections;
@@ -975,16 +1035,16 @@ namespace WindowsFormsApp1.GameLogic
 
 
 		//https://www.messletters.com/ru/big-text/ banner3
-		//////////////////////////////////////////////////////////////////
-		//			##     ##  #######  ##     ## ######## 
-		//			###   ### ##     ## ##     ## ##       
-		//			#### #### ##     ## ##     ## ##       
-		//			## ### ## ##     ## ##     ## ######   
-		//			##     ## ##     ##  ##   ##  ##       
-		//			##     ## ##     ##   ## ##   ##       
-		//			##     ##  #######     ###    ######## 
-		//////////////////////////////////////////////////////////////////
 
+		/*
+							##     ##  #######  ##     ## ######## 
+							###   ### ##     ## ##     ## ##       
+							#### #### ##     ## ##     ## ##       
+							## ### ## ##     ## ##     ## ######   
+							##     ## ##     ##  ##   ##  ##       
+							##     ## ##     ##   ## ##   ##       
+							##     ##  #######     ###    ######## 
+		 */
 		#region Move
 
 		private bool Step(int dir)
@@ -1005,7 +1065,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			// Если координаты попадают за экран то вернуть RefContent.Edge
-			if (nYi < 0 || nYi >= Data.WorldHeight || nXi < 0 || nXi >= Data.WorldWidth)
+			if (IsItEdge(nXi, nYi))
 			{
 				ActivateReceptor5(dir);
 				return false;
@@ -1063,6 +1123,11 @@ namespace WindowsFormsApp1.GameLogic
 					ActivateReceptor3(dir);
 				}
 
+				if (cont == 65503)
+				{
+					ActivateReceptor5(dir);
+				}
+
 				if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 				{
 					ActivateReceptor2(dir, G.IsRelative(Data.Bots[cont].G), Data.Bots[cont].Direction);
@@ -1071,6 +1136,78 @@ namespace WindowsFormsApp1.GameLogic
 				//Func.CheckWorld2(Index, Num, Xi, Yi);
 				return false;
 			}
+		}
+
+		#endregion
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		public bool CanReproduct()
+		{
+			return Energy >= Data.ReproductionBotEnergy;
+		}
+
+		public void HoldReproduction()
+		{
+			_reproductionCycle = Data.HoldReproductionTime;
+		}
+
+		private void ToReproductionList()
+		{
+			if (_reproductionCycle == Data.HoldReproductionTime)
+			{
+				ShareEnergy();
+			}
+
+			if (_reproductionCycle-- > 0) return;
+
+
+			if (!InsertedToReproductionList)
+			{
+				lock (_busyInsertedToReproductionList)
+				{
+					if (!InsertedToReproductionList)
+					{
+
+						InsertedToReproductionList = true;
+						Data.BotReproduction[Interlocked.Increment(ref Data.IndexOfLastBotReproduction)] = this;
+					}
+				}
+			}
+		}
+
+
+		private bool IsItEdge(int x, int y)
+		{
+			return
+				((Data.UpDownEdge && (y < 0 || y >= Data.WorldHeight)) ||
+			(Data.LeftRightEdge && (x < 0 || x >= Data.WorldWidth)));
+		}
+
+
+		private void ShiftPointerGeneralToNextBranch()
+		{
+			if (PointerGeneral.B == G.ActiveGeneralBranchCnt - 1)
+			{
+				PointerGeneral.B = 0;
+			}
+			else
+			{
+				PointerGeneral.B++;
+			}
+
+			PointerGeneral.CmdNum = 0;
 		}
 
 		private (double newXdouble, double newYdouble, int newXint, int newYint, bool iEqual) GetCoordinatesByDirectionForMove(int dir)
@@ -1119,25 +1256,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			return (newXdouble, newYdouble, newXint, newYint, iEqual);
 		}
-		#endregion
-
-		//////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////
-
-		private void ShiftPointerGeneralToNextBranch()
-		{
-			if (PointerGeneral.B == G.ActiveGeneralBranchCnt - 1)
-			{
-				PointerGeneral.B = 0;
-			}
-			else
-			{
-				PointerGeneral.B++;
-			}
-
-			PointerGeneral.CmdNum = 0;
-		}
-
+		
 		private (int newXint, int newYint) GetCoordinatesByDirectionOnlyDifferent(int dir)
 		{
 			var (deltaXdouble, deltaYdouble) = Dir.Directions1[dir];
@@ -1252,6 +1371,10 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine("");
 			sb.AppendLine($"Color: R{Color.R} G{Color.G} B{Color.B}");
 			sb.AppendLine($"Active branch: {G.ActiveGeneralBranchCnt}");
+
+			sb.AppendLine("");
+			sb.AppendLine($"Attack {string.Join(",", G.Attack)}");
+			sb.AppendLine($"Shield {string.Join(",", G.Shield)}");
 			//sb.AppendLine($"Pra: {G.PraHash.ToString().Substring(0, 8)}");
 			//sb.AppendLine($"Hash: {G.GenomHash.ToString().Substring(0, 8)}");
 			//sb.AppendLine($"Parent: {G.ParentHash.ToString().Substring(0, 8)}");

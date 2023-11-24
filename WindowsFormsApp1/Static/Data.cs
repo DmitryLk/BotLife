@@ -167,6 +167,7 @@ namespace WindowsFormsApp1.Static
 		public static int EventCommandsValuesLength;
 		public static bool[] CommandsWithParameter;
 
+		public static bool GridWalls;
 		// public static Log.Log Wlog;
 
 		public static void Initialize()
@@ -250,6 +251,7 @@ namespace WindowsFormsApp1.Static
 				CommandsWithParameter[c] = true;
 			}
 
+			GridWalls = false;
 			//var maxcmd = 0;
 			//FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);
 			//foreach (FieldInfo fi in fields)

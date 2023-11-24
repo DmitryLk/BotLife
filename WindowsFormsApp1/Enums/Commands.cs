@@ -112,30 +112,30 @@ namespace WindowsFormsApp1.Enums
 
 		public static HashSet<byte> GeneralCommands = new HashSet<byte>()
 		{
-			//Cmd.RotateAbsolute,
-			Cmd.RotateRelative,
+			Cmd.RotateAbsolute,
+			//Cmd.RotateRelative,
 			//Cmd.Photosynthesis,
 			Cmd.StepForward,
 			Cmd.EatForward,
 			Cmd.LookForward,
 			Cmd.LookAround,
-			//Cmd.RotateRandom,
+			Cmd.RotateRandom,
 			//Cmd.AlignHorizontaly,
 		};
 
 		public static HashSet<byte> ReactionCommands = new HashSet<byte>()
 		{
-			//Cmd.RotateRelative,
+			Cmd.RotateRelative,
 			Cmd.RotateRelativeContact,
 			Cmd.RotateBackward,
 			Cmd.RotateBackwardContact,
 			Cmd.LookAround,
-			//Cmd.StepRelative,
+			Cmd.StepRelative,
 			Cmd.StepRelativeContact,
 			Cmd.StepBackward,
 			Cmd.StepBackwardContact,
 			Cmd.EatForward,
-			Cmd.EatContact
+			//Cmd.EatContact
 		};
 
 		public static HashSet<byte> CommandsWithParameter = new HashSet<byte>()

@@ -91,7 +91,7 @@ namespace WindowsFormsApp1.GameLogic
 			//}
    //         var dif = te - tot;
 
-			await Task.Run(() => _WORLD.Step());
+			await Task.Run(() => _WORLD.OneStep());
 
    //         tot = Data.TotalEnergy;
 			//te = 0;
@@ -196,12 +196,39 @@ namespace WindowsFormsApp1.GameLogic
             Data.Checks = !Data.Checks;
         }
 
-        public void HistToggle()
-        {
-            Data.HistoryOn = !Data.HistoryOn;
-        }
+		public void HistToggle()
+		{
+			Data.HistoryOn = !Data.HistoryOn;
+		}
 
-        public void Fastest()
+		public void RemoveWalls()
+		{
+            if (!Data.GridWalls) return;
+
+            Data.GridWalls = false;
+
+			for (var x = 0; x < Data.WorldWidth; x += 100)
+			{
+				for (var y = 0; y < Data.WorldHeight; y++)
+				{
+
+					Data.World[x, y] = 0;
+					Func.FixChangeCell(x, y, null);
+				}
+			}
+
+			for (var y = 0; y < Data.WorldWidth; y += 100)
+			{
+				for (var x = 0; x < Data.WorldHeight; x++)
+				{
+
+					Data.World[x, y] = 0;
+					Func.FixChangeCell(x, y, null);
+				}
+			}
+		}
+
+		public void Fastest()
         {
             Data.HistoryOn = false;
             //Data.Logs = false;

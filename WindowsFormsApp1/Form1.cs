@@ -217,6 +217,8 @@ namespace WindowsFormsApp1
 
 					case Keys.H: Game.HistToggle(); break;
 					case Keys.F: Game.Fastest(); break;
+
+					case Keys.W: Game.RemoveWalls(); break;
 					default: break;
 				}
 			}

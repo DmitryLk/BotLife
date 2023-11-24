@@ -36,8 +36,42 @@ namespace WindowsFormsApp1.GameLogic
 
         public void SeedItems()
         {
-            // Заполнение Grass
-            if (Data.SeedFood)
+			// Заполнение Walls
+			if (Data.SeedWalls)
+			{
+				for (var x = 0; x < Data.WorldWidth; x += 100)
+				{
+					for (var y = 0; y < Data.WorldHeight; y++)
+					{
+
+						Data.World[x, y] = (long)CellContent.Wall;
+						Func.FixChangeCell(x, y, Color.Black);
+					}
+				}
+
+				for (var y = 0; y < Data.WorldWidth; y += 100)
+				{
+					for (var x = 0; x < Data.WorldHeight; x++)
+					{
+
+						Data.World[x, y] = (long)CellContent.Wall;
+						Func.FixChangeCell(x, y, Color.Black);
+					}
+				}
+
+				Data.GridWalls = true;
+				//for (var i = 0; i < Data.SeedWallsNumber; i++)
+				//{
+				//	if (Func.TryGetRandomFreeCell(out var x, out var y))
+				//	{
+				//		Data.World[x, y] = (long)CellContent.Wall;
+				//		Func.FixChangeCell(x, y, Color.Black);
+				//	}
+				//}
+			}
+
+			// Заполнение Grass
+			if (Data.SeedFood)
             {
                 for (var i = 0; i < Data.SeedFoodNumber; i++)
                 {
@@ -72,19 +106,6 @@ namespace WindowsFormsApp1.GameLogic
 					if (Func.TryGetRandomFreeCell(out var x, out var y))
 					{
 						Data.World[x, y] = (long)CellContent.Mineral;
-						Func.FixChangeCell(x, y, Color.Black);
-					}
-                }
-            }
-
-            // Заполнение Walls
-            if (Data.SeedWalls)
-            {
-                for (var i = 0; i < Data.SeedWallsNumber; i++)
-                {
-					if (Func.TryGetRandomFreeCell(out var x, out var y))
-					{
-						Data.World[x, y] = (long)CellContent.Wall;
 						Func.FixChangeCell(x, y, Color.Black);
 					}
                 }

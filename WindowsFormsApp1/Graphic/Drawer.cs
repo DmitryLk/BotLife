@@ -153,6 +153,10 @@ namespace WindowsFormsApp1.Graphic
 					{
 						color = Color.Green;
 					}
+					else if (cont == 65503)
+					{
+						color = Color.Black;
+					}
 					else if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 					{
 						color = Data.Bots[cont].Color;

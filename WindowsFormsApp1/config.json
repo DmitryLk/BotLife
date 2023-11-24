@@ -21,7 +21,7 @@
   "SeedFood": true, //####
   "SeedOrganic": false,
   "SeedMinerals": false,
-  "SeedWalls": false,
+  "SeedWalls": true,
   "SeedPoison": false,
   "SeedFoodNumber": 1000, //####
   "SeedOrganicNumber": 0,
