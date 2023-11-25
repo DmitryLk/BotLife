@@ -178,7 +178,7 @@ namespace WindowsFormsApp1.Graphic
 		}
 
 
-		// информация по курсору (работает только на паузе)
+		// информация по курсору (работает только на паузе).  Геном бота.
 		public void DrawCursor()
 		{
 			var cursorCont = Data.World[Data.LensX + Data.CursorX, Data.LensY + Data.CursorY];
