@@ -44,7 +44,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int ReactionCmdsListCnt;  //количество команд в списке ActList
 		public int ActiveGeneralBranchCnt;  //количество активных бранчей команд
 
-		public bool Plant = false;
+		public int Digestion;
 
 		public Guid GenomHash;
 		public Guid ParentHash;
@@ -145,6 +145,8 @@ namespace WindowsFormsApp1.GameLogic
 			g.PraNum = g.Num;
 			g.Level = 1;
 
+			g.Digestion = Func.GetRandomNext(4);
+
 			// Наполнение кода генома
 			for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
 			{
@@ -189,6 +191,9 @@ namespace WindowsFormsApp1.GameLogic
 			g.PraNum = parent.PraNum;
 			g.PraColor = parent.PraColor;
 			g.Level = parent.Level + 1;
+
+			g.Digestion = parent.Digestion;
+
 			Interlocked.Increment(ref Data.MutationCnt);
 
 			// Копирование кода генома
@@ -202,13 +207,25 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-			// Мутация (Data.MutationLenght байт в геноме подменяем)
+			// Копирование атаки - защиты
+			CopyAttackShield(g, parent);
+
+
+			/*	
+			##     ## ##     ## ########    ###    ######## ####  #######  ##    ## 
+			###   ### ##     ##    ##      ## ##      ##     ##  ##     ## ###   ## 
+			#### #### ##     ##    ##     ##   ##     ##     ##  ##     ## ####  ## 
+			## ### ## ##     ##    ##    ##     ##    ##     ##  ##     ## ## ## ## 
+			##     ## ##     ##    ##    #########    ##     ##  ##     ## ##  #### 
+			##     ## ##     ##    ##    ##     ##    ##     ##  ##     ## ##   ### 
+			##     ##  #######     ##    ##     ##    ##    ####  #######  ##    ##  
+			*/
 			for (var i = 0; i < Data.MutationLenght; i++)
 			{
 				var rnd = Func.GetRandomNext(100);
 				var rndpar = Func.GetRandomNext(2);
 
-				// Мутация в основном коде
+				// 1. МУТАЦИЯ В ОСНОВНОМ КОДЕ
 				int branch;
 				int cmdnum;
 				if (rnd >= 0 && rnd < 70)
@@ -239,7 +256,7 @@ namespace WindowsFormsApp1.GameLogic
 					g.Code[branch, cmdnum, 2] = 1;
 				}
 
-				// Мутация в событиях
+				// 2. МУТАЦИЯ В СОБЫТИЯХ
 				if (rnd >= 70 && rnd < 100)
 				{
 					if (parent.ReactionCmdsListCnt > 0)
@@ -269,11 +286,15 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					g.Code[branch, cmdnum, 2] = 1;
 				}
+
+				//3. МУТАЦИЯ АТАКИ-ЗАЩИТЫ
+
+				//4. МУТАЦИЯ ПИЩЕВАРЕНИЯ
+				//if (g.Digestion == 0 && Func.GetRandomNext(10000) == 9999)
+				//{
+				//	g.Digestion++;
+				//}
 			}
-
-
-			// Attack-Shield
-			CopyAttackShield(g, parent);
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");
 			return g;

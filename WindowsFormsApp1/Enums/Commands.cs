@@ -32,7 +32,6 @@ namespace WindowsFormsApp1.Enums
 		public const byte LookForward = 30;
 		public const byte LookAround = 31;
 		// Other
-		public const byte Photosynthesis = 40;
 
 		public static string CmdName(byte cmd)
 		{
@@ -54,7 +53,6 @@ namespace WindowsFormsApp1.Enums
 				Cmd.EatContact => "Есть контакт",
 				Cmd.LookForward => "Смотреть вперед",
 				Cmd.LookAround => "Смотреть вокруг",
-				Cmd.Photosynthesis => "Фотосинтез",
 				_ => $""
 			};
 		}
@@ -79,7 +77,6 @@ namespace WindowsFormsApp1.Enums
                 Cmd.EatContact => Color.Green,
                 Cmd.LookForward => Color.Blue,
                 Cmd.LookAround => Color.Blue,
-                Cmd.Photosynthesis => Color.Green,
                 _ => Color.Black
 			};
         }
@@ -105,7 +102,6 @@ namespace WindowsFormsApp1.Enums
 				Cmd.EatContact => 10,
 				Cmd.LookForward => 20,
 				Cmd.LookAround => 40,
-				Cmd.Photosynthesis => 0,
 				_ => throw new Exception()
 			};
 		}

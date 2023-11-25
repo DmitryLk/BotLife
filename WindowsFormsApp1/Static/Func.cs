@@ -365,6 +365,7 @@ namespace WindowsFormsApp1.Static
 			}
 
 			reproductedBot.EnergyChange(-Data.InitialBotEnergy);
+			reproductedBot.DividedCount++;
 
 			Interlocked.Increment(ref Data.TotalQtyBotReproduction);
 		}
@@ -399,6 +400,7 @@ namespace WindowsFormsApp1.Static
 			updBot.Age = 0;
 			updBot.BiteMeCount = 0;
 			updBot.BiteImCount = 0;
+			updBot.DividedCount = 0;
 			updBot.Alive = true;
 			//updBot.hist = new CodeHistory();
 			updBot.InsertedToReproductionList = false;
@@ -455,6 +457,7 @@ namespace WindowsFormsApp1.Static
 				bot.Age = 0;
 				bot.BiteMeCount = 0;
 				bot.BiteImCount = 0;
+				bot.DividedCount = 0;
 				bot.InsertedToDeathList = false;
 				bot.InsertedToReproductionList = false;
 				bot.Alive = true;

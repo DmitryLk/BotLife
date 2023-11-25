@@ -76,6 +76,7 @@ namespace WindowsFormsApp1.GameLogic
 		public int Age;
 		public int BiteMeCount;
 		public int BiteImCount;
+		public int DividedCount;
 		public long Num;         // Номер бота (остается постоянным)
 
 		private int _en;
@@ -299,6 +300,7 @@ namespace WindowsFormsApp1.GameLogic
 			Age = 0;
 			BiteMeCount = 0;
 			BiteImCount = 0;
+			DividedCount = 0;
 
 			Xd = x;
 			Yd = y;
@@ -318,7 +320,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				BotColorMode.GenomColor => G.Color,
 				BotColorMode.PraGenomColor => G.PraColor,
-				BotColorMode.PlantPredator => G.Plant ? Color.Green : Color.Red,
+				BotColorMode.PlantPredator => GetGraduatedColor(G.Digestion, 0, 3),
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
 				BotColorMode.Age => GetGraduatedColor(500 - Age, 0, 500),
 				BotColorMode.GenomAge => GetGraduatedColor(6000 - (int)(Data.CurrentStep - G.BeginStep), 0, 6000),
@@ -620,9 +622,6 @@ namespace WindowsFormsApp1.GameLogic
 					case Cmd.LookAround: tm = LookAround(); Test2.Mark(22, t); break;
 					case Cmd.LookForward: tm = LookForward(); Test2.Mark(20, t); break;
 
-
-					//// Other
-					case Cmd.Photosynthesis: tm = Photosynthesis(); Test2.Mark(21, t); break;
 					default: throw new Exception();
 				};
 
@@ -821,26 +820,6 @@ namespace WindowsFormsApp1.GameLogic
 			return CmdType.CmdTime(CmdType.LookAround);
 		}
 
-		//// Other
-		//40 C
-		private int Photosynthesis()
-		{
-			if (Yi < Data.PhotosynthesisLayerHeight)
-			{
-				EnergyChange(Data.PhotosynthesisEnergy);
-				Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
-				G.Plant = true;
-				//genom.Color = Color.Green;
-
-				return CmdType.CmdTime(CmdType.PhotosynthesisSuccessful);
-			}
-			else
-			{
-				return CmdType.CmdTime(CmdType.PhotosynthesisNotSuccessful);
-			}
-		}
-
-
 		//===================================================================================================
 
 		/*
@@ -852,10 +831,29 @@ namespace WindowsFormsApp1.GameLogic
 								##       ##     ##    ##    
 								######## ##     ##    ##    
 		 */
+		private bool Photosynthesis()
+		{
+			if (Data.TotalEnergy < 100_000_000 && DividedCount == 0 && Yi < Data.PhotosynthesisLayerHeight)
+			{
+				EnergyChange(Data.PhotosynthesisEnergy);
+				Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 		private bool Eat(int dir)
 		{
+			if (G.Digestion == 0) // ТОЛЬКО ДЛЯ РАСТЕНИЙ
+			{
+				return Photosynthesis();
+			}
+			
 			// Алгоритм:
-			// 1. Узнаем координаты клетки на которую надо посмотреть
+			// 1. Узнаем координаты клетки на которую надо съесть
 			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
 
 
@@ -874,36 +872,39 @@ namespace WindowsFormsApp1.GameLogic
 
 
 			// Grass
-			bool grass = false;
-			if (Data.World[nXi, nYi] == 65500)
+			if (G.Digestion == 1)  // ТОЛЬКО ДЛЯ ТРАВОЯДНЫХ
 			{
-				lock (_busyWorld1)
+				bool grass = false;
+				if (Data.World[nXi, nYi] == 65500)
 				{
-					if (Data.World[nXi, nYi] == 65500)
+					lock (_busyWorld1)
 					{
-						Data.World[nXi, nYi] = 0;
+						if (Data.World[nXi, nYi] == 65500)
+						{
+							Data.World[nXi, nYi] = 0;
 
-						grass = true;
+							grass = true;
+						}
 					}
 				}
-			}
 
-			if (grass)
-			{
-				EnergyChange(Data.FoodEnergy);
-				Interlocked.Add(ref Data.TotalEnergy, Data.FoodEnergy);
-				Interlocked.Decrement(ref Data.CurrentNumberOfFood);
-				if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
-				return true;
+				if (grass)
+				{
+					EnergyChange(Data.FoodEnergy);
+					Interlocked.Add(ref Data.TotalEnergy, Data.FoodEnergy);
+					Interlocked.Decrement(ref Data.CurrentNumberOfFood);
+					if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
+					return true;
+				}
 			}
 
 
 			var cont = Data.World[nXi, nYi];
 
-			// Bot || Relative
+			// Bot или Relative
 			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 			{
-				return BiteBot(cont, dir);
+				return EatBot(cont, dir);
 			}
 			else
 			{
@@ -912,24 +913,30 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		private bool BiteBot(long cont, int dir)
+		private bool EatBot(long cont, int dir)
 		{
 			var eatedBot = Data.Bots[cont];
 
-			// Растение не может есть животное
-			if (G.Plant && !eatedBot.G.Plant)
+			// Мясоед может есть травоядное. Травоядное может есть растение. По другому нельзя.
+			if (G.Digestion != eatedBot.G.Digestion + 1 && G.Digestion != eatedBot.G.Digestion)
 			{
 				return false;
 			}
 
 			// Животное может есть растение, но ни тогда когда его осталось мало
-			if (!G.Plant && eatedBot.G.Plant)
+			if (eatedBot.G.Digestion == 0 && eatedBot.DividedCount == 0)
 			{
+				return false;
 				if (eatedBot.G.CurBots < 2)
 				{
 					return false;
 				}
 			}
+
+			//if (eatedBot.G.CurBots < 10)
+			//{
+			//	return false;
+			//}
 
 			// Не может есть родственника
 			if (G.GenomHash == eatedBot.G.GenomHash)
@@ -947,11 +954,13 @@ namespace WindowsFormsApp1.GameLogic
 			var atc = 0;
 			for (var i = 0; i < G.AttackTypesCnt; i++)
 			{
+				atc = 2;
+
 				//1
-				if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-				{
-					atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-				}
+				//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+				//{
+				//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+				//}
 
 				//2
 				//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type]*2)
@@ -1203,6 +1212,10 @@ namespace WindowsFormsApp1.GameLogic
 
 		private bool Step(int dir)
 		{
+			if (G.Digestion == 0) // ТОЛЬКО ДЛЯ РАСТЕНИЙ
+			{
+				return false;
+			}
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
 			// Алгоритм:
@@ -1438,7 +1451,7 @@ namespace WindowsFormsApp1.GameLogic
 				}
 			}
 
-			// Проверка перехода сквозь экран
+			// Переход сквозь экран
 			if (!Data.LeftRightEdge)
 			{
 				if (newXint < 0)

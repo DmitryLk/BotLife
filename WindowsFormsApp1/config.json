@@ -18,7 +18,7 @@
 
 
   // Настройки Seeder
-  "SeedFood": true, //####
+  "SeedFood": false, //####
   "SeedOrganic": false,
   "SeedMinerals": false,
   "SeedWalls": true,
@@ -51,7 +51,7 @@
 
   //Photosynthesis
   "PhotosynthesisEnergy": 30,
-  "PhotosynthesisLayerHeight": 0, //####################
+  "PhotosynthesisLayerHeight": 1000, //####################
 
   //Size
   "MinSize": 300,
