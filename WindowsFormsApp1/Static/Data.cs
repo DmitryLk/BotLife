@@ -60,7 +60,7 @@ namespace WindowsFormsApp1.Static
 		public static int MaxCmdInStep;
 		public static float MutationProbabilityPercent;
 		public static int MutationLenght;
-
+		public static int DigestionTypeCount;
 
 		public static int FoodEnergy;
 		public static int SeedBotEnergy;
@@ -382,6 +382,7 @@ namespace WindowsFormsApp1.Static
 			MaxCmdInStep = options.MaxCmdInStep;
 			MutationProbabilityPercent = options.MutationProbabilityPercent;
 			MutationLenght = options.MutationLenght;
+			DigestionTypeCount = options.DigestionTypeCount;
 
 			InitialBotEnergy = options.InitialBotEnergy;
 			SeedBotEnergy = options.SeedBotEnergy;

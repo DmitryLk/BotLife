@@ -33,12 +33,12 @@ namespace WindowsFormsApp1.Options
 		public int GenomGeneralBranchCnt;
 		public int GenomReactionBranchCnt;
 		public int MaxCode;
-        public int MaxCmdInStep;
-
-        public float MutationProbabilityPercent;
+		public int MaxCmdInStep;
+		public float MutationProbabilityPercent;
         public int MutationLenght;
+		public int DigestionTypeCount;
 
-        public int FoodEnergy;
+		public int FoodEnergy;
         public int SeedBotEnergy;
         public int InitialBotEnergy;
         public int ReproductionBotEnergy;

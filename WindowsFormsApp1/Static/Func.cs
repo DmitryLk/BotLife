@@ -714,6 +714,13 @@ namespace WindowsFormsApp1.Static
 			return Color.FromArgb(ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256), ThreadSafeRandom.Next(256));
 		}
 
+		public static int GetRandomDigestion()
+		{
+			var rnd = Func.GetRandomNext(100);
+			if (rnd > Data.DigestionTypeCount - 2) return 1;
+			return rnd + 2;
+		}
+
 		public static int GetRandomNext(int max)
 		{
 			return ThreadSafeRandom.Next(max);

@@ -18,7 +18,7 @@
 
 
   // Настройки Seeder
-  "SeedFood": false, //####
+  "SeedFood": true, //####
   "SeedOrganic": false,
   "SeedMinerals": false,
   "SeedWalls": true,
@@ -34,6 +34,7 @@
   "GenomReactionBranchCnt": 7,
   "MaxCode": 63,
   "MaxCmdInStep": 10,
+  "DigestionTypeCount":  1,
 
   // Настройки мутаций
   "MutationProbabilityPercent": 10, //####

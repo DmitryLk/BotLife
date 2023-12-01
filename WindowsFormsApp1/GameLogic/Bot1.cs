@@ -320,14 +320,13 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				BotColorMode.GenomColor => G.Color,
 				BotColorMode.PraGenomColor => G.PraColor,
-				BotColorMode.PlantPredator => GetGraduatedColor(G.Digestion, 0, 3),
+				BotColorMode.PlantPredator => GetGraduatedColor(G.Digestion, 0, Data.DigestionTypeCount),
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
 				BotColorMode.Age => GetGraduatedColor(500 - Age, 0, 500),
 				BotColorMode.GenomAge => GetGraduatedColor(6000 - (int)(Data.CurrentStep - G.BeginStep), 0, 6000),
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
 		}
-
 
 		private Color GetGraduatedColor(int grad, int min, int max)
 		{
@@ -833,7 +832,8 @@ namespace WindowsFormsApp1.GameLogic
 		 */
 		private bool Photosynthesis()
 		{
-			if (Data.TotalEnergy < 100_000_000 && DividedCount == 0 && Yi < Data.PhotosynthesisLayerHeight)
+			//if (Data.TotalEnergy < Data.KeptTotalEnergy && DividedCount == 0 && Yi < Data.PhotosynthesisLayerHeight)
+			if (Data.TotalEnergy < Data.KeptTotalEnergy && Yi < Data.PhotosynthesisLayerHeight)
 			{
 				EnergyChange(Data.PhotosynthesisEnergy);
 				Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
@@ -851,7 +851,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				return Photosynthesis();
 			}
-			
+
 			// Алгоритм:
 			// 1. Узнаем координаты клетки на которую надо съесть
 			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
@@ -917,8 +917,9 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var eatedBot = Data.Bots[cont];
 
-			// Мясоед может есть травоядное. Травоядное может есть растение. По другому нельзя.
-			if (G.Digestion != eatedBot.G.Digestion + 1 && G.Digestion != eatedBot.G.Digestion)
+			// Может есть своего уровня или на уровень меньше.
+
+			if (eatedBot.G.Digestion != G.Digestion && eatedBot.G.Digestion + 1 != G.Digestion) 
 			{
 				return false;
 			}
@@ -932,6 +933,11 @@ namespace WindowsFormsApp1.GameLogic
 					return false;
 				}
 			}
+
+			//if (eatedBot.DividedCount == 0)
+			//{
+			//	return false;
+			//}
 
 			//if (eatedBot.G.CurBots < 10)
 			//{
@@ -952,33 +958,40 @@ namespace WindowsFormsApp1.GameLogic
 
 			//var olden = Energy;
 			var atc = 0;
-			for (var i = 0; i < G.AttackTypesCnt; i++)
+			if (eatedBot.G.Digestion + 1 == G.Digestion)
 			{
 				atc = 2;
+			}
 
-				//1
-				//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-				//{
-				//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-				//}
+			if (eatedBot.G.Digestion == G.Digestion)
+			{
+				for (var i = 0; i < G.AttackTypesCnt; i++)
+				{
 
-				//2
-				//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type]*2)
-				//{
-				//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type]*2;
-				//}
+					//1
+					if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+					{
+						atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					}
 
-				//3
-				//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-				//{
-				//	atc++;
-				//}
+					//2
+					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type]*2)
+					//{
+					//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type]*2;
+					//}
 
-				//4
-				//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type] && eatedBot.G.Shield[G.AttackTypes[i].Type] == 0)
-				//{
-				//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-				//}
+					//3
+					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+					//{
+					//	atc++;
+					//}
+
+					//4
+					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type] && eatedBot.G.Shield[G.AttackTypes[i].Type] == 0)
+					//{
+					//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					//}
+				}
 			}
 
 			if (atc > 0)
@@ -1423,7 +1436,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			return (newXdouble, newYdouble, newXint, newYint, iEqual);
 		}
-		
+
 		private (int newXint, int newYint) GetCoordinatesByDirectionOnlyDifferent(int dir)
 		{
 			var (deltaXdouble, deltaYdouble) = Dir.Directions1[dir];
@@ -1526,6 +1539,7 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Age: {Age}");
 			sb.AppendLine($"Num: {Num}");
 			sb.AppendLine($"Index: {Index}");
+			sb.AppendLine($"Digestion: {G.Digestion}");
 
 			sb.AppendLine($"Energy: {Energy}");
 			sb.AppendLine($"_dir: {Direction}");

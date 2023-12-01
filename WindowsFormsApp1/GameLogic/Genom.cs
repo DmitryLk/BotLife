@@ -145,7 +145,7 @@ namespace WindowsFormsApp1.GameLogic
 			g.PraNum = g.Num;
 			g.Level = 1;
 
-			g.Digestion = Func.GetRandomNext(4);
+			g.Digestion = Func.GetRandomDigestion();
 
 			// Наполнение кода генома
 			for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
@@ -287,13 +287,13 @@ namespace WindowsFormsApp1.GameLogic
 					g.Code[branch, cmdnum, 2] = 1;
 				}
 
-				//3. МУТАЦИЯ АТАКИ-ЗАЩИТЫ
+			}
+			//3. МУТАЦИЯ АТАКИ-ЗАЩИТЫ
 
-				//4. МУТАЦИЯ ПИЩЕВАРЕНИЯ
-				//if (g.Digestion == 0 && Func.GetRandomNext(10000) == 9999)
-				//{
-				//	g.Digestion++;
-				//}
+			//4. МУТАЦИЯ ПИЩЕВАРЕНИЯ
+			if (Func.GetRandomNext(1000) == 999)
+			{
+				g.Digestion = Func.GetRandomDigestion();
 			}
 
 			if (!GENOMS.TryAdd(g, 1)) throw new Exception("dfsdfs85");

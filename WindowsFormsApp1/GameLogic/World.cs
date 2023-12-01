@@ -268,7 +268,7 @@ namespace WindowsFormsApp1.GameLogic
 
 
                 }
-				else
+                else
                 {
                     break;
                 }
