@@ -26,8 +26,11 @@ namespace WindowsFormsApp1.Static
 		public static (double, double)[] Directions2 = new (double, double)[NumberOfDirections];
 		public static int[] DirectionsOpposite = new int[NumberOfDirections];
 
-		public static (int, int)[] NearbyCells = new (int, int)[8]
+		public static (int, int)[] NearbyCells1 = new (int, int)[8]
 			{ (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0) };
+
+		public static (int, int)[] NearbyCells2 = new (int, int)[24]
+			{ (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2), (2, -1), (2, 0), (2, 1), (2, 2), (1, 2), (0, 2), (-1, 2), (-2, 2), (-2, 1), (-2, 0), (-2, -1) };
 
 		public static int[] NearbyCellsDirection = new int[8] { 56, 0, 8, 16, 24, 32, 40, 48 };
 
@@ -74,10 +77,10 @@ namespace WindowsFormsApp1.Static
 			//while (dir1 >= NumberOfDirections) dir1 -= NumberOfDirections;
 			//while (dir2 < 0) dir2 += NumberOfDirections;
 			//while (dir2 >= NumberOfDirections) dir2 -= NumberOfDirections;
-			
+
 			if (diff < 0) diff = -diff;
 			while (diff >= NumberOfDirections) diff -= NumberOfDirections;
-			if (diff > NumberOfDirections/2) diff = NumberOfDirections - diff;
+			if (diff > NumberOfDirections / 2) diff = NumberOfDirections - diff;
 			return diff;
 		}
 

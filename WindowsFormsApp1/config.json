@@ -30,11 +30,9 @@
   "SeedPoisonNumber": 0,
 
   //Genom
-  "GenomGeneralBranchCnt": 10,
-  "GenomReactionBranchCnt": 7,
   "MaxCode": 63,
   "MaxCmdInStep": 10,
-  "DigestionTypeCount":  1,
+  "DigestionTypeCount":  2,
 
   // Настройки мутаций
   "MutationProbabilityPercent": 10, //####
@@ -48,7 +46,7 @@
   "ReproductionBotEnergy": 3000,
   "BiteEnergy": -1000,
   "DeltaEnergyOnStep": -1, //####################
-  "KeptTotalEnergy": 20000000, //####################
+  "KeptTotalEnergy": 15000000, //####################
 
   //Photosynthesis
   "PhotosynthesisEnergy": 30,

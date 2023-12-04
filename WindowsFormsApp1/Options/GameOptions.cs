@@ -30,8 +30,6 @@ namespace WindowsFormsApp1.Options
         public int SeedWallsNumber;
         public int SeedPoisonNumber;
 
-		public int GenomGeneralBranchCnt;
-		public int GenomReactionBranchCnt;
 		public int MaxCode;
 		public int MaxCmdInStep;
 		public float MutationProbabilityPercent;

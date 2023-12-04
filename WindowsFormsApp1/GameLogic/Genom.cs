@@ -20,6 +20,7 @@ using WindowsFormsApp1.Static;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Numerics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TreeView;
+using Branch = WindowsFormsApp1.Enums.Branch;
 
 namespace WindowsFormsApp1.GameLogic
 {
@@ -121,12 +122,12 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		// Создание нового генома
-		public static Genom CreateNewGenom()
+		public static Genom CreateNewGenom(int dig = -1)
 		{
 			var g = new Genom();
-			g.Code = new byte[Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 3];
+			g.Code = new byte[Branch.AllBranchCount, Data.MaxCmdInStep, 3];
 
-			g.Act = new int[(Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt) * Data.MaxCmdInStep];
+			g.Act = new int[Branch.AllBranchCount * Data.MaxCmdInStep];
 			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
 			g.ReactionCmdsList = new int[ActListSize]; g.ReactionCmdsListCnt = 0;
 			g.ActCnt = true;
@@ -145,14 +146,34 @@ namespace WindowsFormsApp1.GameLogic
 			g.PraNum = g.Num;
 			g.Level = 1;
 
-			g.Digestion = Func.GetRandomDigestion();
+			if (dig == -1)
+			{
+				g.Digestion = Func.GetRandomDigestion();
+			}
+			else
+			{
+				g.Digestion = dig;
+			}
 
 			// Наполнение кода генома
-			for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
+			int prob;
+			byte cmd;
+			for (var i = 0; i < Branch.AllBranchCount; i++)
 			{
+				var cmds = Branch.BranchCmds((byte)i);
+
 				for (var j = 0; j < Data.MaxCmdInStep; j++)
 				{
-					g.Code[i, j, 0] = i< Data.GenomGeneralBranchCnt ? Func.GetRandomGeneralCmd() : Func.GetRandomReactionCmd();
+					do
+					{
+						cmd = cmds[ThreadSafeRandom.Next(cmds.Length)];
+						prob = ThreadSafeRandom.Next(Cmd.MaxCmdChance);
+					}
+					while (Cmd.CmdChance(cmd) < prob);
+
+
+
+					g.Code[i, j, 0] = cmd;
 					g.Code[i, j, 1] = Func.GetRandomBotCode();
 					g.Code[i, j, 2] = 0;
 				}
@@ -170,9 +191,9 @@ namespace WindowsFormsApp1.GameLogic
 		public static Genom CreateChildGenom(Genom parent)
 		{
 			var g = new Genom();
-			g.Code = new byte[Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt, Data.MaxCmdInStep, 3];
+			g.Code = new byte[Branch.AllBranchCount, Data.MaxCmdInStep, 3];
 
-			g.Act = new int[(Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt) * Data.MaxCmdInStep];
+			g.Act = new int[Branch.AllBranchCount * Data.MaxCmdInStep];
 			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
 			g.ReactionCmdsList = new int[ActListSize]; g.ReactionCmdsListCnt = 0;
 			g.ActCnt = true;
@@ -197,7 +218,7 @@ namespace WindowsFormsApp1.GameLogic
 			Interlocked.Increment(ref Data.MutationCnt);
 
 			// Копирование кода генома
-			for (var i = 0; i < Data.GenomGeneralBranchCnt + Data.GenomReactionBranchCnt; i++)
+			for (var i = 0; i < Branch.AllBranchCount; i++)
 			{
 				for (var j = 0; j < Data.MaxCmdInStep; j++)
 				{
@@ -241,7 +262,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					else
 					{
-						branch = Func.GetRandomNext(Data.GenomGeneralBranchCnt);
+						branch = Func.GetRandomNext(Branch.GeneralBranchCount);
 						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
 					}
 
@@ -251,7 +272,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					else
 					{
-						g.Code[branch, cmdnum, 0] = Func.GetRandomGeneralCmd();
+						g.Code[branch, cmdnum, 0] = Func.GetRandomBranchCmd(branch);
 					}
 					g.Code[branch, cmdnum, 2] = 1;
 				}
@@ -270,7 +291,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					else
 					{
-						branch = Func.GetRandomNext(Data.GenomReactionBranchCnt) + Data.GenomGeneralBranchCnt;
+						branch = Func.GetRandomNext(Branch.AllBranchCount - Branch.GeneralBranchCount) + Branch.GeneralBranchCount;
 						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
 					}
 
@@ -282,7 +303,7 @@ namespace WindowsFormsApp1.GameLogic
 					}
 					else
 					{
-						g.Code[branch, cmdnum, 0] = Func.GetRandomReactionCmd();
+						g.Code[branch, cmdnum, 0] = Func.GetRandomBranchCmd(branch);
 					}
 					g.Code[branch, cmdnum, 2] = 1;
 				}

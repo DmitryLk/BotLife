@@ -486,7 +486,7 @@ namespace WindowsFormsApp1.Static
 
 			do
 			{
-				(nXi, nYi) = GetCoordinatesByDelta(Xi, Yi, n);
+				(nXi, nYi) = GetCoordinatesByDelta(Xi, Yi, n, 1);
 
 				if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
 				{
@@ -512,9 +512,16 @@ namespace WindowsFormsApp1.Static
 			return result;
 		}
 
-		public static (int nXi, int nYi) GetCoordinatesByDelta(int Xi, int Yi, int nDelta)
+		public static (int nXi, int nYi) GetCoordinatesByDelta(int Xi, int Yi, int nDelta, int width)
 		{
-			var (nXid, nYid) = Dir.NearbyCells[nDelta];
+
+			var (nXid, nYid) = width switch
+			{
+				1 => Dir.NearbyCells1[nDelta],
+				2 => Dir.NearbyCells2[nDelta],
+				_ => throw new NotImplementedException()
+			};
+
 
 
 			var nXi = Xi + nXid;
@@ -559,7 +566,7 @@ namespace WindowsFormsApp1.Static
 
 		public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield(AttackShieldType type)
 		{
-			
+
 
 			var fail = false;
 			var shield = new byte[Data.AttackShieldTypeCountMax];
@@ -591,7 +598,7 @@ namespace WindowsFormsApp1.Static
 					}
 
 					if (!toShield)
-					{ 
+					{
 						if (attack[num] >= Data.AttackMax || (attack[num] == 0 && attackTypesCount >= Data.AttackTypeCountMax))
 						{
 							fail = true;
@@ -617,94 +624,82 @@ namespace WindowsFormsApp1.Static
 			return (shield, attack, attackTypes.ToArray());
 		}
 
-        public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield2()
-        {
-            var fail = false;
-            var shield = new byte[Data.AttackShieldTypeCountMax];
-            var attack = new byte[Data.AttackShieldTypeCountMax];
-            var attackTypes = new List<(byte, byte)>();
+		public static (byte[], byte[], (byte, byte)[]) GetRandomAttackShield2()
+		{
+			var fail = false;
+			var shield = new byte[Data.AttackShieldTypeCountMax];
+			var attack = new byte[Data.AttackShieldTypeCountMax];
+			var attackTypes = new List<(byte, byte)>();
 
-            for (var i = 0; i < Data.AttackShieldSum/2; i++)
-            {
-                do
-                {
-                    var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+			for (var i = 0; i < Data.AttackShieldSum / 2; i++)
+			{
+				do
+				{
+					var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
 
-                    if (shield[type] >= Data.ShieldMax)
-                    {
-                        fail = true;
-                    }
-                    else
-                    {
-                        shield[type]++;
-                    }
-                }
+					if (shield[type] >= Data.ShieldMax)
+					{
+						fail = true;
+					}
+					else
+					{
+						shield[type]++;
+					}
+				}
 				while (fail);
-            }
+			}
 
-            for (var i = 0; i < Data.AttackShieldSum/2; i++)
-            {
-                do
-                {
-                    var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
+			for (var i = 0; i < Data.AttackShieldSum / 2; i++)
+			{
+				do
+				{
+					var type = (byte)ThreadSafeRandom.Next(Data.AttackShieldTypeCount);
 
-                    if (attack[type] >= Data.AttackMax)
-                    {
-                        fail = true;
-                    }
-                    else
-                    {
-                        attack[type]++;
-                    }
-                }
+					if (attack[type] >= Data.AttackMax)
+					{
+						fail = true;
+					}
+					else
+					{
+						attack[type]++;
+					}
+				}
 				while (fail);
-            }
-            
-            for (var i = 0; i < Data.AttackShieldTypeCount; i++)
-            {
-                if (attack[i] > 0)
-                {
-                    attackTypes.Add(((byte)i, attack[i]));
-                }
-            }
+			}
 
-            return (shield, attack, attackTypes.ToArray());
-        }
+			for (var i = 0; i < Data.AttackShieldTypeCount; i++)
+			{
+				if (attack[i] > 0)
+				{
+					attackTypes.Add(((byte)i, attack[i]));
+				}
+			}
 
-        public static int GetRandomDirection()
+			return (shield, attack, attackTypes.ToArray());
+		}
+
+		public static int GetRandomDirection()
 		{
 			return ThreadSafeRandom.Next(Dir.NumberOfDirections);
 		}
 
-        public static byte GetRandomBotCode()
-        {
-            return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
-        }
-
-		public static byte GetRandomGeneralCmd()
+		public static byte GetRandomBotCode()
 		{
-			int prob;
-			byte cmd;
-			do
-			{
-				cmd = Data.GeneralCommandsValues[ThreadSafeRandom.Next(Data.GeneralCommandsValuesLength)];
-				prob = ThreadSafeRandom.Next(Cmd.MaxCmdWeight);
-			}
-			while (Cmd.CmdWeight(cmd) < prob);
-
-			return cmd;
+			return (byte)ThreadSafeRandom.Next(Data.MaxCode + 1);
 		}
 
-		public static byte GetRandomReactionCmd()
+		public static byte GetRandomBranchCmd(int branch)
 		{
 			int prob;
 			byte cmd;
+			var cmds = Branch.BranchCmds((byte)branch);
+
 			do
 			{
-				cmd = Data.EventCommandsValues[ThreadSafeRandom.Next(Data.EventCommandsValuesLength)];
-				prob = ThreadSafeRandom.Next(Cmd.MaxCmdWeight);
+				cmd = cmds[ThreadSafeRandom.Next(cmds.Length)];
+				prob = ThreadSafeRandom.Next(Cmd.MaxCmdChance);
 			}
-			while (Cmd.CmdWeight(cmd) < prob);
+			while (Cmd.CmdChance(cmd) < prob);
 
 			return cmd;
 		}
@@ -941,7 +936,7 @@ namespace WindowsFormsApp1.Static
 					throw new Exception("fdgdfgdsdfdf34f435345g");
 				}
 
-				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index) 
+				if (Data.World[Data.Bots[i].Xi, Data.Bots[i].Yi] != Data.Bots[i].Index)
 				{
 					throw new Exception("fdgdfgd34f435345g");
 				}

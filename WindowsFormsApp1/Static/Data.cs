@@ -54,8 +54,6 @@ namespace WindowsFormsApp1.Static
 		public static int SeedWallsNumber;
 		public static int SeedPoisonNumber;
 
-		public static int GenomGeneralBranchCnt;
-		public static int GenomReactionBranchCnt;
 		public static int MaxCode;
 		public static int MaxCmdInStep;
 		public static float MutationProbabilityPercent;
@@ -161,10 +159,6 @@ namespace WindowsFormsApp1.Static
 		public static bool DgvPra;
 
 		// Commands
-		public static byte[] GeneralCommandsValues;
-		public static int GeneralCommandsValuesLength;
-		public static byte[] EventCommandsValues;
-		public static int EventCommandsValuesLength;
 		public static bool[] CommandsWithParameter;
 
 		public static bool GridWalls;
@@ -235,14 +229,6 @@ namespace WindowsFormsApp1.Static
 			{
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
 			}
-
-			GeneralCommandsValuesLength = Cmd.GeneralCommands.Count;
-			GeneralCommandsValues = new byte[GeneralCommandsValuesLength];
-			GeneralCommandsValues = Cmd.GeneralCommands.ToArray();
-
-			EventCommandsValuesLength = Cmd.ReactionCommands.Count;
-			EventCommandsValues = new byte[EventCommandsValuesLength];
-			EventCommandsValues = Cmd.ReactionCommands.ToArray();
 
 			CommandsWithParameter = new bool[Data.MaxCode + 1];
 			Array.Clear(CommandsWithParameter, 0, CommandsWithParameter.Length);
@@ -376,8 +362,6 @@ namespace WindowsFormsApp1.Static
 			SeedWallsNumber = options.SeedWallsNumber;
 			SeedPoisonNumber = options.SeedPoisonNumber;
 
-			GenomGeneralBranchCnt = options.GenomGeneralBranchCnt;
-			GenomReactionBranchCnt = options.GenomReactionBranchCnt;
 			MaxCode = options.MaxCode;
 			MaxCmdInStep = options.MaxCmdInStep;
 			MutationProbabilityPercent = options.MutationProbabilityPercent;
