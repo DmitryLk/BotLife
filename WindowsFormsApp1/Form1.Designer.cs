@@ -48,6 +48,7 @@
 			this.button4 = new System.Windows.Forms.Button();
 			this.button5 = new System.Windows.Forms.Button();
 			this.textBox6 = new System.Windows.Forms.TextBox();
+			this.button6 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -276,11 +277,23 @@
 			this.textBox6.TabIndex = 26;
 			this.textBox6.TextChanged += new System.EventHandler(this.textBox6_TextChanged);
 			// 
+			// button6
+			// 
+			this.button6.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.button6.Location = new System.Drawing.Point(1526, 61);
+			this.button6.Name = "button6";
+			this.button6.Size = new System.Drawing.Size(28, 29);
+			this.button6.TabIndex = 27;
+			this.button6.Text = "W";
+			this.button6.UseVisualStyleBackColor = true;
+			this.button6.Click += new System.EventHandler(this.button6_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1774, 1061);
+			this.Controls.Add(this.button6);
 			this.Controls.Add(this.textBox6);
 			this.Controls.Add(this.button5);
 			this.Controls.Add(this.button4);
@@ -342,6 +355,7 @@
 		private System.Windows.Forms.Button button4;
 		private System.Windows.Forms.Button button5;
 		private System.Windows.Forms.TextBox textBox6;
+		private System.Windows.Forms.Button button6;
 	}
 }
 

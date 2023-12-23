@@ -131,7 +131,8 @@ namespace WindowsFormsApp1.GameLogic
 			g.GeneralCmdsList = new int[ActListSize]; g.GeneralCmdsListCnt = 0;
 			g.ReactionCmdsList = new int[ActListSize]; g.ReactionCmdsListCnt = 0;
 			g.ActCnt = true;
-			g.ActiveGeneralBranchCnt = Func.GetRandomNext(3) + 1;
+			//g.ActiveGeneralBranchCnt = Func.GetRandomNext(3) + 1;
+			g.ActiveGeneralBranchCnt = 1;
 			Array.Clear(g.Act);
 
 			g.GenomHash = Guid.NewGuid();

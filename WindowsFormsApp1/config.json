@@ -32,7 +32,7 @@
   //Genom
   "MaxCode": 63,
   "MaxCmdInStep": 10,
-  "DigestionTypeCount":  2,
+  "DigestionTypeCount":  1,
 
   // Настройки мутаций
   "MutationProbabilityPercent": 10, //####

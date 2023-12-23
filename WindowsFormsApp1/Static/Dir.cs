@@ -30,7 +30,9 @@ namespace WindowsFormsApp1.Static
 			{ (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0) };
 
 		public static (int, int)[] NearbyCells2 = new (int, int)[24]
-			{ (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2), (2, -1), (2, 0), (2, 1), (2, 2), (1, 2), (0, 2), (-1, 2), (-2, 2), (-2, 1), (-2, 0), (-2, -1) };
+			{   (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0),
+				(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2), (2, -1), (2, 0), (2, 1),
+				(2, 2), (1, 2), (0, 2), (-1, 2), (-2, 2), (-2, 1), (-2, 0), (-2, -1) };
 
 		public static int[] NearbyCellsDirection = new int[8] { 56, 0, 8, 16, 24, 32, 40, 48 };
 
@@ -43,11 +45,11 @@ namespace WindowsFormsApp1.Static
 		//							|
 		//					40		|
 		//							|		24
+		//				  (-1,1)  (0,1)	 (1,1)
 		//							|
+		//  ---------48---(-1,0)---------(1,0)---16------------> x
 		//							|
-		//  ---------48-------------------------16------------> x
-		//							|
-		//							|
+		//				(-1,-1)   (0,-1)  (1,-1)
 		//					56		|       8
 		//							|
 		//							0
@@ -67,6 +69,33 @@ namespace WindowsFormsApp1.Static
 				Directions2[i] = (1.42 * x, 1.42 * y);
 				DirectionsOpposite[i] = (i + NumberOfDirections / 2) % NumberOfDirections;
 			}
+		}
+
+		public static (int, int, int, int)[][] TouchedCells = new (int, int, int, int)[8][] {
+			new (int, int, int, int)[] { (-2, 0, 56, 24), (-2, -1, 48, 16), (-2, -2, 40, 8), (-1, -2, 32, 0), (0, -2, 24, 56)},		// (-1, -1)
+			new (int, int, int, int)[] {(-1, -2, 40, 8), (0, -2, 32, 0), (1, -2, 24, 56) },											// (0, -1)
+			new (int, int, int, int)[] {(0, -2, 40, 8), (1, -2, 32, 0), (2, -2, 24, 56), (2, -1, 16, 48), (2, 0, 8, 40)},			// (1, -1)
+			new (int, int, int, int)[] {(2, -1, 24, 56), (2, 0, 16, 48), (2, 1, 8, 40) },											// (1, 0)
+			new (int, int, int, int)[] {(2, 0, 24, 56), (2, 1, 16, 48), (2, 2, 8, 40), (1, 2, 0, 32), (0, 2, 56, 24) },				// (1, 1)
+			new (int, int, int, int)[] {(-1, 2, 8, 40), (0, 2, 0, 32), (1, 2, 56, 24)},												// (0, 1)
+			new (int, int, int, int)[] {(0, 2, 8, 40), (-1, 2, 0, 32), (-2, 2, 56, 24), (-2, 1, 48, 16), (-2, 0, 40, 8) },			// (-1, 1)
+			new (int, int, int, int)[] { (-2, -1, 56, 24), (-2, 0, 48, 16), (-2, 1, 40, 8) }										// (-1, 0)
+		};
+
+		public static (int X, int Y, int Dir, int DirOp)[] GetTouchedCells(int dX, int dY)
+		{
+			return (dX, dY) switch
+			{
+				(-1, -1) => TouchedCells[0],
+				(0, -1) => TouchedCells[1],
+				(1, -1) => TouchedCells[2],
+				(1, 0) => TouchedCells[3],
+				(1, 1) => TouchedCells[4],
+				(0, 1) => TouchedCells[5],
+				(-1, 1) => TouchedCells[6],
+				(-1, 0) => TouchedCells[7],
+				_ => throw new Exception()
+			};
 		}
 
 		public static int GetDirDiff(int dir1, int dir2)

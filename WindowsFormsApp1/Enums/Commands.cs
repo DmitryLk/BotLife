@@ -128,11 +128,13 @@ namespace WindowsFormsApp1.Enums
 		public const byte StepNotSuccessful = 3;
 		public const byte EatSuccessful = 4;
 		public const byte EatNotSuccessful = 5;
-		public const byte Look = 6;
-		public const byte LookAround1 = 7;
-		public const byte LookAround2 = 8;
-		public const byte PhotosynthesisSuccessful = 9;
-		public const byte PhotosynthesisNotSuccessful = 10;
+		public const byte EatContactSuccessful = 6;
+		public const byte EatContactNotSuccessful = 7;
+		public const byte Look = 8;
+		public const byte LookAround1 = 9;
+		public const byte LookAround2 = 10;
+		public const byte PhotosynthesisSuccessful = 11;
+		public const byte PhotosynthesisNotSuccessful = 12;
 
 		public static int CmdTime(byte cmd)
 		{
@@ -143,6 +145,8 @@ namespace WindowsFormsApp1.Enums
 				CmdType.StepNotSuccessful => 20,
 				CmdType.EatSuccessful => 100,
 				CmdType.EatNotSuccessful => 20,
+				CmdType.EatContactSuccessful => 200,
+				CmdType.EatContactNotSuccessful => 20,
 				CmdType.Look => 10,
 				CmdType.LookAround1 => 20,
 				CmdType.LookAround2 => 30,
@@ -212,24 +216,46 @@ namespace WindowsFormsApp1.Enums
 			var generalCmds = new byte[]
 			{
 				Cmd.RotateAbsolute,
-				//Cmd.RotateRelative,
+				Cmd.RotateRelative,
 				//Cmd.RotateRelativeContact,
-				//Cmd.RotateBackward,
+				Cmd.RotateBackward,
 				//Cmd.RotateBackwardContact,
+				Cmd.RotateRandom,
+				Cmd.AlignHorizontaly,
+				Cmd.StepForward,
+				Cmd.StepRelative,
+				//Cmd.StepRelativeContact,
+				Cmd.StepBackward,
+				//Cmd.StepBackwardContact,
+				Cmd.EatForward,
+				//Cmd.EatContact,
+				//Cmd.LookForward,
+				//Cmd.LookAround1,
+				Cmd.LookAround2
+			};
+
+			var bot_enemyCmds = new byte[]
+			{
+				//Cmd.RotateAbsolute,
+				Cmd.RotateRelative,
+				Cmd.RotateRelativeContact,
+				Cmd.RotateBackward,
+				Cmd.RotateBackwardContact,
 				Cmd.RotateRandom,
 				//Cmd.AlignHorizontaly,
 				Cmd.StepForward,
 				Cmd.StepRelative,
-				//Cmd.StepRelativeContact,
-				//Cmd.StepBackward,
-				//Cmd.StepBackwardContact,
+				Cmd.StepRelativeContact,
+				Cmd.StepBackward,
+				Cmd.StepBackwardContact,
 				Cmd.EatForward,
 				//Cmd.EatContact,
-				Cmd.LookForward,
-				Cmd.LookAround1,
-				Cmd.LookAround2
+				//Cmd.LookForward,
+				//Cmd.LookAround1,
+				//Cmd.LookAround2
 			};
 
+			/*
 			var bot_biteCmds = new byte[]
 			{
 				//Cmd.RotateAbsolute,
@@ -266,27 +292,6 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.StepBackward,
 				//Cmd.StepBackwardContact,
 				//Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				Cmd.LookAround1,
-				Cmd.LookAround2
-			};
-
-			var bot_enemyCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				//Cmd.RotateRandom,
-				//Cmd.AlignHorizontaly,
-				//Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				Cmd.EatForward,
 				//Cmd.EatContact,
 				//Cmd.LookForward,
 				Cmd.LookAround1,
@@ -355,6 +360,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.LookAround1,
 				Cmd.LookAround2
 			};
+			*/
 
 			return branch switch
 			{
@@ -368,16 +374,16 @@ namespace WindowsFormsApp1.Enums
 				Branch.General7 => generalCmds,
 				Branch.General8 => generalCmds,
 				Branch.General9 => generalCmds,
-				Branch.React_Bite => bot_biteCmds,
+				Branch.React_Bite => bot_enemyCmds,
 				Branch.React_Bot_NoBigrot => bot_enemyCmds,
 				Branch.React_Bot_Bigrot => bot_enemyCmds,
-				Branch.React_Bot_LessDigestion => bot_lessdigCmds,
-				Branch.React_Bot_BiggerDigestion => bot_bigdigCmds,
-				Branch.React_Bot_Relat => bot_relCmds,
-				Branch.React_Grass => thingCmds,
-				Branch.React_Mineral => thingCmds,
-				Branch.React_Wall => thingCmds,
-				Branch.React9 => thingCmds,
+				Branch.React_Bot_LessDigestion => bot_enemyCmds,
+				Branch.React_Bot_BiggerDigestion => bot_enemyCmds,
+				Branch.React_Bot_Relat => bot_enemyCmds,
+				Branch.React_Grass => bot_enemyCmds,
+				Branch.React_Mineral => bot_enemyCmds,
+				Branch.React_Wall => bot_enemyCmds,
+				Branch.React9 => bot_enemyCmds,
 				_ => throw new NotImplementedException()
 			};
 		}
