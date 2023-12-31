@@ -137,5 +137,12 @@ namespace WindowsFormsApp1.Static
 		{
 			return ((int)(360 * (dir % NumberOfDirections) / NumberOfDirections)).ToString();
 		}
+
+		public static int GetDirectionTo(double Xfrom, double Yfrom, double Xto, double Yto)
+		{
+			var dir = Round(Math.Atan2(Xfrom - Xto, Yto - Yfrom) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+			if (dir == 64) dir = 0;
+			return dir;
+		}
 	}
 }

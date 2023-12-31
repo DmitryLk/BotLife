@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Diagnostics.Metrics;
 using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
@@ -45,11 +46,13 @@ namespace WindowsFormsApp1.GameLogic
 		// увидел рядом чтото?
 		//private byte _recNum;
 		private bool _recActive;
-		private int _recContactDir;
+		private int _recDirToContact;
 		private byte _recWeight;
 		public bool _recNew;
 		public byte _recNewBranch;
-
+		private double _recContactX;
+		private double _recContactY;
+		private int _recContactDirection;
 
 
 		//private static long COUNTER1 = 0;
@@ -137,20 +140,20 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 		}
 
-		public int Bite(int delta, int contactDir)
+		public int Bite(int delta, int dirToContact, double contactX, double contactY, int contactDir)
 		{
 			Interlocked.Increment(ref BiteMeCount);
-			ActivateReceptor1(contactDir);
+			ActivateReceptor1(dirToContact, contactX, contactY, contactDir);
 			return EnergyChange(delta);
 		}
 
-		public void Touch(int dir, bool isRel,  int touchedBotDirection, int touchedBotDigestion)
+		public void Touch(int dir, bool isRel,  int touchedBotDirection, int touchedBotDigestion, double contactX, double contactY, int contactDir)
 		{
-			ActivateReceptor2(dir, isRel, touchedBotDirection, touchedBotDigestion);
+			ActivateReceptor2(dir, isRel, touchedBotDirection, touchedBotDigestion, contactX, contactY, contactDir);
 		}
 
 		#region Receptors
-		private void ActivateReceptor(byte recWeight, byte bNew, int contactDir)
+		private void ActivateReceptor(byte recWeight, byte bNew, int dirToContact, double contactX, double contactY, int contactDir)
 		{
 			if (!_recActive || _recWeight > recWeight)
 			{
@@ -158,7 +161,10 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (!_recActive || _recWeight > recWeight)
 					{
-						_recContactDir = contactDir;
+						_recDirToContact = dirToContact;
+						_recContactDirection = contactDir;
+						_recContactX = contactX;
+						_recContactY = contactY;
 						_recWeight = recWeight;
 						_recNewBranch = bNew;
 						_recNew = true;
@@ -170,69 +176,69 @@ namespace WindowsFormsApp1.GameLogic
 
 
 		// 1 - укус
-		private void ActivateReceptor1(int contactDir)
+		private void ActivateReceptor1(int dirToContact, double contactX, double contactY, int contactDir)
 		{
-			ActivateReceptor(0, Branch.React_Bite, contactDir);
+			ActivateReceptor(0, Branch.React_Bite, dirToContact, contactX, contactY, contactDir);
 		}
 
 
 		// 2 - рядом бот
-		private void ActivateReceptor2(int contactDir, bool rel, int dir, int dig) //, bool block, int massa, byte[] Shield, byte[] Attack, int dir, bool mov)
+		private void ActivateReceptor2(int dirToContact, bool rel, int contactBotDirection, int dig, double contactX, double contactY, int contactDir) //, bool block, int massa, byte[] Shield, byte[] Attack, int dir, bool mov)
 		{
 			if (!_recActive || _recWeight > 3)
 			{
 				if (rel)
 				{
-					ActivateReceptor(3, Branch.React_Bot_Relat, contactDir);
+					ActivateReceptor(3, Branch.React_Bot_Relat, dirToContact, contactX, contactY, contactDir);
 					return;
 				}
 
 				if (dig == G.Digestion)
 				{
-					var needbigrotate = Dir.GetDirDiff(contactDir, dir) < Dir.NumberOfDirections / 4;
+					var needbigrotate = Dir.GetDirDiff(dirToContact, contactBotDirection) < Dir.NumberOfDirections / 4;
 					if (needbigrotate)
 					{
-						ActivateReceptor(2, Branch.React_Bot_Bigrot, contactDir);
+						ActivateReceptor(2, Branch.React_Bot_Bigrot, dirToContact, contactX, contactY, contactDir);
 						return;
 					}
 					else
 					{
-						ActivateReceptor(1, Branch.React_Bot_NoBigrot, contactDir);
+						ActivateReceptor(1, Branch.React_Bot_NoBigrot, dirToContact, contactX, contactY, contactDir);
 						return;
 					}
 				}
 
 				if (dig < G.Digestion)
 				{
-					ActivateReceptor(2, Branch.React_Bot_LessDigestion, contactDir);
+					ActivateReceptor(2, Branch.React_Bot_LessDigestion, dirToContact, contactX, contactY, contactDir);
 					return;
 				}
 
 
 				if (dig > G.Digestion)
 				{
-					ActivateReceptor(2, Branch.React_Bot_BiggerDigestion, contactDir);
+					ActivateReceptor(2, Branch.React_Bot_BiggerDigestion, dirToContact, contactX, contactY, contactDir);
 					return;
 				}
 			}
 		}
 
 		// 3 - рядом еда
-		private void ActivateReceptor3(int contactDir)
+		private void ActivateReceptor3(int dirToContact, double contactX, double contactY, int contactDir)
 		{
-			ActivateReceptor(4, Branch.React_Grass, contactDir);
+			ActivateReceptor(4, Branch.React_Grass, dirToContact, contactX, contactY, contactDir);
 		}
 
 		// 4 - рядом минерал
-		private void ActivateReceptor4(int contactDir)
+		private void ActivateReceptor4(int dirToContact, double contactX, double contactY, int contactDir)
 		{
-			ActivateReceptor(5, Branch.React_Mineral, contactDir);
+			ActivateReceptor(5, Branch.React_Mineral, dirToContact, contactX, contactY, contactDir);
 		}
 
 		// 5 - рядом край/стена
-		private void ActivateReceptor5(int contactDir)
+		private void ActivateReceptor5(int dirToContact, double contactX, double contactY, int contactDir)
 		{
-			ActivateReceptor(6, Branch.React_Wall, contactDir);
+			ActivateReceptor(6, Branch.React_Wall, dirToContact, contactX, contactY, contactDir);
 		}
 		#endregion
 
@@ -513,65 +519,77 @@ namespace WindowsFormsApp1.GameLogic
 
 				switch (cmd)
 				{
-					//повернуться к контакту
-					//поворот параллельно движению раздражителя
-
-					//повернуть контакт
-					//повернуть бота от себя
-					//повернуть всех ботов от себя
-
-					//обездвижить бота
-					//снизить уровни атаки бота
-					//отключить защиту бота
-
-					//перебросить бота за себя
-					//оттолкнуть / ударить бота
-					//оттолкнуть всех окружающих ботов
-					//притянуть бота
-					//притянуться к боту
-
-					//стать невидимым для ботов
-					//камуфляж
-					//притворится мертвым или стеной
-
-					//сцепиться с родней. копировать движеия
 					//звать на помощь родню
 					//двигаться к ближайшей родне
 					//рои
 					//возможность собирнаться маленькими кучками
 					//объединяться при нападении вокруг альфы
 
-					//превратить в своего
-					//высосать энергию из окружающих ботов в каком - то радиусе
 					//сломать стену перед собой
-					//активировать защиту от определенной атаки
-					//при необходимости один тип защиты преобразовать в другой
 					//телепортация
 					//отталкиваться от опасных врагов
 					//наступает только на ту клетку где вокруг нет хищников
 
 
-					//// Rotate
+					//// CHANGE OWN PROPERTIES
+					//стать невидимым для ботов
+					//камуфляж
+					//притворится мертвым или стеной
+					//активировать защиту от определенной атаки
+					//при необходимости один тип защиты преобразовать в другой
+
+					//// INFLUENCE ON CONTACT
+					//повернуть контакт
+					//повернуть бота от себя
+					//повернуть всех ботов от себя
+					//обездвижить бота
+					//снизить уровни атаки бота
+					//отключить защиту бота
+					//перебросить бота за себя
+					//оттолкнуть / ударить бота
+					//оттолкнуть всех окружающих ботов
+					//притянуть бота
+					//превратить в своего
+					//высосать энергию из окружающих ботов в каком - то радиусе
+
+					//// ROTATE
 					case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
 					case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(10, t); break;
 					case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(11, t); break;
+					case Cmd.RotateToContact: tm = RotateToContact(); Test2.Mark(11, t); break;
 					case Cmd.RotateBackward: tm = RotateBackward(); Test2.Mark(12, t); break;
 					case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(13, t); break;
 					case Cmd.RotateRandom: tm = RotateRandom(); break;
 					case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
+					case Cmd.RotateParallelContact: tm = RotateParallelContact(); Test2.Mark(11, t); break;
+					//повернуться к контакту
+					//повернуться от контакта
+					//поворот параллельно движению контакта
+					//не поворачиваться на этом шаге
 
-					//// Step
+					//// STEP
 					case Cmd.StepRelative: tm = StepRelative(par); break;
 					case Cmd.StepForward: tm = StepForward(); Test2.Mark(14, t); break;
 					case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(15, t); break;
 					case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(16, t); break;
 					case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(17, t); break;
+					case Cmd.StepUnderContact: tm = StepUnderContact(); Test2.Mark(17, t); break;
+					//переместится под бота
+					//переместится перед ботом
+					//переместится сзади бота
+					//встать рядом с ботом
+					//притянуться к боту
+					//сцепиться с родней. копировать движеия
+					//не двигаться на этом шаге
+					//шаг влево
+					//шаг вправо
 
-					//// Eat
+
+					//// EAT
 					case Cmd.EatForward: tm = EatForward(); Test2.Mark(18, t); break;
 					case Cmd.EatContact: tm = EatContact(); break;
 
-					//// Look
+					//// LOOK
 					case Cmd.LookAround1: tm = LookAround1(); Test2.Mark(19, t); break;
 					case Cmd.LookAround2: tm = LookAround2(); Test2.Mark(20, t); break;
 					case Cmd.LookForward: tm = LookForward(); Test2.Mark(21, t); break;
@@ -645,9 +663,19 @@ namespace WindowsFormsApp1.GameLogic
 		//3 E
 		private int RotateRelativeContact(int dir)
 		{
-			var tm = Dir.GetDirDiff(Direction, _recContactDir + dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, _recDirToContact + dir) * CmdType.CmdTime(CmdType.Rotate);
 
-			Rotate(_recContactDir + dir);
+			Rotate(_recDirToContact + dir);
+
+			return tm;
+		}
+
+		//8 E
+		private int RotateToContact()
+		{
+			var tm = Dir.GetDirDiff(Direction, _recDirToContact) * CmdType.CmdTime(CmdType.Rotate);
+
+			Rotate(_recDirToContact);
 
 			return tm;
 		}
@@ -665,7 +693,7 @@ namespace WindowsFormsApp1.GameLogic
 		//5 E
 		private int RotateBackwardContact()
 		{
-			var dir = Dir.GetOppositeDirection(_recContactDir);
+			var dir = Dir.GetOppositeDirection(_recDirToContact);
 
 			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
 
@@ -698,6 +726,17 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
+		private int RotateParallelContact()
+		{
+			var dir = _recContactDirection;
+
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
+
+			Rotate(dir);
+
+			return tm;
+		}
+
 		//// Step
 		//10 11 C
 		private int StepForward()
@@ -718,7 +757,7 @@ namespace WindowsFormsApp1.GameLogic
 		//13 E
 		private int StepRelativeContact(int dir)
 		{
-			var move = Step((_recContactDir + dir) % Dir.NumberOfDirections);
+			var move = Step((_recDirToContact + dir) % Dir.NumberOfDirections);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
@@ -734,7 +773,16 @@ namespace WindowsFormsApp1.GameLogic
 		//15 E
 		private int StepBackwardContact()
 		{
-			var move = Step(Dir.GetOppositeDirection(_recContactDir));
+			var move = Step(Dir.GetOppositeDirection(_recDirToContact));
+
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+		}
+
+		private int StepUnderContact()
+		{
+			var dir = Dir.GetDirectionTo(Xd, Yd, _recContactX, _recContactY - 1);
+
+			var move = Step(dir);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
@@ -751,7 +799,7 @@ namespace WindowsFormsApp1.GameLogic
 		//22 E
 		private int EatContact()
 		{
-			var eat = Eat(_recContactDir);
+			var eat = Eat(_recDirToContact);
 
 			return eat ? CmdType.CmdTime(CmdType.EatContactSuccessful) : CmdType.CmdTime(CmdType.EatContactNotSuccessful);
 		}
@@ -820,13 +868,13 @@ namespace WindowsFormsApp1.GameLogic
 			// 2. Узнаем что находится на этой клетке
 			if (IsItEdge(nXi, nYi))
 			{
-				ActivateReceptor5(dir);
+				ActivateReceptor5(dir, nXi, nYi, 0);
 				return false;
 			}
 
 			if (Data.World[nXi, nYi] == 65503)
 			{
-				ActivateReceptor5(dir);
+				ActivateReceptor5(dir, nXi, nYi, 0);
 				return false;
 			}
 
@@ -878,7 +926,6 @@ namespace WindowsFormsApp1.GameLogic
 			var eatedBot = Data.Bots[cont];
 
 			// Может есть своего уровня или на уровень меньше.
-
 			if (eatedBot.G.Digestion != G.Digestion && eatedBot.G.Digestion + 1 != G.Digestion)
 			{
 				return false;
@@ -912,6 +959,12 @@ namespace WindowsFormsApp1.GameLogic
 
 			// Не может есть нового
 			if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
+			{
+				return false;
+			}
+
+			// Не может распространяться более чем 50% от всех ботов
+			if (G.CurBots >= Data.CurrentNumberOfBots / 2)
 			{
 				return false;
 			}
@@ -965,7 +1018,7 @@ namespace WindowsFormsApp1.GameLogic
 				var requestedEnergy = Data.BiteEnergy * 10 / k * atc;
 
 				Interlocked.Increment(ref BiteImCount);
-				var gotEnergyByEating = eatedBot.Bite(requestedEnergy, Dir.GetOppositeDirection(dir));
+				var gotEnergyByEating = eatedBot.Bite(requestedEnergy, Dir.GetOppositeDirection(dir), Xd, Yd, Direction);
 				EnergyChange(gotEnergyByEating);
 
 				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
@@ -1043,7 +1096,7 @@ namespace WindowsFormsApp1.GameLogic
 			// Если координаты попадают за экран то вернуть RefContent.Edge
 			if (IsItEdge(nXi, nYi))
 			{
-				ActivateReceptor5(dir);
+				ActivateReceptor5(dir, nXi, nYi, 0);
 				return;
 			}
 
@@ -1051,20 +1104,20 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (cont == 65503)
 			{
-				ActivateReceptor5(dir);
+				ActivateReceptor5(dir, nXi, nYi, 0);
 				return;
 			}
 
 			if (cont == 65500)
 			{
-				ActivateReceptor3(dir);
+				ActivateReceptor3(dir, nXi, nYi, 0);
 				return;
 			}
 
 			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 			{
 				var b = Data.Bots[cont];
-				ActivateReceptor2(dir, G.IsRelative(b.G), b.Direction, b.G.Digestion);
+				ActivateReceptor2(dir, G.IsRelative(b.G), b.Direction, b.G.Digestion, b.Xd, b.Yd, b.Direction);
 			}
 
 			return;
@@ -1072,7 +1125,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void LookAround(int widht, int cnt)
 		{
-			int nXi, nYi, dir;
+			int nXi, nYi, dirToContact;
 			Bot1 b;
 
 			Bot1 rel = null;
@@ -1094,10 +1147,10 @@ namespace WindowsFormsApp1.GameLogic
 						if (!G.IsRelative(Data.Bots[cont].G))
 						{
 							b = Data.Bots[cont];
-							dir = Dir.Round(Math.Atan2(Xd - b.Xd, b.Yd - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
-							if (dir == 64) dir = 0;
+
+							dirToContact = Dir.GetDirectionTo(Xd, Yd, b.Xd, b.Yd);
 							//var dir1 = Dir.NearbyCellsDirection[n];
-							ActivateReceptor2(dir, false, b.Direction, b.G.Digestion);
+							ActivateReceptor2(dirToContact, false, b.Direction, b.G.Digestion, b.Xd, b.Yd, b.Direction);
 							return;
 						}
 						else
@@ -1130,26 +1183,23 @@ namespace WindowsFormsApp1.GameLogic
 
 			if (rel != null)
 			{
-				dir = Dir.Round(Math.Atan2(Xd - rel.Xd, rel.Yd - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
-				if (dir == 64) dir = 0;
+				dirToContact = Dir.GetDirectionTo(Xd, Yd, rel.Xd, rel.Yd);
 				//var dir1 = Dir.NearbyCellsDirection[n];
-				ActivateReceptor2(dir, true, rel.Direction, rel.G.Digestion);
+				ActivateReceptor2(dirToContact, true, rel.Direction, rel.G.Digestion, rel.Xd, rel.Yd, rel.Direction);
 				return;
 			}
 
 			if (edge)
 			{
-				dir = Dir.Round(Math.Atan2(Xd - xEdge, yEdge - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
-				if (dir == 64) dir = 0;
-				ActivateReceptor5(dir);
+				dirToContact = Dir.GetDirectionTo(Xd, Yd, xEdge, yEdge);
+				ActivateReceptor5(dirToContact, xEdge, yEdge, 0);
 				return;
 			}
 
 			if (grass)
 			{
-				dir = Dir.Round(Math.Atan2(Xd - xGrass, yGrass - Yd) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
-				if (dir == 64) dir = 0;
-				ActivateReceptor3(dir);
+				dirToContact = Dir.GetDirectionTo(Xd, Yd, xGrass, yGrass);
+				ActivateReceptor3(dirToContact, xGrass, yGrass, 0);
 				return;
 			}
 		}
@@ -1210,7 +1260,7 @@ namespace WindowsFormsApp1.GameLogic
 			// Если координаты попадают за экран то вернуть RefContent.Edge
 			if (IsItEdge(nXi, nYi))
 			{
-				ActivateReceptor5(dir);
+				ActivateReceptor5(dir, nXi, nYi, 0);
 				return false;
 			}
 
@@ -1265,18 +1315,18 @@ namespace WindowsFormsApp1.GameLogic
 
 				if (cont == 65500)
 				{
-					ActivateReceptor3(dir);
+					ActivateReceptor3(dir, nXi, nYi, 0);
 				}
 
 				if (cont == 65503)
 				{
-					ActivateReceptor5(dir);
+					ActivateReceptor5(dir, nXi, nYi, 0);
 				}
 
 				if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 				{
 					var b = Data.Bots[cont];
-					ActivateReceptor2(dir, G.IsRelative(b.G), b.Direction, b.G.Digestion);
+					ActivateReceptor2(dir, G.IsRelative(b.G), b.Direction, b.G.Digestion, b.Xd, b.Yd, b.Direction);
 				}
 
 				//Func.CheckWorld2(Index, Num, Xi, Yi);
@@ -1376,7 +1426,7 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (x < 0 || x >= Data.WorldWidth) 
 					{
-						ActivateReceptor5(t.Dir);
+						ActivateReceptor5(t.Dir ,x ,y, 0);
 						continue;
 					}
 				}
@@ -1390,7 +1440,7 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					if (y < 0 || y >= Data.WorldHeight)
 					{
-						ActivateReceptor5(t.Dir);
+						ActivateReceptor5(t.Dir, x, y, 0);
 						continue;
 					}
 				}
@@ -1399,13 +1449,13 @@ namespace WindowsFormsApp1.GameLogic
 
 				if (cont == 65503)
 				{
-					ActivateReceptor5(t.Dir);
+					ActivateReceptor5(t.Dir, x, y, 0);
 					return;
 				}
 
 				if (cont == 65500)
 				{
-					ActivateReceptor3(t.Dir);
+					ActivateReceptor3(t.Dir, x, y, 0);
 					return;
 				}
 
@@ -1413,8 +1463,8 @@ namespace WindowsFormsApp1.GameLogic
 				{
 					var b = Data.Bots[cont];
 					var isRel = G.IsRelative(b.G);
-					ActivateReceptor2(t.Dir, isRel, b.Direction, b.G.Digestion);
-					b.Touch(t.DirOp, isRel, Direction, G.Digestion);
+					ActivateReceptor2(t.Dir, isRel, b.Direction, b.G.Digestion, b.Xd, b.Yd, b.Direction);
+					b.Touch(t.DirOp, isRel, Direction, G.Digestion, Xd, Yd, Direction);
 				}
 			}
 		}

@@ -20,12 +20,17 @@ namespace WindowsFormsApp1.Enums
 		public const byte RotateBackwardContact = 5;
 		public const byte RotateRandom = 6;
 		public const byte AlignHorizontaly = 7;
+		public const byte RotateToContact = 8;
+		public const byte RotateParallelContact = 9;
+
 		// Step
 		public const byte StepForward = 10;
 		public const byte StepRelative = 11;
 		public const byte StepRelativeContact = 12;
 		public const byte StepBackward = 13;
 		public const byte StepBackwardContact = 14;
+		public const byte StepUnderContact = 15;
+
 		// Eat
 		public const byte EatForward = 20;
 		public const byte EatContact = 21;
@@ -42,15 +47,18 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateAbsolute => "Поворот_абсолютно",
 				Cmd.RotateRelative => "Поворот_относительно",
 				Cmd.RotateRelativeContact => "Поворот_относительно_контакта",
+				Cmd.RotateToContact => "Поворот_к_контакту",
 				Cmd.RotateBackward => "Поворот_назад",
 				Cmd.RotateBackwardContact => "Поворот_назад_от_контакта",
 				Cmd.RotateRandom => "Поворот_случайно",
 				Cmd.AlignHorizontaly => "Выповняться_по_горизонтали",
+				Cmd.RotateParallelContact => "Поворот_параллельно_контакту",
 				Cmd.StepForward => "Шаг_вперед",
 				Cmd.StepRelative => "Шаг_относительно",
 				Cmd.StepRelativeContact => "Шаг_относительно_контакта",
 				Cmd.StepBackward => "Шаг_назад",
 				Cmd.StepBackwardContact => "Шаг_назад_от_контакта",
+				Cmd.StepUnderContact => "Шаг_под_контакт",
 				Cmd.EatForward => "Есть_впереди",
 				Cmd.EatContact => "Есть_контакт",
 				Cmd.LookForward => "Смотреть_вперед",
@@ -67,15 +75,18 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateAbsolute => Color.Orange,
 				Cmd.RotateRelative => Color.Orange,
 				Cmd.RotateRelativeContact => Color.Orange,
+				Cmd.RotateToContact => Color.Orange,
 				Cmd.RotateBackward => Color.Orange,
 				Cmd.RotateBackwardContact => Color.Orange,
 				Cmd.RotateRandom => Color.Orange,
 				Cmd.AlignHorizontaly => Color.Orange,
+				Cmd.RotateParallelContact => Color.Orange,
 				Cmd.StepForward => Color.Red,
 				Cmd.StepRelative => Color.Red,
 				Cmd.StepRelativeContact => Color.Red,
 				Cmd.StepBackward => Color.Red,
 				Cmd.StepBackwardContact => Color.Red,
+				Cmd.StepUnderContact => Color.Red,
 				Cmd.EatForward => Color.Green,
 				Cmd.EatContact => Color.Green,
 				Cmd.LookForward => Color.Blue,
@@ -93,15 +104,18 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateAbsolute => 2,
 				Cmd.RotateRelative => 10,
 				Cmd.RotateRelativeContact => 10,
+				Cmd.RotateToContact => 20,
 				Cmd.RotateBackward => 10,
 				Cmd.RotateBackwardContact => 10,
-				Cmd.RotateRandom => 0,
-				Cmd.AlignHorizontaly => 0,
+				Cmd.RotateRandom => 2,
+				Cmd.AlignHorizontaly => 1,
+				Cmd.RotateParallelContact => 10,
 				Cmd.StepForward => 20,
 				Cmd.StepRelative => 10,
 				Cmd.StepRelativeContact => 10,
 				Cmd.StepBackward => 10,
 				Cmd.StepBackwardContact => 10,
+				Cmd.StepUnderContact => 10,
 				Cmd.EatForward => 20,
 				Cmd.EatContact => 10,
 				Cmd.LookForward => 20,
@@ -218,6 +232,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateAbsolute,
 				Cmd.RotateRelative,
 				//Cmd.RotateRelativeContact,
+				//Cmd.RotateToContact,
 				Cmd.RotateBackward,
 				//Cmd.RotateBackwardContact,
 				Cmd.RotateRandom,
@@ -239,15 +254,18 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.RotateAbsolute,
 				Cmd.RotateRelative,
 				Cmd.RotateRelativeContact,
+				Cmd.RotateToContact,
 				Cmd.RotateBackward,
 				Cmd.RotateBackwardContact,
 				Cmd.RotateRandom,
+				Cmd.RotateParallelContact,
 				//Cmd.AlignHorizontaly,
 				Cmd.StepForward,
 				Cmd.StepRelative,
 				Cmd.StepRelativeContact,
 				Cmd.StepBackward,
 				Cmd.StepBackwardContact,
+				Cmd.StepUnderContact,
 				Cmd.EatForward,
 				//Cmd.EatContact,
 				//Cmd.LookForward,
@@ -255,6 +273,7 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.LookAround2
 			};
 
+			#region comment BranchCmds
 			/*
 			var bot_biteCmds = new byte[]
 			{
@@ -361,6 +380,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.LookAround2
 			};
 			*/
+			#endregion
 
 			return branch switch
 			{
