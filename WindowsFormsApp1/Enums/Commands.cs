@@ -24,13 +24,15 @@ namespace WindowsFormsApp1.Enums
 		public const byte RotateParallelContact = 9;
 
 		// Step
-		public const byte StepForward = 10;
-		public const byte StepRelative = 11;
-		public const byte StepRelativeContact = 12;
-		public const byte StepBackward = 13;
-		public const byte StepBackwardContact = 14;
-		public const byte StepUnderContact = 15;
-
+		public const byte StepAbsolute = 10;
+		public const byte StepForward = 11;
+		public const byte StepRelative = 12;
+		public const byte StepRelativeContact = 13;
+		public const byte StepBackward = 14;
+		public const byte StepBackwardContact = 15;
+		public const byte StepNearContact = 16;
+		public const byte StepToContact = 17;
+		
 		// Eat
 		public const byte EatForward = 20;
 		public const byte EatContact = 21;
@@ -56,12 +58,14 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateRandom => "Поворот_случайно",
 				Cmd.AlignHorizontaly => "Выповняться_по_горизонтали",
 				Cmd.RotateParallelContact => "Поворот_параллельно_контакту",
+				Cmd.StepAbsolute => "Шаг_абсолютно",
 				Cmd.StepForward => "Шаг_вперед",
 				Cmd.StepRelative => "Шаг_относительно",
 				Cmd.StepRelativeContact => "Шаг_относительно_контакта",
 				Cmd.StepBackward => "Шаг_назад",
 				Cmd.StepBackwardContact => "Шаг_назад_от_контакта",
-				Cmd.StepUnderContact => "Шаг_под_контакт",
+				Cmd.StepToContact => "Шаг_к_контакту",
+				Cmd.StepNearContact => "Шаг_рядом_к_контакту",
 				Cmd.EatForward => "Есть_впереди",
 				Cmd.EatContact => "Есть_контакт",
 				Cmd.LookForward => "Смотреть_вперед",
@@ -85,12 +89,14 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateRandom => Color.Orange,
 				Cmd.AlignHorizontaly => Color.Orange,
 				Cmd.RotateParallelContact => Color.Orange,
+				Cmd.StepAbsolute => Color.Red,
 				Cmd.StepForward => Color.Red,
 				Cmd.StepRelative => Color.Red,
 				Cmd.StepRelativeContact => Color.Red,
 				Cmd.StepBackward => Color.Red,
 				Cmd.StepBackwardContact => Color.Red,
-				Cmd.StepUnderContact => Color.Red,
+				Cmd.StepToContact => Color.Red,
+				Cmd.StepNearContact => Color.Red,
 				Cmd.EatForward => Color.Green,
 				Cmd.EatContact => Color.Green,
 				Cmd.LookForward => Color.Blue,
@@ -115,29 +121,33 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateRandom => 2,
 				Cmd.AlignHorizontaly => 1,
 				Cmd.RotateParallelContact => 10,
+				Cmd.StepAbsolute => 0,
 				Cmd.StepForward => 20,
 				Cmd.StepRelative => 10,
 				Cmd.StepRelativeContact => 10,
 				Cmd.StepBackward => 10,
 				Cmd.StepBackwardContact => 10,
-				Cmd.StepUnderContact => 10,
+				Cmd.StepToContact => 10,
+				Cmd.StepNearContact => 10,
 				Cmd.EatForward => 20,
 				Cmd.EatContact => 10,
 				Cmd.LookForward => 20,
 				Cmd.LookAround1 => 40,
 				Cmd.LookAround2 => 40,
-				Cmd.ClingToContact => 10,
+				Cmd.ClingToContact => 40,
 				_ => throw new Exception()
 			};
 		}
 
 		public static HashSet<byte> CommandsWithParameter = new HashSet<byte>()
 		{
+			Cmd.StepAbsolute,
 			Cmd.RotateAbsolute,
 			Cmd.RotateRelative,
 			Cmd.RotateRelativeContact,
 			Cmd.StepRelative,
 			Cmd.StepRelativeContact,
+			Cmd.StepNearContact
 		};
 	}
 
@@ -268,6 +278,32 @@ namespace WindowsFormsApp1.Enums
 				Cmd.RotateBackward,
 				Cmd.RotateBackwardContact,
 				Cmd.RotateRandom,
+				//Cmd.RotateParallelContact,
+				//Cmd.AlignHorizontaly,
+				Cmd.StepForward,
+				Cmd.StepRelative,
+				Cmd.StepRelativeContact,
+				Cmd.StepBackward,
+				Cmd.StepBackwardContact,
+				Cmd.StepNearContact,
+				Cmd.StepToContact,
+				Cmd.EatForward,
+				//Cmd.EatContact,
+				//Cmd.LookForward,
+				//Cmd.LookAround1,
+				//Cmd.LookAround2,
+				//Cmd.ClingToContact
+			};
+
+			var bot_relCmds = new byte[]
+			{
+				//Cmd.RotateAbsolute,
+				Cmd.RotateRelative,
+				Cmd.RotateRelativeContact,
+				Cmd.RotateToContact,
+				Cmd.RotateBackward,
+				Cmd.RotateBackwardContact,
+				Cmd.RotateRandom,
 				Cmd.RotateParallelContact,
 				//Cmd.AlignHorizontaly,
 				Cmd.StepForward,
@@ -275,7 +311,8 @@ namespace WindowsFormsApp1.Enums
 				Cmd.StepRelativeContact,
 				Cmd.StepBackward,
 				Cmd.StepBackwardContact,
-				Cmd.StepUnderContact,
+				Cmd.StepToContact,
+				Cmd.StepNearContact,
 				Cmd.EatForward,
 				//Cmd.EatContact,
 				//Cmd.LookForward,
@@ -283,6 +320,32 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.LookAround2,
 				Cmd.ClingToContact
 			};
+
+			var thingCmds = new byte[]
+			{
+				//Cmd.RotateAbsolute,
+				Cmd.RotateRelative,
+				Cmd.RotateRelativeContact,
+				Cmd.RotateToContact,
+				Cmd.RotateBackward,
+				Cmd.RotateBackwardContact,
+				Cmd.RotateRandom,
+				Cmd.RotateParallelContact,
+				//Cmd.AlignHorizontaly,
+				Cmd.StepForward,
+				Cmd.StepRelative,
+				Cmd.StepRelativeContact,
+				Cmd.StepBackward,
+				Cmd.StepBackwardContact,
+				Cmd.StepToContact,
+				Cmd.StepNearContact,
+				Cmd.EatForward,
+				//Cmd.EatContact,
+				//Cmd.LookForward,
+				//Cmd.LookAround1,
+				//Cmd.LookAround2
+			};
+
 
 			#region comment BranchCmds
 			/*
@@ -305,27 +368,6 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.LookForward,
 				//Cmd.LookAround1,
 				//Cmd.LookAround2
-			};
-
-			var bot_relCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				//Cmd.RotateBackward,
-				//Cmd.RotateBackwardContact,
-				//Cmd.RotateRandom,
-				//Cmd.AlignHorizontaly,
-				//Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				//Cmd.StepBackward,
-				//Cmd.StepBackwardContact,
-				//Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				Cmd.LookAround1,
-				Cmd.LookAround2
 			};
 
 			var bot_lessdigCmds = new byte[]
@@ -369,27 +411,6 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.LookAround1,
 				//Cmd.LookAround2
 			};
-
-			var thingCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				Cmd.RotateRandom,
-				//Cmd.AlignHorizontaly,
-				//Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				Cmd.LookForward,
-				Cmd.LookAround1,
-				Cmd.LookAround2
-			};
 			*/
 			#endregion
 
@@ -411,10 +432,10 @@ namespace WindowsFormsApp1.Enums
 				Branch.React_Bot_Bigrot => bot_enemyCmds,
 				Branch.React_Bot_LessDigestion => bot_enemyCmds,
 				Branch.React_Bot_BiggerDigestion => bot_enemyCmds,
-				Branch.React_Bot_Relat => bot_enemyCmds,
-				Branch.React_Grass => bot_enemyCmds,
-				Branch.React_Mineral => bot_enemyCmds,
-				Branch.React_Wall => bot_enemyCmds,
+				Branch.React_Bot_Relat => bot_relCmds,
+				Branch.React_Grass => thingCmds,
+				Branch.React_Mineral => thingCmds,
+				Branch.React_Wall => thingCmds,
 				_ => throw new NotImplementedException()
 			};
 		}

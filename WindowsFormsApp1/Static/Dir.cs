@@ -140,7 +140,20 @@ namespace WindowsFormsApp1.Static
 
 		public static int GetDirectionTo(double Xfrom, double Yfrom, double Xto, double Yto)
 		{
-			var dir = Round(Math.Atan2(Xfrom - Xto, Yto - Yfrom) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
+			var deltaX = Xfrom - Xto;
+			if (deltaX < -Data.WorldWidth / 2) deltaX += Data.WorldWidth;
+			if (deltaX > Data.WorldWidth / 2) deltaX -= Data.WorldWidth;
+
+			var deltaY = Yto - Yfrom;
+			if (deltaY < -Data.WorldHeight / 2) deltaY += Data.WorldHeight;
+			if (deltaY > Data.WorldHeight / 2) deltaY -= Data.WorldHeight;
+
+			//				2 - 1 = 1
+			//				1 - 2 = -1
+			//				0 - 639 = 0 - (-1) = 1   = 640 - 639 = 1     -639 => 1          (+640)
+			//				639 - 0 = -1 - 0 = -1  639 - 640 = -1		639 => -1             (-640)
+
+			var dir = Round(Math.Atan2(deltaX, deltaY) * Dir.NumberOfDirections / 2 / Math.PI + Dir.NumberOfDirections / 2);
 			if (dir == 64) dir = 0;
 			return dir;
 		}

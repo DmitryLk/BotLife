@@ -422,9 +422,31 @@ namespace WindowsFormsApp1.GameLogic
 			Test2.Mark(3, t);
 		}
 
+
+
+		private bool StepAfterConnected()
+		{
+			if (_connected && _connectedBot.Alive && _connectedBot.Num == _connectedBotNum)
+			{
+				var dx = _connectedBot.Xi - Xi;
+				var dy = _connectedBot.Yi - Yi;
+
+				if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private (bool Ev, Pointer Pointer, byte Cmd, byte Par) GetCommand()
 		{
-			if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
+			if (StepAfterConnected())
+			{
+				var dir = Dir.GetDirectionTo(Xd, Yd, _connectedBot.Xd, _connectedBot.Yd);
+				return (false, null, Cmd.StepAbsolute, (byte)dir);
+			}
+			else if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
 			{
 				if (_recNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
 				{
@@ -559,31 +581,36 @@ namespace WindowsFormsApp1.GameLogic
 					//// ROTATE
 					case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
 					case Cmd.RotateRelative: tm = RotateRelative(par); Test2.Mark(10, t); break;
-					case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(11, t); break;
-					case Cmd.RotateToContact: tm = RotateToContact(); Test2.Mark(11, t); break;
 					case Cmd.RotateBackward: tm = RotateBackward(); Test2.Mark(12, t); break;
-					case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(13, t); break;
 					case Cmd.RotateRandom: tm = RotateRandom(); break;
 					case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
+					case Cmd.RotateRelativeContact: tm = RotateRelativeContact(par); Test2.Mark(11, t); break;
 					case Cmd.RotateParallelContact: tm = RotateParallelContact(); Test2.Mark(11, t); break;
+					case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(13, t); break;
+					case Cmd.RotateToContact: tm = RotateToContact(); Test2.Mark(11, t); break;
 					//не поворачиваться на этом шаге
 
 					//// STEP
+					case Cmd.StepAbsolute: tm = StepAbsolute(par); break;
 					case Cmd.StepRelative: tm = StepRelative(par); break;
 					case Cmd.StepForward: tm = StepForward(); Test2.Mark(14, t); break;
-					case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(15, t); break;
 					case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(16, t); break;
+					case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(15, t); break;
 					case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(17, t); break;
-					case Cmd.StepUnderContact: tm = StepUnderContact(); Test2.Mark(17, t); break;
+					case Cmd.StepToContact: tm = StepToContact(); Test2.Mark(17, t); break;
+					case Cmd.StepNearContact: tm = StepNearContact(par); Test2.Mark(17, t); break;
 					//переместится под бота
+					//переместится к боту (притянуться к боту)
+					//переместится над ботом
+
+					//шаг влево относительно контакта
+					//шаг вправо относительно контакта
+
 					//переместится перед ботом
 					//переместится сзади бота
 					//встать рядом с ботом
-					//притянуться к боту
 					//сцепиться с родней. копировать движеия
 					//не двигаться на этом шаге
-					//шаг влево
-					//шаг вправо
 
 
 					//// EAT
@@ -611,7 +638,8 @@ namespace WindowsFormsApp1.GameLogic
 				}
 
 				t2 = Stopwatch.GetTimestamp();
-				if (Data.HistoryOn) hist.SaveCmdToHistory(p_H, ev, tm);
+
+				if (Data.HistoryOn && p_H != null) hist.SaveCmdToHistory(p_H, ev, tm);
 				Test2.Mark(7, t2);
 
 				if (ev)
@@ -644,7 +672,6 @@ namespace WindowsFormsApp1.GameLogic
 
 		//===================================================================================================
 		//// Rotate
-		//1 C
 		private int RotateAbsolute(int dir)
 		{
 			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
@@ -654,7 +681,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//2 CE
 		private int RotateRelative(int dir)
 		{
 			var tm = Dir.GetDirDiff(0, dir) * CmdType.CmdTime(CmdType.Rotate);
@@ -664,7 +690,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//3 E
 		private int RotateRelativeContact(int dir)
 		{
 			var tm = Dir.GetDirDiff(Direction, _recDirToContact + dir) * CmdType.CmdTime(CmdType.Rotate);
@@ -674,7 +699,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//8 E
 		private int RotateToContact()
 		{
 			var tm = Dir.GetDirDiff(Direction, _recDirToContact) * CmdType.CmdTime(CmdType.Rotate);
@@ -684,7 +708,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//4 E
 		private int RotateBackward()
 		{
 			var tm = Dir.NumberOfDirections / 2 * CmdType.CmdTime(CmdType.Rotate);
@@ -694,7 +717,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//5 E
 		private int RotateBackwardContact()
 		{
 			var dir = Dir.GetOppositeDirection(_recDirToContact);
@@ -706,7 +728,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//6 C - может быть лучше для E ?
 		private int RotateRandom()
 		{
 			var dir = Func.GetRandomDirection();
@@ -718,7 +739,6 @@ namespace WindowsFormsApp1.GameLogic
 			return tm;
 		}
 
-		//7 C
 		private int AlignHorizontaly()
 		{
 			var dir = 16;
@@ -742,7 +762,13 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		//// Step
-		//10 11 C
+		private int StepAbsolute(int dir)
+		{
+			var move = Step(dir);
+
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+		}
+
 		private int StepForward()
 		{
 			var move = Step(GetDirForward());
@@ -750,7 +776,6 @@ namespace WindowsFormsApp1.GameLogic
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		//12 E
 		private int StepRelative(int dir)
 		{
 			var move = Step((Direction + dir) % Dir.NumberOfDirections);
@@ -758,7 +783,6 @@ namespace WindowsFormsApp1.GameLogic
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		//13 E
 		private int StepRelativeContact(int dir)
 		{
 			var move = Step((_recDirToContact + dir) % Dir.NumberOfDirections);
@@ -766,7 +790,6 @@ namespace WindowsFormsApp1.GameLogic
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		//14 E
 		private int StepBackward()
 		{
 			var move = Step(Dir.GetOppositeDirection(Direction));
@@ -774,7 +797,6 @@ namespace WindowsFormsApp1.GameLogic
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		//15 E
 		private int StepBackwardContact()
 		{
 			var move = Step(Dir.GetOppositeDirection(_recDirToContact));
@@ -782,17 +804,25 @@ namespace WindowsFormsApp1.GameLogic
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepUnderContact()
+		private int StepToContact()
 		{
-			var dir = Dir.GetDirectionTo(Xd, Yd, _recContactX, _recContactY - 1);
+			var move = Step(_recDirToContact);
 
-			var move = Step(dir);
+			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+		}
+
+		private int StepNearContact(int dir)
+		{
+			var (deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
+
+			var dir2 = Dir.GetDirectionTo(Xd, Yd, _recContactX + deltaXdouble, _recContactY + deltaYdouble);
+
+			var move = Step(dir2);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
 		//// Eat
-		//20 21 CE
 		private int EatForward()
 		{
 			var eat = Eat(GetDirForward());
@@ -800,7 +830,6 @@ namespace WindowsFormsApp1.GameLogic
 			return eat ? CmdType.CmdTime(CmdType.EatSuccessful) : CmdType.CmdTime(CmdType.EatNotSuccessful);
 		}
 
-		//22 E
 		private int EatContact()
 		{
 			var eat = Eat(_recDirToContact);
@@ -809,7 +838,6 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		//// Look
-		//30 31 C
 		private int LookForward()
 		{
 			Look(GetDirForward());
@@ -817,14 +845,12 @@ namespace WindowsFormsApp1.GameLogic
 			return CmdType.CmdTime(CmdType.Look);
 		}
 
-		//32 CE
 		private int LookAround1()
 		{
 			LookAround(1, 8);
 			return CmdType.CmdTime(CmdType.LookAround1);
 		}
 
-		//33 CE
 		private int LookAround2()
 		{
 			LookAround(2, 24);
@@ -1594,6 +1620,48 @@ namespace WindowsFormsApp1.GameLogic
 
 			return (newXint, newYint);
 		}
+
+		//private (double newX, double newY) GetCoordinatesByDirectionOnlyDifferent2(int dir)
+		//{
+		//	var (deltaXdouble, deltaYdouble) = Dir.Directions1[dir];
+
+		//	if (Dir.Round(_recContactX + deltaXdouble) == Dir.Round(_recContactX) && Dir.Round(_recContactY + deltaYdouble) == Dir.Round(_recContactY))
+		//	{
+		//		(deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
+		//	}
+
+		//	var newX = _recContactX + deltaXdouble;
+		//	var newY = _recContactY + deltaYdouble;
+
+		//	// Переход сквозь экран
+		//	if (!Data.LeftRightEdge)
+		//	{
+		//		if (newX < 0)
+		//		{
+		//			newX += Data.WorldWidth;
+		//		}
+
+		//		if (newX >= Data.WorldWidth)
+		//		{
+		//			newX -= Data.WorldWidth;
+		//		}
+		//	}
+
+		//	if (!Data.UpDownEdge)
+		//	{
+		//		if (newY < 0)
+		//		{
+		//			newY += Data.WorldHeight;
+		//		}
+
+		//		if (newY >= Data.WorldHeight)
+		//		{
+		//			newY -= Data.WorldHeight;
+		//		}
+		//	}
+
+		//	return (newX, newY);
+		//}
 
 		//private bool IdentifyRelativity(long cont)
 		//{
