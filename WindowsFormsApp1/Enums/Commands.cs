@@ -34,11 +34,14 @@ namespace WindowsFormsApp1.Enums
 		// Eat
 		public const byte EatForward = 20;
 		public const byte EatContact = 21;
+
 		// Look
 		public const byte LookForward = 30;
 		public const byte LookAround1 = 31;
 		public const byte LookAround2 = 32;
+
 		// Other
+		public const byte ClingToContact = 40;
 
 		public static string CmdName(byte cmd)
 		{
@@ -64,6 +67,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.LookForward => "Смотреть_вперед",
 				Cmd.LookAround1 => "Смотреть_вокруг_на_1",
 				Cmd.LookAround2 => "Смотреть_вокруг_на_2",
+				Cmd.ClingToContact => "Прицепиться_к_контакту",
 				_ => $""
 			};
 		}
@@ -92,6 +96,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.LookForward => Color.Blue,
 				Cmd.LookAround1 => Color.Blue,
 				Cmd.LookAround2 => Color.Blue,
+				Cmd.ClingToContact => Color.Magenta,
 				_ => Color.Black
 			};
 		}
@@ -121,6 +126,7 @@ namespace WindowsFormsApp1.Enums
 				Cmd.LookForward => 20,
 				Cmd.LookAround1 => 40,
 				Cmd.LookAround2 => 40,
+				Cmd.ClingToContact => 10,
 				_ => throw new Exception()
 			};
 		}
@@ -149,6 +155,8 @@ namespace WindowsFormsApp1.Enums
 		public const byte LookAround2 = 10;
 		public const byte PhotosynthesisSuccessful = 11;
 		public const byte PhotosynthesisNotSuccessful = 12;
+		public const byte ClingToSuccessful = 13;
+		public const byte ClingToNotSuccessful = 14;
 
 		public static int CmdTime(byte cmd)
 		{
@@ -166,6 +174,8 @@ namespace WindowsFormsApp1.Enums
 				CmdType.LookAround2 => 30,
 				CmdType.PhotosynthesisSuccessful => 60,
 				CmdType.PhotosynthesisNotSuccessful => 20,
+				CmdType.ClingToSuccessful => 2,
+				CmdType.ClingToNotSuccessful => 0,
 				_ => throw new Exception()
 			};
 		}
@@ -270,7 +280,8 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.EatContact,
 				//Cmd.LookForward,
 				//Cmd.LookAround1,
-				//Cmd.LookAround2
+				//Cmd.LookAround2,
+				Cmd.ClingToContact
 			};
 
 			#region comment BranchCmds

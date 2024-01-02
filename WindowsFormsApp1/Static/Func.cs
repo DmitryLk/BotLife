@@ -359,7 +359,7 @@ namespace WindowsFormsApp1.Static
 			else
 			{
 				var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-				CreateNewBot(x, y, newBotIndex, Data.InitialBotEnergy, genom);
+				CreateNewBot(newBotIndex, x, y, Data.InitialBotEnergy, genom);
 				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 				//reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 			}
@@ -370,42 +370,10 @@ namespace WindowsFormsApp1.Static
 			Interlocked.Increment(ref Data.TotalQtyBotReproduction);
 		}
 
-		public static void InitBot(int x, int y, long botIndex, int en, Genom genom)
+		public static void UpdateBot(int deathInd, int x, int y, int en, Genom genom)
 		{
-			var dir = GetRandomDirection();
-			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
-			genom.IncBot();
-
-			bot.Direction = dir;
-			bot.Num = botNumber;
-
-
-			bot.Age = 0;
-			bot.Alive = true;
-			bot.BiteMeCount = 0;
-			bot.BiteImCount = 0;
-			bot.DividedCount = 0;
-
-			bot.Xi = x;
-			bot.Xd = x;
-			bot.Yi = y;
-			bot.Yd = y;
-
-			bot.PointerGeneral.Clear();
-			bot.PointerReaction.Clear();
-			bot.RefreshColor();
-			bot.EnergySet(en);
-			bot.ResetMoved();
-			bot.RecNumClear();
-
-			bot.InsertedToReproductionList = false;
-			bot.InsertedToDeathList = false;
-		}
-
-		public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
-		{
-			var bot = Data.BotDeath[ind];
-			var index = Data.BotDeath[ind].Index;
+			var bot = Data.BotDeath[deathInd];
+			var botind = Data.BotDeath[deathInd].Index;
 			bot.G.DecBot(bot.Age, bot.BiteMeCount, bot.BiteImCount);
 			var xiold = bot.Xi;
 			var yiold = bot.Yi;
@@ -413,15 +381,12 @@ namespace WindowsFormsApp1.Static
 			//Data.BotDeath[ind] = null;
 			//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
 
-			// Изменение бота
-			bot.G = genom;
-
-
+			bot.Init(x, y, botind, en, genom);
 
 			lock (_busyWorld)
 			{
 				Data.World[xiold, yiold] = 0;
-				Data.World[x, y] = index;
+				Data.World[x, y] = botind;
 			}
 
 			if (Data.DrawType == DrawType.OnlyChangedCells)
@@ -431,26 +396,17 @@ namespace WindowsFormsApp1.Static
 			}
 		}
 
-		public static void CreateNewBot(int x, int y, long ind, int en, Genom genom)
+		public static void CreateNewBot(long botInd, int x, int y,  int en, Genom genom)
 		{
-			Bot1 bot;
-			if (Data.Bots[ind] == null)
-			{
-				bot = new Bot1();
-				Data.Bots[ind] = bot;
-			}
-			else
-			{
-				bot = Data.Bots[ind];
-				bot.Index = ind;
-				bot.G = genom;
-			}
+			if (Data.Bots[botInd] == null) Data.Bots[botInd] = new Bot1();
 
+			var bot = Data.Bots[botInd];
 
+			bot.Init(x, y, botInd, en, genom);
 
 			lock (_busyWorld)
 			{
-				Data.World[x, y] = ind;
+				Data.World[x, y] = botInd;
 			}
 
 			if (Data.DrawType == DrawType.OnlyChangedCells)
@@ -849,6 +805,16 @@ namespace WindowsFormsApp1.Static
 				if (!Data.Bots[botNumber].Alive)
 				{
 					cnt2++;
+				}
+
+				if (Data.Bots[botNumber].Index != botNumber)
+				{
+					throw new Exception("fdgdfgdsdfdf34f435345g");
+				}
+
+				if (Data.World[Data.Bots[botNumber].Xi, Data.Bots[botNumber].Yi] != Data.Bots[botNumber].Index)
+				{
+					throw new Exception("fdgdfgd34f435345g");
 				}
 			}
 			if (cnt0 != Data.QtyAllBotDeathMinusOne + 1) throw new Exception("fdgergg");
