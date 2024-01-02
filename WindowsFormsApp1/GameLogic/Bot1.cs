@@ -1,25 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Diagnostics.Metrics;
-using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
-using System.Drawing.Text;
-using System.Globalization;
 using System.Linq;
-using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using System.Xml;
-using System.Xml.Linq;
-using WindowsFormsApp1.Dto;
 using WindowsFormsApp1.Enums;
-using WindowsFormsApp1.Logger;
 using WindowsFormsApp1.Static;
 
 namespace WindowsFormsApp1.GameLogic
@@ -27,11 +12,69 @@ namespace WindowsFormsApp1.GameLogic
 	// Бот с океана foo52
 	public class Bot1
 	{
+		public long Index;         // Индекс бота (может меняться)
+		public long Num;         // Номер бота (остается постоянным)
+		public bool Alive;
+		public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
+		public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
+		public int Direction;         // Направление бота
+		public int Age;
+		public int BiteMeCount;
+		public int BiteImCount;
+		public int DividedCount;
+		public Genom G;
+		public Color Color;
+		public Pointer PointerGeneral = new Pointer();
+		public Pointer PointerReaction = new Pointer();
+		public CodeHistory hist = new CodeHistory();
+		public double Xd;
+		public double Yd;
+		public int Xi;
+		public int Yi;
+		//public BotLog Log = new BotLog();
+
+		private int _en;
+		private int _size;
+		private int _reproductionCycle;
+		private int df = 0;
+		private long _moved = 0;
+		private int _tm = 0;
+		private int _tmR = 0;
+
+		private bool _connected;
+		private Bot1 _connectedBot;
+		private long _connectedNum;
+
+		public void InitBot(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom)
+		{
+			G = genom;
+			Direction = dir;
+			Num = botNumber;
+			Index = botIndex;
+			Age = 0;
+			BiteMeCount = 0;
+			BiteImCount = 0;
+			DividedCount = 0;
+			InsertedToDeathList = false;
+			InsertedToReproductionList = false;
+			Alive = true;
+			Xd = x;
+			Yd = y;
+			Xi = x;
+			Yi = y;
+
+			_reproductionCycle = 0;
+			_en = en;
+
+			//Log.LogInfo($"bot was initialized. index:{Index}");
+		}
+
+		//--------------------------------------------------------------
+
 		//private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 		//private static readonly object _busy = new();
 
 		const int hueFrom = 200;
-
 		private static readonly object _busyWorld1 = new();
 		private static readonly object _busyWorld2 = new();
 		private readonly object _busyBotEnergy = new();
@@ -46,53 +89,23 @@ namespace WindowsFormsApp1.GameLogic
 		// увидел рядом чтото?
 		//private byte _recNum;
 		private bool _recActive;
-		private int _recDirToContact;
 		private byte _recWeight;
 		public bool _recNew;
 		public byte _recNewBranch;
+		private int _recDirToContact;
+
+		// свойства контакта
 		private double _recContactX;
 		private double _recContactY;
 		private int _recContactDirection;
+		private Bot1 _recContactBot;
+		private long _recContactBotNum;
 
 
 		//private static long COUNTER1 = 0;
 		//private static long COUNTER2 = 0;
 
-		public Genom G;
-		public Color Color;
-		public Pointer PointerGeneral;
-		public Pointer PointerReaction;
-		private int _tm = 0;
-		private int _tmR = 0;
 
-		public CodeHistory hist;
-		//public BotLog Log;
-
-		public double Xd;
-		public double Yd;
-		public int Xi;
-		public int Yi;
-
-
-		public long Index;         // Индекс бота (может меняться)
-		public int Direction;         // Направление бота
-		public int Age;
-		public int BiteMeCount;
-		public int BiteImCount;
-		public int DividedCount;
-		public long Num;         // Номер бота (остается постоянным)
-
-		private int _en;
-		private int _size;
-
-		public bool Alive;
-		public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
-		public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
-		private int _reproductionCycle;
-
-		private int df = 0;
-
-		private long _moved = 0;
 		public bool Moved
 		{
 			get
@@ -195,6 +208,8 @@ namespace WindowsFormsApp1.GameLogic
 
 				if (dig == G.Digestion)
 				{
+					ActivateReceptor(1, Branch.React_Bot_Enemy, dirToContact, contactX, contactY, contactDir);
+
 					var needbigrotate = Dir.GetDirDiff(dirToContact, contactBotDirection) < Dir.NumberOfDirections / 4;
 					if (needbigrotate)
 					{
@@ -312,35 +327,6 @@ namespace WindowsFormsApp1.GameLogic
 			_recActive = false;
 		}
 
-		public Bot1(int x, int y, int dir, long botNumber, long botIndex, int en, Genom genom)
-		{
-			PointerGeneral = new Pointer();
-			PointerReaction = new Pointer();
-
-			this.G = genom;
-			hist = new CodeHistory();
-			//Log = new BotLog();
-
-			Direction = dir;
-			Num = botNumber;
-			Index = botIndex;
-			_en = en;
-			Age = 0;
-			BiteMeCount = 0;
-			BiteImCount = 0;
-			DividedCount = 0;
-
-			Xd = x;
-			Yd = y;
-			Xi = x;
-			Yi = y;
-
-			InsertedToDeathList = false;
-			InsertedToReproductionList = false;
-			Alive = true;
-			_reproductionCycle = 0;
-			//Log.LogInfo($"bot was born. index:{Index}");
-		}
 
 		public void RefreshColor()
 		{
@@ -562,9 +548,6 @@ namespace WindowsFormsApp1.GameLogic
 					case Cmd.RotateRandom: tm = RotateRandom(); break;
 					case Cmd.AlignHorizontaly: tm = AlignHorizontaly(); break;
 					case Cmd.RotateParallelContact: tm = RotateParallelContact(); Test2.Mark(11, t); break;
-					//повернуться к контакту
-					//повернуться от контакта
-					//поворот параллельно движению контакта
 					//не поворачиваться на этом шаге
 
 					//// STEP
@@ -593,6 +576,9 @@ namespace WindowsFormsApp1.GameLogic
 					case Cmd.LookAround1: tm = LookAround1(); Test2.Mark(19, t); break;
 					case Cmd.LookAround2: tm = LookAround2(); Test2.Mark(20, t); break;
 					case Cmd.LookForward: tm = LookForward(); Test2.Mark(21, t); break;
+
+					//// OTHERS
+					case Cmd.ClingToContact: tm = ClingToContact(); break;
 
 					default: throw new Exception();
 				};
@@ -827,6 +813,13 @@ namespace WindowsFormsApp1.GameLogic
 			return CmdType.CmdTime(CmdType.LookAround2);
 		}
 
+
+		private int ClingToContact()
+		{
+			LookAround(2, 24);
+			return CmdType.CmdTime(CmdType.LookAround2);
+		}
+
 		//===================================================================================================
 
 		/*
@@ -964,7 +957,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 
 			// Не может распространяться более чем 50% от всех ботов
-			if (G.CurBots >= Data.CurrentNumberOfBots / 2)
+			if (G.CurBots >= Data.CurrentNumberOfBots * 0.4)
 			{
 				return false;
 			}

@@ -370,44 +370,52 @@ namespace WindowsFormsApp1.Static
 			Interlocked.Increment(ref Data.TotalQtyBotReproduction);
 		}
 
-		public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
+		public static void InitBot(int x, int y, long botIndex, int en, Genom genom)
 		{
 			var dir = GetRandomDirection();
 			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
 			genom.IncBot();
 
+			bot.Direction = dir;
+			bot.Num = botNumber;
 
-			var updBot = Data.BotDeath[ind];
+
+			bot.Age = 0;
+			bot.Alive = true;
+			bot.BiteMeCount = 0;
+			bot.BiteImCount = 0;
+			bot.DividedCount = 0;
+
+			bot.Xi = x;
+			bot.Xd = x;
+			bot.Yi = y;
+			bot.Yd = y;
+
+			bot.PointerGeneral.Clear();
+			bot.PointerReaction.Clear();
+			bot.RefreshColor();
+			bot.EnergySet(en);
+			bot.ResetMoved();
+			bot.RecNumClear();
+
+			bot.InsertedToReproductionList = false;
+			bot.InsertedToDeathList = false;
+		}
+
+		public static void UpdateBot(int ind, int x, int y, int en, Genom genom)
+		{
+			var bot = Data.BotDeath[ind];
 			var index = Data.BotDeath[ind].Index;
-			updBot.G.DecBot(updBot.Age, updBot.BiteMeCount, updBot.BiteImCount);
-			var xiold = updBot.Xi;
-			var yiold = updBot.Yi;
+			bot.G.DecBot(bot.Age, bot.BiteMeCount, bot.BiteImCount);
+			var xiold = bot.Xi;
+			var yiold = bot.Yi;
 			//Interlocked.Increment(ref Removedbots1);
 			//Data.BotDeath[ind] = null;
 			//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
 
 			// Изменение бота
-			updBot.Xi = x;
-			updBot.Xd = x;
-			updBot.Yi = y;
-			updBot.Yd = y;
-			updBot.Direction = dir;
-			updBot.Num = botNumber;
-			updBot.G = genom;
-			updBot.PointerGeneral.Clear();
-			updBot.PointerReaction.Clear();
-			updBot.RecNumClear();
-			updBot.Age = 0;
-			updBot.BiteMeCount = 0;
-			updBot.BiteImCount = 0;
-			updBot.DividedCount = 0;
-			updBot.Alive = true;
-			//updBot.hist = new CodeHistory();
-			updBot.InsertedToReproductionList = false;
-			updBot.EnergySet(en);
-			updBot.ResetMoved();
+			bot.G = genom;
 
-			updBot.RefreshColor();
 
 
 			lock (_busyWorld)
@@ -419,62 +427,35 @@ namespace WindowsFormsApp1.Static
 			if (Data.DrawType == DrawType.OnlyChangedCells)
 			{
 				FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
-				FixChangeCell(x, y, updBot.Color);
+				FixChangeCell(x, y, bot.Color);
 			}
-
-			updBot.InsertedToDeathList = false;
 		}
 
-		public static void CreateNewBot(int x, int y, long botIndex, int en, Genom genom)
+		public static void CreateNewBot(int x, int y, long ind, int en, Genom genom)
 		{
-			var dir = GetRandomDirection();
-			var botNumber = Interlocked.Increment(ref Data.MaxBotNumber);
-			genom.IncBot();
-
-
 			Bot1 bot;
-			if (Data.Bots[botIndex] == null)
+			if (Data.Bots[ind] == null)
 			{
-				bot = new Bot1(x, y, dir, botNumber, botIndex, en, genom);
-
-				Data.Bots[botIndex] = bot;
+				bot = new Bot1();
+				Data.Bots[ind] = bot;
 			}
 			else
 			{
-				bot = Data.Bots[botIndex];
-				bot.Index = botIndex;
-				bot.Xi = x;
-				bot.Xd = x;
-				bot.Yi = y;
-				bot.Yd = y;
-				bot.Direction = dir;
-				bot.Num = botNumber;
-				bot.EnergySet(en);
+				bot = Data.Bots[ind];
+				bot.Index = ind;
 				bot.G = genom;
-				bot.PointerGeneral.Clear();
-				bot.PointerReaction.Clear();
-				bot.RecNumClear();
-				bot.Age = 0;
-				bot.BiteMeCount = 0;
-				bot.BiteImCount = 0;
-				bot.DividedCount = 0;
-				bot.InsertedToDeathList = false;
-				bot.InsertedToReproductionList = false;
-				bot.Alive = true;
-				//bot.hist = new CodeHistory();
 			}
 
-			bot.RefreshColor();
 
+
+			lock (_busyWorld)
+			{
+				Data.World[x, y] = ind;
+			}
 
 			if (Data.DrawType == DrawType.OnlyChangedCells)
 			{
 				FixChangeCell(x, y, bot.Color);
-			}
-
-			lock (_busyWorld)
-			{
-				Data.World[x, y] = botIndex;
 			}
 		}
 

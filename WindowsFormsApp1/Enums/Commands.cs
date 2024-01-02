@@ -187,15 +187,15 @@ namespace WindowsFormsApp1.Enums
 		public const byte General8 = 8;
 		public const byte General9 = 9;
 		public const byte React_Bite = 10;
-		public const byte React_Bot_NoBigrot = 11;
-		public const byte React_Bot_Bigrot = 12;
-		public const byte React_Bot_LessDigestion = 13;
-		public const byte React_Bot_BiggerDigestion = 14;
-		public const byte React_Bot_Relat = 15;
-		public const byte React_Grass = 16;
-		public const byte React_Mineral = 17;
-		public const byte React_Wall = 18;
-		public const byte React9 = 19;
+		public const byte React_Bot_Enemy = 11;
+		public const byte React_Bot_NoBigrot = 12;
+		public const byte React_Bot_Bigrot = 13;
+		public const byte React_Bot_LessDigestion = 14;
+		public const byte React_Bot_BiggerDigestion = 15;
+		public const byte React_Bot_Relat = 16;
+		public const byte React_Grass = 17;
+		public const byte React_Mineral = 18;
+		public const byte React_Wall = 19;
 
 		public static string BranchName(byte cmd)
 		{
@@ -212,6 +212,7 @@ namespace WindowsFormsApp1.Enums
 				Branch.General8 => "Gen8",
 				Branch.General9 => "Gen9",
 				Branch.React_Bite => "bite",
+				Branch.React_Bot_Enemy => "bot enemy",
 				Branch.React_Bot_NoBigrot => "bot nobigrot",
 				Branch.React_Bot_Bigrot => "bot bigrot",
 				Branch.React_Bot_LessDigestion => "bot less dig",
@@ -220,7 +221,6 @@ namespace WindowsFormsApp1.Enums
 				Branch.React_Grass => "grass",
 				Branch.React_Mineral => "mineral",
 				Branch.React_Wall => "wall",
-				Branch.React9 => "-",
 				_ => throw new NotImplementedException()
 			};
 		}
@@ -395,6 +395,7 @@ namespace WindowsFormsApp1.Enums
 				Branch.General8 => generalCmds,
 				Branch.General9 => generalCmds,
 				Branch.React_Bite => bot_enemyCmds,
+				Branch.React_Bot_Enemy => bot_enemyCmds,
 				Branch.React_Bot_NoBigrot => bot_enemyCmds,
 				Branch.React_Bot_Bigrot => bot_enemyCmds,
 				Branch.React_Bot_LessDigestion => bot_enemyCmds,
@@ -403,7 +404,6 @@ namespace WindowsFormsApp1.Enums
 				Branch.React_Grass => bot_enemyCmds,
 				Branch.React_Mineral => bot_enemyCmds,
 				Branch.React_Wall => bot_enemyCmds,
-				Branch.React9 => bot_enemyCmds,
 				_ => throw new NotImplementedException()
 			};
 		}
