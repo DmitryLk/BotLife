@@ -200,7 +200,7 @@ namespace WindowsFormsApp1.Graphic
 						var par = bot.G.Code[i, j, 1];
 						var absDirStr = Dir.GetDirectionStringFromCode(par);
 
-						var textColor = Cmd.CmdColor(code);
+						var textColor = Data.CmdColor[code];
 
 						_PRESENTER.DrawTextOnCursorFrame(j, k, code.ToString(), textColor);
 						_PRESENTER.DrawSmallTextOnCursorFrame(j, k, 35, 20, absDirStr, Color.Blue);

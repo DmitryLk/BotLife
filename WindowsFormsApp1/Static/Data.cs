@@ -159,7 +159,11 @@ namespace WindowsFormsApp1.Static
 		public static bool DgvPra;
 
 		// Commands
-		public static bool[] CommandsWithParameter;
+		public static bool[] CmdWithParameter;
+		public static string[] CmdName;
+		public static Color[] CmdColor;
+		public static int[] CmdChance;
+		public static byte[] CmdClass;
 
 		public static bool GridWalls;
 		// public static Log.Log Wlog;
@@ -231,35 +235,36 @@ namespace WindowsFormsApp1.Static
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
 			}
 
-			CommandsWithParameter = new bool[Data.MaxCode + 1];
-			Array.Clear(CommandsWithParameter, 0, CommandsWithParameter.Length);
+			CmdWithParameter = new bool[Data.MaxCode + 1];
+			CmdName = new string[Data.MaxCode + 1];
+			CmdColor = new Color[Data.MaxCode + 1];
+			CmdChance = new int[Data.MaxCode + 1];
+			CmdClass = new byte[Data.MaxCode + 1];
+			Array.Clear(CmdWithParameter, 0, Data.MaxCode + 1);
+			Array.Clear(CmdName, 0, Data.MaxCode + 1);
+			Array.Clear(CmdColor, 0, Data.MaxCode + 1);
+			Array.Clear(CmdChance, 0, Data.MaxCode + 1);
+			Array.Clear(CmdClass, 0, Data.MaxCode + 1);
+
 			foreach (var c in Cmd.CommandsWithParameter)
 			{
-				CommandsWithParameter[c] = true;
+				CmdWithParameter[c] = true;
 			}
 
-			CommandsWithParameter = new bool[Data.MaxCode + 1];
-			Array.Clear(CommandsWithParameter, 0, CommandsWithParameter.Length);
-
-			//CmdInfo         
-			
-			foreach (var c in Cmd.CommandsWithParameter)
-			{
-				CommandsWithParameter[c] = true;
-			}
-			FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);
+			FieldInfo[] fields = typeof(Cmd).GetFields();
 			foreach (FieldInfo fi in fields)
 			{
-				var val = fi.GetValue(null);
-				if (val is byte)
+				if (fi.FieldType.Name == "Byte" && fi.Name.Length > 1)
 				{
-					if ((int)val > maxcmd)
-					{
-						maxcmd = (int)val;
-					}
+					var cmd = (byte)fi.GetValue(null);
+
+					var cmdInfo = Cmd.CmdInfo(cmd);
+					CmdName[cmd] = cmdInfo.CmdName;
+					CmdColor[cmd] = cmdInfo.CmdColor;
+					CmdChance[cmd] = cmdInfo.CmdChance;
+					CmdClass[cmd] = cmdInfo.CmdClass;
 				}
 			}
-
 
 			//var maxcmd = 0;
 			//FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);

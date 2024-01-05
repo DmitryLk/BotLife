@@ -510,7 +510,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				(ev, p_H, cmd, par) = GetCommand();
 
-				if (externalInfluence && Cmd.GetCmdClass(cmd) == CmdClass.Step)
+				if (externalInfluence && Data.CmdClass[cmd] == CmdClass.Step)
 				{
 					cmd = Cmd.Nothing;
 				}
@@ -1808,10 +1808,10 @@ namespace WindowsFormsApp1.GameLogic
 					cmd = G.Code[hist[i].b, hist[i].c, 0];
 					par = G.Code[hist[i].b, hist[i].c, 1];
 
-					cmdTxt = $"{cmd} {Cmd.CmdName(cmd)} ({hist[i].b}.{hist[i].c})";
+					cmdTxt = $"{cmd} {Data.CmdName[cmd]} ({hist[i].b}.{hist[i].c})";
 
 					string dirStr;
-					if (Data.CommandsWithParameter[cmd])
+					if (Data.CmdWithParameter[cmd])
 					{
 						dirStr = Dir.GetDirectionStringFromCode(par);
 					}

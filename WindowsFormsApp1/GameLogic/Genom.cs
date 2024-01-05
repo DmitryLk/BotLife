@@ -170,7 +170,7 @@ namespace WindowsFormsApp1.GameLogic
 						cmd = cmds[ThreadSafeRandom.Next(cmds.Length)];
 						prob = ThreadSafeRandom.Next(Cmd.MaxCmdChance);
 					}
-					while (Cmd.CmdChance(cmd) < prob);
+					while (Data.CmdChance[cmd] < prob);
 
 
 
@@ -267,7 +267,7 @@ namespace WindowsFormsApp1.GameLogic
 						cmdnum = Func.GetRandomNext(Data.MaxCmdInStep);
 					}
 
-					if (Data.CommandsWithParameter[g.Code[branch, cmdnum, 0]] && rndpar == 1)
+					if (Data.CmdWithParameter[g.Code[branch, cmdnum, 0]] && rndpar == 1)
 					{
 						g.Code[branch, cmdnum, 1] = Func.GetRandomBotCode();
 					}
@@ -298,7 +298,7 @@ namespace WindowsFormsApp1.GameLogic
 
 					//branch += Data.GenomGeneralBranchCnt;
 
-					if (Data.CommandsWithParameter[g.Code[branch, cmdnum, 0]] && rndpar == 1)
+					if (Data.CmdWithParameter[g.Code[branch, cmdnum, 0]] && rndpar == 1)
 					{
 						g.Code[branch, cmdnum, 1] = Func.GetRandomBotCode();
 					}

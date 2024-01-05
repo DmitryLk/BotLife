@@ -49,7 +49,9 @@ namespace WindowsFormsApp1.Enums
 
 		public static int MaxCmdChance = 50;
 		public const byte _ = 0;
-		public static (string CmdName, Color CmdColor, int CmdChance, byte CmdClass, byte, byte, byte, byte, byte, byte) CmdInfo(byte cmd)
+		
+		public static (string CmdName, Color CmdColor, int CmdChance, byte CmdClass, byte WithParameters, 
+			byte General, byte EnemyDangerous, byte EnemyNoDangerous, byte Relative, byte Things) CmdInfo(byte cmd)
 		{
 			return cmd switch
 			{

@@ -659,7 +659,7 @@ namespace WindowsFormsApp1.Static
 				cmd = cmds[ThreadSafeRandom.Next(cmds.Length)];
 				prob = ThreadSafeRandom.Next(Cmd.MaxCmdChance);
 			}
-			while (Cmd.CmdChance(cmd) < prob);
+			while (Data.CmdChance[cmd] < prob);
 
 			return cmd;
 		}
