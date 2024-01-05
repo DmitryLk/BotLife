@@ -41,9 +41,11 @@ namespace WindowsFormsApp1.GameLogic
 		private int _tm = 0;
 		private int _tmR = 0;
 
-		private bool _connected;
-		private Bot1 _connectedBot;
-		private long _connectedBotNum;
+		public bool ConnectedTo;
+		private Bot1 _connectedToBot;
+		private long _connectedToBotNum;
+		private bool _forced;
+		private int _forcedDir;
 
 		public void Init(int x, int y, long ind, int en, Genom genom)
 		{
@@ -71,14 +73,21 @@ namespace WindowsFormsApp1.GameLogic
 			_moved = 0;
 			_reproductionCycle = 0;
 
-			_connected = false;
-			_connectedBot = null;
-			_connectedBotNum = 0;
+			ConnectedTo = false;
+			_connectedToBot = null;
+			_connectedToBotNum = 0;
 
 			PointerGeneral.Clear();
 			PointerReaction.Clear();
 			RefreshColor();
-			EnergySet(en);
+
+			if (en <= 0) throw new Exception("sdfsdf");
+			if (_en != 0) throw new Exception("fglkeru84");
+
+			lock (_busyBotEnergy)
+			{
+				_en = en;
+			}
 			//Log.LogInfo($"bot was initialized. index:{Index}");
 		}
 
@@ -161,6 +170,12 @@ namespace WindowsFormsApp1.GameLogic
 			//        }
 			//    }
 			//}
+		}
+
+		public void Force(int forceDir)
+		{
+			_forcedDir = forceDir;
+			_forced = true;
 		}
 
 		public int Bite(int delta, int dirToContact, Bot1 recContactBot)
@@ -335,17 +350,6 @@ namespace WindowsFormsApp1.GameLogic
 			return -delta;
 		}
 
-		private void EnergySet(int en)
-		{
-			if (en <= 0) throw new Exception("sdfsdf");
-			if (_en != 0) throw new Exception("fglkeru84");
-
-			lock (_busyBotEnergy)
-			{
-				_en = en;
-			}
-		}
-
 		public void RefreshColor()
 		{
 			Color = Data.BotColorMode switch
@@ -423,30 +427,9 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-
-		private bool StepAfterConnected()
-		{
-			if (_connected && _connectedBot.Alive && _connectedBot.Num == _connectedBotNum)
-			{
-				var dx = _connectedBot.Xi - Xi;
-				var dy = _connectedBot.Yi - Yi;
-
-				if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
 		private (bool Ev, Pointer Pointer, byte Cmd, byte Par) GetCommand()
 		{
-			if (StepAfterConnected())
-			{
-				var dir = Dir.GetDirectionTo(Xd, Yd, _connectedBot.Xd, _connectedBot.Yd);
-				return (false, null, Cmd.StepAbsolute, (byte)dir);
-			}
-			else if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
+			if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
 			{
 				if (_recNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
 				{
@@ -473,6 +456,40 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
+		private bool ProcessExternalInfluence()
+		{
+			if (ConnectedTo)
+			{
+				// Проверка что это тот же самый бот, а не обновленный (новый созданный на месте старого)
+				if (_connectedToBot.Alive && _connectedToBot.Num == _connectedToBotNum)
+				{
+					var dx = _connectedToBot.Xi - Xi;
+					var dy = _connectedToBot.Yi - Yi;
+
+					if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
+					{
+						var dir = Dir.GetDirectionTo(Xd, Yd, _connectedToBot.Xd, _connectedToBot.Yd);
+						_forced = false;
+						Step(dir);
+						return true;
+					}
+				}
+				else
+				{
+					ConnectedTo = false;
+				}
+			}
+
+			if (_forced)
+			{
+				_forced = false;
+				Step(_forcedDir);
+				return true;
+			}
+
+			return false;
+		}
+
 
 		private void CommandCycle()
 		{
@@ -487,9 +504,16 @@ namespace WindowsFormsApp1.GameLogic
 
 			t = Stopwatch.GetTimestamp();
 
+			var externalInfluence = ProcessExternalInfluence();
+
 			while (_tm < 100 && !lastcmd && cntJmp < 10)
 			{
 				(ev, p_H, cmd, par) = GetCommand();
+
+				if (externalInfluence && Cmd.GetCmdClass(cmd) == CmdClass.Step)
+				{
+					cmd = Cmd.Nothing;
+				}
 
 				t = Test2.Mark(4, t);
 
@@ -568,6 +592,7 @@ namespace WindowsFormsApp1.GameLogic
 					//повернуть контакт
 					//повернуть бота от себя
 					//повернуть всех ботов от себя
+					//повернуть всех ботов к себе
 					//обездвижить бота
 					//снизить уровни атаки бота
 					//отключить защиту бота
@@ -609,7 +634,7 @@ namespace WindowsFormsApp1.GameLogic
 					//переместится перед ботом
 					//переместится сзади бота
 					//встать рядом с ботом
-					//сцепиться с родней. копировать движеия
+					//копировать движеия
 					//не двигаться на этом шаге
 
 
@@ -624,6 +649,11 @@ namespace WindowsFormsApp1.GameLogic
 
 					//// OTHERS
 					case Cmd.ClingToContact: tm = ClingToContact(); break;
+					case Cmd.Nothing: tm = 0; break;
+					case Cmd.PushContact: tm = PushContact(); break;
+					//сцепиться с родней
+					//#прицепиться к контакту
+					//прицепить к себе контакта
 
 					default: throw new Exception();
 				};
@@ -859,16 +889,30 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int ClingToContact()
 		{
-			if (!_connected && _recContactBot != null)
+			if (!ConnectedTo && _recContactBot != null && _recContactBot.Alive && _recContactBot.Num == _recContactBotNum)
 			{
-				_connected = true;
-				_connectedBot = _recContactBot;
-				_connectedBotNum = _recContactBotNum;
+				ConnectedTo = true;
+				_connectedToBot = _recContactBot;
+				_connectedToBotNum = _recContactBotNum;
+
 				return CmdType.CmdTime(CmdType.ClingToSuccessful);
 			}
 			else
 			{
 				return CmdType.CmdTime(CmdType.ClingToNotSuccessful);
+			}
+		}
+
+		private int PushContact()
+		{
+			if (_recContactBot != null && _recContactBot.Alive && _recContactBot.Num == _recContactBotNum)
+			{
+				_recContactBot.Force(_recDirToContact);
+				return CmdType.CmdTime(CmdType.PushContactSuccessful);
+			}
+			else
+			{
+				return CmdType.CmdTime(CmdType.PushContactNotSuccessful);
 			}
 		}
 
@@ -1764,7 +1808,7 @@ namespace WindowsFormsApp1.GameLogic
 					cmd = G.Code[hist[i].b, hist[i].c, 0];
 					par = G.Code[hist[i].b, hist[i].c, 1];
 
-					cmdTxt = $"{Cmd.CmdName(cmd)} {cmd}({hist[i].b}.{hist[i].c})";
+					cmdTxt = $"{cmd} {Cmd.CmdName(cmd)} ({hist[i].b}.{hist[i].c})";
 
 					string dirStr;
 					if (Data.CommandsWithParameter[cmd])

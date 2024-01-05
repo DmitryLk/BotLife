@@ -348,21 +348,23 @@ namespace WindowsFormsApp1.Static
 				while (ind < Data.QtyAllBotDeathMinusOne && en > 0);  // можно провернуть еще раз если этот бот как оказалось не умирает и есть еще умирающие боты в запасе
 			}
 
-
+			long newBotIndex;
 			if (update)
 			{
-				UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
+				newBotIndex = Data.BotDeath[ind].Index;
+				//UpdateBot(ind, x, y, Data.InitialBotEnergy, genom);
 				Interlocked.Increment(ref Data.QtyFactBotDeathUsedForReproduction);
 				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 				//reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} UpdateBot {Data.BotDeath[ind].Index} LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 			}
 			else
 			{
-				var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-				CreateNewBot(newBotIndex, x, y, Data.InitialBotEnergy, genom);
+				newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
 				//Data.Wlog.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 				//reproductedBot.Log.LogInfo($"ReproductionBot {index}-{reproductedBot.Index} CreateNewBot 1/2  LIOBDAUFR:{Data.IndexOfLastBotDeathArrayUsedForReproduction}");
 			}
+
+			CreateNewBot(newBotIndex, x, y, Data.InitialBotEnergy, genom, update);
 
 			reproductedBot.EnergyChange(-Data.InitialBotEnergy);
 			reproductedBot.DividedCount++;
@@ -370,47 +372,67 @@ namespace WindowsFormsApp1.Static
 			Interlocked.Increment(ref Data.TotalQtyBotReproduction);
 		}
 
-		public static void UpdateBot(int deathInd, int x, int y, int en, Genom genom)
+		//public static void UpdateBot(int deathInd, int x, int y, int en, Genom genom)
+		//{
+		//	var bot = Data.BotDeath[deathInd];
+		//	var botind = Data.BotDeath[deathInd].Index;
+		//	bot.G.DecBot(bot.Age, bot.BiteMeCount, bot.BiteImCount);
+		//	var xiold = bot.Xi;
+		//	var yiold = bot.Yi;
+		//	//Interlocked.Increment(ref Removedbots1);
+		//	//Data.BotDeath[ind] = null;
+		//	//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
+
+		//	bot.Init(x, y, botind, en, genom);
+
+		//	lock (_busyWorld)
+		//	{
+		//		Data.World[xiold, yiold] = 0;
+		//		Data.World[x, y] = botind;
+		//	}
+
+		//	if (Data.DrawType == DrawType.OnlyChangedCells)
+		//	{
+		//		FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
+		//		FixChangeCell(x, y, bot.Color);
+		//	}
+		//}
+
+
+		//Сюда попадает в трех случаях
+		//1. При старте для создания первых ботов
+		//2. При падении энергии для создания новых ботов, чтобы повысить общую энергию
+		//3. При размножении ботов
+		public static void CreateNewBot(long botInd, int x, int y,  int en, Genom genom, bool removeOldBot)
 		{
-			var bot = Data.BotDeath[deathInd];
-			var botind = Data.BotDeath[deathInd].Index;
-			bot.G.DecBot(bot.Age, bot.BiteMeCount, bot.BiteImCount);
-			var xiold = bot.Xi;
-			var yiold = bot.Yi;
-			//Interlocked.Increment(ref Removedbots1);
-			//Data.BotDeath[ind] = null;
-			//Data.NumberOfBotDeath = -1; - не делаем так как не уменьшаем массив а прореживаем (или сокращаем снизу)
+			int xiold = 0;
+			int yiold = 0;
 
-			bot.Init(x, y, botind, en, genom);
-
-			lock (_busyWorld)
-			{
-				Data.World[xiold, yiold] = 0;
-				Data.World[x, y] = botind;
-			}
-
-			if (Data.DrawType == DrawType.OnlyChangedCells)
-			{
-				FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
-				FixChangeCell(x, y, bot.Color);
-			}
-		}
-
-		public static void CreateNewBot(long botInd, int x, int y,  int en, Genom genom)
-		{
 			if (Data.Bots[botInd] == null) Data.Bots[botInd] = new Bot1();
-
 			var bot = Data.Bots[botInd];
 
+			if (removeOldBot)
+			{
+				bot.G.DecBot(bot.Age, bot.BiteMeCount, bot.BiteImCount);
+				xiold = bot.Xi;
+				yiold = bot.Yi;
+			}
+
+			// Три типа обновления:
+			// 1. Обновится только что умерший бот
+			// 2. Обновится ранее умерший бот
+			// 3. Обновится только что созданный с нуля бот
 			bot.Init(x, y, botInd, en, genom);
 
 			lock (_busyWorld)
 			{
+				if (removeOldBot) Data.World[xiold, yiold] = 0;
 				Data.World[x, y] = botInd;
 			}
 
 			if (Data.DrawType == DrawType.OnlyChangedCells)
 			{
+				if (removeOldBot) FixChangeCell(xiold, yiold, null); // при следующей отрисовке бот стерется с экрана
 				FixChangeCell(x, y, bot.Color);
 			}
 		}
@@ -430,6 +452,7 @@ namespace WindowsFormsApp1.Static
 					if (Data.World[nXi, nYi] == 0)
 					{
 						lock (_busyWorld)
+			
 						{
 							if (Data.World[nXi, nYi] == 0)
 							{

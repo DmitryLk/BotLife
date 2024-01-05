@@ -268,7 +268,7 @@ namespace WindowsFormsApp1.GameLogic
 						var genom = Genom.CreateNewGenom(1);
 						Data.TotalEnergy += Data.InitialBotEnergy * 10;
 						var newBotIndex = Interlocked.Increment(ref Data.CurrentNumberOfBots);
-						Func.CreateNewBot(newBotIndex, x, y, Data.InitialBotEnergy * 10, genom);
+						Func.CreateNewBot(newBotIndex, x, y, Data.InitialBotEnergy * 10, genom, false);
 					}
 				}
                 else

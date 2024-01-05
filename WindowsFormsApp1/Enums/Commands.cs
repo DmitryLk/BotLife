@@ -32,7 +32,7 @@ namespace WindowsFormsApp1.Enums
 		public const byte StepBackwardContact = 15;
 		public const byte StepNearContact = 16;
 		public const byte StepToContact = 17;
-		
+
 		// Eat
 		public const byte EatForward = 20;
 		public const byte EatContact = 21;
@@ -44,100 +44,46 @@ namespace WindowsFormsApp1.Enums
 
 		// Other
 		public const byte ClingToContact = 40;
-
-		public static string CmdName(byte cmd)
-		{
-			return cmd switch
-			{
-				Cmd.RotateAbsolute => "Поворот_абсолютно",
-				Cmd.RotateRelative => "Поворот_относительно",
-				Cmd.RotateRelativeContact => "Поворот_относительно_контакта",
-				Cmd.RotateToContact => "Поворот_к_контакту",
-				Cmd.RotateBackward => "Поворот_назад",
-				Cmd.RotateBackwardContact => "Поворот_назад_от_контакта",
-				Cmd.RotateRandom => "Поворот_случайно",
-				Cmd.AlignHorizontaly => "Выповняться_по_горизонтали",
-				Cmd.RotateParallelContact => "Поворот_параллельно_контакту",
-				Cmd.StepAbsolute => "Шаг_абсолютно",
-				Cmd.StepForward => "Шаг_вперед",
-				Cmd.StepRelative => "Шаг_относительно",
-				Cmd.StepRelativeContact => "Шаг_относительно_контакта",
-				Cmd.StepBackward => "Шаг_назад",
-				Cmd.StepBackwardContact => "Шаг_назад_от_контакта",
-				Cmd.StepToContact => "Шаг_к_контакту",
-				Cmd.StepNearContact => "Шаг_рядом_к_контакту",
-				Cmd.EatForward => "Есть_впереди",
-				Cmd.EatContact => "Есть_контакт",
-				Cmd.LookForward => "Смотреть_вперед",
-				Cmd.LookAround1 => "Смотреть_вокруг_на_1",
-				Cmd.LookAround2 => "Смотреть_вокруг_на_2",
-				Cmd.ClingToContact => "Прицепиться_к_контакту",
-				_ => $""
-			};
-		}
-
-		public static Color CmdColor(byte cmd)
-		{
-			return cmd switch
-			{
-				Cmd.RotateAbsolute => Color.Orange,
-				Cmd.RotateRelative => Color.Orange,
-				Cmd.RotateRelativeContact => Color.Orange,
-				Cmd.RotateToContact => Color.Orange,
-				Cmd.RotateBackward => Color.Orange,
-				Cmd.RotateBackwardContact => Color.Orange,
-				Cmd.RotateRandom => Color.Orange,
-				Cmd.AlignHorizontaly => Color.Orange,
-				Cmd.RotateParallelContact => Color.Orange,
-				Cmd.StepAbsolute => Color.Red,
-				Cmd.StepForward => Color.Red,
-				Cmd.StepRelative => Color.Red,
-				Cmd.StepRelativeContact => Color.Red,
-				Cmd.StepBackward => Color.Red,
-				Cmd.StepBackwardContact => Color.Red,
-				Cmd.StepToContact => Color.Red,
-				Cmd.StepNearContact => Color.Red,
-				Cmd.EatForward => Color.Green,
-				Cmd.EatContact => Color.Green,
-				Cmd.LookForward => Color.Blue,
-				Cmd.LookAround1 => Color.Blue,
-				Cmd.LookAround2 => Color.Blue,
-				Cmd.ClingToContact => Color.Magenta,
-				_ => Color.Black
-			};
-		}
+		public const byte Nothing = 41;
+		public const byte PushContact = 42;
 
 		public static int MaxCmdChance = 50;
-		public static int CmdChance(byte cmd)
+		public const byte _ = 0;
+		public static (string CmdName, Color CmdColor, int CmdChance, byte CmdClass, byte, byte, byte, byte, byte, byte) CmdInfo(byte cmd)
 		{
 			return cmd switch
 			{
-				Cmd.RotateAbsolute => 2,
-				Cmd.RotateRelative => 10,
-				Cmd.RotateRelativeContact => 10,
-				Cmd.RotateToContact => 20,
-				Cmd.RotateBackward => 10,
-				Cmd.RotateBackwardContact => 10,
-				Cmd.RotateRandom => 2,
-				Cmd.AlignHorizontaly => 1,
-				Cmd.RotateParallelContact => 10,
-				Cmd.StepAbsolute => 0,
-				Cmd.StepForward => 20,
-				Cmd.StepRelative => 10,
-				Cmd.StepRelativeContact => 10,
-				Cmd.StepBackward => 10,
-				Cmd.StepBackwardContact => 10,
-				Cmd.StepToContact => 10,
-				Cmd.StepNearContact => 10,
-				Cmd.EatForward => 20,
-				Cmd.EatContact => 10,
-				Cmd.LookForward => 20,
-				Cmd.LookAround1 => 40,
-				Cmd.LookAround2 => 40,
-				Cmd.ClingToContact => 40,
+				Cmd.RotateAbsolute =>			("Поворот_абсолютно",				Color.Orange,	2,		CmdClass.Rotate,	1,		_,_,_,_,_																),
+				Cmd.RotateRelative =>			("Поворот_относительно",			Color.Orange,	10,		CmdClass.Rotate,	1,		_,_,_,_,_																),
+				Cmd.RotateRelativeContact =>	("Поворот_относительно_контакта",	Color.Orange,	10,		CmdClass.Rotate,	1,		_,_,_,_,_																),
+				Cmd.RotateToContact =>			("Поворот_к_контакту",				Color.Orange,	20,		CmdClass.Rotate,	_,		_,_,_,_,_																),
+				Cmd.RotateBackward =>			("Поворот_назад",					Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,_,_																),
+				Cmd.RotateBackwardContact =>	("Поворот_назад_от_контакта",		Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,_,_																),
+				Cmd.RotateRandom =>				("Поворот_случайно",				Color.Orange,	2,		CmdClass.Rotate,	_,		_,_,_,_,_																),
+				Cmd.AlignHorizontaly =>			("Выровняться_по_горизонтали",		Color.Orange,	1,		CmdClass.Rotate,	_,		_,_,_,_,_																),
+				Cmd.RotateParallelContact =>	("Поворот_параллельно_контакту",	Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,_,_																),
+				Cmd.StepAbsolute =>				("Шаг_абсолютно",					Color.Red,		0,		CmdClass.Step,		1,		_,_,_,_,_																),
+				Cmd.StepForward =>				("Шаг_вперед",						Color.Red,		20,		CmdClass.Step,		_,		_,_,_,_,_																),
+				Cmd.StepRelative =>				("Шаг_относительно",				Color.Red,		10,		CmdClass.Step,		1,		_,_,_,_,_																),
+				Cmd.StepRelativeContact =>		("Шаг_относительно_контакта",		Color.Red,		10,		CmdClass.Step,		1,		_,_,_,_,_																),
+				Cmd.StepBackward =>				("Шаг_назад",						Color.Red,		10,		CmdClass.Step,		_,		_,_,_,_,_																),
+				Cmd.StepBackwardContact =>		("Шаг_назад_от_контакта",			Color.Red,		10,		CmdClass.Step,		_,		_,_,_,_,_																),
+				Cmd.StepToContact =>			("Шаг_к_контакту",					Color.Red,		10,		CmdClass.Step,		_,		_,_,_,_,_																),
+				Cmd.StepNearContact =>			("Шаг_рядом_к_контакту",			Color.Red,		10,		CmdClass.Step,		1,		_,_,_,_,_																),
+				Cmd.EatForward =>				("Есть_впереди",					Color.Green,	20,		CmdClass.Eat,		_,		_,_,_,_,_																),
+				Cmd.EatContact =>				("Есть_контакт",					Color.Green,	10,		CmdClass.Eat,		_,		_,_,_,_,_																),
+				Cmd.LookForward =>				("Смотреть_вперед",					Color.Blue,		20,		CmdClass.Look,		_,		_,_,_,_,_																),
+				Cmd.LookAround1 =>				("Смотреть_вокруг_на_1",			Color.Blue,		40,		CmdClass.Look,		_,		_,_,_,_,_																),
+				Cmd.LookAround2 =>				("Смотреть_вокруг_на_2",			Color.Blue,		40,		CmdClass.Look,		_,		_,_,_,_,_																),
+				Cmd.ClingToContact =>			("Прицепиться_к_контакту",			Color.Magenta,	10,		CmdClass.Other,		_,		_,_,_,_,_																),
+				Cmd.Nothing =>					("Ничего_не_делать",				Color.Magenta,	0,		CmdClass.Other,		_,		_,_,_,_,_																),
+				Cmd.PushContact =>				("Оттолкнуть_контакт",				Color.Magenta,	20,		CmdClass.Other,		_,		_,_,_,_,_																),
 				_ => throw new Exception()
 			};
 		}
+
+
+
 
 		public static HashSet<byte> CommandsWithParameter = new HashSet<byte>()
 		{
@@ -149,6 +95,15 @@ namespace WindowsFormsApp1.Enums
 			Cmd.StepRelativeContact,
 			Cmd.StepNearContact
 		};
+	}
+
+	public static class CmdClass
+	{
+		public const byte Rotate = 1;
+		public const byte Step = 2;
+		public const byte Eat = 3;
+		public const byte Look = 4;
+		public const byte Other = 5;
 	}
 
 	public static class CmdType
@@ -167,6 +122,8 @@ namespace WindowsFormsApp1.Enums
 		public const byte PhotosynthesisNotSuccessful = 12;
 		public const byte ClingToSuccessful = 13;
 		public const byte ClingToNotSuccessful = 14;
+		public const byte PushContactSuccessful = 15;
+		public const byte PushContactNotSuccessful = 16;
 
 		public static int CmdTime(byte cmd)
 		{
@@ -186,6 +143,8 @@ namespace WindowsFormsApp1.Enums
 				CmdType.PhotosynthesisNotSuccessful => 20,
 				CmdType.ClingToSuccessful => 2,
 				CmdType.ClingToNotSuccessful => 0,
+				CmdType.PushContactSuccessful => 50,
+				CmdType.PushContactNotSuccessful => 10,
 				_ => throw new Exception()
 			};
 		}
@@ -266,7 +225,7 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.EatContact,
 				//Cmd.LookForward,
 				//Cmd.LookAround1,
-				Cmd.LookAround2
+				Cmd.LookAround2  
 			};
 
 			var bot_enemyCmds = new byte[]
@@ -293,6 +252,7 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.LookAround1,
 				//Cmd.LookAround2,
 				//Cmd.ClingToContact
+				Cmd.PushContact
 			};
 
 			var bot_relCmds = new byte[]
@@ -318,7 +278,8 @@ namespace WindowsFormsApp1.Enums
 				//Cmd.LookForward,
 				//Cmd.LookAround1,
 				//Cmd.LookAround2,
-				Cmd.ClingToContact
+				Cmd.ClingToContact,
+				Cmd.PushContact
 			};
 
 			var thingCmds = new byte[]

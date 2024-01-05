@@ -223,6 +223,7 @@ namespace WindowsFormsApp1.Static
 			DgvDirection = ListSortDirection.Ascending;
 			DgvOnlyLive = false;
 			DgvPra = false;
+			GridWalls = false;
 
 
 			for (var hue = 0; hue <= 360; hue++)
@@ -237,7 +238,29 @@ namespace WindowsFormsApp1.Static
 				CommandsWithParameter[c] = true;
 			}
 
-			GridWalls = false;
+			CommandsWithParameter = new bool[Data.MaxCode + 1];
+			Array.Clear(CommandsWithParameter, 0, CommandsWithParameter.Length);
+
+			//CmdInfo         
+			
+			foreach (var c in Cmd.CommandsWithParameter)
+			{
+				CommandsWithParameter[c] = true;
+			}
+			FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);
+			foreach (FieldInfo fi in fields)
+			{
+				var val = fi.GetValue(null);
+				if (val is byte)
+				{
+					if ((int)val > maxcmd)
+					{
+						maxcmd = (int)val;
+					}
+				}
+			}
+
+
 			//var maxcmd = 0;
 			//FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);
 			//foreach (FieldInfo fi in fields)
