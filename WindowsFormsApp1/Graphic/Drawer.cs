@@ -177,6 +177,34 @@ namespace WindowsFormsApp1.Graphic
 
 		}
 
+		private (byte Y1, byte X1) GetPreviousNoForcedHistory(int hi, CodeHistory hist)
+		{
+			var deltay = 0;
+			var (hist_old, histPtrCnt_old, _, _, _) = hist.GetLastStepPtrs(Data.DeltaHistory);
+			bool force;
+			byte y1, x1;
+
+			do
+			{
+				if (hi == 0)
+				{
+					deltay--;
+					(hist_old, histPtrCnt_old, _, _, _) = hist.GetLastStepPtrs(Data.DeltaHistory - deltay);
+					hi = histPtrCnt_old - 1;
+
+				}
+				else
+				{
+					hi--;
+				}
+
+				(y1, x1, _, force,_) = hist_old[hi].GetHistoryData();
+
+			}
+			while (force);
+
+			return (y1, x1);
+		}
 
 		// информация по курсору (работает только на паузе).  Геном бота.
 		public void DrawCursor()
@@ -193,7 +221,7 @@ namespace WindowsFormsApp1.Graphic
 				{
 					if (i >= bot.G.ActiveGeneralBranchCnt && i < Branch.GeneralBranchCount) continue;
 
-					_PRESENTER.DrawMediumTextOnCursorFrame(0, k, -9, 23, i.ToString(), i >= Branch.GeneralBranchCount ? Color.Red :  Color.Black);
+					_PRESENTER.DrawMediumTextOnCursorFrame(0, k, -9, 23, i.ToString(), i >= Branch.GeneralBranchCount ? Color.Red : Color.Black);
 					for (var j = 0; j < Data.MaxCmdInStep; j++)
 					{
 						var code = bot.G.Code[i, j, 0];
@@ -231,29 +259,19 @@ namespace WindowsFormsApp1.Graphic
 
 				if (bot.hist.historyPointerY >= 0)
 				{
-					var (hist_old, histPtrCnt_old, _, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory - 1);
 					var (hist, histPtrCnt, _, _, _) = bot.hist.GetLastStepPtrs(Data.DeltaHistory);
 
 
 					for (var i = 0; i < histPtrCnt; i++)
 					{
-						if (i == 0)
-						{
-							x1 = hist_old[histPtrCnt_old - 1].c;
-							y1 = hist_old[histPtrCnt_old - 1].b;
-						}
-						else
-						{
-							x1 = hist[i - 1].c;
-							y1 = hist[i - 1].b;
-						}
+						(y2, x2, _, var force, _) = hist[i].GetHistoryData();
 
-						x2 = hist[i].c;
-						y2 = hist[i].b;
+						if (force) continue;
+
+						(y1, x1) = GetPreviousNoForcedHistory(i, bot.hist);
 
 						if (y1 >= Branch.GeneralBranchCount) y1 -= Branch.GeneralBranchCount - bot.G.ActiveGeneralBranchCnt;
 						if (y2 >= Branch.GeneralBranchCount) y2 -= Branch.GeneralBranchCount - bot.G.ActiveGeneralBranchCnt;
-
 
 						color = Color.DarkOrchid;
 						if (i == histPtrCnt - 1) color = Color.Orange;

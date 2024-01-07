@@ -36,7 +36,6 @@ namespace WindowsFormsApp1.GameLogic
 		private int _en;
 		private int _size;
 		private int _reproductionCycle;
-		private int df = 0;
 		private long _moved = 0;
 		private int _tm = 0;
 		private int _tmR = 0;
@@ -76,6 +75,8 @@ namespace WindowsFormsApp1.GameLogic
 			ConnectedTo = false;
 			_connectedToBot = null;
 			_connectedToBotNum = 0;
+			_tm = 0;
+			_tmR = 0;
 
 			PointerGeneral.Clear();
 			PointerReaction.Clear();
@@ -456,7 +457,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 		}
 
-		private bool ProcessExternalInfluence()
+		private bool ProcessExternalForce()
 		{
 			if (ConnectedTo)
 			{
@@ -471,6 +472,7 @@ namespace WindowsFormsApp1.GameLogic
 						var dir = Dir.GetDirectionTo(Xd, Yd, _connectedToBot.Xd, _connectedToBot.Yd);
 						_forced = false;
 						Step(dir);
+						if (Data.HistoryOn) hist.SaveForcedCmdToHistory(Cmd.StepAbsolute, (byte)dir, 0);
 						return true;
 					}
 				}
@@ -484,6 +486,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				_forced = false;
 				Step(_forcedDir);
+				if (Data.HistoryOn) hist.SaveForcedCmdToHistory(Cmd.StepAbsolute, (byte)_forcedDir, 0);
 				return true;
 			}
 
@@ -504,16 +507,11 @@ namespace WindowsFormsApp1.GameLogic
 
 			t = Stopwatch.GetTimestamp();
 
-			var externalInfluence = ProcessExternalInfluence();
+			var externalInfluence = ProcessExternalForce();
 
 			while (_tm < 100 && !lastcmd && cntJmp < 10)
 			{
 				(ev, p_H, cmd, par) = GetCommand();
-
-				if (externalInfluence && Data.CmdClass[cmd] == CmdClass.Step)
-				{
-					cmd = Cmd.Nothing;
-				}
 
 				t = Test2.Mark(4, t);
 
@@ -616,14 +614,14 @@ namespace WindowsFormsApp1.GameLogic
 					//не поворачиваться на этом шаге
 
 					//// STEP
-					case Cmd.StepAbsolute: tm = StepAbsolute(par); break;
-					case Cmd.StepRelative: tm = StepRelative(par); break;
-					case Cmd.StepForward: tm = StepForward(); Test2.Mark(14, t); break;
-					case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(16, t); break;
-					case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(15, t); break;
-					case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(17, t); break;
-					case Cmd.StepToContact: tm = StepToContact(); Test2.Mark(17, t); break;
-					case Cmd.StepNearContact: tm = StepNearContact(par); Test2.Mark(17, t); break;
+					case Cmd.StepAbsolute: tm = StepAbsolute(par, externalInfluence); break;
+					case Cmd.StepRelative: tm = StepRelative(par, externalInfluence); break;
+					case Cmd.StepForward: tm = StepForward(externalInfluence); Test2.Mark(14, t); break;
+					case Cmd.StepBackward: tm = StepBackward(externalInfluence); Test2.Mark(16, t); break;
+					case Cmd.StepRelativeContact: tm = StepRelativeContact(par, externalInfluence); Test2.Mark(15, t); break;
+					case Cmd.StepBackwardContact: tm = StepBackwardContact(externalInfluence); Test2.Mark(17, t); break;
+					case Cmd.StepToContact: tm = StepToContact(externalInfluence); Test2.Mark(17, t); break;
+					case Cmd.StepNearContact: tm = StepNearContact(par, externalInfluence); Test2.Mark(17, t); break;
 					//переместится под бота
 					//переместится к боту (притянуться к боту)
 					//переместится над ботом
@@ -674,17 +672,21 @@ namespace WindowsFormsApp1.GameLogic
 
 				if (ev)
 				{
-					PointerReaction.CmdNum++; if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
+					PointerReaction.CmdNum++;
+					//if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 
 					_tmR += tm;
-					if (_tmR >= 100 || lastcmd)
+					
+					//if (_tmR >= 100 || lastcmd)
+					if (_tmR >= 100 || PointerReaction.CmdNum >= Data.MaxCmdInStep)
 					{
 						_recActive = false; // завершаем команду реакции, переходим на обычные команды
 					}
 				}
 				else
 				{
-					PointerGeneral.CmdNum++; if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
+					PointerGeneral.CmdNum++;
+					if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 				}
 
 				t = Test2.Mark(5, t);
@@ -695,6 +697,9 @@ namespace WindowsFormsApp1.GameLogic
 			if (Data.HistoryOn) hist.EndNewStep(_tm);
 
 			_tm -= 100;
+			if (_tm < -100)
+			{
+			}
 			ShiftPointerGeneralToNextBranch();
 
 			Test2.Mark(6, t);
@@ -792,56 +797,58 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		//// Step
-		private int StepAbsolute(int dir)
+		private int StepAbsolute(int dir, bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step(dir);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepForward()
+		private int StepForward(bool externalInfluence)
 		{
 			var move = Step(GetDirForward());
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepRelative(int dir)
+		private int StepRelative(int dir, bool externalInfluence)
 		{
 			var move = Step((Direction + dir) % Dir.NumberOfDirections);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepRelativeContact(int dir)
+		private int StepRelativeContact(int dir, bool externalInfluence)
 		{
 			var move = Step((_recDirToContact + dir) % Dir.NumberOfDirections);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepBackward()
+		private int StepBackward(bool externalInfluence)
 		{
 			var move = Step(Dir.GetOppositeDirection(Direction));
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepBackwardContact()
+		private int StepBackwardContact(bool externalInfluence)
 		{
 			var move = Step(Dir.GetOppositeDirection(_recDirToContact));
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepToContact()
+		private int StepToContact(bool externalInfluence)
 		{
 			var move = Step(_recDirToContact);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
 		}
 
-		private int StepNearContact(int dir)
+		private int StepNearContact(int dir, bool externalInfluence)
 		{
 			var (deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
 
@@ -1483,16 +1490,19 @@ namespace WindowsFormsApp1.GameLogic
 
 		private void ShiftPointerGeneralToNextBranch()
 		{
-			if (PointerGeneral.B == G.ActiveGeneralBranchCnt - 1)
+			if (PointerGeneral.CmdNum != 0)
 			{
-				PointerGeneral.B = 0;
-			}
-			else
-			{
-				PointerGeneral.B++;
-			}
+				if (PointerGeneral.B == G.ActiveGeneralBranchCnt - 1)
+				{
+					PointerGeneral.B = 0;
+				}
+				else
+				{
+					PointerGeneral.B++;
+				}
 
-			PointerGeneral.CmdNum = 0;
+				PointerGeneral.CmdNum = 0;
+			}
 		}
 
 		private void ProcessingTouchedCells(int deltaXInt, int deltaYInt)
@@ -1753,6 +1763,7 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Num: {Num}");
 			sb.AppendLine($"Index: {Index}");
 			sb.AppendLine($"Digestion: {G.Digestion}");
+			sb.AppendLine($"Connected to: {(ConnectedTo ? $"Yes {_connectedToBotNum}" : "No")}");
 
 			sb.AppendLine($"Energy: {Energy}");
 			sb.AppendLine($"_dir: {Direction}");
@@ -1804,11 +1815,32 @@ namespace WindowsFormsApp1.GameLogic
 				for (var i = 0; i < histPtrCnt; i++)
 				{
 					string cmdTxt;
+					string sev = "";
+					string bc = "";
 
-					cmd = G.Code[hist[i].b, hist[i].c, 0];
-					par = G.Code[hist[i].b, hist[i].c, 1];
+					//var (b, c, ev, _, tm) = hist[i].GetAllHistoryData();
+					var (b0, b1, ev, force, tm) = hist[i].GetHistoryData();
 
-					cmdTxt = $"{cmd} {Data.CmdName[cmd]} ({hist[i].b}.{hist[i].c})";
+					if (!force)
+					{
+						cmd = G.Code[b0, b1, 0];
+						par = G.Code[b0, b1, 1];
+
+						bc = $"({b0}.{b1})";
+
+						if (ev)
+						{
+							sev = $"EV{b0}";
+						}
+					}
+					else
+					{
+						cmd = b0;
+						par = b1;
+					}
+
+
+					cmdTxt = $"{cmd} {Data.CmdName[cmd]} {bc}";
 
 					string dirStr;
 					if (Data.CmdWithParameter[cmd])
@@ -1820,21 +1852,11 @@ namespace WindowsFormsApp1.GameLogic
 						dirStr = string.Empty;
 					}
 
-					string ev;
-					if (hist[i].ev)
-					{
-						ev = $"EV{hist[i].b}";
-					}
-					else
-					{
-						ev = "";
-					}
-
 
 					if (cmdTxt != "")
 					{
 
-						sb.AppendLine($"{cmdTxt} {dirStr} {(hist[i].ev ? ev : "")}   ==tm:{hist[i].tm}");
+						sb.AppendLine($"{cmdTxt} {dirStr} {(ev ? sev : "")}   ==tm:{tm}");
 					}
 				}
 			}
