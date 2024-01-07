@@ -195,8 +195,6 @@ namespace WindowsFormsApp1.Graphic
 
         public void DrawObjectOnLensFrame(int x, int y, Color? color, int? dir)
         {
-
-
             _lensImageWrapper.FillSquare(x * _lensCellWidth + 1, y * _lensCellHeight + 1, _lensCellWidth - 2, color ?? _fon);
 
             if (dir.HasValue)
@@ -212,6 +210,16 @@ namespace WindowsFormsApp1.Graphic
             }
         }
 
+		public void DrawTieOnLensFrame(int x1, int y1, int x2, int y2)
+		{
+			_lensImageWrapper.Line(
+				_lensCellWidth * x1 + _lensCellWidth / 2,
+				_lensCellHeight * y1 + _lensCellHeight / 2,
+				_lensCellWidth * x2,
+				_lensCellHeight * y2,
+				Color.Black);
+		}
+		
         public void DrawCursorOnLens(int x, int y, Color? color = null)
         {
             _lensImageWrapper.EmptySquare(x * _lensCellWidth, y * _lensCellHeight, _lensCellWidth, _lensCellHeight, color ?? _fon, 1);

@@ -41,8 +41,8 @@ namespace WindowsFormsApp1.GameLogic
 		private int _tmR = 0;
 
 		public bool ConnectedTo;
-		private Bot1 _connectedToBot;
-		private long _connectedToBotNum;
+		public Bot1 ConnectedToBot;
+		public long ConnectedToBotNum;
 		private bool _forced;
 		private int _forcedDir;
 
@@ -73,8 +73,8 @@ namespace WindowsFormsApp1.GameLogic
 			_reproductionCycle = 0;
 
 			ConnectedTo = false;
-			_connectedToBot = null;
-			_connectedToBotNum = 0;
+			ConnectedToBot = null;
+			ConnectedToBotNum = 0;
 			_tm = 0;
 			_tmR = 0;
 
@@ -462,14 +462,29 @@ namespace WindowsFormsApp1.GameLogic
 			if (ConnectedTo)
 			{
 				// Проверка что это тот же самый бот, а не обновленный (новый созданный на месте старого)
-				if (_connectedToBot.Alive && _connectedToBot.Num == _connectedToBotNum)
+				if (ConnectedToBot.Alive && ConnectedToBot.Num == ConnectedToBotNum)
 				{
-					var dx = _connectedToBot.Xi - Xi;
-					var dy = _connectedToBot.Yi - Yi;
+					var de = Energy - ConnectedToBot.Energy;
+					//if (de > 20 /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
+					//{
+					//	var transferedEnergy = EnergyChange(-de / 2);
+					//	_connectedToBot.EnergyChange(transferedEnergy);
+					//	if (transferedEnergy < 0) throw new Exception("dfgdfg");
+					//}
+
+					//if (de < -20 /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
+					//{
+					//	var transferedEnergy = _connectedToBot.EnergyChange(de / 2);
+					//	EnergyChange(transferedEnergy);
+					//	if (transferedEnergy < 0) throw new Exception("dfgdfg");
+					//}
+
+					var dx = ConnectedToBot.Xi - Xi;
+					var dy = ConnectedToBot.Yi - Yi;
 
 					if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
 					{
-						var dir = Dir.GetDirectionTo(Xd, Yd, _connectedToBot.Xd, _connectedToBot.Yd);
+						var dir = Dir.GetDirectionTo(Xd, Yd, ConnectedToBot.Xd, ConnectedToBot.Yd);
 						_forced = false;
 						Step(dir);
 						if (Data.HistoryOn) hist.SaveForcedCmdToHistory(Cmd.StepAbsolute, (byte)dir, 0);
@@ -676,7 +691,7 @@ namespace WindowsFormsApp1.GameLogic
 					//if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
 
 					_tmR += tm;
-					
+
 					//if (_tmR >= 100 || lastcmd)
 					if (_tmR >= 100 || PointerReaction.CmdNum >= Data.MaxCmdInStep)
 					{
@@ -697,9 +712,8 @@ namespace WindowsFormsApp1.GameLogic
 			if (Data.HistoryOn) hist.EndNewStep(_tm);
 
 			_tm -= 100;
-			if (_tm < -100)
-			{
-			}
+			//if (_tm < 0) _tm = 0;
+
 			ShiftPointerGeneralToNextBranch();
 
 			Test2.Mark(6, t);
@@ -808,6 +822,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepForward(bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step(GetDirForward());
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
@@ -815,6 +831,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepRelative(int dir, bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step((Direction + dir) % Dir.NumberOfDirections);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
@@ -822,6 +840,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepRelativeContact(int dir, bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step((_recDirToContact + dir) % Dir.NumberOfDirections);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
@@ -829,6 +849,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepBackward(bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step(Dir.GetOppositeDirection(Direction));
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
@@ -836,6 +858,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepBackwardContact(bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step(Dir.GetOppositeDirection(_recDirToContact));
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
@@ -843,6 +867,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepToContact(bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var move = Step(_recDirToContact);
 
 			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
@@ -850,6 +876,8 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int StepNearContact(int dir, bool externalInfluence)
 		{
+			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+
 			var (deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
 
 			var dir2 = Dir.GetDirectionTo(Xd, Yd, _recContactX + deltaXdouble, _recContactY + deltaYdouble);
@@ -899,8 +927,8 @@ namespace WindowsFormsApp1.GameLogic
 			if (!ConnectedTo && _recContactBot != null && _recContactBot.Alive && _recContactBot.Num == _recContactBotNum)
 			{
 				ConnectedTo = true;
-				_connectedToBot = _recContactBot;
-				_connectedToBotNum = _recContactBotNum;
+				ConnectedToBot = _recContactBot;
+				ConnectedToBotNum = _recContactBotNum;
 
 				return CmdType.CmdTime(CmdType.ClingToSuccessful);
 			}
@@ -1763,7 +1791,7 @@ namespace WindowsFormsApp1.GameLogic
 			sb.AppendLine($"Num: {Num}");
 			sb.AppendLine($"Index: {Index}");
 			sb.AppendLine($"Digestion: {G.Digestion}");
-			sb.AppendLine($"Connected to: {(ConnectedTo ? $"Yes {_connectedToBotNum}" : "No")}");
+			sb.AppendLine($"Connected to: {(ConnectedTo ? $"Yes {ConnectedToBotNum}" : "No")}");
 
 			sb.AppendLine($"Energy: {Energy}");
 			sb.AppendLine($"_dir: {Direction}");

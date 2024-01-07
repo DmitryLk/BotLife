@@ -141,7 +141,7 @@ namespace WindowsFormsApp1.Graphic
 			{
 				for (var x = Data.LensX; x < Data.LensX + Data.LensWidth; x++)
 				{
-
+					Bot1 b = null;
 					var cont = Data.World[x, y];
 					color = null;
 					dir = null;
@@ -159,16 +159,24 @@ namespace WindowsFormsApp1.Graphic
 					}
 					else if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
 					{
-						color = Data.Bots[cont].Color;
-						dir = Data.Bots[cont].Direction;
+						b = Data.Bots[cont];
+						color = b.Color;
+						dir = b.Direction;
+
 					}
 					else
 					{
 						throw new Exception("var color = cont switch");
 					}
 
-
 					_PRESENTER.DrawObjectOnLensFrame(x - Data.LensX, y - Data.LensY, color, dir);
+
+					if (b != null && b.ConnectedTo && b.ConnectedToBot.Alive && b.ConnectedToBot.Num == b.ConnectedToBotNum)
+					{
+						_PRESENTER.DrawTieOnLensFrame(
+							b.Xi - Data.LensX, b.Yi - Data.LensY,
+							b.ConnectedToBot.Xi - Data.LensX, b.ConnectedToBot.Yi - Data.LensY);
+					}
 				}
 			}
 			_PRESENTER.DrawCursorOnLens(Data.CursorX, Data.CursorY, Color.Black);  // рмсование курсора.
