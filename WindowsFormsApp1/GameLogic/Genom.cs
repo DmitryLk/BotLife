@@ -20,7 +20,7 @@ using WindowsFormsApp1.Static;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Numerics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TreeView;
-using Branch = WindowsFormsApp1.Enums.Branch;
+using Branch = WindowsFormsApp1.Enums.Branches;
 
 namespace WindowsFormsApp1.GameLogic
 {

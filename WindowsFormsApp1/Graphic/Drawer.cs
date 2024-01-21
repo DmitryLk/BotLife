@@ -225,11 +225,11 @@ namespace WindowsFormsApp1.Graphic
 				//TEXT
 				_PRESENTER.ClearGraphicsOnCursorFrame();
 				var k = 0;
-				for (var i = 0; i < Branch.AllBranchCount; i++)
+				for (var i = 0; i < Branches.AllBranchCount; i++)
 				{
-					if (i >= bot.G.ActiveGeneralBranchCnt && i < Branch.GeneralBranchCount) continue;
+					if (i >= bot.G.ActiveGeneralBranchCnt && i < Branches.GeneralBranchCount) continue;
 
-					_PRESENTER.DrawMediumTextOnCursorFrame(0, k, -9, 23, i.ToString(), i >= Branch.GeneralBranchCount ? Color.Red : Color.Black);
+					_PRESENTER.DrawMediumTextOnCursorFrame(0, k, -9, 23, i.ToString(), i >= Branches.GeneralBranchCount ? Color.Red : Color.Black);
 					for (var j = 0; j < Data.MaxCmdInStep; j++)
 					{
 						var code = bot.G.Code[i, j, 0];
@@ -243,7 +243,7 @@ namespace WindowsFormsApp1.Graphic
 						if (bot.G.Act[i * Data.MaxCmdInStep + j] > 0) _PRESENTER.DrawMediumTextOnCursorFrame(j, k, 15, 35, bot.G.Act[i * Data.MaxCmdInStep + j].ToString(), Color.Red);
 					}
 
-					var rn = Branch.BranchName((byte)i);
+					var rn = Branches.BranchName((byte)i);
 
 					_PRESENTER.DrawOtherTextOnCursorFrame(Data.MaxCmdInStep, k, rn, Color.Green);
 
@@ -255,9 +255,9 @@ namespace WindowsFormsApp1.Graphic
 				Color color;
 				int x1, y1, x2, y2;
 				k = 0;
-				for (var i = 0; i < Branch.AllBranchCount; i++)
+				for (var i = 0; i < Branches.AllBranchCount; i++)
 				{
-					if (i >= bot.G.ActiveGeneralBranchCnt && i < Branch.GeneralBranchCount) continue;
+					if (i >= bot.G.ActiveGeneralBranchCnt && i < Branches.GeneralBranchCount) continue;
 					for (var j = 0; j < Data.MaxCmdInStep; j++)
 					{
 						_PRESENTER.DrawCodeCellOnCursorFrame(j, k, bot.G.Code[i, j, 2] == 1 ? Color.Red : (bot.G.Act[i * Data.MaxCmdInStep + j] > 0 ? Color.Black : Color.LightGray));
@@ -278,8 +278,8 @@ namespace WindowsFormsApp1.Graphic
 
 						(y1, x1) = GetPreviousNoForcedHistory(i, bot.hist);
 
-						if (y1 >= Branch.GeneralBranchCount) y1 -= Branch.GeneralBranchCount - bot.G.ActiveGeneralBranchCnt;
-						if (y2 >= Branch.GeneralBranchCount) y2 -= Branch.GeneralBranchCount - bot.G.ActiveGeneralBranchCnt;
+						if (y1 >= Branches.GeneralBranchCount) y1 -= Branches.GeneralBranchCount - bot.G.ActiveGeneralBranchCnt;
+						if (y2 >= Branches.GeneralBranchCount) y2 -= Branches.GeneralBranchCount - bot.G.ActiveGeneralBranchCnt;
 
 						color = Color.DarkOrchid;
 						if (i == histPtrCnt - 1) color = Color.Orange;

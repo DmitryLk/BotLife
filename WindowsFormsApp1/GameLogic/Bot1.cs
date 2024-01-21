@@ -229,7 +229,7 @@ namespace WindowsFormsApp1.GameLogic
 		// 1 - укус
 		private void ActivateReceptor1(int dirToContact, Bot1 recContactBot)
 		{
-			ActivateReceptor(0, Branch.React_Bite, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+			ActivateReceptor(0, Branches.React_Bite, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 		}
 
 
@@ -240,7 +240,7 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				if (isRel)
 				{
-					ActivateReceptor(3, Branch.React_Bot_Relat, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+					ActivateReceptor(3, Branches.React_Bot_Relat, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 					return;
 				}
 
@@ -248,31 +248,31 @@ namespace WindowsFormsApp1.GameLogic
 
 				if (dig == G.Digestion)
 				{
-					ActivateReceptor(1, Branch.React_Bot_Enemy, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+					ActivateReceptor(1, Branches.React_Bot_Enemy, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 
 					var needbigrotate = Dir.GetDirDiff(dirToContact, recContactBot.Direction) < Dir.NumberOfDirections / 4;
 					if (needbigrotate)
 					{
-						ActivateReceptor(2, Branch.React_Bot_Bigrot, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+						ActivateReceptor(2, Branches.React_Bot_Bigrot, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 						return;
 					}
 					else
 					{
-						ActivateReceptor(1, Branch.React_Bot_NoBigrot, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+						ActivateReceptor(1, Branches.React_Bot_NoBigrot, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 						return;
 					}
 				}
 
 				if (dig < G.Digestion)
 				{
-					ActivateReceptor(2, Branch.React_Bot_LessDigestion, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+					ActivateReceptor(2, Branches.React_Bot_LessDigestion, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 					return;
 				}
 
 
 				if (dig > G.Digestion)
 				{
-					ActivateReceptor(2, Branch.React_Bot_BiggerDigestion, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
+					ActivateReceptor(2, Branches.React_Bot_BiggerDigestion, dirToContact, recContactBot.Xd, recContactBot.Yd, recContactBot);
 					return;
 				}
 			}
@@ -281,19 +281,19 @@ namespace WindowsFormsApp1.GameLogic
 		// 3 - рядом еда
 		private void ActivateReceptor3(int dirToContact, double contactX, double contactY)
 		{
-			ActivateReceptor(4, Branch.React_Grass, dirToContact, contactX, contactY, null);
+			ActivateReceptor(4, Branches.React_Grass, dirToContact, contactX, contactY, null);
 		}
 
 		// 4 - рядом минерал
 		private void ActivateReceptor4(int dirToContact, double contactX, double contactY)
 		{
-			ActivateReceptor(5, Branch.React_Mineral, dirToContact, contactX, contactY, null);
+			ActivateReceptor(5, Branches.React_Mineral, dirToContact, contactX, contactY, null);
 		}
 
 		// 5 - рядом край/стена
 		private void ActivateReceptor5(int dirToContact, double contactX, double contactY)
 		{
-			ActivateReceptor(6, Branch.React_Wall, dirToContact, contactX, contactY, null);
+			ActivateReceptor(6, Branches.React_Wall, dirToContact, contactX, contactY, null);
 		}
 		#endregion
 
@@ -465,16 +465,16 @@ namespace WindowsFormsApp1.GameLogic
 				if (ConnectedToBot.Alive && ConnectedToBot.Num == ConnectedToBotNum)
 				{
 					var de = Energy - ConnectedToBot.Energy;
-					//if (de > 20 /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
-					//{
-					//	var transferedEnergy = EnergyChange(-de / 2);
-					//	_connectedToBot.EnergyChange(transferedEnergy);
-					//	if (transferedEnergy < 0) throw new Exception("dfgdfg");
-					//}
+					if (de > 20 /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
+					{
+						var transferedEnergy = EnergyChange(-de / 2);
+						ConnectedToBot.EnergyChange(transferedEnergy);
+						if (transferedEnergy < 0) throw new Exception("dfgdfg");
+					}
 
 					//if (de < -20 /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
 					//{
-					//	var transferedEnergy = _connectedToBot.EnergyChange(de / 2);
+					//	var transferedEnergy = ConnectedToBot.EnergyChange(de / 2);
 					//	EnergyChange(transferedEnergy);
 					//	if (transferedEnergy < 0) throw new Exception("dfgdfg");
 					//}
@@ -528,6 +528,12 @@ namespace WindowsFormsApp1.GameLogic
 			{
 				(ev, p_H, cmd, par) = GetCommand();
 
+				if (externalInfluence && Data.CmdClass[cmd] == CmdClass.Step)
+				{
+					cmd = Cmd.Nothing;
+				}
+
+
 				t = Test2.Mark(4, t);
 
 				cntJmp++;
@@ -580,6 +586,8 @@ namespace WindowsFormsApp1.GameLogic
 					какое сейчас время года - в зависимости от времени года меняеьтся поведения бота - может зимой он стремится вверх летом вниз
 				 */
 
+
+
 				switch (cmd)
 				{
 					//звать на помощь родню
@@ -610,9 +618,14 @@ namespace WindowsFormsApp1.GameLogic
 					//снизить уровни атаки бота
 					//отключить защиту бота
 					//перебросить бота за себя
+					//перебросить бота в сторону0
+					//поменяться местами
+
 					//оттолкнуть / ударить бота
 					//оттолкнуть всех окружающих ботов
+					//оттолкнуть всех окружающих ботов с большого радиуса
 					//притянуть бота
+					//притянуть ботов с большого радиуса
 					//превратить в своего
 					//высосать энергию из окружающих ботов в каком - то радиусе
 
@@ -646,6 +659,7 @@ namespace WindowsFormsApp1.GameLogic
 
 					//переместится перед ботом
 					//переместится сзади бота
+					//перепрыгнуть бота
 					//встать рядом с ботом
 					//копировать движеия
 					//не двигаться на этом шаге
@@ -667,6 +681,7 @@ namespace WindowsFormsApp1.GameLogic
 					//сцепиться с родней
 					//#прицепиться к контакту
 					//прицепить к себе контакта
+					//держаться на определенном расстоянии от того к кому прицеплен, например не больше 10
 
 					default: throw new Exception();
 				};
@@ -712,7 +727,11 @@ namespace WindowsFormsApp1.GameLogic
 			if (Data.HistoryOn) hist.EndNewStep(_tm);
 
 			_tm -= 100;
-			//if (_tm < 0) _tm = 0;
+			if (_tm < 0) _tm = 0;
+			//if (_tm < -10000)
+			//{
+			//	throw new Exception("67343");
+			//}	
 
 			ShiftPointerGeneralToNextBranch();
 
@@ -1087,11 +1106,17 @@ namespace WindowsFormsApp1.GameLogic
 				return false;
 			}
 
-			// Не может распространяться более чем 50% от всех ботов
+			// Не может распространяться более чем 40% от всех ботов
 			if (G.CurBots >= Data.CurrentNumberOfBots * 0.4)
 			{
 				return false;
 			}
+
+			// Не может есть многоклетоочных
+			//if (eatedBot.ConnectedTo && eatedBot.ConnectedToBot.Alive && eatedBot.ConnectedToBot.Num == eatedBot.ConnectedToBotNum)
+			//{
+			//	return false;
+			//}
 
 			//var olden = Energy;
 			var atc = 0;
@@ -1256,11 +1281,14 @@ namespace WindowsFormsApp1.GameLogic
 			bool edge = false; int xEdge = 0, yEdge = 0;
 			bool grass = false; int xGrass = 0, yGrass = 0;
 
+			var nrnd = ThreadSafeRandom.Next(cnt);
 
 
-			for (var n = 0; n < cnt; n++)
+			for (var i = 0; i < cnt; i++)
 			{
-				(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n, widht);
+				nrnd++; if (nrnd >= cnt) nrnd = 0;
+
+				(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, nrnd, widht);
 
 				if (!IsItEdge(nXi, nYi))
 				{

@@ -49,54 +49,41 @@ namespace WindowsFormsApp1.Enums
 
 		public static int MaxCmdChance = 50;
 		public const byte _ = 0;
-		
+		public const byte Y = 1;
+
 		public static (string CmdName, Color CmdColor, int CmdChance, byte CmdClass, byte WithParameters, 
 			byte General, byte EnemyDangerous, byte EnemyNoDangerous, byte Relative, byte Things) CmdInfo(byte cmd)
 		{
 			return cmd switch
 			{
-				Cmd.RotateAbsolute =>			("Поворот_абсолютно",				Color.Orange,	2,		CmdClass.Rotate,	1,		_,_,_,_,_																),
-				Cmd.RotateRelative =>			("Поворот_относительно",			Color.Orange,	10,		CmdClass.Rotate,	1,		_,_,_,_,_																),
-				Cmd.RotateRelativeContact =>	("Поворот_относительно_контакта",	Color.Orange,	10,		CmdClass.Rotate,	1,		_,_,_,_,_																),
-				Cmd.RotateToContact =>			("Поворот_к_контакту",				Color.Orange,	20,		CmdClass.Rotate,	_,		_,_,_,_,_																),
-				Cmd.RotateBackward =>			("Поворот_назад",					Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,_,_																),
-				Cmd.RotateBackwardContact =>	("Поворот_назад_от_контакта",		Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,_,_																),
-				Cmd.RotateRandom =>				("Поворот_случайно",				Color.Orange,	2,		CmdClass.Rotate,	_,		_,_,_,_,_																),
-				Cmd.AlignHorizontaly =>			("Выровняться_по_горизонтали",		Color.Orange,	1,		CmdClass.Rotate,	_,		_,_,_,_,_																),
-				Cmd.RotateParallelContact =>	("Поворот_параллельно_контакту",	Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,_,_																),
-				Cmd.StepAbsolute =>				("Шаг_абсолютно",					Color.Red,		0,		CmdClass.Step,		1,		_,_,_,_,_																),
-				Cmd.StepForward =>				("Шаг_вперед",						Color.Red,		20,		CmdClass.Step,		_,		_,_,_,_,_																),
-				Cmd.StepRelative =>				("Шаг_относительно",				Color.Red,		10,		CmdClass.Step,		1,		_,_,_,_,_																),
-				Cmd.StepRelativeContact =>		("Шаг_относительно_контакта",		Color.Red,		10,		CmdClass.Step,		1,		_,_,_,_,_																),
-				Cmd.StepBackward =>				("Шаг_назад",						Color.Red,		10,		CmdClass.Step,		_,		_,_,_,_,_																),
-				Cmd.StepBackwardContact =>		("Шаг_назад_от_контакта",			Color.Red,		10,		CmdClass.Step,		_,		_,_,_,_,_																),
-				Cmd.StepToContact =>			("Шаг_к_контакту",					Color.Red,		10,		CmdClass.Step,		_,		_,_,_,_,_																),
-				Cmd.StepNearContact =>			("Шаг_рядом_к_контакту",			Color.Red,		10,		CmdClass.Step,		1,		_,_,_,_,_																),
-				Cmd.EatForward =>				("Есть_впереди",					Color.Green,	20,		CmdClass.Eat,		_,		_,_,_,_,_																),
-				Cmd.EatContact =>				("Есть_контакт",					Color.Green,	10,		CmdClass.Eat,		_,		_,_,_,_,_																),
-				Cmd.LookForward =>				("Смотреть_вперед",					Color.Blue,		20,		CmdClass.Look,		_,		_,_,_,_,_																),
-				Cmd.LookAround1 =>				("Смотреть_вокруг_на_1",			Color.Blue,		40,		CmdClass.Look,		_,		_,_,_,_,_																),
-				Cmd.LookAround2 =>				("Смотреть_вокруг_на_2",			Color.Blue,		40,		CmdClass.Look,		_,		_,_,_,_,_																),
-				Cmd.ClingToContact =>			("Прицепиться_к_контакту",			Color.Magenta,	10,		CmdClass.Other,		_,		_,_,_,_,_																),
-				Cmd.Nothing =>					("Ничего_не_делать",				Color.Magenta,	0,		CmdClass.Other,		_,		_,_,_,_,_																),
-				Cmd.PushContact =>				("Оттолкнуть_контакт",				Color.Magenta,	20,		CmdClass.Other,		_,		_,_,_,_,_																),
+				Cmd.RotateAbsolute =>			("Поворот_абсолютно",				Color.Orange,	2,		CmdClass.Rotate,	Y,		Y,_,_,_,_													),
+				Cmd.RotateRelative =>			("Поворот_относительно",			Color.Orange,	10,		CmdClass.Rotate,	Y,		Y,Y,Y,Y,Y													),
+				Cmd.RotateBackward =>			("Поворот_назад",					Color.Orange,	10,		CmdClass.Rotate,	_,		Y,Y,_,Y,Y													),
+				Cmd.RotateRandom =>				("Поворот_случайно",				Color.Orange,	2,		CmdClass.Rotate,	_,		Y,Y,Y,Y,Y													),
+				Cmd.AlignHorizontaly =>			("Выровняться_по_горизонтали",		Color.Orange,	1,		CmdClass.Rotate,	_,		Y,_,_,_,_													),
+				Cmd.RotateRelativeContact =>	("Поворот_относительно_контакта",	Color.Orange,	10,		CmdClass.Rotate,	Y,		_,Y,Y,Y,Y													),
+				Cmd.RotateToContact =>			("Поворот_к_контакту",				Color.Orange,	20,		CmdClass.Rotate,	_,		_,Y,Y,Y,Y													),
+				Cmd.RotateBackwardContact =>	("Поворот_назад_от_контакта",		Color.Orange,	10,		CmdClass.Rotate,	_,		_,Y,_,Y,Y													),
+				Cmd.RotateParallelContact =>	("Поворот_параллельно_контакту",	Color.Orange,	10,		CmdClass.Rotate,	_,		_,_,_,Y,Y													),
+				Cmd.StepAbsolute =>				("Шаг_абсолютно",					Color.Red,		0,		CmdClass.Step,		Y,		_,_,_,_,_													),
+				Cmd.StepForward =>				("Шаг_вперед",						Color.Red,		20,		CmdClass.Step,		_,		Y,Y,Y,Y,Y													),
+				Cmd.StepRelative =>				("Шаг_относительно",				Color.Red,		10,		CmdClass.Step,		Y,		Y,Y,Y,Y,Y													),
+				Cmd.StepBackward =>				("Шаг_назад",						Color.Red,		10,		CmdClass.Step,		_,		Y,Y,_,Y,Y													),
+				Cmd.StepRelativeContact =>		("Шаг_относительно_контакта",		Color.Red,		10,		CmdClass.Step,		Y,		_,Y,Y,Y,Y													),
+				Cmd.StepBackwardContact =>		("Шаг_назад_от_контакта",			Color.Red,		10,		CmdClass.Step,		_,		_,Y,_,Y,Y													),
+				Cmd.StepToContact =>			("Шаг_к_контакту",					Color.Red,		10,		CmdClass.Step,		_,		_,Y,Y,Y,Y													),
+				Cmd.StepNearContact =>			("Шаг_рядом_к_контакту",			Color.Red,		10,		CmdClass.Step,		Y,		_,Y,Y,Y,Y													),
+				Cmd.EatForward =>				("Есть_впереди",					Color.Green,	20,		CmdClass.Eat,		_,		Y,Y,Y,Y,Y													),
+				Cmd.EatContact =>				("Есть_контакт",					Color.Green,	10,		CmdClass.Eat,		_,		_,_,_,_,_													),
+				Cmd.LookForward =>				("Смотреть_вперед",					Color.Blue,		20,		CmdClass.Look,		_,		_,_,_,_,_													),
+				Cmd.LookAround1 =>				("Смотреть_вокруг_на_1",			Color.Blue,		40,		CmdClass.Look,		_,		_,_,Y,_,_													),
+				Cmd.LookAround2 =>				("Смотреть_вокруг_на_2",			Color.Blue,		40,		CmdClass.Look,		_,		Y,_,Y,_,_													),
+				Cmd.ClingToContact =>			("Прицепиться_к_контакту",			Color.Magenta,	10,		CmdClass.Other,		_,		_,_,_,Y,_													),
+				Cmd.Nothing =>					("Ничего_не_делать",				Color.Magenta,	0,		CmdClass.Other,		_,		_,_,_,_,_													),
+				Cmd.PushContact =>				("Оттолкнуть_контакт",				Color.Magenta,	20,		CmdClass.Other,		_,		_,Y,Y,Y,_													),
 				_ => throw new Exception()
 			};
 		}
-
-
-
-
-		public static HashSet<byte> CommandsWithParameter = new HashSet<byte>()
-		{
-			Cmd.StepAbsolute,
-			Cmd.RotateAbsolute,
-			Cmd.RotateRelative,
-			Cmd.RotateRelativeContact,
-			Cmd.StepRelative,
-			Cmd.StepRelativeContact,
-			Cmd.StepNearContact
-		};
 	}
 
 	public static class CmdClass
@@ -148,258 +135,6 @@ namespace WindowsFormsApp1.Enums
 				CmdType.PushContactSuccessful => 50,
 				CmdType.PushContactNotSuccessful => 10,
 				_ => throw new Exception()
-			};
-		}
-	}
-
-	public static class Branch
-	{
-		public static int AllBranchCount = 20;
-		public static int GeneralBranchCount = 10;
-
-		public const byte General0 = 0;
-		public const byte General1 = 1;
-		public const byte General2 = 2;
-		public const byte General3 = 3;
-		public const byte General4 = 4;
-		public const byte General5 = 5;
-		public const byte General6 = 6;
-		public const byte General7 = 7;
-		public const byte General8 = 8;
-		public const byte General9 = 9;
-		public const byte React_Bite = 10;
-		public const byte React_Bot_Enemy = 11;
-		public const byte React_Bot_NoBigrot = 12;
-		public const byte React_Bot_Bigrot = 13;
-		public const byte React_Bot_LessDigestion = 14;
-		public const byte React_Bot_BiggerDigestion = 15;
-		public const byte React_Bot_Relat = 16;
-		public const byte React_Grass = 17;
-		public const byte React_Mineral = 18;
-		public const byte React_Wall = 19;
-
-		public static string BranchName(byte cmd)
-		{
-			return cmd switch
-			{
-				Branch.General0 => "Gen0",
-				Branch.General1 => "Gen1",
-				Branch.General2 => "Gen2",
-				Branch.General3 => "Gen3",
-				Branch.General4 => "Gen4",
-				Branch.General5 => "Gen5",
-				Branch.General6 => "Gen6",
-				Branch.General7 => "Gen7",
-				Branch.General8 => "Gen8",
-				Branch.General9 => "Gen9",
-				Branch.React_Bite => "bite",
-				Branch.React_Bot_Enemy => "bot enemy",
-				Branch.React_Bot_NoBigrot => "bot nobigrot",
-				Branch.React_Bot_Bigrot => "bot bigrot",
-				Branch.React_Bot_LessDigestion => "bot less dig",
-				Branch.React_Bot_BiggerDigestion => "bot bigger dig",
-				Branch.React_Bot_Relat => "bot rel",
-				Branch.React_Grass => "grass",
-				Branch.React_Mineral => "mineral",
-				Branch.React_Wall => "wall",
-				_ => throw new NotImplementedException()
-			};
-		}
-
-		public static byte[] BranchCmds(byte branch)
-		{
-			var generalCmds = new byte[]
-			{
-				Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				//Cmd.RotateRelativeContact,
-				//Cmd.RotateToContact,
-				Cmd.RotateBackward,
-				//Cmd.RotateBackwardContact,
-				Cmd.RotateRandom,
-				Cmd.AlignHorizontaly,
-				Cmd.StepForward,
-				Cmd.StepRelative,
-				//Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				//Cmd.StepBackwardContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				//Cmd.LookAround1,
-				Cmd.LookAround2  
-			};
-
-			var bot_enemyCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateToContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				Cmd.RotateRandom,
-				//Cmd.RotateParallelContact,
-				//Cmd.AlignHorizontaly,
-				Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				Cmd.StepNearContact,
-				Cmd.StepToContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				//Cmd.LookAround1,
-				//Cmd.LookAround2,
-				//Cmd.ClingToContact
-				Cmd.PushContact
-			};
-
-			var bot_relCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateToContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				Cmd.RotateRandom,
-				Cmd.RotateParallelContact,
-				//Cmd.AlignHorizontaly,
-				Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				Cmd.StepToContact,
-				Cmd.StepNearContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				//Cmd.LookAround1,
-				//Cmd.LookAround2,
-				Cmd.ClingToContact,
-				Cmd.PushContact
-			};
-
-			var thingCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateToContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				Cmd.RotateRandom,
-				Cmd.RotateParallelContact,
-				//Cmd.AlignHorizontaly,
-				Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				Cmd.StepToContact,
-				Cmd.StepNearContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				//Cmd.LookAround1,
-				//Cmd.LookAround2
-			};
-
-
-			#region comment BranchCmds
-			/*
-			var bot_biteCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				//Cmd.RotateRandom,
-				//Cmd.AlignHorizontaly,
-				//Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				//Cmd.LookAround1,
-				//Cmd.LookAround2
-			};
-
-			var bot_lessdigCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				//Cmd.RotateBackward,
-				//Cmd.RotateBackwardContact,
-				//Cmd.RotateRandom,
-				//Cmd.AlignHorizontaly,
-				//Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				//Cmd.StepBackward,
-				//Cmd.StepBackwardContact,
-				Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				Cmd.LookAround1,
-				Cmd.LookAround2
-			};
-
-			var bot_bigdigCmds = new byte[]
-			{
-				//Cmd.RotateAbsolute,
-				Cmd.RotateRelative,
-				Cmd.RotateRelativeContact,
-				Cmd.RotateBackward,
-				Cmd.RotateBackwardContact,
-				//Cmd.RotateRandom,
-				//Cmd.AlignHorizontaly,
-				//Cmd.StepForward,
-				Cmd.StepRelative,
-				Cmd.StepRelativeContact,
-				Cmd.StepBackward,
-				Cmd.StepBackwardContact,
-				//Cmd.EatForward,
-				//Cmd.EatContact,
-				//Cmd.LookForward,
-				//Cmd.LookAround1,
-				//Cmd.LookAround2
-			};
-			*/
-			#endregion
-
-			return branch switch
-			{
-				Branch.General0 => generalCmds,
-				Branch.General1 => generalCmds,
-				Branch.General2 => generalCmds,
-				Branch.General3 => generalCmds,
-				Branch.General4 => generalCmds,
-				Branch.General5 => generalCmds,
-				Branch.General6 => generalCmds,
-				Branch.General7 => generalCmds,
-				Branch.General8 => generalCmds,
-				Branch.General9 => generalCmds,
-				Branch.React_Bite => bot_enemyCmds,
-				Branch.React_Bot_Enemy => bot_enemyCmds,
-				Branch.React_Bot_NoBigrot => bot_enemyCmds,
-				Branch.React_Bot_Bigrot => bot_enemyCmds,
-				Branch.React_Bot_LessDigestion => bot_enemyCmds,
-				Branch.React_Bot_BiggerDigestion => bot_enemyCmds,
-				Branch.React_Bot_Relat => bot_relCmds,
-				Branch.React_Grass => thingCmds,
-				Branch.React_Mineral => thingCmds,
-				Branch.React_Wall => thingCmds,
-				_ => throw new NotImplementedException()
 			};
 		}
 	}

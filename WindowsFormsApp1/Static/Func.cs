@@ -652,7 +652,7 @@ namespace WindowsFormsApp1.Static
 		{
 			int prob;
 			byte cmd;
-			var cmds = Branch.BranchCmds((byte)branch);
+			var cmds = Branches.BranchCmds((byte)branch);
 
 			do
 			{

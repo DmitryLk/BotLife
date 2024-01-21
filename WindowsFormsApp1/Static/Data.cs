@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
@@ -158,15 +159,22 @@ namespace WindowsFormsApp1.Static
 		public static bool DgvOnlyLive;
 		public static bool DgvPra;
 
+		public static bool GridWalls;
+		// public static Log.Log Wlog;
+
+
 		// Commands
-		public static bool[] CmdWithParameter;
 		public static string[] CmdName;
 		public static Color[] CmdColor;
 		public static int[] CmdChance;
 		public static byte[] CmdClass;
+		public static bool[] CmdWithParameter;
 
-		public static bool GridWalls;
-		// public static Log.Log Wlog;
+		public static byte[] CmdGeneralCmds;
+		public static byte[] CmdEnemyDangerousCmds;
+		public static byte[] CmdEnemyNoDangerousCmds;
+		public static byte[] CmdRelativeCmds;
+		public static byte[] CmdThingsCmds;
 
 		public static void Initialize()
 		{
@@ -235,21 +243,23 @@ namespace WindowsFormsApp1.Static
 				GrColors[hue] = ColorFromHSV(hue, 1, 1);
 			}
 
-			CmdWithParameter = new bool[Data.MaxCode + 1];
 			CmdName = new string[Data.MaxCode + 1];
 			CmdColor = new Color[Data.MaxCode + 1];
 			CmdChance = new int[Data.MaxCode + 1];
 			CmdClass = new byte[Data.MaxCode + 1];
-			Array.Clear(CmdWithParameter, 0, Data.MaxCode + 1);
+			CmdWithParameter = new bool[Data.MaxCode + 1];
+
 			Array.Clear(CmdName, 0, Data.MaxCode + 1);
 			Array.Clear(CmdColor, 0, Data.MaxCode + 1);
 			Array.Clear(CmdChance, 0, Data.MaxCode + 1);
 			Array.Clear(CmdClass, 0, Data.MaxCode + 1);
+			Array.Clear(CmdWithParameter, 0, Data.MaxCode + 1);
 
-			foreach (var c in Cmd.CommandsWithParameter)
-			{
-				CmdWithParameter[c] = true;
-			}
+			var CmdGeneralCmdsB = new List<byte>();
+			var CmdEnemyDangerousCmdsB = new List<byte>();
+			var CmdEnemyNoDangerousCmdsB = new List<byte>();
+			var CmdRelativeCmdsB = new List<byte>();
+			var CmdThingsCmdsB = new List<byte>();
 
 			FieldInfo[] fields = typeof(Cmd).GetFields();
 			foreach (FieldInfo fi in fields)
@@ -263,8 +273,21 @@ namespace WindowsFormsApp1.Static
 					CmdColor[cmd] = cmdInfo.CmdColor;
 					CmdChance[cmd] = cmdInfo.CmdChance;
 					CmdClass[cmd] = cmdInfo.CmdClass;
+					CmdWithParameter[cmd] = cmdInfo.WithParameters == 1;
+
+					if (cmdInfo.General == 1) CmdGeneralCmdsB.Add(cmd);
+					if (cmdInfo.EnemyDangerous == 1) CmdEnemyDangerousCmdsB.Add(cmd);
+					if (cmdInfo.EnemyNoDangerous == 1) CmdEnemyNoDangerousCmdsB.Add(cmd);
+					if (cmdInfo.Relative == 1) CmdRelativeCmdsB.Add(cmd);
+					if (cmdInfo.Things == 1) CmdThingsCmdsB.Add(cmd);
 				}
 			}
+
+			CmdGeneralCmds = CmdGeneralCmdsB.ToArray();
+			CmdEnemyDangerousCmds = CmdEnemyDangerousCmdsB.ToArray();
+			CmdEnemyNoDangerousCmds = CmdEnemyNoDangerousCmdsB.ToArray();
+			CmdRelativeCmds = CmdRelativeCmdsB.ToArray();
+			CmdThingsCmds = CmdThingsCmdsB.ToArray();
 
 			//var maxcmd = 0;
 			//FieldInfo[] fields = typeof(Cmd).GetFields(BindingFlags.Static | BindingFlags.Public);
