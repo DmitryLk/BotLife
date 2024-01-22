@@ -16,6 +16,7 @@ namespace WindowsFormsApp1.Enums
 		PlantPredator = 3,
 		Energy = 4,
 		Age = 5,
-		GenomAge = 6
+		GenomAge = 6,
+		Connected = 7
 	}
 }

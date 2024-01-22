@@ -361,6 +361,7 @@ namespace WindowsFormsApp1.GameLogic
 				BotColorMode.Energy => GetGraduatedColor(Energy, 0, 6000),
 				BotColorMode.Age => GetGraduatedColor(500 - Age, 0, 500),
 				BotColorMode.GenomAge => GetGraduatedColor(6000 - (int)(Data.CurrentStep - G.BeginStep), 0, 6000),
+				BotColorMode.Connected => ConnectedTo ? Color.Red : Color.Green,
 				_ => throw new Exception("Color = Data.BotColorMode switch")
 			};
 		}
@@ -482,7 +483,7 @@ namespace WindowsFormsApp1.GameLogic
 					var dx = ConnectedToBot.Xi - Xi;
 					var dy = ConnectedToBot.Yi - Yi;
 
-					if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
+					if (dx < -3 || dx > 3 || dy < -3 || dy > 3)
 					{
 						var dir = Dir.GetDirectionTo(Xd, Yd, ConnectedToBot.Xd, ConnectedToBot.Yd);
 						_forced = false;
@@ -494,6 +495,14 @@ namespace WindowsFormsApp1.GameLogic
 				else
 				{
 					ConnectedTo = false;
+					if (Data.BotColorMode == BotColorMode.Connected)
+					{
+						RefreshColor();
+						if (Data.DrawType == DrawType.OnlyChangedCells)
+						{
+							Func.FixChangeCell(Xi, Yi, Color);
+						}
+					}
 				}
 			}
 
@@ -742,7 +751,7 @@ namespace WindowsFormsApp1.GameLogic
 		//// Rotate
 		private int RotateAbsolute(int dir)
 		{
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(dir);
 
@@ -751,7 +760,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int RotateRelative(int dir)
 		{
-			var tm = Dir.GetDirDiff(0, dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(0, dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(Direction + dir);
 
@@ -760,7 +769,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int RotateRelativeContact(int dir)
 		{
-			var tm = Dir.GetDirDiff(Direction, _recDirToContact + dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, _recDirToContact + dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(_recDirToContact + dir);
 
@@ -769,7 +778,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int RotateToContact()
 		{
-			var tm = Dir.GetDirDiff(Direction, _recDirToContact) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, _recDirToContact) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(_recDirToContact);
 
@@ -778,7 +787,7 @@ namespace WindowsFormsApp1.GameLogic
 
 		private int RotateBackward()
 		{
-			var tm = Dir.NumberOfDirections / 2 * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.NumberOfDirections / 2 * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(Dir.GetOppositeDirection(Direction));
 
@@ -789,7 +798,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = Dir.GetOppositeDirection(_recDirToContact);
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(dir);
 
@@ -800,7 +809,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = Func.GetRandomDirection();
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(dir);
 
@@ -811,7 +820,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = 16;
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(dir);
 
@@ -822,7 +831,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var dir = _recContactDirection;
 
-			var tm = Dir.GetDirDiff(Direction, dir) * CmdType.CmdTime(CmdType.Rotate);
+			var tm = Dir.GetDirDiff(Direction, dir) * CmdClass.CmdSuccTime(CmdClass.Rotate);
 
 			Rotate(dir);
 
@@ -832,70 +841,70 @@ namespace WindowsFormsApp1.GameLogic
 		//// Step
 		private int StepAbsolute(int dir, bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step(dir);
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepForward(bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step(GetDirForward());
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepRelative(int dir, bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step((Direction + dir) % Dir.NumberOfDirections);
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepRelativeContact(int dir, bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step((_recDirToContact + dir) % Dir.NumberOfDirections);
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepBackward(bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step(Dir.GetOppositeDirection(Direction));
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepBackwardContact(bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step(Dir.GetOppositeDirection(_recDirToContact));
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepToContact(bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var move = Step(_recDirToContact);
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		private int StepNearContact(int dir, bool externalInfluence)
 		{
-			if (externalInfluence) return CmdType.CmdTime(CmdType.StepNotSuccessful);
+			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
 
 			var (deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
 
@@ -903,7 +912,7 @@ namespace WindowsFormsApp1.GameLogic
 
 			var move = Step(dir2);
 
-			return move ? CmdType.CmdTime(CmdType.StepSuccessful) : CmdType.CmdTime(CmdType.StepNotSuccessful);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
 		}
 
 		//// Eat
@@ -911,14 +920,14 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var eat = Eat(GetDirForward());
 
-			return eat ? CmdType.CmdTime(CmdType.EatSuccessful) : CmdType.CmdTime(CmdType.EatNotSuccessful);
+			return eat ? CmdClass.CmdSuccTime(CmdClass.Eat) : CmdClass.CmdNoSuccTime(CmdClass.Eat);
 		}
 
 		private int EatContact()
 		{
 			var eat = Eat(_recDirToContact);
 
-			return eat ? CmdType.CmdTime(CmdType.EatContactSuccessful) : CmdType.CmdTime(CmdType.EatContactNotSuccessful);
+			return eat ? CmdClass.CmdSuccTime(CmdClass.Eat) : CmdClass.CmdNoSuccTime(CmdClass.Eat);
 		}
 
 		//// Look
@@ -926,19 +935,19 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			Look(GetDirForward());
 
-			return CmdType.CmdTime(CmdType.Look);
+			return CmdClass.CmdSuccTime(CmdClass.Look);
 		}
 
 		private int LookAround1()
 		{
 			LookAround(1, 8);
-			return CmdType.CmdTime(CmdType.LookAround1);
+			return CmdClass.CmdSuccTime(CmdClass.LookAround1);
 		}
 
 		private int LookAround2()
 		{
 			LookAround(2, 24);
-			return CmdType.CmdTime(CmdType.LookAround2);
+			return CmdClass.CmdNoSuccTime(CmdClass.LookAround2);
 		}
 
 		private int ClingToContact()
@@ -949,11 +958,20 @@ namespace WindowsFormsApp1.GameLogic
 				ConnectedToBot = _recContactBot;
 				ConnectedToBotNum = _recContactBotNum;
 
-				return CmdType.CmdTime(CmdType.ClingToSuccessful);
+				if (Data.BotColorMode == BotColorMode.Connected)
+				{
+					RefreshColor();
+					if (Data.DrawType == DrawType.OnlyChangedCells)
+					{
+						Func.FixChangeCell(Xi, Yi, Color);
+					}
+				}
+
+				return CmdClass.CmdSuccTime(CmdClass.ClingToContact);
 			}
 			else
 			{
-				return CmdType.CmdTime(CmdType.ClingToNotSuccessful);
+				return CmdClass.CmdNoSuccTime(CmdClass.ClingToContact);
 			}
 		}
 
@@ -962,11 +980,11 @@ namespace WindowsFormsApp1.GameLogic
 			if (_recContactBot != null && _recContactBot.Alive && _recContactBot.Num == _recContactBotNum)
 			{
 				_recContactBot.Force(_recDirToContact);
-				return CmdType.CmdTime(CmdType.PushContactSuccessful);
+				return CmdClass.CmdSuccTime(CmdClass.PushContact);
 			}
 			else
 			{
-				return CmdType.CmdTime(CmdType.PushContactNotSuccessful);
+				return CmdClass.CmdNoSuccTime(CmdClass.PushContact);
 			}
 		}
 

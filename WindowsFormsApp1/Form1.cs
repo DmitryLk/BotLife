@@ -208,6 +208,7 @@ namespace WindowsFormsApp1
 					case Keys.F4: Game.ChangeBotColorMode(BotColorMode.Energy); break;
 					case Keys.F5: Game.ChangeBotColorMode(BotColorMode.Age); break;
 					case Keys.F6: Game.ChangeBotColorMode(BotColorMode.GenomAge); break;
+					case Keys.F7: Game.ChangeBotColorMode(BotColorMode.Connected); break;
 
 					case Keys.G: Game.GenomInfo(GenomInfoMode.OneTime); break;
 					case Keys.Y: Game.GenomInfo(GenomInfoMode.Periodical); break;
