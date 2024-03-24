@@ -119,7 +119,7 @@ namespace WindowsFormsApp1.Enums
 			};
 		}
 
-		public static int CmdNoSuccTime(byte cmd)
+		public static int CmdNoSuccessTime(byte cmd)
 		{
 			return cmd switch
 			{

@@ -14,37 +14,41 @@ namespace WindowsFormsApp1.GameLogic
 	{
 		public long Index;         // Индекс бота (может меняться)
 		public long Num;         // Номер бота (остается постоянным)
-		public bool Alive;
-		public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
-		public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
 		public int Direction;         // Направление бота
 		public int Age;
-		public int BiteMeCount;
-		public int BiteImCount;
-		public int DividedCount;
-		public Genom G;
-		public Color Color;
-		public Pointer PointerGeneral = new Pointer();
-		public Pointer PointerReaction = new Pointer();
-		public CodeHistory hist = new CodeHistory();
 		public double Xd;
 		public double Yd;
 		public int Xi;
 		public int Yi;
+
+		public Genom G;
+		public Color Color;
+		public Pointer PointerGeneral = new Pointer();
+		public Pointer PointerReaction = new Pointer();
+		private int _tm = 0;
+		private int _tmR = 0;
+		public CodeHistory hist = new CodeHistory();
+
+		public bool Alive;
+		public bool InsertedToDeathList;  // чтобы не вставить бота два раза в этот лист, только для этого
+		public bool InsertedToReproductionList;  // чтобы не вставить бота два раза в этот лист, только для этого
 		//public BotLog Log = new BotLog();
 
 		private int _en;
 		private int _size;
 		private int _reproductionCycle;
 		private long _moved = 0;
-		private int _tm = 0;
-		private int _tmR = 0;
 
 		public bool ConnectedTo;
 		public Bot1 ConnectedToBot;
 		public long ConnectedToBotNum;
+		
 		private bool _forced;
 		private int _forcedDir;
+
+		public int BiteMeCount;
+		public int BiteImCount;
+		public int DividedCount;
 
 		public void Init(int x, int y, long ind, int en, Genom genom)
 		{
@@ -71,6 +75,8 @@ namespace WindowsFormsApp1.GameLogic
 			_recActive = false;
 			_moved = 0;
 			_reproductionCycle = 0;
+
+			_forced = false;
 
 			ConnectedTo = false;
 			ConnectedToBot = null;
@@ -173,6 +179,7 @@ namespace WindowsFormsApp1.GameLogic
 			//}
 		}
 
+		//EXTERNAL INFLUENCE ON BOT
 		public void Force(int forceDir)
 		{
 			_forcedDir = forceDir;
@@ -190,6 +197,7 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			ActivateReceptor2(dir, isRel, recContactBot);
 		}
+		// END EXTERNAL INFLUENCE ON BOT
 
 		#region Receptors
 		private void ActivateReceptor(byte recWeight, byte bNew, int dirToContact, double contactX, double contactY, Bot1 recContactBot)
@@ -394,7 +402,6 @@ namespace WindowsFormsApp1.GameLogic
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 			//Func.CheckWorld2(Index, Num, Xi, Yi);
 
-
 			t = Test2.Mark(1, t);
 
 			CommandCycle();
@@ -429,36 +436,7 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 
-		private (bool Ev, Pointer Pointer, byte Cmd, byte Par) GetCommand()
-		{
-			if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
-			{
-				if (_recNew) // новая сработка рецептора. Обновление PointerReaction делается только здесь
-				{
-					lock (_busyReceptors)
-					{
-						if (_recNew)
-						{
-							PointerReaction.B = (byte)(_recNewBranch);
-							PointerReaction.CmdNum = 0;
-							_recNew = false;
-							_tmR = 0;
-						}
-					}
-				}
-
-				var (cmd, par) = G.GetReactionCommandAndSetAct(PointerReaction, true);
-
-				return (true, PointerReaction, cmd, par);
-			}
-			else
-			{
-				var (cmd, par) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
-				return (false, PointerGeneral, cmd, par);
-			}
-		}
-
-		private bool ProcessExternalForce()
+		private (CmdT CmdT, Pointer Pointer, byte Cmd, byte Par) GetCommand()
 		{
 			if (ConnectedTo)
 			{
@@ -483,13 +461,11 @@ namespace WindowsFormsApp1.GameLogic
 					var dx = ConnectedToBot.Xi - Xi;
 					var dy = ConnectedToBot.Yi - Yi;
 
-					if (dx < -3 || dx > 3 || dy < -3 || dy > 3)
+					if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
 					{
 						var dir = Dir.GetDirectionTo(Xd, Yd, ConnectedToBot.Xd, ConnectedToBot.Yd);
-						_forced = false;
-						Step(dir);
-						if (Data.HistoryOn) hist.SaveForcedCmdToHistory(Cmd.StepAbsolute, (byte)dir, 0);
-						return true;
+						//_forced = false;
+						return (CmdT.Force, null, Cmd.StepAbsolute, (byte)dir);
 					}
 				}
 				else
@@ -509,45 +485,55 @@ namespace WindowsFormsApp1.GameLogic
 			if (_forced)
 			{
 				_forced = false;
-				Step(_forcedDir);
-				if (Data.HistoryOn) hist.SaveForcedCmdToHistory(Cmd.StepAbsolute, (byte)_forcedDir, 0);
-				return true;
+				return (CmdT.Force, null, Cmd.StepAbsolute, (byte)_forcedDir);
 			}
 
-			return false;
-		}
+			if (_recActive)  // Есть сигнал от рецепторов. Цикл по командам конкретного event.
+			{
+				if (_recNew) // Это новая сработка рецептора? Обновление PointerReaction делается только здесь
+				{
+					lock (_busyReceptors)
+					{
+						if (_recNew)
+						{
+							PointerReaction.B = (byte)(_recNewBranch);
+							PointerReaction.CmdNum = 0;
+							_recNew = false;
+							_tmR = 0;
+						}
+					}
+				}
 
+				var (cmd1, par1) = G.GetReactionCommandAndSetAct(PointerReaction, true);
+
+				return (CmdT.Event, PointerReaction, cmd1, par1);
+			}
+
+			var (cmd2, par2) = G.GetGeneralCommandAndSetAct(PointerGeneral, true);
+			return (CmdT.General, PointerGeneral, cmd2, par2);
+		}
 
 		private void CommandCycle()
 		{
 			byte cmd, par;
-			bool ev, lastcmd = false;
+			CmdT cmdT;
+			bool lastcmd = false;
 			int cntJmp = 0;
 			long t, t2;
 			int tm;
 			Pointer p_H;
 
 			if (Data.HistoryOn) hist.BeginNewStep(_tm);
-
 			t = Stopwatch.GetTimestamp();
-
-			var externalInfluence = ProcessExternalForce();
 
 			while (_tm < 100 && !lastcmd && cntJmp < 10)
 			{
-				(ev, p_H, cmd, par) = GetCommand();
-
-				if (externalInfluence && Data.CmdClass[cmd] == CmdClass.Step)
-				{
-					cmd = Cmd.Nothing;
-				}
-
-
+				(cmdT, p_H, cmd, par) = GetCommand();
 				t = Test2.Mark(4, t);
-
 				cntJmp++;
 				tm = 0;
 
+				#region advices
 				/*
 					при каждой мутации масса может меняться вверх или вниз процентов на 10
 					более массивные расталкивают менее массивных
@@ -594,11 +580,11 @@ namespace WindowsFormsApp1.GameLogic
 					какое сейчас время суток - в зависимости от времени суток меняеьтся поведения бота - может утром он стремится вверх после обеда вниз
 					какое сейчас время года - в зависимости от времени года меняеьтся поведения бота - может зимой он стремится вверх летом вниз
 				 */
-
-
+				#endregion
 
 				switch (cmd)
 				{
+					#region advices
 					//звать на помощь родню
 					//двигаться к ближайшей родне
 					//рои
@@ -637,6 +623,7 @@ namespace WindowsFormsApp1.GameLogic
 					//притянуть ботов с большого радиуса
 					//превратить в своего
 					//высосать энергию из окружающих ботов в каком - то радиусе
+					#endregion
 
 					//// ROTATE
 					case Cmd.RotateAbsolute: tm = RotateAbsolute(par); break;
@@ -648,17 +635,20 @@ namespace WindowsFormsApp1.GameLogic
 					case Cmd.RotateParallelContact: tm = RotateParallelContact(); Test2.Mark(11, t); break;
 					case Cmd.RotateBackwardContact: tm = RotateBackwardContact(); Test2.Mark(13, t); break;
 					case Cmd.RotateToContact: tm = RotateToContact(); Test2.Mark(11, t); break;
+					#region advices
 					//не поворачиваться на этом шаге
+					#endregion
 
 					//// STEP
-					case Cmd.StepAbsolute: tm = StepAbsolute(par, externalInfluence); break;
-					case Cmd.StepRelative: tm = StepRelative(par, externalInfluence); break;
-					case Cmd.StepForward: tm = StepForward(externalInfluence); Test2.Mark(14, t); break;
-					case Cmd.StepBackward: tm = StepBackward(externalInfluence); Test2.Mark(16, t); break;
-					case Cmd.StepRelativeContact: tm = StepRelativeContact(par, externalInfluence); Test2.Mark(15, t); break;
-					case Cmd.StepBackwardContact: tm = StepBackwardContact(externalInfluence); Test2.Mark(17, t); break;
-					case Cmd.StepToContact: tm = StepToContact(externalInfluence); Test2.Mark(17, t); break;
-					case Cmd.StepNearContact: tm = StepNearContact(par, externalInfluence); Test2.Mark(17, t); break;
+					case Cmd.StepAbsolute: tm = StepAbsolute(par); break;
+					case Cmd.StepRelative: tm = StepRelative(par); break;
+					case Cmd.StepForward: tm = StepForward(); Test2.Mark(14, t); break;
+					case Cmd.StepBackward: tm = StepBackward(); Test2.Mark(16, t); break;
+					case Cmd.StepRelativeContact: tm = StepRelativeContact(par); Test2.Mark(15, t); break;
+					case Cmd.StepBackwardContact: tm = StepBackwardContact(); Test2.Mark(17, t); break;
+					case Cmd.StepToContact: tm = StepToContact(); Test2.Mark(17, t); break;
+					case Cmd.StepNearContact: tm = StepNearContact(par); Test2.Mark(17, t); break;
+					#region advises
 					//переместится под бота
 					//переместится к боту (притянуться к боту)
 					//переместится над ботом
@@ -672,7 +662,7 @@ namespace WindowsFormsApp1.GameLogic
 					//встать рядом с ботом
 					//копировать движеия
 					//не двигаться на этом шаге
-
+					#endregion
 
 					//// EAT
 					case Cmd.EatForward: tm = EatForward(); Test2.Mark(18, t); break;
@@ -687,10 +677,12 @@ namespace WindowsFormsApp1.GameLogic
 					case Cmd.ClingToContact: tm = ClingToContact(); break;
 					case Cmd.Nothing: tm = 0; break;
 					case Cmd.PushContact: tm = PushContact(); break;
+					#region advices
 					//сцепиться с родней
 					//#прицепиться к контакту
 					//прицепить к себе контакта
 					//держаться на определенном расстоянии от того к кому прицеплен, например не больше 10
+					#endregion
 
 					default: throw new Exception();
 				};
@@ -706,10 +698,20 @@ namespace WindowsFormsApp1.GameLogic
 
 				t2 = Stopwatch.GetTimestamp();
 
-				if (Data.HistoryOn && p_H != null) hist.SaveCmdToHistory(p_H, ev, tm);
+				if (cmdT == CmdT.Force) tm = 0;
+
+				// Запись в историю
+				if (Data.HistoryOn) 
+				{
+					if (cmdT == CmdT.General) hist.SaveCmdToHistory(p_H, false, tm);
+					if (cmdT == CmdT.Event) hist.SaveCmdToHistory(p_H, true, tm);
+					if (cmdT == CmdT.Force) hist.SaveForcedCmdToHistory(cmd, par, 0);
+				}
+
 				Test2.Mark(7, t2);
 
-				if (ev)
+				// Перевод указателя на следующую команду в программе
+				if (cmdT == CmdT.Event)
 				{
 					PointerReaction.CmdNum++;
 					//if (PointerReaction.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
@@ -722,7 +724,8 @@ namespace WindowsFormsApp1.GameLogic
 						_recActive = false; // завершаем команду реакции, переходим на обычные команды
 					}
 				}
-				else
+
+				if (cmdT == CmdT.General)
 				{
 					PointerGeneral.CmdNum++;
 					if (PointerGeneral.CmdNum >= Data.MaxCmdInStep) lastcmd = true;
@@ -839,80 +842,64 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		//// Step
-		private int StepAbsolute(int dir, bool externalInfluence)
+		private int StepAbsolute(int dir)
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step(dir);
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepForward(bool externalInfluence)
+		private int StepForward()
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step(GetDirForward());
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepRelative(int dir, bool externalInfluence)
+		private int StepRelative(int dir)
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step((Direction + dir) % Dir.NumberOfDirections);
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepRelativeContact(int dir, bool externalInfluence)
+		private int StepRelativeContact(int dir)
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step((_recDirToContact + dir) % Dir.NumberOfDirections);
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepBackward(bool externalInfluence)
+		private int StepBackward()
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step(Dir.GetOppositeDirection(Direction));
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepBackwardContact(bool externalInfluence)
+		private int StepBackwardContact()
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step(Dir.GetOppositeDirection(_recDirToContact));
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepToContact(bool externalInfluence)
+		private int StepToContact()
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var move = Step(_recDirToContact);
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
-		private int StepNearContact(int dir, bool externalInfluence)
+		private int StepNearContact(int dir)
 		{
-			if (externalInfluence) return CmdClass.CmdNoSuccTime(CmdClass.Step);
-
 			var (deltaXdouble, deltaYdouble) = Dir.Directions2[dir];
 
 			var dir2 = Dir.GetDirectionTo(Xd, Yd, _recContactX + deltaXdouble, _recContactY + deltaYdouble);
 
 			var move = Step(dir2);
 
-			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccTime(CmdClass.Step);
+			return move ? CmdClass.CmdSuccTime(CmdClass.Step) : CmdClass.CmdNoSuccessTime(CmdClass.Step);
 		}
 
 		//// Eat
@@ -920,14 +907,14 @@ namespace WindowsFormsApp1.GameLogic
 		{
 			var eat = Eat(GetDirForward());
 
-			return eat ? CmdClass.CmdSuccTime(CmdClass.Eat) : CmdClass.CmdNoSuccTime(CmdClass.Eat);
+			return eat ? CmdClass.CmdSuccTime(CmdClass.Eat) : CmdClass.CmdNoSuccessTime(CmdClass.Eat);
 		}
 
 		private int EatContact()
 		{
 			var eat = Eat(_recDirToContact);
 
-			return eat ? CmdClass.CmdSuccTime(CmdClass.Eat) : CmdClass.CmdNoSuccTime(CmdClass.Eat);
+			return eat ? CmdClass.CmdSuccTime(CmdClass.Eat) : CmdClass.CmdNoSuccessTime(CmdClass.Eat);
 		}
 
 		//// Look
@@ -947,7 +934,7 @@ namespace WindowsFormsApp1.GameLogic
 		private int LookAround2()
 		{
 			LookAround(2, 24);
-			return CmdClass.CmdNoSuccTime(CmdClass.LookAround2);
+			return CmdClass.CmdNoSuccessTime(CmdClass.LookAround2);
 		}
 
 		private int ClingToContact()
@@ -971,7 +958,7 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			else
 			{
-				return CmdClass.CmdNoSuccTime(CmdClass.ClingToContact);
+				return CmdClass.CmdNoSuccessTime(CmdClass.ClingToContact);
 			}
 		}
 
@@ -984,263 +971,11 @@ namespace WindowsFormsApp1.GameLogic
 			}
 			else
 			{
-				return CmdClass.CmdNoSuccTime(CmdClass.PushContact);
+				return CmdClass.CmdNoSuccessTime(CmdClass.PushContact);
 			}
 		}
 
 		//===================================================================================================
-
-		/*
-								########    ###    ######## 
-								##         ## ##      ##    
-								##        ##   ##     ##    
-								######   ##     ##    ##    
-								##       #########    ##    
-								##       ##     ##    ##    
-								######## ##     ##    ##    
-		 */
-		private bool Photosynthesis()
-		{
-			//if (Data.TotalEnergy < Data.KeptTotalEnergy && DividedCount == 0 && Yi < Data.PhotosynthesisLayerHeight)
-			if (Data.TotalEnergy < Data.KeptTotalEnergy && Yi < Data.PhotosynthesisLayerHeight)
-			{
-				EnergyChange(Data.PhotosynthesisEnergy);
-				Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-
-		private bool Eat(int dir)
-		{
-			if (G.Digestion == 0) // ТОЛЬКО ДЛЯ РАСТЕНИЙ
-			{
-				return Photosynthesis();
-			}
-
-			// Алгоритм:
-			// 1. Узнаем координаты клетки на которую надо съесть
-			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
-
-
-			// 2. Узнаем что находится на этой клетке
-			if (IsItEdge(nXi, nYi))
-			{
-				ActivateReceptor5(dir, nXi, nYi);
-				return false;
-			}
-
-			if (Data.World[nXi, nYi] == 65503)
-			{
-				ActivateReceptor5(dir, nXi, nYi);
-				return false;
-			}
-
-
-			// Grass
-			if (G.Digestion == 1)  // ТОЛЬКО ДЛЯ ТРАВОЯДНЫХ
-			{
-				bool grass = false;
-				if (Data.World[nXi, nYi] == 65500)
-				{
-					lock (_busyWorld1)
-					{
-						if (Data.World[nXi, nYi] == 65500)
-						{
-							Data.World[nXi, nYi] = 0;
-
-							grass = true;
-						}
-					}
-				}
-
-				if (grass)
-				{
-					EnergyChange(Data.FoodEnergy);
-					Interlocked.Add(ref Data.TotalEnergy, Data.FoodEnergy);
-					Interlocked.Decrement(ref Data.CurrentNumberOfFood);
-					if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
-					return true;
-				}
-			}
-
-
-			var cont = Data.World[nXi, nYi];
-
-			// Bot или Relative
-			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
-			{
-				return EatBot(cont, dir);
-			}
-			else
-			{
-				return false;
-			}
-		}
-
-
-		private bool EatBot(long cont, int dir)
-		{
-			var eatedBot = Data.Bots[cont];
-
-			// Может есть своего уровня или на уровень меньше.
-			if (eatedBot.G.Digestion != G.Digestion && eatedBot.G.Digestion + 1 != G.Digestion)
-			{
-				return false;
-			}
-
-			// Животное может есть растение, но ни тогда когда его осталось мало
-			if (eatedBot.G.Digestion == 0 && eatedBot.DividedCount == 0)
-			{
-				return false;
-				if (eatedBot.G.CurBots < 2)
-				{
-					return false;
-				}
-			}
-
-			//if (eatedBot.DividedCount == 0)
-			//{
-			//	return false;
-			//}
-
-			//if (eatedBot.G.CurBots < 10)
-			//{
-			//	return false;
-			//}
-
-			// Не может есть родственника
-			if (G.GenomHash == eatedBot.G.GenomHash)
-			{
-				return false;
-			}
-
-			// Не может есть нового
-			if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
-			{
-				return false;
-			}
-
-			// Не может распространяться более чем 40% от всех ботов
-			if (G.CurBots >= Data.CurrentNumberOfBots * 0.4)
-			{
-				return false;
-			}
-
-			// Не может есть многоклетоочных
-			//if (eatedBot.ConnectedTo && eatedBot.ConnectedToBot.Alive && eatedBot.ConnectedToBot.Num == eatedBot.ConnectedToBotNum)
-			//{
-			//	return false;
-			//}
-
-			//var olden = Energy;
-			var atc = 0;
-			//if (eatedBot.G.Digestion + 1 == G.Digestion)
-			//{
-			//	atc = 2;
-			//}
-
-			//if (eatedBot.G.Digestion == G.Digestion || eatedBot.G.Digestion + 1 == G.Digestion)
-			if (eatedBot.G.Digestion + 1 == G.Digestion || eatedBot.G.Digestion == G.Digestion)
-			{
-				for (var i = 0; i < G.AttackTypesCnt; i++)
-				{
-
-					//1
-					if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-					{
-						atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-					}
-
-					//2
-					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type]*2)
-					//{
-					//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type]*2;
-					//}
-
-					//3
-					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
-					//{
-					//	atc++;
-					//}
-
-					//4
-					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type] && eatedBot.G.Shield[G.AttackTypes[i].Type] == 0)
-					//{
-					//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
-					//}
-				}
-			}
-
-			if (atc > 0)
-			{
-				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
-
-				var k = 20;
-				if (!Moved && eatedBot.Moved) k = Data.MovedBiteStrength;
-
-				var requestedEnergy = Data.BiteEnergy * 10 / k * atc;
-
-				Interlocked.Increment(ref BiteImCount);
-				var gotEnergyByEating = eatedBot.Bite(requestedEnergy, Dir.GetOppositeDirection(dir), this);
-				EnergyChange(gotEnergyByEating);
-
-				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
-				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-
-
-			//eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
-			//Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
-		}
-
-		private void ShareEnergy()
-		{
-			// Передать энергию окружающим ботам
-			var n = ThreadSafeRandom.Next(8);
-			int nXi, nYi;
-			long cont;
-			int i = 0;
-			var ent = (Energy - Data.ReproductionBotEnergy) / 2;
-
-			if (ent > 0)
-			{
-				do
-				{
-					(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n, 1);
-
-					if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
-					{
-						cont = Data.World[nXi, nYi];
-
-						if (cont >= 1 && cont <= Data.CurrentNumberOfBots && G.IsRelative(Data.Bots[cont].G))
-						{
-							var targetBot = Data.Bots[cont];
-
-							if (Energy > targetBot.Energy /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
-							{
-								var transferedEnergy = EnergyChange(-ent);
-								targetBot.EnergyChange(transferedEnergy);
-								if (transferedEnergy < 0) throw new Exception("dfgdfg");
-							}
-						}
-					}
-					if (++n >= 8) n -= 8;
-					i++;
-				}
-				while (CanReproduct() && i <= 8);
-			}
-		}
-
-
 		/*
 							##        #######   #######  ##    ## 
 							##       ##     ## ##     ## ##   ##  
@@ -1505,6 +1240,257 @@ namespace WindowsFormsApp1.GameLogic
 		}
 
 		#endregion
+
+		/*
+								########    ###    ######## 
+								##         ## ##      ##    
+								##        ##   ##     ##    
+								######   ##     ##    ##    
+								##       #########    ##    
+								##       ##     ##    ##    
+								######## ##     ##    ##    
+		 */
+		private bool Photosynthesis()
+		{
+			//if (Data.TotalEnergy < Data.KeptTotalEnergy && DividedCount == 0 && Yi < Data.PhotosynthesisLayerHeight)
+			if (Data.TotalEnergy < Data.KeptTotalEnergy && Yi < Data.PhotosynthesisLayerHeight)
+			{
+				EnergyChange(Data.PhotosynthesisEnergy);
+				Interlocked.Add(ref Data.TotalEnergy, Data.PhotosynthesisEnergy);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		private bool Eat(int dir)
+		{
+			if (G.Digestion == 0) // ТОЛЬКО ДЛЯ РАСТЕНИЙ
+			{
+				return Photosynthesis();
+			}
+
+			// Алгоритм:
+			// 1. Узнаем координаты клетки на которую надо съесть
+			var (nXi, nYi) = GetCoordinatesByDirectionOnlyDifferent(dir);
+
+
+			// 2. Узнаем что находится на этой клетке
+			if (IsItEdge(nXi, nYi))
+			{
+				ActivateReceptor5(dir, nXi, nYi);
+				return false;
+			}
+
+			if (Data.World[nXi, nYi] == 65503)
+			{
+				ActivateReceptor5(dir, nXi, nYi);
+				return false;
+			}
+
+
+			// Grass
+			if (G.Digestion == 1)  // ТОЛЬКО ДЛЯ ТРАВОЯДНЫХ
+			{
+				bool grass = false;
+				if (Data.World[nXi, nYi] == 65500)
+				{
+					lock (_busyWorld1)
+					{
+						if (Data.World[nXi, nYi] == 65500)
+						{
+							Data.World[nXi, nYi] = 0;
+
+							grass = true;
+						}
+					}
+				}
+
+				if (grass)
+				{
+					EnergyChange(Data.FoodEnergy);
+					Interlocked.Add(ref Data.TotalEnergy, Data.FoodEnergy);
+					Interlocked.Decrement(ref Data.CurrentNumberOfFood);
+					if (Data.DrawType == DrawType.OnlyChangedCells) Func.FixChangeCell(nXi, nYi, null);
+					return true;
+				}
+			}
+
+
+			var cont = Data.World[nXi, nYi];
+
+			// Bot или Relative
+			if (cont >= 1 && cont <= Data.CurrentNumberOfBots)
+			{
+				return EatBot(cont, dir);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+
+		private bool EatBot(long cont, int dir)
+		{
+			var eatedBot = Data.Bots[cont];
+
+			// Может есть своего уровня или на уровень меньше.
+			if (eatedBot.G.Digestion != G.Digestion && eatedBot.G.Digestion + 1 != G.Digestion)
+			{
+				return false;
+			}
+
+			// Животное может есть растение, но ни тогда когда его осталось мало
+			if (eatedBot.G.Digestion == 0 && eatedBot.DividedCount == 0)
+			{
+				return false;
+				if (eatedBot.G.CurBots < 2)
+				{
+					return false;
+				}
+			}
+
+			//if (eatedBot.DividedCount == 0)
+			//{
+			//	return false;
+			//}
+
+			//if (eatedBot.G.CurBots < 10)
+			//{
+			//	return false;
+			//}
+
+			// Не может есть родственника
+			if (G.GenomHash == eatedBot.G.GenomHash)
+			{
+				return false;
+			}
+
+			// Не может есть нового
+			if (Data.DelayForNewbie && Data.CurrentStep - eatedBot.G.BeginStep < 10)
+			{
+				return false;
+			}
+
+			// Не может распространяться более чем 40% от всех ботов
+			if (G.CurBots >= Data.CurrentNumberOfBots * 0.4)
+			{
+				return false;
+			}
+
+			// Не может есть многоклетоочных
+			//if (eatedBot.ConnectedTo && eatedBot.ConnectedToBot.Alive && eatedBot.ConnectedToBot.Num == eatedBot.ConnectedToBotNum)
+			//{
+			//	return false;
+			//}
+
+			//var olden = Energy;
+			var atc = 0;
+			//if (eatedBot.G.Digestion + 1 == G.Digestion)
+			//{
+			//	atc = 2;
+			//}
+
+			//if (eatedBot.G.Digestion == G.Digestion || eatedBot.G.Digestion + 1 == G.Digestion)
+			if (eatedBot.G.Digestion + 1 == G.Digestion || eatedBot.G.Digestion == G.Digestion)
+			{
+				for (var i = 0; i < G.AttackTypesCnt; i++)
+				{
+
+					//1
+					if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+					{
+						atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					}
+
+					//2
+					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type]*2)
+					//{
+					//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type]*2;
+					//}
+
+					//3
+					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type])
+					//{
+					//	atc++;
+					//}
+
+					//4
+					//if (G.AttackTypes[i].Level > eatedBot.G.Shield[G.AttackTypes[i].Type] && eatedBot.G.Shield[G.AttackTypes[i].Type] == 0)
+					//{
+					//	atc += G.AttackTypes[i].Level - eatedBot.G.Shield[G.AttackTypes[i].Type];
+					//}
+				}
+			}
+
+			if (atc > 0)
+			{
+				// Data.BiteEnergy / 2 * atc - отрицательное число. возвращается положительное число.
+
+				var k = 20;
+				if (!Moved && eatedBot.Moved) k = Data.MovedBiteStrength;
+
+				var requestedEnergy = Data.BiteEnergy * 10 / k * atc;
+
+				Interlocked.Increment(ref BiteImCount);
+				var gotEnergyByEating = eatedBot.Bite(requestedEnergy, Dir.GetOppositeDirection(dir), this);
+				EnergyChange(gotEnergyByEating);
+
+				//var gotEnergyByEating = eatedBot.EnergyChange(Data.BiteEnergy);
+				if (gotEnergyByEating < 0) throw new Exception("dfgdfg");
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
+
+			//eatedBot.Log.LogInfo($"bot was bited. energy:{eatedBot.Energy}");
+			//Log.LogInfo($"bot{Index} bite bot{cont} and got {gotEnergyByEating} energy. From {olden} to {Energy}.");
+		}
+
+		private void ShareEnergy()
+		{
+			// Передать энергию окружающим ботам
+			var n = ThreadSafeRandom.Next(8);
+			int nXi, nYi;
+			long cont;
+			int i = 0;
+			var ent = (Energy - Data.ReproductionBotEnergy) / 2;
+
+			if (ent > 0)
+			{
+				do
+				{
+					(nXi, nYi) = Func.GetCoordinatesByDelta(Xi, Yi, n, 1);
+
+					if (nYi >= 0 && nYi < Data.WorldHeight && nXi >= 0 && nXi < Data.WorldWidth)
+					{
+						cont = Data.World[nXi, nYi];
+
+						if (cont >= 1 && cont <= Data.CurrentNumberOfBots && G.IsRelative(Data.Bots[cont].G))
+						{
+							var targetBot = Data.Bots[cont];
+
+							if (Energy > targetBot.Energy /*&& targetBot.Energy > 0 && !targetBot.InsertedToDeathList*/)
+							{
+								var transferedEnergy = EnergyChange(-ent);
+								targetBot.EnergyChange(transferedEnergy);
+								if (transferedEnergy < 0) throw new Exception("dfgdfg");
+							}
+						}
+					}
+					if (++n >= 8) n -= 8;
+					i++;
+				}
+				while (CanReproduct() && i <= 8);
+			}
+		}
+
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
